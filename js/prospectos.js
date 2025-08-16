@@ -1,10 +1,10 @@
-// js/prospectos.js — reemplazo completo (CSP-safe, clampFinMes corregido)
+// js/prospectos.js — reemplazo completo (ES5, sin template strings, CSP-safe)
 document.addEventListener('DOMContentLoaded', function(){
   // Utilidades comunes (definidas en app.js)
   if (typeof setupMoneyFormatting === 'function') setupMoneyFormatting();
   if (typeof setupMoneyLive === 'function') setupMoneyLive();
 
-  var $  = function(id){ return document.getElementById(id); };
+  function $(id){ return document.getElementById(id); }
   var nf0 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
   var nf1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
 
@@ -34,22 +34,26 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function setPhase(ph){
     currentPhase = ph;
-    Object.keys(gates).forEach(function(k){
+    for (var k in gates){
+      if (!gates.hasOwnProperty(k)) continue;
       var el = gates[k];
       if (el) el.hidden = (k !== ph);
-    });
+    }
     if (stepsEl){
       var nodes = stepsEl.querySelectorAll('.step');
       for (var i=0;i<nodes.length;i++){
         var s = nodes[i];
-        s.classList.toggle('active', s.getAttribute('data-phase') === ph);
+        var phAttr = s.getAttribute('data-phase');
+        if (phAttr === ph){ s.classList.add('active'); }
+        else { s.classList.remove('active'); }
       }
     }
   }
 
   if (stepsEl){
     stepsEl.addEventListener('click', function(e){
-      var t = e.target.closest('.step'); if(!t) return;
+      var t = e.target.closest ? e.target.closest('.step') : null;
+      if(!t) return;
       setPhase(t.getAttribute('data-phase'));
     });
   }
@@ -68,19 +72,30 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   function minimalF1OK(){
-    return !!((F.email && F.email.value.trim()) || (F.tel && F.tel.value.trim()));
+    var hasEmail = (F.email && F.email.value && F.email.value.trim());
+    var hasTel   = (F.tel && F.tel.value && F.tel.value.trim());
+    return !!(hasEmail || hasTel);
   }
 
-  // ------------ CORREGIDO: usa template string con backticks ------------
+  // ---------- clampFinMes: sin template strings ----------
   function clampFinMes(){
     if(!F.inicio || !F.fin) return;
-    var s = F.inicio.value, e = F.fin.value; if(!s || !e) return;
-    var ys = Number(s.split('-')[0]); var ms = Number(s.split('-')[1]);
-    var ye = Number(e.split('-')[0]); var me = Number(e.split('-')[1]);
+    var s = F.inicio.value;
+    var e = F.fin.value;
+    if(!s || !e) return;
+
+    var sp = s.split('-'); var ep = e.split('-');
+    var ys = Number(sp[0]); var ms = Number(sp[1]);
+    var ye = Number(ep[0]); var me = Number(ep[1]);
+
     var max = new Date(ys, ms-1+5, 1);
     var end = new Date(ye, me-1, 1);
+
     if(end > max){
-      F.fin.value = ${max.getFullYear()}-${String(max.getMonth()+1).padStart(2,'0')};
+      var y = String(max.getFullYear());
+      var m = String(max.getMonth()+1);
+      if(m.length < 2) m = '0' + m;
+      F.fin.value = y + '-' + m;
     }
   }
   if(F.inicio) F.inicio.addEventListener('change', clampFinMes);
@@ -89,21 +104,25 @@ document.addEventListener('DOMContentLoaded', function(){
   // Máx. compra = (Budget - Notaría - Honorarios) / (1 + ITP)
   function recalcMaxCompra(){
     var cfg = (window.Store && window.Store.cfg) || {};
-    var itp = (cfg.c_itp != null ? cfg.c_itp : 8) / 100;
+    var itp = ((cfg.c_itp != null ? cfg.c_itp : 8) / 100);
     var notaria = (cfg.c_notaria != null ? cfg.c_notaria : 1500);
     var incl = (F.incl_honor && F.incl_honor.value === 'si');
     var honor = incl ? (3500 * 1.21) : 0;
     var budget = parseEs(F.budget && F.budget.value) || 0;
+
     if(!F.max_compra) return;
     if(budget <= 0){ F.max_compra.value = ''; return; }
+
     var numerador = Math.max(0, budget - notaria - honor);
     var maxCompra = Math.max(0, numerador / (1 + itp));
     F.max_compra.value = nf0.format(Math.round(maxCompra));
   }
-  ['input','change'].forEach(function(ev){
+  var recalcEvts = ['input','change'];
+  for (var r=0; r<recalcEvts.length; r++){
+    var ev = recalcEvts[r];
     if(F.budget) F.budget.addEventListener(ev, recalcMaxCompra);
     if(F.incl_honor) F.incl_honor.addEventListener(ev, recalcMaxCompra);
-  });
+  }
 
   function filtered(list){
     var fF = (F.f_fase && F.f_fase.value) || '';
@@ -113,10 +132,11 @@ document.addEventListener('DOMContentLoaded', function(){
       if(fF && p.fase !== fF) return false;
       if(fT && p.pref_tipo !== fT) return false;
       if(q){
-        var hay = (p.nombre||'').toLowerCase().includes(q) ||
-                  (p.locs_text||'').toLowerCase().includes(q) ||
-                  (p.loc_res||'').toLowerCase().includes(q) ||
-                  (p.email||'').toLowerCase().includes(q);
+        var hay =
+          ((p.nombre||'').toLowerCase().indexOf(q) !== -1) ||
+          ((p.locs_text||'').toLowerCase().indexOf(q) !== -1) ||
+          ((p.loc_res||'').toLowerCase().indexOf(q) !== -1) ||
+          ((p.email||'').toLowerCase().indexOf(q) !== -1);
         if(!hay) return false;
       }
       return true;
@@ -127,7 +147,9 @@ document.addEventListener('DOMContentLoaded', function(){
     if(!F.tbody) return;
     F.tbody.innerHTML = '';
     var arr = (window.Store && window.Store.pros) || [];
-    filtered(arr).forEach(function(p,i){
+    var rows = filtered(arr);
+    for (var i=0;i<rows.length;i++){
+      var p = rows[i];
       var contacto = [p.email, p.tel].filter(Boolean).join(' / ') || '—';
       var tr = document.createElement('tr');
       tr.innerHTML =
@@ -145,15 +167,18 @@ document.addEventListener('DOMContentLoaded', function(){
           '<button class="btn" data-act="del" data-i="'+i+'">Eliminar</button>'+
         '</td>';
       F.tbody.appendChild(tr);
-    });
+    }
   }
 
   function clearForm(){
     if(!F.idx) return;
     F.idx.value = -1;
-    ['nombre','email','tel','recordatorio','dni','dir','loc_res','obj_val',
-     'budget','max_compra','locs_obj','n_activos','alt_max','notes','notaria_fecha']
-     .forEach(function(k){ if(F[k]) F[k].value=''; });
+    var toClear = ['nombre','email','tel','recordatorio','dni','dir','loc_res','obj_val',
+                   'budget','max_compra','locs_obj','n_activos','alt_max','notes','notaria_fecha'];
+    for (var i=0;i<toClear.length;i++){
+      var k = toClear[i];
+      if(F[k]) F[k].value = '';
+    }
 
     if(F.sub_f1) F.sub_f1.value='Contacto recibido';
     if(F.pref_tipo) F.pref_tipo.value='Tradicional';
@@ -206,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(F.sub_f5) F.sub_f5.value = p.sub_f5||'Notaría fijada';
 
     setPhase(p.fase || 'F1');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   }
 
   function advancePhaseObj(p){
@@ -227,22 +252,22 @@ document.addEventListener('DOMContentLoaded', function(){
 
     return {
       fase: currentPhase,
-      nombre: (F.nombre && F.nombre.value.trim()) || '',
-      email: (F.email && F.email.value.trim()) || '',
-      tel:   (F.tel && F.tel.value.trim()) || '',
+      nombre: (F.nombre && F.nombre.value ? F.nombre.value.trim() : ''),
+      email: (F.email && F.email.value ? F.email.value.trim() : ''),
+      tel:   (F.tel && F.tel.value ? F.tel.value.trim() : ''),
       recordatorio: (F.recordatorio && F.recordatorio.value) || '',
       sub_f1: (F.sub_f1 && F.sub_f1.value) || 'Contacto recibido',
       sub:    (F.sub_f1 && F.sub_f1.value) || 'Contacto recibido',
-      dni: (F.dni && F.dni.value.trim()) || '',
-      dir: (F.dir && F.dir.value.trim()) || '',
-      loc_res: (F.loc_res && F.loc_res.value.trim()) || '',
+      dni: (F.dni && F.dni.value ? F.dni.value.trim() : ''),
+      dir: (F.dir && F.dir.value ? F.dir.value.trim() : ''),
+      loc_res: (F.loc_res && F.loc_res.value ? F.loc_res.value.trim() : ''),
       pref_tipo: (F.pref_tipo && F.pref_tipo.value) || 'Tradicional',
       obj_tipo: obj_tipo,
-      obj_raw: Number.isFinite(obj_raw) ? obj_raw : (obj_tipo==='flujo'? 0 : 0),
+      obj_raw: (Number.isFinite(obj_raw) ? obj_raw : (obj_tipo==='flujo'? 0 : 0)),
       budget: budget,
       incl_honor: (F.incl_honor && F.incl_honor.value) || 'si',
       max_compra: max_compra,
-      locs_text: (F.locs_obj && F.locs_obj.value.trim()) || '',
+      locs_text: (F.locs_obj && F.locs_obj.value ? F.locs_obj.value.trim() : ''),
       n_activos: parseEs(F.n_activos && F.n_activos.value) || 0,
       no_asc: (F.no_asc && F.no_asc.value) || 'no',
       alt_max: parseEs(F.alt_max && F.alt_max.value) || 0,
@@ -250,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function(){
       reforma: (F.reforma && F.reforma.value) || 'No',
       inicio: (F.inicio && F.inicio.value) || '',
       fin: (F.fin && F.fin.value) || '',
-      notes: (F.notes && F.notes.value.trim()) || '',
+      notes: (F.notes && F.notes.value ? F.notes.value.trim() : ''),
       notaria_fecha: (F.notaria_fecha && F.notaria_fecha.value) || '',
       sub_f5: (F.sub_f5 && F.sub_f5.value) || 'Notaría fijada',
       ts: Date.now()
@@ -275,30 +300,35 @@ document.addEventListener('DOMContentLoaded', function(){
     var href = 'mailto:'+encodeURIComponent(to||'') +
                '?subject='+encodeURIComponent(subject||'') +
                '&body='+encodeURIComponent(body||'');
-    window.open(href, '_blank');
+    var w = window.open(href, '_blank');
+    if(w) w.focus();
   }
-  function takeName(){ return ((F.nombre && F.nombre.value) || 'Cliente').trim(); }
+  function takeName(){
+    return (F.nombre && F.nombre.value ? F.nombre.value : 'Cliente').trim();
+  }
 
   function printSummary(phase){
-    var html =
-      '<html><head><meta charset="utf-8"><title>Resumen '+phase+'</title>'+
-      '<style>body{font-family:Inter,Arial;padding:24px}h1{margin:0 0 8px}.k{color:#666}.b{font-weight:700}</style>'+
-      '</head><body>'+
-      '<h1>Unihouser · Resumen '+phase+'</h1>'+
-      '<p><span class="k">Cliente:</span> <span class="b">'+takeName()+'</span></p>'+
-      '<p><span class="k">Email:</span> '+((F.email && F.email.value) || '—')+' · <span class="k">Tel:</span> '+((F.tel && F.tel.value) || '—')+'</p>'+
-      '<hr>'+
-      '<p><span class="k">Tipo:</span> '+((F.pref_tipo && F.pref_tipo.value) || '—')+' · <span class="k">Objetivo:</span> '+((F.obj_tipo && F.obj_tipo.value) || '—')+' '+((F.obj_val && F.obj_val.value) || '')+'</p>'+
-      '<p><span class="k">Presupuesto total:</span> '+((F.budget && F.budget.value) || '—')+' · <span class="k">Máx compra:</span> '+((F.max_compra && F.max_compra.value) || '—')+'</p>'+
-      '<p><span class="k">Localidades objetivo:</span> '+((F.locs_obj && F.locs_obj.value) || '—')+'</p>'+
-      '<p><span class="k">Notas:</span> '+((F.notes && F.notes.value) || '—')+'</p>'+
-      '<hr><small>© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</small>'+
-      '</body></html>';
-    var w = window.open('', '_blank'); w.document.write(html); w.document.close(); w.focus(); w.print();
+    var html = ''
+      + '<html><head><meta charset="utf-8"><title>Resumen '+phase+'</title>'
+      + '<style>body{font-family:Inter,Arial;padding:24px}h1{margin:0 0 8px}.k{color:#666}.b{font-weight:700}</style>'
+      + '</head><body>'
+      + '<h1>Unihouser · Resumen '+phase+'</h1>'
+      + '<p><span class="k">Cliente:</span> <span class="b">'+takeName()+'</span></p>'
+      + '<p><span class="k">Email:</span> '+((F.email && F.email.value) || '—')+' · <span class="k">Tel:</span> '+((F.tel && F.tel.value) || '—')+'</p>'
+      + '<hr>'
+      + '<p><span class="k">Tipo:</span> '+((F.pref_tipo && F.pref_tipo.value) || '—')+' · <span class="k">Objetivo:</span> '+((F.obj_tipo && F.obj_tipo.value) || '—')+' '+((F.obj_val && F.obj_val.value) || '')+'</p>'
+      + '<p><span class="k">Presupuesto total:</span> '+((F.budget && F.budget.value) || '—')+' · <span class="k">Máx compra:</span> '+((F.max_compra && F.max_compra.value) || '—')+'</p>'
+      + '<p><span class="k">Localidades objetivo:</span> '+((F.locs_obj && F.locs_obj.value) || '—')+'</p>'
+      + '<p><span class="k">Notas:</span> '+((F.notes && F.notes.value) || '—')+'</p>'
+      + '<hr><small>© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</small>'
+      + '</body></html>';
+    var w = window.open('', '_blank');
+    if(!w) return;
+    w.document.write(html); w.document.close(); w.focus(); w.print();
   }
 
   document.addEventListener('click', function(e){
-    var t = e.target.closest('button'); if(!t) return;
+    var t = e.target.closest ? e.target.closest('button') : null; if(!t) return;
 
     if(t.id === 'p_save'){ save(); return; }
     if(t.id === 'p_clear'){ clearForm(); toast('Formulario limpio'); return; }
@@ -314,8 +344,11 @@ document.addEventListener('DOMContentLoaded', function(){
 
     if(t.id === 'f1_email'){
       if(!F.email || !F.email.value){ alert('Necesitas un email.'); return; }
-      mailto(F.email.value, 'Unihouser · Primer contacto',
-        'Hola '+takeName()+',\n\nGracias por tu interés. ¿Cuándo te viene bien una breve reunión para alinear objetivos y presupuesto?\n\nSaludos.');
+      mailto(
+        F.email.value,
+        'Unihouser · Primer contacto',
+        'Hola '+takeName()+',\n\nGracias por tu interés. ¿Cuándo te viene bien una breve reunión para alinear objetivos y presupuesto?\n\nSaludos.'
+      );
       return;
     }
     if(t.id === 'f1_pdf'){ printSummary('F1 · Contacto'); return; }
@@ -323,14 +356,20 @@ document.addEventListener('DOMContentLoaded', function(){
     if(t.id === 'f2_pdf'){ printSummary('F2 · Reunión'); return; }
     if(t.id === 'f2_mail_ok'){
       if(!F.email || !F.email.value){ alert('Necesitas un email.'); return; }
-      mailto(F.email.value, 'Unihouser · Contrato de servicio',
-        'Hola '+takeName()+',\n\nTe envío contrato para firma. Objetivo: '+(F.obj_tipo && F.obj_tipo.value)+' '+(F.obj_val && F.obj_val.value)+'. Presupuesto total: '+(F.budget && F.budget.value)+'. Máx compra: '+(F.max_compra && F.max_compra.value)+'.\n\nSaludos.');
+      mailto(
+        F.email.value,
+        'Unihouser · Contrato de servicio',
+        'Hola '+takeName()+',\n\nTe envío contrato para firma. Objetivo: '+(F.obj_tipo && F.obj_tipo.value)+' '+(F.obj_val && F.obj_val.value)+'. Presupuesto total: '+(F.budget && F.budget.value)+'. Máx compra: '+(F.max_compra && F.max_compra.value)+'.\n\nSaludos.'
+      );
       return;
     }
     if(t.id === 'f2_mail_no'){
       if(!F.email || !F.email.value){ alert('Necesitas un email.'); return; }
-      mailto(F.email.value, 'Unihouser · Gracias por tu tiempo',
-        'Hola '+takeName()+',\n\nGracias por la conversación. Si en el futuro cambian tus planes, estaremos encantados de ayudarte.\n\nSaludos.');
+      mailto(
+        F.email.value,
+        'Unihouser · Gracias por tu tiempo',
+        'Hola '+takeName()+',\n\nGracias por la conversación. Si en el futuro cambian tus planes, estaremos encantados de ayudarte.\n\nSaludos.'
+      );
       return;
     }
     if(t.id === 'f2_contrato'){
@@ -340,8 +379,11 @@ document.addEventListener('DOMContentLoaded', function(){
 
     if(t.id === 'f3_enviar_props'){
       if(!F.email || !F.email.value){ alert('Necesitas un email.'); return; }
-      mailto(F.email.value, 'Unihouser · Propuesta enviada',
-        'Hola '+takeName()+',\n\nTe acabamos de enviar una propuesta de activo ajustada a tus criterios. Quedo atento a tu feedback.\n\nSaludos.');
+      mailto(
+        F.email.value,
+        'Unihouser · Propuesta enviada',
+        'Hola '+takeName()+',\n\nTe acabamos de enviar una propuesta de activo ajustada a tus criterios. Quedo atento a tu feedback.\n\nSaludos.'
+      );
       return;
     }
     if(t.id === 'f3_reserva'){ toast('Reserva activa'); save(); return; }
@@ -351,24 +393,27 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 
   document.addEventListener('click', function(e){
-    var b = e.target.closest('button[data-act]'); if(!b) return;
+    var b = e.target.closest ? e.target.closest('button[data-act]') : null; if(!b) return;
     var i = parseInt(b.getAttribute('data-i') || '-1', 10);
     var arr = (window.Store && window.Store.pros) || [];
     var p = arr[i]; if(!p) return;
 
-    if(b.getAttribute('data-act') === 'edit'){ editRow(i); return; }
-    if(b.getAttribute('data-act') === 'phase'){ advancePhaseObj(p); if(window.Store) window.Store.pros = arr; render(); return; }
-    if(b.getAttribute('data-act') === 'del'){
+    var act = b.getAttribute('data-act');
+    if(act === 'edit'){ editRow(i); return; }
+    if(act === 'phase'){ advancePhaseObj(p); if(window.Store) window.Store.pros = arr; render(); return; }
+    if(act === 'del'){
       if(confirm('¿Eliminar prospecto?')){ arr.splice(i,1); if(window.Store) window.Store.pros = arr; render(); }
       return;
     }
   });
 
-  ['change','input'].forEach(function(ev){
-    if(F.f_fase) F.f_fase.addEventListener(ev, render);
-    if(F.f_tipo) F.f_tipo.addEventListener(ev, render);
-    if(F.f_q)    F.f_q.addEventListener(ev, render);
-  });
+  var filterEvts = ['change','input'];
+  for (var f=0; f<filterEvts.length; f++){
+    var fe = filterEvts[f];
+    if(F.f_fase) F.f_fase.addEventListener(fe, render);
+    if(F.f_tipo) F.f_tipo.addEventListener(fe, render);
+    if(F.f_q)    F.f_q.addEventListener(fe, render);
+  }
 
   setPhase('F1');
   render();
