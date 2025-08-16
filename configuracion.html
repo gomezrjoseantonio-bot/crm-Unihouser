@@ -1,41 +1,61 @@
-const fmtE0 = new Intl.NumberFormat('es-ES', { style:'currency', currency:'EUR', maximumFractionDigits:0 });
-const fmtN0 = new Intl.NumberFormat('es-ES', { maximumFractionDigits:0 });
-const fmtN1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits:1 });
-
-function parseEs(str){
-if(str==null) return NaN;
-const s=String(str).trim().replace(/\./g,'').replace(',', '.');
-if(!s) return NaN;
-const n=Number(s);
-return Number.isFinite(n)?n:NaN;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Configuración</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; }
+label { display: block; margin: 10px 0 5px; }
+input { padding: 6px; width: 220px; }
+button { margin-top: 20px; padding: 10px 15px; }
+#toast {
+visibility: hidden; min-width: 250px; margin-left: -125px;
+background: #333; color: #fff; text-align: center;
+border-radius: 2px; padding: 16px; position: fixed;
+z-index: 1; left: 50%; bottom: 30px; font-size: 17px;
 }
-function e0(v){ return fmtE0.format(v||0); }
+#toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+@keyframes fadein { from{bottom:0; opacity:0;} to{bottom:30px; opacity:1;} }
+@keyframes fadeout{ from{bottom:30px; opacity:1;} to{bottom:0; opacity:0;} }
+</style>
+</head>
+<body>
+<h1>Configuración</h1>
 
-function setupMoneyFormatting(){
-document.querySelectorAll('input[data-money]').forEach(inp=>{
-inp.addEventListener('blur', ()=>{
-const n=parseEs(inp.value);
-if(Number.isFinite(n))
-inp.value = new Intl.NumberFormat('es-ES', {maximumFractionDigits:0}).format(Math.round(n));
-});
-});
-}
-function setupMoneyLive(){
-document.querySelectorAll('input[data-money]').forEach(inp=>{
-inp.addEventListener('input', ()=>{
-const digits=(inp.value||'').replace(/[^\d]/g,'');
-if(!digits){inp.value='';return;}
-const n=Number(digits);
-inp.value=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(n);
-});
-});
-}
+<form id="cfgForm">
+<h2>Gastos de Adquisición</h2>
+<label>ITP (%)</label>
+<input type="text" name="itp" data-money>
 
-const Store={
-get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
-set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); },
-get pros(){ try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]} },
-set pros(v){ localStorage.setItem('pros', JSON.stringify(v)); },
-get evals(){ try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]} },
-set evals(v){ localStorage.setItem('evals', JSON.stringify(v)); }
-};
+<label>Notaría y Registro (€)</label>
+<input type="text" name="notaria" data-money value="1.500">
+
+<h2>Seguros</h2>
+<label>Seguro de Hogar (€)</label>
+<input type="text" name="seguroHogar" data-money>
+<label>Seguro de Impago (habitaciones) (€)</label>
+<input type="text" name="seguroImpagoHab" data-money>
+<label>Seguro de Impago (tradicional) (€)</label>
+<input type="text" name="seguroImpagoTrad" data-money>
+
+<h2>Gestión</h2>
+<label>% Gestión Habitaciones</label>
+<input type="text" name="gestionHab" data-money>
+<label>% Gestión Tradicional</label>
+<input type="text" name="gestionTrad" data-money>
+
+<h2>Otros</h2>
+<label>Flujo de Caja Inicial (€)</label>
+<input type="text" name="flujoCaja" data-money>
+
+<button type="submit">Guardar configuración</button>
+</form>
+
+<div id="toast">Nueva configuración guardada con éxito</div>
+
+<!-- scripts en orden -->
+<script defer src="js/app.js"></script>
+<script defer src="js/config.js"></script>
+</body>
+</html>
