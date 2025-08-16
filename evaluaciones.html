@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unihouser — Evaluaciones</title>
+<link rel="stylesheet" href="css/style.css">
+</head><body>
+<header class="topbar">
+  <div class="container flex between center">
+    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
+    <nav class="nav">
+      <a href="evaluar.html">Evaluar</a>
+      <a href="evaluaciones.html" class="active">Evaluaciones</a>
+      <a href="prospectos.html">Prospectos</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="configuracion.html">Configuración</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+<section class="card">
+  <h2>Evaluaciones guardadas</h2>
+  <div class="actions"><button class="btn" id="ev_clear">Borrar todas</button></div>
+  <table class="table">
+    <thead><tr><th>Referencia</th><th>Localidad</th><th>Bruta</th><th>Neta</th><th>Flujo</th><th>Asignado a</th><th>Acciones</th></tr></thead>
+    <tbody id="ev_body"></tbody>
+  </table>
+</section>
+</main>
+
+<footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
+<script defer src="js/app.js"></script>
+<script defer src="js/evaluaciones.js"></script>
+</body></html>
