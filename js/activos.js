@@ -48,9 +48,9 @@ const alqA = (alq+otros)*12;
 const pct_h = ((cfg.c_pct_hogar ?? 3.5)/100);
 
 // >>> PUNTO 4: Impago diferente según tipo de alquiler <<<
-const pct_i = (tipoSel.value === 'Habitaciones'
-? (cfg.c_pct_impago_hab ?? 4.0)
-: (cfg.c_pct_impago_trad ?? 4.0)) / 100;
+const pct_i = (document.getElementById('e_tipo').value === 'Habitaciones'
+? (Store.cfg.c_pct_impago_hab  ?? 4.0)
+: (Store.cfg.c_pct_impago_trad ?? 4.0)) / 100;
 
 const pct_g = (tipoSel.value === 'Habitaciones'
 ? (cfg.c_pct_g_hab ?? 25.0)
