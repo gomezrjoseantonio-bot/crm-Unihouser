@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unihouser — Evaluar</title>
+<link rel="stylesheet" href="css/style.css">
+</head><body>
+<header class="topbar">
+  <div class="container flex between center">
+    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
+    <nav class="nav">
+      <a href="evaluar.html" class="active">Evaluar</a>
+      <a href="evaluaciones.html">Evaluaciones</a>
+      <a href="prospectos.html">Prospectos</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="configuracion.html">Configuración</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+<section class="card">
+  <h2>Evaluar Activo</h2>
+
+  <div class="section">
+    <h3>Datos del inmueble</h3>
+    <div class="row three">
+      <div class="field"><label>Localidad</label><select id="e_loc"></select></div>
+      <div class="field"><label>Calle</label><input id="e_calle" placeholder="C/ Ejemplo 1"></div>
+      <div class="field"><label>Superficie (m²) — opcional</label><input id="e_m2" inputmode="numeric" placeholder="72"></div>
+    </div>
+    <div class="row three">
+      <div class="field"><label>Año construcción — opcional</label><input id="e_anio" inputmode="numeric" placeholder="1975"></div>
+      <div class="field"><label>Ascensor</label><select id="e_asc"><option>Sí</option><option>No</option></select></div>
+      <div class="field"><label>Altura (planta)</label><input id="e_alt" inputmode="numeric" value="1"></div>
+    </div>
+    <div class="row three">
+      <div class="field"><label>¿Es bajo?</label><select id="e_bajo"><option>No</option><option>Sí</option></select></div>
+      <div class="field"><label>Habitaciones</label><input id="e_habs" inputmode="numeric" placeholder="3"></div>
+      <div class="field"><label>Baños</label><input id="e_banos" inputmode="numeric" placeholder="1"></div>
+    </div>
+    <div class="row one">
+      <div class="field"><label>URL Idealista (opcional)</label><input id="e_url" placeholder="https://www.idealista.com/inmueble/..."></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Gastos de adquisición</h3>
+    <div class="row three">
+      <div class="field"><label>Precio de compra (€)</label><input id="e_precio" data-money></div>
+      <div class="field"><label>ITP (€ auto)</label><input id="e_itp_eur" data-money></div>
+      <div class="field"><label>Notaría y Registro (€ auto)</label><input id="e_notaria" data-money></div>
+    </div>
+    <div class="row three">
+      <div class="field"><label>Reforma (€)</label><input id="e_reforma" value="0" data-money></div>
+      <div class="field"><label>Incluir honorarios (PSI)</label><select id="e_honor"><option value="si">Sí</option><option value="no">No</option></select></div>
+      <div class="field"><label>Precio máximo de compra</label><input id="e_pmax" data-money disabled></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Gastos de mantenimiento</h3>
+    <div class="row three">
+      <div class="field"><label>Comunidad (€/año)</label><input id="e_comunidad" value="0" data-money></div>
+      <div class="field"><label>IBI (€/año)</label><input id="e_ibi" value="0" data-money></div>
+      <div class="field"><label>Seguro hogar (€/año)</label><input id="e_hogar" value="0" data-money></div>
+    </div>
+    <div class="row three">
+      <div class="field"><label>Seguro impago (€/año)</label><input id="e_impago" value="0" data-money></div>
+      <div class="field"><label>Gestión (€/año)</label><input id="e_gestion" value="0" data-money></div>
+      <div class="field"><small class="hint">Hogar/impago/gestión se autocalculan desde Config al indicar alquiler.</small></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Tipo de explotación e ingresos</h3>
+    <div class="row three">
+      <div class="field"><label>Tipo de alquiler</label><select id="e_tipo"><option>Tradicional</option><option>Habitaciones</option></select></div>
+      <div class="field"><label>Alquiler mensual (€)</label><input id="e_alq" data-money></div>
+      <div class="field"><label>Otros ingresos (€/mes)</label><input id="e_otros" value="0" data-money></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn primary" id="e_calc">Calcular</button>
+    <button class="btn ghost" id="e_clean">Limpiar</button>
+  </div>
+
+  <div id="e_result" class="section" hidden>
+    <h3>Resultados</h3>
+    <div class="kpis">
+      <div class="kpi"><div class="lab">Inversión total</div><div class="val" id="r_inv">—</div></div>
+      <div class="kpi"><div class="lab">Rentabilidad bruta <span id="sb" class="dot"></span></div><div class="val"><span id="r_bruta">—</span> <span id="r_bruta_diff" class="muted"></span></div></div>
+      <div class="kpi"><div class="lab">Rentabilidad neta <span id="sn" class="dot"></span></div><div class="val"><span id="r_neta">—</span> <span id="r_neta_diff" class="muted"></span></div></div>
+      <div class="kpi"><div class="lab">Flujo de caja anual <span id="sf" class="dot"></span></div><div class="val" id="r_flujo">—</div></div>
+      <div class="kpi"><div class="lab">Precio máx. de compra</div><div class="val" id="r_pmax">—</div></div>
+    </div>
+
+    <div class="chartWrap"><canvas id="chartKPI" width="420" height="200"></canvas></div>
+
+    <div class="card" style="margin-top:12px">
+      <h3 style="margin:0 0 8px">Clientes potenciales</h3>
+      <div id="matchList" class="muted">—</div>
+      <div class="actions">
+        <select id="assign_cli" size="4" style="min-width:280px"></select>
+        <button class="btn" id="save_only">Guardar evaluación</button>
+        <button class="btn primary" id="save_assign">Guardar y asignar</button>
+      </div>
+    </div>
+
+    <div id="clientMirror" class="card" style="margin-top:12px" hidden>
+      <h3 style="margin:0 0 6px">Resumen para el cliente seleccionado</h3>
+      <div class="kpis">
+        <div class="kpi"><div class="lab">Cliente</div><div class="val" id="cm_nombre">—</div></div>
+        <div class="kpi"><div class="lab">Objetivo principal</div><div class="val" id="cm_obj">—</div></div>
+        <div class="kpi"><div class="lab">Real (KPI)</div><div class="val" id="cm_real">—</div></div>
+        <div class="kpi"><div class="lab">Objetivo</div><div class="val" id="cm_goal">—</div></div>
+        <div class="kpi"><div class="lab">Gap</div><div class="val" id="cm_gap">—</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
+<script defer src="js/app.js"></script>
+<script defer src="vendor/chart-lite.js"></script>
+<script defer src="js/activos.js"></script>
+</body></html>
