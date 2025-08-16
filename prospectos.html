@@ -9,7 +9,9 @@
 <body>
 <header class="topbar">
   <div class="container flex between center">
-    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
+    <div class="brand flex center">
+      <div class="title">Unihouser — CRM & BuyBox</div>
+    </div>
     <nav class="nav">
       <a href="evaluar.html">Evaluar</a>
       <a href="evaluaciones.html">Evaluaciones</a>
@@ -21,190 +23,188 @@
 </header>
 
 <main class="container">
-  <section class="card">
-    <h2>Prospectos</h2>
 
-    <!-- barra de pasos -->
-    <div id="steps" class="steps">
-      <div class="step active" data-phase="F1"><span>F1</span> Contacto</div>
-      <div class="step" data-phase="F2"><span>F2</span> Reunión</div>
-      <div class="step" data-phase="F3"><span>F3</span> Búsqueda</div>
-      <div class="step" data-phase="F4"><span>F4</span> Arras</div>
-      <div class="step" data-phase="F5"><span>F5</span> Notaría</div>
+  <section class="card">
+    <h2>Prospecto</h2>
+
+    <!-- pasos/fases -->
+    <div id="steps" class="row" style="margin-bottom:8px">
+      <div class="step chip" data-phase="F1">F1 · Contacto</div>
+      <div class="step chip" data-phase="F2">F2 · Contrato</div>
+      <div class="step chip" data-phase="F3">F3 · Búsqueda</div>
+      <div class="step chip" data-phase="F4">F4 · Arras</div>
+      <div class="step chip" data-phase="F5">F5 · Notaría</div>
     </div>
 
     <input type="hidden" id="p_idx" value="-1">
-    <div id="p_toast" class="toast" hidden>OK</div>
+    <div id="p_toast" class="banner" hidden>OK</div>
 
-    <!-- FASE 1 -->
-    <div id="gateF1" class="section">
-      <h3>Fase 1 — Contacto</h3>
+    <!-- F1 CONTACTO -->
+    <div class="section" id="gateF1">
+      <h3>F1 · Contacto</h3>
       <div class="row three">
-        <div class="field">
-          <label>Nombre y apellidos</label>
-          <input id="p_nombre" placeholder="Nombre Apellidos" autocomplete="name">
-        </div>
-        <div class="field">
-          <label>Email</label>
-          <input id="p_email" type="email" placeholder="nombre@dominio.com" autocomplete="email">
-        </div>
-        <div class="field">
-          <label>Teléfono</label>
-          <input id="p_tel" inputmode="tel" placeholder="644 300 200" autocomplete="tel">
-        </div>
+        <div class="field"><label>Nombre y Apellidos</label><input id="p_nombre" placeholder="Juan Pérez"></div>
+        <div class="field"><label>Email</label><input id="p_email" type="email" placeholder="cliente@email.com"></div>
+        <div class="field"><label>Teléfono</label><input id="p_tel" inputmode="tel" placeholder="644 000 000"></div>
       </div>
-
       <div class="row two">
+        <div class="field"><label>Recordatorio</label><input id="p_recordatorio" type="date"></div>
         <div class="field">
           <label>Subestado</label>
           <select id="p_sub_f1">
             <option>Contacto recibido</option>
-            <option>Pendiente llamada</option>
-            <option>Reunión agendada</option>
+            <option>Pendiente contacto</option>
             <option>Descartado</option>
+            <option>Reunión inicial fijada</option>
           </select>
         </div>
-        <div class="field">
-          <label>Recordatorio (nota)</label>
-          <input id="p_recordatorio" placeholder="Llamar el lunes, etc.">
-        </div>
       </div>
-
       <div class="actions">
+        <button class="btn" id="f1_email">Enviar email inicial</button>
+        <button class="btn ghost" id="f1_pdf">Resumen F1</button>
+        <button class="btn" id="toF2">Siguiente · F2</button>
         <button class="btn primary" id="p_save">Guardar</button>
-        <button class="btn ghost" id="p_clear">Limpiar</button>
-        <button class="btn" id="f1_email">Enviar email</button>
-        <button class="btn" id="f1_pdf">Resumen PDF</button>
-        <button class="btn" id="toF2">Ir a Fase 2</button>
+        <button class="btn" id="p_clear">Limpiar</button>
       </div>
     </div>
 
-    <!-- FASE 2 -->
-    <div id="gateF2" class="section" hidden>
-      <h3>Fase 2 — Reunión inicial</h3>
-
+    <!-- F2 CONTRATO (Datos personales + Financiación) -->
+    <div class="section" id="gateF2" hidden>
+      <h3>F2 · Contrato</h3>
       <div class="row three">
         <div class="field"><label>DNI</label><input id="p_dni" placeholder="00000000X"></div>
-        <div class="field"><label>Dirección</label><input id="p_dir" placeholder="C/ Dirección 1, 1ºA"></div>
+        <div class="field"><label>Dirección</label><input id="p_dir" placeholder="C/ Ejemplo 1"></div>
         <div class="field"><label>Localidad (residencia)</label><input id="p_loc_res" placeholder="Oviedo"></div>
       </div>
 
+      <h4>Financiación</h4>
       <div class="row three">
-        <div class="field">
-          <label>Tipo de alquiler</label>
+        <div class="field"><label>Financiación bancaria</label>
+          <select id="p_financia"><option value="si">Sí</option><option value="no">No</option></select>
+        </div>
+        <div class="field"><label>Necesita broker</label>
+          <select id="p_broker"><option value="no">No</option><option value="si">Sí</option></select>
+        </div>
+        <div class="field"><label>% financiación (habitual 80%)</label><input id="p_pct_fin" inputmode="numeric" placeholder="80"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="f2_pdf">Resumen F2</button>
+        <button class="btn" id="f2_mail_ok">Enviar contrato</button>
+        <button class="btn" id="f2_mail_no">No le interesa</button>
+        <button class="btn ghost" id="toF1">Volver · F1</button>
+        <button class="btn" id="toF3">Siguiente · F3</button>
+        <button class="btn primary" id="p_save">Guardar</button>
+      </div>
+    </div>
+
+    <!-- F3 BÚSQUEDA (Características + Objetivos + Presupuesto) -->
+    <div class="section" id="gateF3" hidden>
+      <h3>F3 · Búsqueda</h3>
+
+      <h4>Características deseadas</h4>
+      <div class="row three">
+        <div class="field"><label>Localidades objetivo (coma)</label><input id="p_locs_obj" placeholder="Oviedo, Gijón, Avilés"></div>
+        <div class="field"><label>Tipo de alquiler</label>
           <select id="p_pref_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
         </div>
-        <div class="field">
-          <label>Objetivo principal</label>
-          <select id="p_obj_tipo">
-            <option value="bruta">Rentabilidad bruta %</option>
-            <option value="neta">Rentabilidad neta %</option>
-            <option value="flujo">Flujo de caja €/año</option>
+        <div class="field"><label>Nº de activos</label><input id="p_n_activos" inputmode="numeric" placeholder="1"></div>
+      </div>
+      <div class="row three">
+        <div class="field"><label>Sin ascensor</label><select id="p_no_asc"><option value="no">No</option><option value="si">Sí</option></select></div>
+        <div class="field"><label>Altura máxima (planta)</label><input id="p_alt_max" inputmode="numeric" placeholder="3"></div>
+        <div class="field"><label>¿Bajos?</label><select id="p_bajos"><option value="no">No</option><option value="si">Sí</option></select></div>
+      </div>
+      <div class="row two">
+        <div class="field"><label>Acepta reforma</label>
+          <select id="p_reforma">
+            <option>No</option>
+            <option>Lavado de cara</option>
+            <option>Integral</option>
           </select>
         </div>
-        <div class="field">
-          <label>Valor objetivo</label>
-          <input id="p_obj_val" placeholder="8,5 o 1.200">
-        </div>
+        <div class="field"><label>Notas</label><input id="p_notes" placeholder="Observaciones relevantes"></div>
       </div>
 
+      <h4>Objetivos</h4>
       <div class="row three">
-        <div class="field">
-          <label>Presupuesto total inversión (€ con ITP/Notaría/Honor.)</label>
-          <input id="p_budget" data-money placeholder="120.000">
+        <div class="field"><label>Objetivo principal</label>
+          <select id="p_obj_tipo">
+            <option value="bruta">Rentabilidad bruta (%)</option>
+            <option value="neta">Rentabilidad neta (%)</option>
+            <option value="flujo">Flujo de caja (€/año)</option>
+          </select>
         </div>
-        <div class="field">
-          <label>Incluir honorarios (PSI)</label>
+        <div class="field"><label>Valor objetivo</label><input id="p_obj_val" inputmode="decimal" placeholder="Ej: 6,5 ó 1200"></div>
+        <div class="field"><label>Mes inicio búsqueda</label><input id="p_inicio" type="month"></div>
+      </div>
+      <div class="row two">
+        <div class="field"><label>Mes fin búsqueda (máx +5 meses)</label><input id="p_fin" type="month"></div>
+      </div>
+
+      <h4>Presupuesto</h4>
+      <div class="row three">
+        <div class="field"><label>Presupuesto total inversión (€)</label><input id="p_budget" data-money placeholder="120.000"></div>
+        <div class="field"><label>Incluir honorarios PSI</label>
           <select id="p_incl_honor"><option value="si">Sí</option><option value="no">No</option></select>
         </div>
-        <div class="field">
-          <label>Precio máx. compra (auto)</label>
-          <input id="p_max_compra" data-money disabled>
-        </div>
+        <div class="field"><label>Máx. compra activo (€ auto)</label><input id="p_max_compra" data-money disabled></div>
       </div>
 
-      <div class="row one">
-        <div class="field">
-          <label>Localidades objetivo (separadas por coma)</label>
-          <input id="p_locs_obj" placeholder="Oviedo, Gijón, Avilés">
-        </div>
+      <div class="actions">
+        <button class="btn ghost" id="toF2">Volver · F2</button>
+        <button class="btn" id="toF4">Siguiente · F4</button>
+        <button class="btn primary" id="p_save">Guardar</button>
       </div>
+    </div>
 
+    <!-- F4 ARRAS / PROPUESTAS -->
+    <div class="section" id="gateF4" hidden>
+      <h3>F4 · Arras / Propuestas</h3>
       <div class="row three">
-        <div class="field"><label>Nº de activos objetivo</label><input id="p_n_activos" inputmode="numeric" placeholder="2"></div>
-        <div class="field"><label>Sin ascensor</label><select id="p_no_asc"><option value="no">No</option><option value="si">Sí</option></select></div>
-        <div class="field"><label>Altura máxima</label><input id="p_alt_max" inputmode="numeric" placeholder="3"></div>
-      </div>
-
-      <div class="row three">
-        <div class="field"><label>Bajos</label><select id="p_bajos"><option value="no">No</option><option value="si">Sí</option></select></div>
-        <div class="field"><label>Acepta reforma</label>
-          <select id="p_reforma"><option>No</option><option>Lavado de cara</option><option>Integral</option></select>
+        <div class="field"><label>Estado</label>
+          <select id="p_sub_f4">
+            <option>Propuesta enviada</option>
+            <option>Reserva activa</option>
+            <option>Pendientes (arras)</option>
+            <option>Arras firmadas</option>
+            <option>Descartado</option>
+          </select>
         </div>
-        <div class="field"><label>Notas</label><input id="p_notes" placeholder="Preferencias, límites…"></div>
+        <div class="field"><label>Nº propuestas enviadas</label><input id="p_props" inputmode="numeric" placeholder="0"></div>
+        <div class="field"><label>Notas</label><input id="p_notes_f4" placeholder="Seguimiento"></div>
       </div>
+      <div class="actions">
+        <button class="btn ghost" id="toF3">Volver · F3</button>
+        <button class="btn" id="toF5">Siguiente · F5</button>
+        <button class="btn primary" id="p_save">Guardar</button>
+      </div>
+    </div>
 
+    <!-- F5 NOTARÍA -->
+    <div class="section" id="gateF5" hidden>
+      <h3>F5 · Notaría</h3>
       <div class="row two">
-        <div class="field"><label>Mes inicio búsqueda</label><input id="p_inicio" type="month"></div>
-        <div class="field"><label>Mes fin (máx +5 meses)</label><input id="p_fin" type="month"></div>
-      </div>
-
-      <div class="actions">
-        <button class="btn primary" id="p_save_f2">Guardar</button>
-        <button class="btn" id="f2_pdf">Resumen PDF</button>
-        <button class="btn" id="f2_mail_ok">Enviar contrato</button>
-        <button class="btn ghost" id="f2_mail_no">No interesa</button>
-        <button class="btn" id="toF3">Ir a Fase 3</button>
-        <button class="btn ghost" id="toF1">Volver Fase 1</button>
-      </div>
-    </div>
-
-    <!-- FASE 3 -->
-    <div id="gateF3" class="section" hidden>
-      <h3>Fase 3 — Búsqueda y propuestas</h3>
-      <div class="actions">
-        <button class="btn" id="f3_enviar_props">Enviar propuestas</button>
-        <button class="btn" id="f3_reserva">Reserva activa</button>
-        <button class="btn" id="toF4">Ir a Fase 4</button>
-        <button class="btn ghost" id="backF2">Volver Fase 2</button>
-      </div>
-    </div>
-
-    <!-- FASE 4 -->
-    <div id="gateF4" class="section" hidden>
-      <h3>Fase 4 — Arras</h3>
-      <div class="actions">
-        <button class="btn" id="f4_pendientes">Arras pendientes</button>
-        <button class="btn" id="f4_firmadas">Arras firmadas</button>
-        <button class="btn" id="toF5">Ir a Fase 5</button>
-        <button class="btn ghost" id="backF3">Volver Fase 3</button>
-      </div>
-    </div>
-
-    <!-- FASE 5 -->
-    <div id="gateF5" class="section" hidden>
-      <h3>Fase 5 — Notaría</h3>
-      <div class="row two">
-        <div class="field"><label>Fecha notaría</label><input id="p_notaria_fecha" type="date"></div>
-        <div class="field"><label>Subestado</label>
+        <div class="field"><label>Fecha de notaría</label><input id="p_notaria_fecha" type="date"></div>
+        <div class="field"><label>Estado</label>
           <select id="p_sub_f5">
             <option>Notaría fijada</option>
-            <option>Firmado</option>
+            <option>Completado</option>
             <option>Cancelado</option>
           </select>
         </div>
       </div>
       <div class="actions">
-        <button class="btn primary" id="p_save_f5">Guardar</button>
-        <button class="btn" id="f5_cerrar">Cerrar operación</button>
-        <button class="btn ghost" id="backF4">Volver Fase 4</button>
+        <button class="btn ghost" id="toF4">Volver · F4</button>
+        <button class="btn primary" id="p_save">Guardar</button>
       </div>
     </div>
+
   </section>
 
   <!-- GRID -->
   <section class="card">
-    <h3>Listado de prospectos</h3>
+    <h2>Listado de prospectos</h2>
     <div class="row three">
       <div class="field"><label>Filtrar por fase</label>
         <select id="f_fase">
@@ -212,27 +212,27 @@
           <option>F1</option><option>F2</option><option>F3</option><option>F4</option><option>F5</option>
         </select>
       </div>
-      <div class="field"><label>Tipo</label>
-        <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
+      <div class="field"><label>Filtrar por tipo</label>
+        <select id="f_tipo">
+          <option value="">Todos</option>
+          <option>Tradicional</option><option>Habitaciones</option>
+        </select>
       </div>
       <div class="field"><label>Buscar</label><input id="f_q" placeholder="Nombre, email, localidad…"></div>
     </div>
 
     <table class="table">
-      <thead>
-        <tr>
-          <th>Cliente</th><th>Contacto</th><th>Tipo</th><th>Objetivo</th>
-          <th>Presupuesto</th><th>Máx. compra</th><th>Fase</th><th>Subestado</th><th>Acciones</th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th>Cliente</th><th>Contacto</th><th>Tipo</th><th>Objetivo</th>
+        <th>Presupuesto</th><th>Máx compra</th><th>Fase</th><th>Subestado</th><th>Acciones</th>
+      </tr></thead>
       <tbody id="p_body"></tbody>
     </table>
   </section>
+
 </main>
 
-<footer class="foot">
-  <div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
-</footer>
+<footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
 <script defer src="js/app.js"></script>
 <script defer src="js/prospectos.js"></script>
