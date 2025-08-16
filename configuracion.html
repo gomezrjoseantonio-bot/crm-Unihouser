@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unihouser — Configuración</title>
+<link rel="stylesheet" href="css/style.css">
+</head><body>
+<header class="topbar">
+  <div class="container flex between center">
+    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
+    <nav class="nav">
+      <a href="evaluar.html">Evaluar</a>
+      <a href="evaluaciones.html">Evaluaciones</a>
+      <a href="prospectos.html">Prospectos</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="configuracion.html" class="active">Configuración</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+<section class="card">
+  <h2>Configuración</h2>
+  <div class="row three">
+    <div class="field"><label>ITP (%)</label><input id="c_itp" value="8,0"></div>
+    <div class="field"><label>Notaría y Registro (€)</label><input id="c_notaria" value="1.500" data-money></div>
+    <div class="field"><label>Incluir honorarios por defecto</label><select id="c_incl_honor"><option value="si">Sí</option><option value="no">No</option></select></div>
+  </div>
+  <div class="row three">
+    <div class="field"><label>% Seguro hogar</label><input id="c_pct_hogar" value="3,5"></div>
+    <div class="field"><label>% Seguro impago</label><input id="c_pct_impago" value="4,0"></div>
+    <div class="field"><label>% Gestión Tradicional</label><input id="c_pct_g_trad" value="15,0"></div>
+  </div>
+  <div class="row three">
+    <div class="field"><label>% Gestión Habitaciones</label><input id="c_pct_g_hab" value="25,0"></div>
+    <div class="field"><label>Objetivo BRUTA por defecto (%)</label><input id="c_obj_bruta" value="6,0"></div>
+    <div class="field"><label>Objetivo NETA por defecto (%)</label><input id="c_obj_neta" value="4,5"></div>
+  </div>
+  <div class="row two">
+    <div class="field"><label>Objetivo Flujo por defecto (€/mes)</label><input id="c_obj_flujo" value="150" data-money></div>
+  </div>
+  <div class="actions"><button class="btn primary" id="c_save">Guardar configuración</button></div>
+</section>
+</main>
+
+<footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
+<script defer src="js/app.js"></script>
+<script defer src="js/config.js"></script>
+</body></html>
