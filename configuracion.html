@@ -1,47 +1,41 @@
-<!DOCTYPE html><html lang="es"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unihouser — Configuración</title>
-<link rel="stylesheet" href="css/style.css">
-</head><body>
-<header class="topbar">
-  <div class="container flex between center">
-    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
-    <nav class="nav">
-      <a href="evaluar.html">Evaluar</a>
-      <a href="evaluaciones.html">Evaluaciones</a>
-      <a href="prospectos.html">Prospectos</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="configuracion.html" class="active">Configuración</a>
-    </nav>
-  </div>
-</header>
+const fmtE0 = new Intl.NumberFormat('es-ES', { style:'currency', currency:'EUR', maximumFractionDigits:0 });
+const fmtN0 = new Intl.NumberFormat('es-ES', { maximumFractionDigits:0 });
+const fmtN1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits:1 });
 
-<main class="container">
-<section class="card">
-  <h2>Configuración</h2>
-  <div class="row three">
-    <div class="field"><label>ITP (%)</label><input id="c_itp" value="8,0"></div>
-    <div class="field"><label>Notaría y Registro (€)</label><input id="c_notaria" value="1.500" data-money></div>
-    <div class="field"><label>Incluir honorarios por defecto</label><select id="c_incl_honor"><option value="si">Sí</option><option value="no">No</option></select></div>
-  </div>
-  <div class="row three">
-    <div class="field"><label>% Seguro hogar</label><input id="c_pct_hogar" value="3,5"></div>
-    <div class="field"><label>% Seguro impago</label><input id="c_pct_impago" value="4,0"></div>
-    <div class="field"><label>% Gestión Tradicional</label><input id="c_pct_g_trad" value="15,0"></div>
-  </div>
-  <div class="row three">
-    <div class="field"><label>% Gestión Habitaciones</label><input id="c_pct_g_hab" value="25,0"></div>
-    <div class="field"><label>Objetivo BRUTA por defecto (%)</label><input id="c_obj_bruta" value="6,0"></div>
-    <div class="field"><label>Objetivo NETA por defecto (%)</label><input id="c_obj_neta" value="4,5"></div>
-  </div>
-  <div class="row two">
-    <div class="field"><label>Objetivo Flujo por defecto (€/mes)</label><input id="c_obj_flujo" value="150" data-money></div>
-  </div>
-  <div class="actions"><button class="btn primary" id="c_save">Guardar configuración</button></div>
-</section>
-</main>
+function parseEs(str){
+if(str==null) return NaN;
+const s=String(str).trim().replace(/\./g,'').replace(',', '.');
+if(!s) return NaN;
+const n=Number(s);
+return Number.isFinite(n)?n:NaN;
+}
+function e0(v){ return fmtE0.format(v||0); }
 
-<footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
-<script defer src="js/app.js"></script>
-<script defer src="js/config.js"></script>
-</body></html>
+function setupMoneyFormatting(){
+document.querySelectorAll('input[data-money]').forEach(inp=>{
+inp.addEventListener('blur', ()=>{
+const n=parseEs(inp.value);
+if(Number.isFinite(n))
+inp.value = new Intl.NumberFormat('es-ES', {maximumFractionDigits:0}).format(Math.round(n));
+});
+});
+}
+function setupMoneyLive(){
+document.querySelectorAll('input[data-money]').forEach(inp=>{
+inp.addEventListener('input', ()=>{
+const digits=(inp.value||'').replace(/[^\d]/g,'');
+if(!digits){inp.value='';return;}
+const n=Number(digits);
+inp.value=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(n);
+});
+});
+}
+
+const Store={
+get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
+set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); },
+get pros(){ try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]} },
+set pros(v){ localStorage.setItem('pros', JSON.stringify(v)); },
+get evals(){ try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]} },
+set evals(v){ localStorage.setItem('evals', JSON.stringify(v)); }
+};
