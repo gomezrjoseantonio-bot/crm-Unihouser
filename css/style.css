@@ -42,3 +42,9 @@ margin-top:12px;padding:12px;border-radius:12px;border:1px solid var(--border);
 background:#f8fafc;color:#0f172a;font-weight:700
 }
 .toast.success{border-color:#86efac;background:#ecfdf5}
+/* Opcional: refuerzo visual de .steps si tu style.css no lo tiene */
+.steps{display:flex;gap:8px;margin:10px 0 4px}
+.step{padding:8px 10px;border:1px solid #2b343a;border-radius:10px;background:#0f1214;opacity:.8;cursor:pointer}
+.step.active{outline:2px solid var(--accent);opacity:1}
+.step span{font-weight:700;margin-right:6px}
+.toast{background:#0f1214;border:1px solid #2b343a;border-radius:10px;padding:8px 12px;margin:8px 0}
