@@ -7,7 +7,7 @@ c_itp: 8,
 c_notaria: 1500,
 c_pct_hogar: 3.5,
 c_pct_impago_trad: 4.0,
-c_pct_impago_hab: 3.0,
+c_pct_impago_hab: 4.0,
 c_pct_g_trad: 15.0,
 c_pct_g_hab: 25.0,
 c_obj_flujo: 250
