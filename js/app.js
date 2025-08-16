@@ -1,0 +1,41 @@
+const fmtE0 = new Intl.NumberFormat('es-ES', { style:'currency', currency:'EUR', maximumFractionDigits:0 });
+const fmtN0 = new Intl.NumberFormat('es-ES', { maximumFractionDigits:0 });
+const fmtN1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits:1 });
+
+function parseEs(str){
+  if(str==null) return NaN;
+  const s=String(str).trim().replace(/\./g,'').replace(',', '.');
+  if(!s) return NaN;
+  const n=Number(s);
+  return Number.isFinite(n)?n:NaN;
+}
+function e0(v){ return fmtE0.format(v||0); }
+
+function setupMoneyFormatting(){
+  document.querySelectorAll('input[data-money]').forEach(inp=>{
+    inp.addEventListener('blur', ()=>{
+      const n=parseEs(inp.value);
+      if(Number.isFinite(n))
+        inp.value = new Intl.NumberFormat('es-ES', {maximumFractionDigits:0}).format(Math.round(n));
+    });
+  });
+}
+function setupMoneyLive(){
+  document.querySelectorAll('input[data-money]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const digits=(inp.value||'').replace(/[^\d]/g,'');
+      if(!digits){inp.value='';return;}
+      const n=Number(digits);
+      inp.value=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(n);
+    });
+  });
+}
+
+const Store={
+  get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
+  set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); },
+  get pros(){ try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]} },
+  set pros(v){ localStorage.setItem('pros', JSON.stringify(v)); },
+  get evals(){ try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]} },
+  set evals(v){ localStorage.setItem('evals', JSON.stringify(v)); }
+};
