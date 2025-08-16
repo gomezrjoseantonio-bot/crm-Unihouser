@@ -1,11 +1,13 @@
 document.addEventListener('DOMContentLoaded', ()=>{
-  // utilidades comunes
-  setupMoneyFormatting();
-  setupMoneyLive();
+  // Asegura utilidades disponibles (evita fallos si app.js aún no cargó)
+  if (typeof setupMoneyFormatting === 'function') setupMoneyFormatting();
+  if (typeof setupMoneyLive === 'function') setupMoneyLive();
 
   const $ = id => document.getElementById(id);
+  function getVal(id){ const el=$(id); return el?el.value:''; }
+  function setVal(id,v){ const el=$(id); if(el) el.value=v; }
 
-  // Defaults “oficiales”
+  // Defaults
   const DEFAULTS = {
     c_itp: 8,
     c_notaria: 1500,
@@ -17,67 +19,74 @@ document.addEventListener('DOMContentLoaded', ()=>{
     c_obj_flujo: 150
   };
 
-  // Mezcla cfg guardada con defaults sin perder otras claves previas
-  const cfg = Object.assign({}, DEFAULTS, Store.cfg || {});
+  // Carga cfg
+  const cfg = Object.assign({}, DEFAULTS, (window.Store?.cfg)||{});
 
-  // Euros (con miles)
-  $('#c_notaria').value   = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(cfg.c_notaria);
-  $('#c_obj_flujo').value = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(cfg.c_obj_flujo);
+  // Pintar (euros con miles)
+  setVal('c_notaria', new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(cfg.c_notaria));
+  setVal('c_obj_flujo', new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(cfg.c_obj_flujo));
 
-  // Porcentajes (con coma decimal)
-  $('#c_itp').value             = String(cfg.c_itp).replace('.', ',');
-  $('#c_pct_hogar').value       = String(cfg.c_pct_hogar).replace('.', ',');
-  $('#c_pct_impago_trad').value = String(cfg.c_pct_impago_trad).replace('.', ',');
-  $('#c_pct_impago_hab').value  = String(cfg.c_pct_impago_hab).replace('.', ',');
-  $('#c_pct_g_trad').value      = String(cfg.c_pct_g_trad).replace('.', ',');
-  $('#c_pct_g_hab').value       = String(cfg.c_pct_g_hab).replace('.', ',');
+  // Pintar (porcentajes con coma)
+  setVal('c_itp', String(cfg.c_itp).replace('.', ','));
+  setVal('c_pct_hogar', String(cfg.c_pct_hogar).replace('.', ','));
+  setVal('c_pct_impago_trad', String(cfg.c_pct_impago_trad).replace('.', ','));
+  setVal('c_pct_impago_hab', String(cfg.c_pct_impago_hab).replace('.', ','));
+  setVal('c_pct_g_trad', String(cfg.c_pct_g_trad).replace('.', ','));
+  setVal('c_pct_g_hab', String(cfg.c_pct_g_hab).replace('.', ','));
 
-  // Guardar configuración
-  $('#c_save').onclick = ()=>{
-    const out = {
-      ...Store.cfg, // preserva cualquier otra clave histórica
-      c_itp:             parseEs($('#c_itp').value)             ?? DEFAULTS.c_itp,
-      c_notaria:         parseEs($('#c_notaria').value)         ?? DEFAULTS.c_notaria,
-      c_pct_hogar:       parseEs($('#c_pct_hogar').value)       ?? DEFAULTS.c_pct_hogar,
-      c_pct_impago_trad: parseEs($('#c_pct_impago_trad').value) ?? DEFAULTS.c_pct_impago_trad,
-      c_pct_impago_hab:  parseEs($('#c_pct_impago_hab').value)  ?? DEFAULTS.c_pct_impago_hab,
-      c_pct_g_trad:      parseEs($('#c_pct_g_trad').value)      ?? DEFAULTS.c_pct_g_trad,
-      c_pct_g_hab:       parseEs($('#c_pct_g_hab').value)       ?? DEFAULTS.c_pct_g_hab,
-      c_obj_flujo:       parseEs($('#c_obj_flujo').value)       ?? DEFAULTS.c_obj_flujo
-    };
-    Store.cfg = out;
+  // Guardar
+  const btnSave = $('c_save');
+  if(btnSave){
+    btnSave.addEventListener('click', ()=>{
+      const out = {
+        ...(window.Store?.cfg||{}),
+        c_itp:             parseEs(getVal('c_itp'))             ?? DEFAULTS.c_itp,
+        c_notaria:         parseEs(getVal('c_notaria'))         ?? DEFAULTS.c_notaria,
+        c_pct_hogar:       parseEs(getVal('c_pct_hogar'))       ?? DEFAULTS.c_pct_hogar,
+        c_pct_impago_trad: parseEs(getVal('c_pct_impago_trad')) ?? DEFAULTS.c_pct_impago_trad,
+        c_pct_impago_hab:  parseEs(getVal('c_pct_impago_hab'))  ?? DEFAULTS.c_pct_impago_hab,
+        c_pct_g_trad:      parseEs(getVal('c_pct_g_trad'))      ?? DEFAULTS.c_pct_g_trad,
+        c_pct_g_hab:       parseEs(getVal('c_pct_g_hab'))       ?? DEFAULTS.c_pct_g_hab,
+        c_obj_flujo:       parseEs(getVal('c_obj_flujo'))       ?? DEFAULTS.c_obj_flujo
+      };
+      if(window.Store) window.Store.cfg = out;
+      showToast('✅ Nueva configuración guardada con éxito');
+    });
+  }
 
-    // Toast éxito
-    const toast = $('#c_toast');
-    toast.hidden = false;
-    clearTimeout(window.__cfg_toast);
-    window.__cfg_toast = setTimeout(()=> toast.hidden = true, 2200);
-  };
+  // Reset
+  const btnReset = $('c_reset');
+  if(btnReset){
+    btnReset.addEventListener('click', ()=>{
+      // Pintar defaults
+      setVal('c_notaria', new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(DEFAULTS.c_notaria));
+      setVal('c_obj_flujo', new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(DEFAULTS.c_obj_flujo));
 
-  // Restaurar valores por defecto
-  $('#c_reset').onclick = ()=>{
-    // Pintar defaults en inputs
-    $('#c_notaria').value   = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(DEFAULTS.c_notaria);
-    $('#c_obj_flujo').value = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(DEFAULTS.c_obj_flujo);
+      setVal('c_itp', String(DEFAULTS.c_itp).replace('.', ','));
+      setVal('c_pct_hogar', String(DEFAULTS.c_pct_hogar).replace('.', ','));
+      setVal('c_pct_impago_trad', String(DEFAULTS.c_pct_impago_trad).replace('.', ','));
+      setVal('c_pct_impago_hab', String(DEFAULTS.c_pct_impago_hab).replace('.', ','));
+      setVal('c_pct_g_trad', String(DEFAULTS.c_pct_g_trad).replace('.', ','));
+      setVal('c_pct_g_hab', String(DEFAULTS.c_pct_g_hab).replace('.', ','));
 
-    $('#c_itp').value             = String(DEFAULTS.c_itp).replace('.', ',');
-    $('#c_pct_hogar').value       = String(DEFAULTS.c_pct_hogar).replace('.', ',');
-    $('#c_pct_impago_trad').value = String(DEFAULTS.c_pct_impago_trad).replace('.', ',');
-    $('#c_pct_impago_hab').value  = String(DEFAULTS.c_pct_impago_hab).replace('.', ',');
-    $('#c_pct_g_trad').value      = String(DEFAULTS.c_pct_g_trad).replace('.', ',');
-    $('#c_pct_g_hab').value       = String(DEFAULTS.c_pct_g_hab).replace('.', ',');
+      if(window.Store) window.Store.cfg = Object.assign({}, window.Store.cfg||{}, DEFAULTS);
+      showToast('✅ Configuración restaurada');
+      // Volver al texto estándar después
+      setTimeout(()=>{
+        const t=$('c_toast'); if(t) t.textContent='✅ Nueva configuración guardada con éxito';
+      }, 2400);
+    });
+  }
 
-    // Guardar defaults
-    Store.cfg = Object.assign({}, Store.cfg, DEFAULTS);
-
-    // Toast
-    const toast = $('#c_toast');
-    toast.textContent = '✅ Configuración restaurada';
-    toast.hidden = false;
+  function showToast(msg){
+    const t = $('c_toast'); if(!t) return;
+    t.textContent = msg;
+    t.hidden = false;
+    t.classList.add('show');
     clearTimeout(window.__cfg_toast);
     window.__cfg_toast = setTimeout(()=>{
-      toast.hidden = true; 
-      toast.textContent = '✅ Nueva configuración guardada con éxito';
+      t.classList.remove('show');
+      t.hidden = true;
     }, 2200);
-  };
+  }
 });
