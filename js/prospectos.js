@@ -1,9 +1,9 @@
-// js/prospectos.js — reemplazo completo
+// js/prospectos.js — reemplazo completo (CSP-safe)
 document.addEventListener('DOMContentLoaded', ()=>{
   if (typeof setupMoneyFormatting === 'function') setupMoneyFormatting();
   if (typeof setupMoneyLive === 'function') setupMoneyLive();
 
-  const $ = id => document.getElementById(id);
+  const $  = id => document.getElementById(id);
   const nf0 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
   const nf1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   }
 
-  stepsEl?.addEventListener('click', (e)=>{
+  stepsEl && stepsEl.addEventListener('click', (e)=>{
     const t = e.target.closest('.step'); if(!t) return;
     setPhase(t.dataset.phase);
   });
@@ -51,50 +51,52 @@ document.addEventListener('DOMContentLoaded', ()=>{
     F.toast.textContent = msg;
     F.toast.hidden = false;
     clearTimeout(window.__p_toast);
-    window.__p_toast = setTimeout(()=> F.toast.hidden = true, 2000);
+    window.__p_toast = setTimeout(function(){ F.toast.hidden = true; }, 2000);
   }
   function objLabel(rec){
     if(rec.obj_tipo === 'flujo') return nf0.format(rec.obj_raw||0) + ' €';
     return nf1.format(rec.obj_raw||0) + ' %';
   }
-  function minimalF1OK(){ return !!(F.email?.value.trim() || F.tel?.value.trim()); }
+  function minimalF1OK(){ return !!(F.email && F.email.value.trim() || F.tel && F.tel.value.trim()); }
 
+  // ✅ CORREGIDO: backticks y sin evals
   function clampFinMes(){
-    const s = F.inicio?.value, e = F.fin?.value; if(!s || !e) return;
-    const [ys, ms] = s.split('-').map(Number);
-    const [ye, me] = e.split('-').map(Number);
+    if(!F.inicio || !F.fin) return;
+    const s = F.inicio.value, e = F.fin.value; if(!s || !e) return;
+    const ys = Number(s.split('-')[0]); const ms = Number(s.split('-')[1]);
+    const ye = Number(e.split('-')[0]); const me = Number(e.split('-')[1]);
     const max = new Date(ys, ms-1+5, 1);
     const end = new Date(ye, me-1, 1);
     if(end > max){
       F.fin.value = ${max.getFullYear()}-${String(max.getMonth()+1).padStart(2,'0')};
     }
   }
-  F.inicio?.addEventListener('change', clampFinMes);
-  F.fin?.addEventListener('change', clampFinMes);
+  F.inicio && F.inicio.addEventListener('change', clampFinMes);
+  F.fin    && F.fin.addEventListener('change', clampFinMes);
 
   function recalcMaxCompra(){
-    const cfg = (window.Store?.cfg) || {};
+    const cfg = (window.Store && window.Store.cfg) || {};
     const itp = (cfg.c_itp ?? 8) / 100;
     const notaria = (cfg.c_notaria ?? 1500);
-    const incl = (F.incl_honor?.value === 'si');
+    const incl = (F.incl_honor && F.incl_honor.value === 'si');
     const honor = incl ? (3500 * 1.21) : 0;
-    const budget = parseEs(F.budget?.value) || 0;
+    const budget = parseEs(F.budget && F.budget.value) || 0;
     if(!F.max_compra) return;
     if(budget <= 0){ F.max_compra.value = ''; return; }
     const numerador = Math.max(0, budget - notaria - honor);
     const maxCompra = Math.max(0, numerador / (1 + itp));
     F.max_compra.value = nf0.format(Math.round(maxCompra));
   }
-  ['input','change'].forEach(ev=>{
-    F.budget?.addEventListener(ev, recalcMaxCompra);
-    F.incl_honor?.addEventListener(ev, recalcMaxCompra);
+  ['input','change'].forEach(function(ev){
+    F.budget   && F.budget.addEventListener(ev, recalcMaxCompra);
+    F.incl_honor && F.incl_honor.addEventListener(ev, recalcMaxCompra);
   });
 
   function filtered(list){
-    const fF = F.f_fase?.value || '';
-    const fT = F.f_tipo?.value || '';
-    const q  = (F.f_q?.value || '').toLowerCase();
-    return (list||[]).filter(p=>{
+    const fF = F.f_fase && F.f_fase.value || '';
+    const fT = F.f_tipo && F.f_tipo.value || '';
+    const q  = (F.f_q && F.f_q.value || '').toLowerCase();
+    return (list||[]).filter(function(p){
       if(fF && p.fase !== fF) return false;
       if(fT && p.pref_tipo !== fT) return false;
       if(q){
@@ -110,23 +112,23 @@ document.addEventListener('DOMContentLoaded', ()=>{
   function render(){
     if(!F.tbody) return;
     F.tbody.innerHTML = '';
-    filtered(window.Store?.pros || []).forEach((p,i)=>{
+    filtered((window.Store && window.Store.pros) || []).forEach(function(p,i){
       const contacto = [p.email, p.tel].filter(Boolean).join(' / ') || '—';
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${p.nombre||'—'}</td>
-        <td>${contacto}</td>
-        <td>${p.pref_tipo||'—'}</td>
-        <td>${(p.obj_tipo||'').toUpperCase()} ${objLabel(p)}</td>
-        <td>${p.budget ? nf0.format(p.budget)+' €' : '—'}</td>
-        <td>${p.max_compra ? nf0.format(p.max_compra)+' €' : '—'}</td>
-        <td>${p.fase||'F1'}</td>
-        <td>${p.sub||'Contacto recibido'}</td>
-        <td>
-          <button class="btn ghost" data-act="edit" data-i="${i}">Editar</button>
-          <button class="btn" data-act="phase" data-i="${i}">Avanzar fase</button>
-          <button class="btn" data-act="del" data-i="${i}">Eliminar</button>
-        </td>`;
+      tr.innerHTML =
+        '<td>'+(p.nombre||'—')+'</td>'+
+        '<td>'+contacto+'</td>'+
+        '<td>'+(p.pref_tipo||'—')+'</td>'+
+        '<td>'+((p.obj_tipo||'').toUpperCase())+' '+objLabel(p)+'</td>'+
+        '<td>'+(p.budget ? nf0.format(p.budget)+' €' : '—')+'</td>'+
+        '<td>'+(p.max_compra ? nf0.format(p.max_compra)+' €' : '—')+'</td>'+
+        '<td>'+(p.fase||'F1')+'</td>'+
+        '<td>'+(p.sub||'Contacto recibido')+'</td>'+
+        '<td>'+
+          '<button class="btn ghost" data-act="edit" data-i="'+i+'">Editar</button> '+
+          '<button class="btn" data-act="phase" data-i="'+i+'">Avanzar fase</button> '+
+          '<button class="btn" data-act="del" data-i="'+i+'">Eliminar</button>'+
+        '</td>';
       F.tbody.appendChild(tr);
     });
   }
@@ -136,7 +138,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     F.idx.value = -1;
     ['nombre','email','tel','recordatorio','dni','dir','loc_res','obj_val',
      'budget','max_compra','locs_obj','n_activos','alt_max','notes','notaria_fecha']
-     .forEach(k=>{ if(F[k]) F[k].value=''; });
+     .forEach(function(k){ if(F[k]) F[k].value=''; });
 
     F.sub_f1 && (F.sub_f1.value='Contacto recibido');
     F.pref_tipo && (F.pref_tipo.value='Tradicional');
@@ -153,7 +155,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function editRow(i){
-    const arr = window.Store?.pros || [];
+    const arr = (window.Store && window.Store.pros) || [];
     const p = arr[i]; if(!p) return;
     F.idx.value = i;
 
@@ -203,42 +205,41 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function collect(){
-    const obj_tipo = F.obj_tipo?.value || 'bruta';
-    const obj_raw  = parseEs(F.obj_val?.value);
-    const budget   = parseEs(F.budget?.value) || 0;
-    const max_compra = parseEs(F.max_compra?.value) || 0;
+    const obj_tipo = F.obj_tipo && F.obj_tipo.value || 'bruta';
+    const obj_raw  = parseEs(F.obj_val && F.obj_val.value);
+    const budget   = parseEs(F.budget && F.budget.value) || 0;
+    const max_compra = parseEs(F.max_compra && F.max_compra.value) || 0;
 
-    const rec = {
+    return {
       fase: currentPhase,
-      nombre: F.nombre?.value.trim() || '',
-      email: F.email?.value.trim() || '',
-      tel: F.tel?.value.trim() || '',
-      recordatorio: F.recordatorio?.value || '',
-      sub_f1: F.sub_f1?.value || 'Contacto recibido',
-      sub: F.sub_f1?.value || 'Contacto recibido',
-      dni: F.dni?.value.trim() || '',
-      dir: F.dir?.value.trim() || '',
-      loc_res: F.loc_res?.value.trim() || '',
-      pref_tipo: F.pref_tipo?.value || 'Tradicional',
-      obj_tipo,
+      nombre: F.nombre && F.nombre.value.trim() || '',
+      email: F.email && F.email.value.trim() || '',
+      tel:   F.tel && F.tel.value.trim() || '',
+      recordatorio: F.recordatorio && F.recordatorio.value || '',
+      sub_f1: F.sub_f1 && F.sub_f1.value || 'Contacto recibido',
+      sub:    F.sub_f1 && F.sub_f1.value || 'Contacto recibido',
+      dni: F.dni && F.dni.value.trim() || '',
+      dir: F.dir && F.dir.value.trim() || '',
+      loc_res: F.loc_res && F.loc_res.value.trim() || '',
+      pref_tipo: F.pref_tipo && F.pref_tipo.value || 'Tradicional',
+      obj_tipo: obj_tipo,
       obj_raw: Number.isFinite(obj_raw) ? obj_raw : (obj_tipo==='flujo'? 0 : 0),
-      budget,
-      incl_honor: F.incl_honor?.value || 'si',
-      max_compra,
-      locs_text: F.locs_obj?.value.trim() || '',
-      n_activos: parseEs(F.n_activos?.value) || 0,
-      no_asc: F.no_asc?.value || 'no',
-      alt_max: parseEs(F.alt_max?.value) || 0,
-      bajos: F.bajos?.value || 'no',
-      reforma: F.reforma?.value || 'No',
-      inicio: F.inicio?.value || '',
-      fin: F.fin?.value || '',
-      notes: F.notes?.value.trim() || '',
-      notaria_fecha: F.notaria_fecha?.value || '',
-      sub_f5: F.sub_f5?.value || 'Notaría fijada',
+      budget: budget,
+      incl_honor: F.incl_honor && F.incl_honor.value || 'si',
+      max_compra: max_compra,
+      locs_text: F.locs_obj && F.locs_obj.value.trim() || '',
+      n_activos: parseEs(F.n_activos && F.n_activos.value) || 0,
+      no_asc: F.no_asc && F.no_asc.value || 'no',
+      alt_max: parseEs(F.alt_max && F.alt_max.value) || 0,
+      bajos: F.bajos && F.bajos.value || 'no',
+      reforma: F.reforma && F.reforma.value || 'No',
+      inicio: F.inicio && F.inicio.value || '',
+      fin: F.fin && F.fin.value || '',
+      notes: F.notes && F.notes.value.trim() || '',
+      notaria_fecha: F.notaria_fecha && F.notaria_fecha.value || '',
+      sub_f5: F.sub_f5 && F.sub_f5.value || 'Notaría fijada',
       ts: Date.now()
     };
-    return rec;
   }
 
   function save(){
@@ -246,8 +247,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
       alert('En F1 necesitas al menos email o teléfono.');
       return;
     }
-    const arr = window.Store?.pros || [];
-    const idx = parseInt(F.idx?.value || '-1', 10);
+    const arr = (window.Store && window.Store.pros) || [];
+    const idx = parseInt(F.idx && F.idx.value || '-1', 10);
     const rec = collect();
     if(idx >= 0) arr[idx] = rec; else arr.unshift(rec);
     if(window.Store) window.Store.pros = arr;
@@ -256,32 +257,32 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function mailto(to, subject, body){
-    const href = mailto:${encodeURIComponent(to||'')} +
-                 ?subject=${encodeURIComponent(subject||'')} +
-                 &body=${encodeURIComponent(body||'')};
+    const href = 'mailto:'+encodeURIComponent(to||'') +
+                 '?subject='+encodeURIComponent(subject||'') +
+                 '&body='+encodeURIComponent(body||'');
     window.open(href, '_blank');
   }
-  function takeName(){ return (F.nombre?.value || 'Cliente').trim(); }
+  function takeName(){ return (F.nombre && F.nombre.value || 'Cliente').trim(); }
 
   function printSummary(phase){
-    const html = `
-      <html><head><meta charset="utf-8"><title>Resumen ${phase}</title>
-      <style>body{font-family:Inter,Arial;padding:24px}h1{margin:0 0 8px}.k{color:#666}.b{font-weight:700}</style>
-      </head><body>
-      <h1>Unihouser · Resumen ${phase}</h1>
-      <p><span class="k">Cliente:</span> <span class="b">${takeName()}</span></p>
-      <p><span class="k">Email:</span> ${F.email?.value||'—'} · <span class="k">Tel:</span> ${F.tel?.value||'—'}</p>
-      <hr>
-      <p><span class="k">Tipo:</span> ${F.pref_tipo?.value||'—'} · <span class="k">Objetivo:</span> ${F.obj_tipo?.value||'—'} ${F.obj_val?.value||''}</p>
-      <p><span class="k">Presupuesto total:</span> ${F.budget?.value||'—'} · <span class="k">Máx compra:</span> ${F.max_compra?.value||'—'}</p>
-      <p><span class="k">Localidades objetivo:</span> ${F.locs_obj?.value||'—'}</p>
-      <p><span class="k">Notas:</span> ${F.notes?.value||'—'}</p>
-      <hr><small>© Unihouser · unihouser.es · info@unihouser.es · 644 300 200</small>
-      </body></html>`;
+    const html =
+      '<html><head><meta charset="utf-8"><title>Resumen '+phase+'</title>'+
+      '<style>body{font-family:Inter,Arial;padding:24px}h1{margin:0 0 8px}.k{color:#666}.b{font-weight:700}</style>'+
+      '</head><body>'+
+      '<h1>Unihouser · Resumen '+phase+'</h1>'+
+      '<p><span class="k">Cliente:</span> <span class="b">'+takeName()+'</span></p>'+
+      '<p><span class="k">Email:</span> '+(F.email && F.email.value || '—')+' · <span class="k">Tel:</span> '+(F.tel && F.tel.value || '—')+'</p>'+
+      '<hr>'+
+      '<p><span class="k">Tipo:</span> '+(F.pref_tipo && F.pref_tipo.value || '—')+' · <span class="k">Objetivo:</span> '+(F.obj_tipo && F.obj_tipo.value || '—')+' '+(F.obj_val && F.obj_val.value || '')+'</p>'+
+      '<p><span class="k">Presupuesto total:</span> '+(F.budget && F.budget.value || '—')+' · <span class="k">Máx compra:</span> '+(F.max_compra && F.max_compra.value || '—')+'</p>'+
+      '<p><span class="k">Localidades objetivo:</span> '+(F.locs_obj && F.locs_obj.value || '—')+'</p>'+
+      '<p><span class="k">Notas:</span> '+(F.notes && F.notes.value || '—')+'</p>'+
+      '<hr><small>© Unihouser · unihouser.es · info@unihouser.es · 644 300 200</small>'+
+      '</body></html>';
     const w = window.open('', '_blank'); w.document.write(html); w.document.close(); w.focus(); w.print();
   }
 
-  document.addEventListener('click', (e)=>{
+  document.addEventListener('click', function(e){
     const t = e.target.closest('button'); if(!t) return;
 
     if(t.id === 'p_save'){ save(); return; }
@@ -297,24 +298,24 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(t.id === 'backF4'){ setPhase('F4'); return; }
 
     if(t.id === 'f1_email'){
-      if(!F.email?.value){ alert('Necesitas un email.'); return; }
+      if(!F.email || !F.email.value){ alert('Necesitas un email.'); return; }
       mailto(F.email.value, 'Unihouser · Primer contacto',
-        Hola ${takeName()},\n\nGracias por tu interés. ¿Cuándo te viene bien una breve reunión para alinear objetivos y presupuesto?\n\nSaludos.);
+        'Hola '+takeName()+',\n\nGracias por tu interés. ¿Cuándo te viene bien una breve reunión para alinear objetivos y presupuesto?\n\nSaludos.');
       return;
     }
     if(t.id === 'f1_pdf'){ printSummary('F1 · Contacto'); return; }
 
     if(t.id === 'f2_pdf'){ printSummary('F2 · Reunión'); return; }
     if(t.id === 'f2_mail_ok'){
-      if(!F.email?.value){ alert('Necesitas un email.'); return; }
+      if(!F.email || !F.email.value){ alert('Necesitas un email.'); return; }
       mailto(F.email.value, 'Unihouser · Contrato de servicio',
-        Hola ${takeName()},\n\nTe envío contrato para firma. Objetivo: ${F.obj_tipo?.value} ${F.obj_val?.value}. Presupuesto total: ${F.budget?.value}. Máx compra: ${F.max_compra?.value}.\n\nSaludos.);
+        'Hola '+takeName()+',\n\nTe envío contrato para firma. Objetivo: '+(F.obj_tipo && F.obj_tipo.value)+' '+(F.obj_val && F.obj_val.value)+'. Presupuesto total: '+(F.budget && F.budget.value)+'. Máx compra: '+(F.max_compra && F.max_compra.value)+'.\n\nSaludos.');
       return;
     }
     if(t.id === 'f2_mail_no'){
-      if(!F.email?.value){ alert('Necesitas un email.'); return; }
+      if(!F.email || !F.email.value){ alert('Necesitas un email.'); return; }
       mailto(F.email.value, 'Unihouser · Gracias por tu tiempo',
-        Hola ${takeName()},\n\nGracias por la conversación. Si en el futuro cambian tus planes, estaremos encantados de ayudarte.\n\nSaludos.);
+        'Hola '+takeName()+',\n\nGracias por la conversación. Si en el futuro cambian tus planes, estaremos encantados de ayudarte.\n\nSaludos.');
       return;
     }
     if(t.id === 'f2_contrato'){
@@ -323,9 +324,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
 
     if(t.id === 'f3_enviar_props'){
-      if(!F.email?.value){ alert('Necesitas un email.'); return; }
+      if(!F.email || !F.email.value){ alert('Necesitas un email.'); return; }
       mailto(F.email.value, 'Unihouser · Propuesta enviada',
-        Hola ${takeName()},\n\nTe acabamos de enviar una propuesta de activo ajustada a tus criterios. Quedo atento a tu feedback.\n\nSaludos.);
+        'Hola '+takeName()+',\n\nTe acabamos de enviar una propuesta de activo ajustada a tus criterios. Quedo atento a tu feedback.\n\nSaludos.');
       return;
     }
     if(t.id === 'f3_reserva'){ toast('Reserva activada'); save(); return; }
@@ -334,10 +335,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(t.id === 'f5_cerrar'){ toast('Operación completada'); save(); return; }
   });
 
-  document.addEventListener('click', (e)=>{
+  document.addEventListener('click', function(e){
     const b = e.target.closest('button[data-act]'); if(!b) return;
     const i = parseInt(b.dataset.i || '-1', 10);
-    const arr = window.Store?.pros || [];
+    const arr = (window.Store && window.Store.pros) || [];
     const p = arr[i]; if(!p) return;
 
     if(b.dataset.act === 'edit'){ editRow(i); return; }
@@ -348,10 +349,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   });
 
-  ['change','input'].forEach(ev=>{
-    F.f_fase?.addEventListener(ev, render);
-    F.f_tipo?.addEventListener(ev, render);
-    F.f_q?.addEventListener(ev, render);
+  ['change','input'].forEach(function(ev){
+    F.f_fase && F.f_fase.addEventListener(ev, render);
+    F.f_tipo && F.f_tipo.addEventListener(ev, render);
+    F.f_q && F.f_q.addEventListener(ev, render);
   });
 
   setPhase('F1');
