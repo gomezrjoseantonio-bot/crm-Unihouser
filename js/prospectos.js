@@ -1,6 +1,5 @@
 // js/prospectos.js — reemplazo completo
 document.addEventListener('DOMContentLoaded', ()=>{
-  // Utilidades comunes (de app.js)
   if (typeof setupMoneyFormatting === 'function') setupMoneyFormatting();
   if (typeof setupMoneyLive === 'function') setupMoneyLive();
 
@@ -8,13 +7,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const nf0 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
   const nf1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
 
-  // Secciones (gates) por fase y barra de pasos
   const gates = { F1: $('gateF1'), F2: $('gateF2'), F3: $('gateF3'), F4: $('gateF4'), F5: $('gateF5') };
   const stepsEl = $('steps');
 
-  // Refs del formulario (IDs usados en el HTML que ya tienes)
   const F = {
-    // control
     idx: $('p_idx'), toast: $('p_toast'),
     // F1
     nombre: $('p_nombre'), email: $('p_email'), tel: $('p_tel'),
@@ -33,10 +29,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     tbody: $('p_body'), f_fase: $('f_fase'), f_tipo: $('f_tipo'), f_q: $('f_q')
   };
 
-  // Estado actual de la fase visible (no confundir con la guardada en Store)
   let currentPhase = 'F1';
 
-  // ----------------- UI DE FASES -----------------
   function setPhase(ph){
     currentPhase = ph;
     Object.entries(gates).forEach(([k,el])=> { if(el) el.hidden = (k!==ph); });
@@ -46,13 +40,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
       });
     }
   }
-  // Clic en la barra de pasos
+
   stepsEl?.addEventListener('click', (e)=>{
     const t = e.target.closest('.step'); if(!t) return;
     setPhase(t.dataset.phase);
   });
 
-  // ----------------- HELPERS -----------------
   function toast(msg='OK'){
     if(!F.toast) return;
     F.toast.textContent = msg;
@@ -66,7 +59,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
   function minimalF1OK(){ return !!(F.email?.value.trim() || F.tel?.value.trim()); }
 
-  // Limitar mes fin a +5 meses desde inicio
   function clampFinMes(){
     const s = F.inicio?.value, e = F.fin?.value; if(!s || !e) return;
     const [ys, ms] = s.split('-').map(Number);
@@ -80,7 +72,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   F.inicio?.addEventListener('change', clampFinMes);
   F.fin?.addEventListener('change', clampFinMes);
 
-  // Máx. compra = (Budget - Notaría - Honorarios) / (1 + ITP)
   function recalcMaxCompra(){
     const cfg = (window.Store?.cfg) || {};
     const itp = (cfg.c_itp ?? 8) / 100;
@@ -99,7 +90,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     F.incl_honor?.addEventListener(ev, recalcMaxCompra);
   });
 
-  // ----------------- GRID -----------------
   function filtered(list){
     const fF = F.f_fase?.value || '';
     const fT = F.f_tipo?.value || '';
@@ -141,7 +131,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
   }
 
-  // ----------------- CARGA/EDICIÓN -----------------
   function clearForm(){
     if(!F.idx) return;
     F.idx.value = -1;
@@ -149,7 +138,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
      'budget','max_compra','locs_obj','n_activos','alt_max','notes','notaria_fecha']
      .forEach(k=>{ if(F[k]) F[k].value=''; });
 
-    // Defaults
     F.sub_f1 && (F.sub_f1.value='Contacto recibido');
     F.pref_tipo && (F.pref_tipo.value='Tradicional');
     F.obj_tipo && (F.obj_tipo.value='bruta');
@@ -169,14 +157,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const p = arr[i]; if(!p) return;
     F.idx.value = i;
 
-    // F1
     F.nombre && (F.nombre.value = p.nombre||'');
     F.email && (F.email.value = p.email||'');
     F.tel && (F.tel.value = p.tel||'');
     F.recordatorio && (F.recordatorio.value = p.recordatorio||'');
     F.sub_f1 && (F.sub_f1.value = p.sub_f1 || p.sub || 'Contacto recibido');
 
-    // F2
     F.dni && (F.dni.value = p.dni||'');
     F.dir && (F.dir.value = p.dir||'');
     F.loc_res && (F.loc_res.value = p.loc_res||'');
@@ -189,7 +175,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(F.incl_honor)F.incl_honor.value= p.incl_honor||'si';
     if(F.max_compra)F.max_compra.value= p.max_compra ? nf0.format(p.max_compra) : '';
 
-    // F3
     F.locs_obj && (F.locs_obj.value = p.locs_text||'');
     F.n_activos && (F.n_activos.value = p.n_activos||'');
     F.no_asc && (F.no_asc.value = p.no_asc||'no');
@@ -200,7 +185,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     F.fin && (F.fin.value = p.fin||'');
     F.notes && (F.notes.value = p.notes||'');
 
-    // F5
     F.notaria_fecha && (F.notaria_fecha.value = p.notaria_fecha||'');
     F.sub_f5 && (F.sub_f5.value = p.sub_f5||'Notaría fijada');
 
@@ -218,7 +202,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(p.fase==='F5') p.sub='Notaría fijada';
   }
 
-  // ----------------- SAVE -----------------
   function collect(){
     const obj_tipo = F.obj_tipo?.value || 'bruta';
     const obj_raw  = parseEs(F.obj_val?.value);
@@ -227,14 +210,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     const rec = {
       fase: currentPhase,
-      // F1
       nombre: F.nombre?.value.trim() || '',
       email: F.email?.value.trim() || '',
       tel: F.tel?.value.trim() || '',
       recordatorio: F.recordatorio?.value || '',
       sub_f1: F.sub_f1?.value || 'Contacto recibido',
       sub: F.sub_f1?.value || 'Contacto recibido',
-      // F2
       dni: F.dni?.value.trim() || '',
       dir: F.dir?.value.trim() || '',
       loc_res: F.loc_res?.value.trim() || '',
@@ -244,7 +225,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
       budget,
       incl_honor: F.incl_honor?.value || 'si',
       max_compra,
-      // F3
       locs_text: F.locs_obj?.value.trim() || '',
       n_activos: parseEs(F.n_activos?.value) || 0,
       no_asc: F.no_asc?.value || 'no',
@@ -254,7 +234,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
       inicio: F.inicio?.value || '',
       fin: F.fin?.value || '',
       notes: F.notes?.value.trim() || '',
-      // F5
       notaria_fecha: F.notaria_fecha?.value || '',
       sub_f5: F.sub_f5?.value || 'Notaría fijada',
       ts: Date.now()
@@ -276,7 +255,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     toast('✅ Prospecto guardado');
   }
 
-  // ----------------- ACCIONES EXTRA -----------------
   function mailto(to, subject, body){
     const href = mailto:${encodeURIComponent(to||'')} +
                  ?subject=${encodeURIComponent(subject||'')} +
@@ -303,15 +281,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const w = window.open('', '_blank'); w.document.write(html); w.document.close(); w.focus(); w.print();
   }
 
-  // ----------------- DELEGACIÓN DE EVENTOS -----------------
   document.addEventListener('click', (e)=>{
     const t = e.target.closest('button'); if(!t) return;
 
-    // Global
     if(t.id === 'p_save'){ save(); return; }
     if(t.id === 'p_clear'){ clearForm(); toast('Formulario limpio'); return; }
 
-    // Navegación entre fases (guardando)
     if(t.id === 'toF2'){ setPhase('F2'); save(); return; }
     if(t.id === 'toF3'){ setPhase('F3'); save(); return; }
     if(t.id === 'toF4'){ setPhase('F4'); save(); return; }
@@ -321,27 +296,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(t.id === 'backF3'){ setPhase('F3'); return; }
     if(t.id === 'backF4'){ setPhase('F4'); return; }
 
-    // Acciones F1
     if(t.id === 'f1_email'){
       if(!F.email?.value){ alert('Necesitas un email.'); return; }
       mailto(F.email.value, 'Unihouser · Primer contacto',
-        Hola ${takeName()},%0D%0A%0D%0AGracias por tu interés. ¿Cuándo te viene bien una breve reunión para alinear objetivos y presupuesto?%0D%0A%0D%0ASaludos.);
+        Hola ${takeName()},\n\nGracias por tu interés. ¿Cuándo te viene bien una breve reunión para alinear objetivos y presupuesto?\n\nSaludos.);
       return;
     }
     if(t.id === 'f1_pdf'){ printSummary('F1 · Contacto'); return; }
 
-    // Acciones F2
     if(t.id === 'f2_pdf'){ printSummary('F2 · Reunión'); return; }
     if(t.id === 'f2_mail_ok'){
       if(!F.email?.value){ alert('Necesitas un email.'); return; }
       mailto(F.email.value, 'Unihouser · Contrato de servicio',
-        Hola ${takeName()},%0D%0A%0D%0ATe envío contrato para firma. Objetivo: ${F.obj_tipo?.value} ${F.obj_val?.value}. Presupuesto total: ${F.budget?.value}. Máx compra: ${F.max_compra?.value}.%0D%0A%0D%0ASaludos.);
+        Hola ${takeName()},\n\nTe envío contrato para firma. Objetivo: ${F.obj_tipo?.value} ${F.obj_val?.value}. Presupuesto total: ${F.budget?.value}. Máx compra: ${F.max_compra?.value}.\n\nSaludos.);
       return;
     }
     if(t.id === 'f2_mail_no'){
       if(!F.email?.value){ alert('Necesitas un email.'); return; }
       mailto(F.email.value, 'Unihouser · Gracias por tu tiempo',
-        Hola ${takeName()},%0D%0A%0D%0AGracias por la conversación. Si en el futuro cambian tus planes, estaremos encantados de ayudarte.%0D%0A%0D%0ASaludos.);
+        Hola ${takeName()},\n\nGracias por la conversación. Si en el futuro cambian tus planes, estaremos encantados de ayudarte.\n\nSaludos.);
       return;
     }
     if(t.id === 'f2_contrato'){
@@ -349,11 +322,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
       return;
     }
 
-    // Acciones F3/F4/F5
     if(t.id === 'f3_enviar_props'){
       if(!F.email?.value){ alert('Necesitas un email.'); return; }
       mailto(F.email.value, 'Unihouser · Propuesta enviada',
-        Hola ${takeName()},%0D%0A%0D%0ATe acabamos de enviar una propuesta de activo ajustada a tus criterios. Quedo atento a tu feedback.%0D%0A%0D%0ASaludos.);
+        Hola ${takeName()},\n\nTe acabamos de enviar una propuesta de activo ajustada a tus criterios. Quedo atento a tu feedback.\n\nSaludos.);
       return;
     }
     if(t.id === 'f3_reserva'){ toast('Reserva activada'); save(); return; }
@@ -362,7 +334,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(t.id === 'f5_cerrar'){ toast('Operación completada'); save(); return; }
   });
 
-  // Acciones en la tabla (editar / avanzar / eliminar)
   document.addEventListener('click', (e)=>{
     const b = e.target.closest('button[data-act]'); if(!b) return;
     const i = parseInt(b.dataset.i || '-1', 10);
@@ -377,15 +348,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   });
 
-  // Filtros
   ['change','input'].forEach(ev=>{
     F.f_fase?.addEventListener(ev, render);
     F.f_tipo?.addEventListener(ev, render);
     F.f_q?.addEventListener(ev, render);
   });
 
-  // Inicial
   setPhase('F1');
   render();
-  recalcMaxCompra(); // por si hay presupuesto precargado
-});/
+  recalcMaxCompra();
+});
