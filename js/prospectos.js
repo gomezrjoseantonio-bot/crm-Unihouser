@@ -1,122 +1,166 @@
-<!DOCTYPE html><html lang="es"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unihouser — Prospectos</title>
-<link rel="stylesheet" href="css/style.css">
-</head><body>
-<header class="topbar">
-  <div class="container flex between center">
-    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
-    <nav class="nav">
-      <a href="evaluar.html">Evaluar</a>
-      <a href="evaluaciones.html">Evaluaciones</a>
-      <a href="prospectos.html" class="active">Prospectos</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="configuracion.html">Configuración</a>
-    </nav>
-  </div>
-</header>
+document.addEventListener('DOMContentLoaded', ()=>{
+  console.debug('[prospectos] DOM listo');
+  if (typeof setupMoneyFormatting === 'function') setupMoneyFormatting();
+  if (typeof setupMoneyLive === 'function') setupMoneyLive();
 
-<main class="container">
-<section class="card">
-  <h2>Prospectos</h2>
+  const $ = id=>document.getElementById(id);
+  const nf0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+  const nf1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
 
-  <!-- Alta / edición -->
-  <div class="section">
-    <h3>Ficha de prospecto</h3>
-    <input type="hidden" id="p_idx" value="-1">
-    <div class="row three">
-      <div class="field"><label>Nombre</label><input id="p_nombre" placeholder="Nombre y apellidos"></div>
-      <div class="field"><label>Email</label><input id="p_email" placeholder="email@dominio.com"></div>
-      <div class="field"><label>Teléfono</label><input id="p_tel" placeholder="644 300 200"></div>
-    </div>
-    <div class="row three">
-      <div class="field"><label>Localidad de residencia</label><input id="p_loc_res" placeholder="Oviedo"></div>
-      <div class="field"><label>Localidades objetivo (separadas por comas)</label><input id="p_locs_obj" placeholder="Oviedo, Gijón, Avilés"></div>
-      <div class="field"><label>Presupuesto TOTAL (€ impuestos + honorarios)</label><input id="p_budget" data-money placeholder="150.000"></div>
-    </div>
-    <div class="row three">
-      <div class="field"><label>Tipo de alquiler preferido</label>
-        <select id="p_pref_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
-      </div>
-      <div class="field"><label>Objetivo principal</label>
-        <select id="p_obj_tipo">
-          <option value="bruta">Rentabilidad bruta (%)</option>
-          <option value="neta">Rentabilidad neta (%)</option>
-          <option value="flujo">Flujo de caja (€/mes)</option>
-        </select>
-      </div>
-      <div class="field"><label>Valor objetivo</label><input id="p_obj_val" placeholder="7,5 o 300"></div>
-    </div>
+  const form = {
+    idx: $('p_idx'),
+    nombre: $('p_nombre'), email: $('p_email'), tel: $('p_tel'),
+    loc_res: $('p_loc_res'), locs_obj: $('p_locs_obj'), budget: $('p_budget'),
+    pref_tipo: $('p_pref_tipo'), obj_tipo: $('p_obj_tipo'), obj_val: $('p_obj_val'),
+    fase: $('p_fase'), sub: $('p_sub'), notes: $('p_notes')
+  };
+  const filters = { fase: $('f_fase'), tipo: $('f_tipo'), q: $('f_q') };
+  const tbody = $('p_body');
+  const toast = $('p_toast');
 
-    <div class="row three">
-      <div class="field"><label>Fase</label>
-        <select id="p_fase">
-          <option value="F1">F1 - Contacto</option>
-          <option value="F2" selected>F2 - Contrato</option>
-          <option value="F3">F3 - Activos Propuestos</option>
-          <option value="F4">F4 - Arras</option>
-          <option value="F5">F5 - Notaría</option>
-        </select>
-      </div>
-      <div class="field"><label>Subestado</label>
-        <select id="p_sub">
-          <option>Pendiente contacto</option>
-          <option>Descartado</option>
-          <option>Propuesta enviada</option>
-          <option selected>Contratado</option>
-          <option>Aceptado</option>
-          <option>Pendiente</option>
-          <option>Firmadas</option>
-          <option>Pendientes (arras)</option>
-          <option>Descartada (arras)</option>
-          <option>Notaría fijada</option>
-        </select>
-      </div>
-      <div class="field"><label>Observaciones</label><input id="p_notes" placeholder="Preferencias, restricciones, etc."></div>
-    </div>
+  function objLabel(p){
+    if(p.obj_tipo==='flujo') return nf0.format(p.obj_raw||0)+' €';
+    return nf1.format(p.obj_raw||0)+' %';
+  }
 
-    <div class="actions">
-      <button class="btn primary" id="p_save" type="button">Guardar</button>
-      <button class="btn ghost" id="p_clear" type="button">Limpiar</button>
-    </div>
-    <div id="p_toast" class="toast success" hidden>✅ Prospecto guardado</div>
-  </div>
+  function clearForm(){
+    if(!form.idx) return;
+    form.idx.value=-1;
+    form.nombre.value=form.email.value=form.tel.value='';
+    form.loc_res.value=form.locs_obj.value=form.budget.value='';
+    form.pref_tipo.value='Tradicional'; form.obj_tipo.value='bruta'; form.obj_val.value='';
+    form.fase.value='F2'; form.sub.value='Contratado'; form.notes.value='';
+  }
 
-  <div class="hr"></div>
+  function editRow(i){
+    const arr=Store.pros||[]; const p=arr[i]; if(!p) return;
+    form.idx.value=i;
+    form.nombre.value=p.nombre||''; form.email.value=p.email||''; form.tel.value=p.tel||'';
+    form.loc_res.value=p.loc_res||''; form.locs_obj.value=p.locs_text||'';
+    form.budget.value=nf0.format(p.budget||0);
+    form.pref_tipo.value=p.pref_tipo||'Tradicional';
+    form.obj_tipo.value=p.obj_tipo||'bruta';
+    form.obj_val.value=(p.obj_tipo==='flujo')? nf0.format(p.obj_raw||0) : String(p.obj_raw||'').replace('.',',');
+    form.fase.value=p.fase||'F2'; form.sub.value=p.sub||'Contratado'; form.notes.value=p.notes||'';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
 
-  <!-- Filtros -->
-  <div class="section">
-    <h3>Listado</h3>
-    <div class="row three">
-      <div class="field"><label>Filtrar por fase</label>
-        <select id="f_fase">
-          <option value="">Todas</option>
-          <option value="F1">F1</option><option value="F2">F2</option>
-          <option value="F3">F3</option><option value="F4">F4</option><option value="F5">F5</option>
-        </select>
-      </div>
-      <div class="field"><label>Filtrar por tipo</label>
-        <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
-      </div>
-      <div class="field"><label>Buscar</label><input id="f_q" placeholder="Nombre / localidad"></div>
-    </div>
-  </div>
+  function advancePhase(p){
+    const order=['F1','F2','F3','F4','F5'];
+    const i=order.indexOf(p.fase||'F1');
+    p.fase = order[Math.min(order.length-1, i+1)];
+    if(p.fase==='F3' && p.sub==='Contratado') p.sub='Propuesta enviada';
+    if(p.fase==='F4') p.sub='Pendientes (arras)';
+    if(p.fase==='F5') p.sub='Notaría fijada';
+  }
 
-  <!-- Grid -->
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Nombre</th><th>Email</th><th>Teléfono</th>
-        <th>Objetivo</th><th>Tipo</th><th>Localidades</th>
-        <th>Fase</th><th>Sub</th><th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="p_body"></tbody>
-  </table>
-</section>
-</main>
+  function showToast(msg='✅ Prospecto guardado'){
+    if(!toast) return;
+    toast.textContent=msg;
+    toast.hidden=false;
+    clearTimeout(window.__p_toast);
+    window.__p_toast=setTimeout(()=> toast.hidden=true, 2000);
+  }
 
-<footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
-<script defer src="js/app.js"></script>
-<script defer src="js/prospectos.js"></script>
-</body></html>
+  function filtered(list){
+    const fF=filters.fase?.value||'', fT=filters.tipo?.value||'', q=(filters.q?.value||'').toLowerCase();
+    return (list||[]).filter(p=>{
+      if(fF && p.fase!==fF) return false;
+      if(fT && p.pref_tipo!==fT) return false;
+      if(q){
+        const hay = (p.nombre||'').toLowerCase().includes(q) ||
+                    (p.locs_text||'').toLowerCase().includes(q) ||
+                    (p.loc_res||'').toLowerCase().includes(q);
+        if(!hay) return false;
+      }
+      return true;
+    });
+  }
+
+  function render(){
+    console.debug('[prospectos] render');
+    if(!tbody) return;
+    tbody.innerHTML='';
+    filtered(Store.pros||[]).forEach((p,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${p.nombre||'—'}</td>
+        <td>${p.email||'—'}</td>
+        <td>${p.tel||'—'}</td>
+        <td>${(p.obj_tipo||'').toUpperCase()} ${objLabel(p)}</td>
+        <td>${p.pref_tipo||'—'}</td>
+        <td>${p.locs_text||'—'}</td>
+        <td>${p.fase||'—'}</td>
+        <td>${p.sub||'—'}</td>
+        <td>
+          <button class="btn ghost" data-act="edit" data-i="${i}">Editar</button>
+          <button class="btn" data-act="phase" data-i="${i}">Avanzar fase</button>
+          <button class="btn" data-act="del" data-i="${i}">Eliminar</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Delegación de eventos (un solo listener para todo)
+  document.addEventListener('click', (ev)=>{
+    const t = ev.target;
+    if(!(t instanceof HTMLElement)) return;
+
+    // Guardar
+    if(t.id==='p_save'){
+      console.debug('[prospectos] click guardar');
+      const arr = Store.pros||[];
+      const idx = parseInt(form.idx.value||'-1',10);
+      const obj_tipo = form.obj_tipo.value;
+      const obj_raw = parseEs(form.obj_val.value);
+      const budget  = parseEs(form.budget.value)||0;
+
+      const rec = {
+        nombre:form.nombre.value.trim(),
+        email:form.email.value.trim(),
+        tel:form.tel.value.trim(),
+        loc_res:form.loc_res.value.trim(),
+        locs_text:form.locs_obj.value.trim(),
+        budget,
+        pref_tipo:form.pref_tipo.value,
+        obj_tipo,
+        obj_raw: Number.isFinite(obj_raw)? obj_raw : (obj_tipo==='flujo'?0:0),
+        fase:form.fase.value,
+        sub:form.sub.value,
+        notes:form.notes.value.trim(),
+        ts: Date.now()
+      };
+      if(idx>=0){ arr[idx]=rec; } else { arr.unshift(rec); }
+      Store.pros=arr;
+      render(); showToast('✅ Prospecto guardado'); clearForm();
+      return;
+    }
+
+    // Limpiar
+    if(t.id==='p_clear'){
+      console.debug('[prospectos] click limpiar');
+      clearForm(); return;
+    }
+
+    // Acciones en la tabla
+    if(t.dataset && t.dataset.act){
+      const act=t.dataset.act; const i=parseInt(t.dataset.i||'-1',10);
+      const arr=Store.pros||[];
+      if(!arr[i]) return;
+
+      if(act==='edit'){ editRow(i); return; }
+      if(act==='phase'){ advancePhase(arr[i]); Store.pros=arr; render(); return; }
+      if(act==='del'){ if(confirm('¿Eliminar prospecto?')){ arr.splice(i,1); Store.pros=arr; render(); } return; }
+    }
+  });
+
+  // Filtros en vivo
+  ['change','input'].forEach(ev=>{
+    filters.fase?.addEventListener(ev, render);
+    filters.tipo?.addEventListener(ev, render);
+    filters.q?.addEventListener(ev, render);
+  });
+
+  // Primer render
+  render();
+});
