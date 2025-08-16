@@ -1,61 +1,81 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Configuración</title>
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unihouser — Configuración</title>
 <link rel="stylesheet" href="css/style.css">
-<style>
-body { font-family: Arial, sans-serif; margin: 20px; }
-label { display: block; margin: 10px 0 5px; }
-input { padding: 6px; width: 220px; }
-button { margin-top: 20px; padding: 10px 15px; }
-#toast {
-visibility: hidden; min-width: 250px; margin-left: -125px;
-background: #333; color: #fff; text-align: center;
-border-radius: 2px; padding: 16px; position: fixed;
-z-index: 1; left: 50%; bottom: 30px; font-size: 17px;
-}
-#toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-@keyframes fadein { from{bottom:0; opacity:0;} to{bottom:30px; opacity:1;} }
-@keyframes fadeout{ from{bottom:30px; opacity:1;} to{bottom:0; opacity:0;} }
-</style>
-</head>
-<body>
-<h1>Configuración</h1>
+</head><body>
+<header class="topbar">
+  <div class="container flex between center">
+    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
+    <nav class="nav">
+      <a href="evaluar.html">Evaluar</a>
+      <a href="evaluaciones.html">Evaluaciones</a>
+      <a href="prospectos.html">Prospectos</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="configuracion.html" class="active">Configuración</a>
+    </nav>
+  </div>
+</header>
 
-<form id="cfgForm">
-<h2>Gastos de Adquisición</h2>
-<label>ITP (%)</label>
-<input type="text" name="itp" data-money>
+<main class="container">
+<section class="card">
+  <h2>Configuración</h2>
 
-<label>Notaría y Registro (€)</label>
-<input type="text" name="notaria" data-money value="1.500">
+  <div class="row three">
+    <div class="field">
+      <label>ITP (%)</label>
+      <input id="c_itp" value="8,0">
+    </div>
+    <div class="field">
+      <label>Notaría y Registro (€)</label>
+      <input id="c_notaria" value="1.500" data-money>
+      <small class="hint">Se muestra y guarda con punto de miles.</small>
+    </div>
+    <div class="field">
+      <label>% Seguro hogar</label>
+      <input id="c_pct_hogar" value="3,5">
+    </div>
+  </div>
 
-<h2>Seguros</h2>
-<label>Seguro de Hogar (€)</label>
-<input type="text" name="seguroHogar" data-money>
-<label>Seguro de Impago (habitaciones) (€)</label>
-<input type="text" name="seguroImpagoHab" data-money>
-<label>Seguro de Impago (tradicional) (€)</label>
-<input type="text" name="seguroImpagoTrad" data-money>
+  <div class="row three">
+    <div class="field">
+      <label>% Seguro impago (Tradicional)</label>
+      <input id="c_pct_impago_trad" value="4,0">
+    </div>
+    <div class="field">
+      <label>% Seguro impago (Habitaciones)</label>
+      <input id="c_pct_impago_hab" value="4,0">
+    </div>
+    <div class="field">
+      <label>% Gestión (Tradicional)</label>
+      <input id="c_pct_g_trad" value="15,0">
+    </div>
+  </div>
 
-<h2>Gestión</h2>
-<label>% Gestión Habitaciones</label>
-<input type="text" name="gestionHab" data-money>
-<label>% Gestión Tradicional</label>
-<input type="text" name="gestionTrad" data-money>
+  <div class="row three">
+    <div class="field">
+      <label>% Gestión (Habitaciones)</label>
+      <input id="c_pct_g_hab" value="25,0">
+    </div>
+    <div class="field">
+      <label>Objetivo de Flujo por defecto (€/mes)</label>
+      <input id="c_obj_flujo" value="150" data-money>
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <div class="actions">
+        <button class="btn primary" id="c_save">Guardar configuración</button>
+        <button class="btn ghost" id="c_reset">Restaurar valores por defecto</button>
+      </div>
+    </div>
+  </div>
 
-<h2>Otros</h2>
-<label>Flujo de Caja Inicial (€)</label>
-<input type="text" name="flujoCaja" data-money>
+  <div id="c_toast" class="toast success" hidden>✅ Nueva configuración guardada con éxito</div>
+</section>
+</main>
 
-<button type="submit">Guardar configuración</button>
-</form>
+<footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
-<div id="toast">Nueva configuración guardada con éxito</div>
-
-<!-- scripts en orden -->
+<!-- Orden correcto -->
 <script defer src="js/app.js"></script>
 <script defer src="js/config.js"></script>
-</body>
-</html>
+</body></html>
