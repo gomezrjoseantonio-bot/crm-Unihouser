@@ -37,3 +37,8 @@ input:focus,select:focus,textarea:focus{outline:0;border-color:var(--accent);box
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px;background:#e5e7eb}
 .dot.green{background:#16a34a}.dot.amber{background:#f59e0b}.dot.red{background:#ef4444}
 small.hint{color:#64748b}
+toast{
+margin-top:12px;padding:12px;border-radius:12px;border:1px solid var(--border);
+background:#f8fafc;color:#0f172a;font-weight:700
+}
+.toast.success{border-color:#86efac;background:#ecfdf5}
