@@ -40,12 +40,23 @@
     <div id="gateF1" class="section">
       <h3>Fase 1 — Contacto</h3>
       <div class="row three">
-        <div class="field"><label>Nombre y apellidos</label><input id="p_nombre" placeholder="Nombre Apellidos"></div>
-        <div class="field"><label>Email</label><input id="p_email" type="email" placeholder="nombre@dominio.com"></div>
-        <div class="field"><label>Teléfono</label><input id="p_tel" inputmode="tel" placeholder="644 300 200"></div>
+        <div class="field">
+          <label>Nombre y apellidos</label>
+          <input id="p_nombre" placeholder="Nombre Apellidos" autocomplete="name">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input id="p_email" type="email" placeholder="nombre@dominio.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Teléfono</label>
+          <input id="p_tel" inputmode="tel" placeholder="644 300 200" autocomplete="tel">
+        </div>
       </div>
+
       <div class="row two">
-        <div class="field"><label>Subestado</label>
+        <div class="field">
+          <label>Subestado</label>
           <select id="p_sub_f1">
             <option>Contacto recibido</option>
             <option>Pendiente llamada</option>
@@ -53,8 +64,12 @@
             <option>Descartado</option>
           </select>
         </div>
-        <div class="field"><label>Recordatorio (nota)</label><input id="p_recordatorio" placeholder="Llamar el lunes, etc."></div>
+        <div class="field">
+          <label>Recordatorio (nota)</label>
+          <input id="p_recordatorio" placeholder="Llamar el lunes, etc.">
+        </div>
       </div>
+
       <div class="actions">
         <button class="btn primary" id="p_save">Guardar</button>
         <button class="btn ghost" id="p_clear">Limpiar</button>
@@ -67,6 +82,7 @@
     <!-- FASE 2 -->
     <div id="gateF2" class="section" hidden>
       <h3>Fase 2 — Reunión inicial</h3>
+
       <div class="row three">
         <div class="field"><label>DNI</label><input id="p_dni" placeholder="00000000X"></div>
         <div class="field"><label>Dirección</label><input id="p_dir" placeholder="C/ Dirección 1, 1ºA"></div>
@@ -88,7 +104,7 @@
         </div>
         <div class="field">
           <label>Valor objetivo</label>
-          <input id="p_obj_val" placeholder="8,5 o 1200">
+          <input id="p_obj_val" placeholder="8,5 o 1.200">
         </div>
       </div>
 
@@ -108,8 +124,10 @@
       </div>
 
       <div class="row one">
-        <div class="field"><label>Localidades objetivo (separadas por coma)</label>
-          <input id="p_locs_obj" placeholder="Oviedo, Gijón, Avilés"></div>
+        <div class="field">
+          <label>Localidades objetivo (separadas por coma)</label>
+          <input id="p_locs_obj" placeholder="Oviedo, Gijón, Avilés">
+        </div>
       </div>
 
       <div class="row three">
@@ -121,9 +139,7 @@
       <div class="row three">
         <div class="field"><label>Bajos</label><select id="p_bajos"><option value="no">No</option><option value="si">Sí</option></select></div>
         <div class="field"><label>Acepta reforma</label>
-          <select id="p_reforma">
-            <option>No</option><option>Lavado de cara</option><option>Integral</option>
-          </select>
+          <select id="p_reforma"><option>No</option><option>Lavado de cara</option><option>Integral</option></select>
         </div>
         <div class="field"><label>Notas</label><input id="p_notes" placeholder="Preferencias, límites…"></div>
       </div>
