@@ -1,93 +1,100 @@
-!DOCTYPE html><html lang="es"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unihouser — Prospectos</title>
-<link rel="stylesheet" href="css/style.css">
-<style>
-  .steps{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
-  .step{padding:8px 12px;border-radius:999px;border:1px solid #2b343a;background:#0f1214;opacity:.7;cursor:pointer}
-  .step.active{opacity:1;border-color:var(--accent)}
-  .gate{margin:12px 0;padding:12px;border:1px dashed #2b343a;border-radius:12px}
-  .gate h3{margin:0 0 8px}
-  .actions .small{padding:8px 10px;font-weight:600}
-  .muted{color:var(--muted)}
-</style>
-</head><body>
-<header class="topbar">
-  <div class="container flex between center">
-    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
-    <nav class="nav">
-      <a href="evaluar.html">Evaluar</a>
-      <a href="evaluaciones.html">Evaluaciones</a>
-      <a href="prospectos.html" class="active">Prospectos</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="configuracion.html">Configuración</a>
-    </nav>
-  </div>
-</header>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Prospectos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Prospectos</h1>
 
-<main class="container">
-<section class="card">
-  <h2>Prospectos</h2>
+  <section id="fase1">
+    <h2>FASE 1 - Contacto</h2>
+    <form id="formFase1">
+      <label>Nombre y Apellidos <input type="text" name="nombre"></label><br>
+      <label>Email <input type="email" name="email"></label><br>
+      <label>Teléfono <input type="tel" name="telefono"></label><br>
+      <button type="button" id="guardarFase1">Guardar Contacto</button>
+      <button type="button" id="limpiarFase1">Limpiar</button>
+    </form>
+  </section>
 
-  <!-- Barra de fases -->
-  <div class="steps" id="steps">
-    <div class="step" data-phase="F1">F1 · Contacto</div>
-    <div class="step" data-phase="F2">F2 · Contrato</div>
-    <div class="step" data-phase="F3">F3 · Búsqueda</div>
-    <div class="step" data-phase="F4">F4 · Arras</div>
-    <div class="step" data-phase="F5">F5 · Notaría</div>
-  </div>
+  <section id="fase2">
+    <h2>FASE 2 - Reunión Inicial</h2>
+    <form id="formFase2">
+      <fieldset>
+        <legend>Datos Personales</legend>
+        <label>DNI <input type="text" name="dni"></label><br>
+        <label>Dirección <input type="text" name="direccion"></label><br>
+        <label>Localidad <input type="text" name="localidad"></label><br>
+      </fieldset>
 
-  <input type="hidden" id="p_idx" value="-1">
+      <fieldset>
+        <legend>Características Activo Inversión</legend>
+        <label>Localidades <input type="text" name="localidades"></label><br>
+        <label>Tipo de Alquiler 
+          <select name="tipoAlquiler">
+            <option value="tradicional">Tradicional</option>
+            <option value="habitaciones">Por Habitaciones</option>
+          </select>
+        </label><br>
+        <label>Número de activos <input type="number" name="nActivos"></label><br>
+        <label>Sin Ascensor <input type="checkbox" name="sinAscensor"></label><br>
+        <label>Altura máxima <input type="number" name="altura"></label><br>
+        <label>Bajos <input type="checkbox" name="bajos"></label><br>
+        <label>Acepta Reforma
+          <select name="reforma">
+            <option value="no">No</option>
+            <option value="lavado">Lavado de cara</option>
+            <option value="integral">Integral</option>
+          </select>
+        </label><br>
+        <label>Precio máximo inversión <input type="number" name="precioMaxInversion"></label><br>
+        <label>Precio máximo compra activo <input type="number" name="precioMaxCompra"></label><br>
+      </fieldset>
 
-  <!-- ===== F1: CONTACTO ===== -->
-  <div class="gate" id="gateF1">
-    <h3>F1 · Contacto</h3>
-    <div class="row three">
-      <div class="field"><label>Nombre y apellidos (opcional)</label><input id="p_nombre" placeholder="Nombre y apellidos"></div>
-      <div class="field"><label>Email</label><input id="p_email" placeholder="email@dominio.com"></div>
-      <div class="field"><label>Teléfono</label><input id="p_tel" placeholder="644 300 200"></div>
-    </div>
-    <div class="row three">
-      <div class="field"><label>Recordatorio contactar el</label><input id="p_recordatorio" type="date"></div>
-      <div class="field"><label>Subestado</label>
-        <select id="p_sub_f1">
-          <option>Contacto recibido</option>
-          <option>Pendiente contactar</option>
-          <option>Contactado</option>
-          <option>Descartado (F1)</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>&nbsp;</label>
-        <div class="actions">
-          <button class="btn small" id="f1_email" type="button">Enviar email inicial</button>
-          <button class="btn small" id="f1_pdf" type="button">Generar resumen F1</button>
-          <button class="btn primary small" id="toF2" type="button">Pasar a F2 · Contrato</button>
-        </div>
-      </div>
-    </div>
-    <small class="muted">Mínimo para guardar en F1: email o teléfono.</small>
-  </div>
+      <fieldset>
+        <legend>Financiación</legend>
+        <label>Financiación Bancaria <input type="checkbox" name="financiacion"></label><br>
+        <label>Necesita Broker <input type="checkbox" name="broker"></label><br>
+        <label>% Financiación <input type="number" name="porcentajeFinanciacion" value="80"></label><br>
+      </fieldset>
 
-  <!-- ===== F2: CONTRATO ===== -->
-  <div class="gate" id="gateF2" hidden>
-    <h3>F2 · Contrato</h3>
-    <div class="row three">
-      <div class="field"><label>DNI</label><input id="p_dni" placeholder="00000000X"></div>
-      <div class="field"><label>Dirección</label><input id="p_dir" placeholder="C/ Ejemplo 1, 3ºA"></div>
-      <div class="field"><label>Localidad</label><input id="p_loc_res" placeholder="Oviedo"></div>
-    </div>
+      <fieldset>
+        <legend>Objetivos</legend>
+        <label>Renta Bruta <input type="number" name="rentaBruta"></label><br>
+        <label>Renta Neta <input type="number" name="rentaNeta"></label><br>
+        <label>Cash Flow <input type="number" name="cashFlow"></label><br>
+        <label>Mes inicio búsqueda <input type="month" name="mesInicio"></label><br>
+        <label>Mes fin búsqueda <input type="month" name="mesFin"></label><br>
+      </fieldset>
 
-    <div class="row three">
-      <div class="field"><label>Tipo de alquiler</label>
-        <select id="p_pref_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
-      </div>
-      <div class="field"><label>Objetivo principal</label>
-        <select id="p_obj_tipo">
-          <option value="bruta">Rentabilidad bruta (%)</option>
-          <option value="neta">Rentabilidad neta (%)</option>
-          <option value="flujo">Flujo de caja (€/mes)</option>
-        </select>
-      </div>
-      <div class="field"><label>Valor objetivo</
+      <button type="button" id="guardarFase2">Guardar Reunión</button>
+      <button type="button" id="limpiarFase2">Limpiar</button>
+    </form>
+  </section>
+
+  <section id="fase3">
+    <h2>FASE 3 - Contrato</h2>
+    <form id="formFase3">
+      <label>Contrato recibido <input type="checkbox" name="contratoRecibido"></label><br>
+      <button type="button" id="guardarFase3">Guardar Contrato</button>
+    </form>
+  </section>
+
+  <section id="fase4">
+    <h2>FASE 4 - Búsqueda</h2>
+    <form id="formFase4">
+      <label>Propuestas enviadas <input type="number" name="propuestas"></label><br>
+      <label>Ok a alguna <input type="checkbox" name="okAlguna"></label><br>
+      <label>Arras firmadas <input type="date" name="arras"></label><br>
+      <label>Notaría <input type="date" name="notaria"></label><br>
+      <button type="button" id="guardarFase4">Guardar Búsqueda</button>
+    </form>
+  </section>
+
+  <div id="mensaje"></div>
+
+  <script src="prospectos.js"></script>
+</body>
+</html>
