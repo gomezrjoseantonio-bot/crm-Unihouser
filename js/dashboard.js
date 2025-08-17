@@ -1,7 +1,7 @@
-(function(){
+function(){
   "use strict";
 
-  /* ====== Store (localStorage) ====== */
+  /* ===== Store ===== */
   var Store = window.Store || {
     get pros(){ try{return JSON.parse(localStorage.getItem("pros")||"[]");}catch(_){return[];} },
     set pros(v){ localStorage.setItem("pros", JSON.stringify(v)); },
@@ -11,7 +11,7 @@
     set cfg(v){ localStorage.setItem("cfg", JSON.stringify(v)); }
   };
 
-  /* ====== Utils ====== */
+  /* ===== Utils ===== */
   var fmtN0=new Intl.NumberFormat("es-ES",{maximumFractionDigits:0});
   var fmtN1=new Intl.NumberFormat("es-ES",{maximumFractionDigits:1});
   function $(id){return document.getElementById(id);}
@@ -31,7 +31,7 @@
     }, true);
   }
 
-  /* ====== Fases ====== */
+  /* ===== Fases ===== */
   var phases=["CONTACTO","REUNION","BUSQUEDA","COMPRAVENTA","NOTARIA"];
   var subestados={
     CONTACTO:["Pendiente contactar","Contactado","Descartado"],
@@ -42,7 +42,7 @@
   };
   function nextPhase(f){var i=phases.indexOf(f||"CONTACTO"); if(i<0)i=0; return (i>=phases.length-1)?phases[i]:phases[i+1];}
 
-  /* ====== IDs y evals ====== */
+  /* ===== IDs & Evals ===== */
   function ensureIds(){var a=Store.pros||[],ch=false; for(var i=0;i<a.length;i++){ if(!a[i].id){a[i].id=uid(); ch=true;} } if(ch) Store.pros=a;}
   function evalsByProspect(pid){var evs=Store.evals||[]; return evs.filter(e=>Array.isArray(e.prospect_ids)&&e.prospect_ids.includes(pid));}
   function scoreDotFor(p){
@@ -53,7 +53,7 @@
     else{ if(val>=goal) return "green"; if(val>=goal-1) return "amber"; return "red"; }
   }
 
-  /* ====== Filtros ====== */
+  /* ===== Filtros ===== */
   function readFilters(){return{
     q:($("f_q")?.value||"").trim().toLowerCase(),
     fase:$("f_fase")?.value||"",
@@ -74,7 +74,7 @@
     });
   }
 
-  /* ====== KPIs ====== */
+  /* ===== KPIs ===== */
   function renderKPIs(rows){
     var c={CONTACTO:0,REUNION:0,BUSQUEDA:0,COMPRAVENTA:0,NOTARIA:0};
     rows.forEach(p=>{c[p.fase||"CONTACTO"]=(c[p.fase||"CONTACTO"]||0)+1;});
@@ -86,7 +86,7 @@
     $("k_notaria").textContent=c.NOTARIA||0;
   }
 
-  /* ====== Kanban ====== */
+  /* ===== Kanban ===== */
   function cardHTML(p, idx){
     var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
     var dot=scoreDotFor(p);
@@ -120,7 +120,7 @@
     enableDnD();
   }
 
-  /* ====== Tabla ====== */
+  /* ===== Tabla ===== */
   function renderTable(rows){
     var tb=$("tbody"); if(!tb) return;
     if(!rows.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#667085">Sin datos</td></tr>'; return;}
@@ -141,7 +141,7 @@
     }).join("");
   }
 
-  /* ====== Drawer ====== */
+  /* ===== Drawer ===== */
   function fillSubestadosSel(fase,current){
     var sel=$("dv_sub_sel"); if(!sel) return; sel.innerHTML="";
     (subestados[fase]||["—"]).forEach(s=>{
@@ -164,7 +164,7 @@
   }
   function closeDrawer(){ $("drawer")?.classList.remove("open"); $("drawer")?.setAttribute("aria-hidden","true"); }
 
-  /* ====== Config & Cálculos ====== */
+  /* ===== Config & Cálculos reunión ===== */
   function cfgOrDefaults(){var c=Store.cfg||{}; return {
     itp_pct: toNum(c.itp_pct)||8, not_eur: toNum(c.notaria)||1500, honor_eur: toNum(c.honorarios)||0
   };}
@@ -175,7 +175,7 @@
   }
   function monthPlus5(v){ if(!v||!/\d{4}-\d{2}/.test(v))return""; var y=+v.slice(0,4), m=+v.slice(5,7)+5; while(m>12){m-=12;y++;} return y+"-"+(m<10?"0"+m:m); }
 
-  /* ====== Modal reunión ====== */
+  /* ===== Modal reunión ===== */
   function openMeeting(p){
     $("m_dni").value=p.dni||""; $("m_dir").value=p.dir||""; $("m_locres").value=p.loc_res||"";
     $("m_email").value=p.email||""; $("m_tel").value=p.tel||"";
@@ -207,7 +207,7 @@
     var mi=$("m_mesini")?.value||""; if(mi) $("m_mesfin").value=monthPlus5(mi);
   }
 
-  /* ====== Render ====== */
+  /* ===== Render ===== */
   function renderAll(){
     ensureIds();
     var all=(Store.pros||[]).map((p,i)=>{p.__idx=i; return p;});
@@ -215,7 +215,7 @@
     renderKPIs(rows); renderKanban(rows); renderTable(rows);
   }
 
-  /* ====== Delegación ====== */
+  /* ===== Delegación ===== */
   function onClick(sel,fn){
     document.addEventListener("click",e=>{
       var t=e.target; while(t && t!==document){ if(t.matches&&t.matches(sel)){ fn.call(t,e); return;} t=t.parentNode; }
@@ -225,7 +225,7 @@
   function attach(){
     attachMoneyLive();
 
-    // Toggle tabla (opcional)
+    // Filtros
     onClick("#f_clear", ()=>{ $("f_q").value=""; $("f_fase").value=""; $("f_tipo").value=""; $("f_loc").value=""; $("f_fin").value=""; renderAll(); toast("Filtros limpiados","ok"); });
     onClick("#f_apply", ()=>{ renderAll(); toast("Filtros aplicados","ok"); });
     onClick("#btn_csv", ()=>downloadCSV());
@@ -273,7 +273,7 @@
       arr[i]=p; Store.pros=arr; closeMeeting(); renderAll(); toast("Reunión guardada","ok");
     });
 
-    // Toggle tabla (botón aparece/oculta)
+    // Toggle tabla flotante
     document.body.insertAdjacentHTML("beforeend",
       '<div style="position:fixed;right:16px;top:96px;z-index:9"><button class="btn" id="toggleTable">Mostrar tabla</button></div>');
     onClick("#toggleTable", function(){
@@ -284,7 +284,7 @@
     document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeMeeting(); closeDrawer(); } });
   }
 
-  /* ====== Drag & Drop ====== */
+  /* ===== Drag & Drop ===== */
   function enableDnD(){
     document.querySelectorAll(".card-mini").forEach(card=>{
       card.addEventListener("dragstart", e=>{ card.classList.add("dragging"); e.dataTransfer.setData("text/plain", card.dataset.i||""); });
@@ -301,7 +301,7 @@
     });
   }
 
-  /* ====== CSV ====== */
+  /* ===== CSV ===== */
   function downloadCSV(){
     var rows=applyFilters(Store.pros||[], readFilters()); if(!rows.length){ toast("Nada que exportar","warn"); return; }
     var lines=[["Nombre","Email","Teléfono","Fase","Subestado","Tipo","Localidades","Objetivo","Valor","Presupuesto"].join(";")];
@@ -312,6 +312,6 @@
     var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="prospectos.csv"; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),800);
   }
 
-  /* ====== Init ====== */
+  /* ===== Init ===== */
   document.addEventListener("DOMContentLoaded", ()=>{ attach(); ensureIds(); renderAll(); });
 })();
