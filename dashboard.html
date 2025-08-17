@@ -13,14 +13,11 @@
   background:#fff; color:var(--text);
 }
 .theme-light .topbar{ background:#fff; border-bottom:1px solid var(--border); }
-.theme-light .container{ background:transparent; }
 .theme-light h1,.theme-light h2,.theme-light h3,.theme-light h4{ color:#101828; }
 .theme-light label, .theme-light small.hint{ color:var(--muted); }
 .theme-light input, .theme-light select{ background:#fff; color:#101828; border:1px solid var(--border); }
 .theme-light .btn{ background:#f9fafb; border:1px solid var(--border); color:#101828; cursor:pointer; }
 .theme-light .btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
-.theme-light .btn.ghost{ background:#fff; border:1px solid var(--border); color:#101828; }
-.theme-light .btn:hover{ box-shadow:0 1px 2px rgba(16,24,40,.06); }
 .theme-light .card,.theme-light .kpi-card,.theme-light .column,.theme-light .card-mini{
   background:#fff; border:1px solid var(--border); box-shadow:0 1px 2px rgba(16,24,40,.04);
 }
@@ -29,10 +26,8 @@
 .theme-light .table{ background:#fff; border:1px solid var(--border); }
 .theme-light .table th{ background:#f9fafb; color:#344054; border-bottom:1px solid var(--border); }
 .theme-light .table td{ border-bottom:1px solid #f2f4f7; }
-.theme-light .table tr:last-child td{ border-bottom:none; }
-.theme-light .nav a.active{ background:rgba(255,106,61,.12); color:#8a3410; border-radius:10px; padding:8px 10px; }
 
-/* Título coherente */
+/* Título */
 .page-header{ margin:18px 0 10px; }
 .page-title{ font-size:1.6rem; font-weight:700; margin:0; }
 
@@ -43,14 +38,17 @@
 .kpi-card .val{font-size:22px;font-weight:800;margin-top:4px}
 
 .filter-bar{display:grid;gap:10px;grid-template-columns:1fr}
-@media(min-width:900px){.filter-bar{grid-template-columns:1.2fr .8fr .8fr 1fr .8fr .6fr}}
+@media(min-width:1000px){.filter-bar{grid-template-columns:1.2fr .8fr .8fr 1fr .8fr .6fr .6fr}}
 .filter-bar .btn{height:44px}
 
 .kanban{display:grid;gap:12px;grid-template-columns:1fr}
 @media(min-width:1100px){.kanban{grid-template-columns:repeat(5,1fr)}}
-.column{border-radius:14px;min-height:240px;padding:8px}
+.column{border-radius:14px;min-height:260px;padding:8px}
 .column h4{margin:2px 6px 8px;color:#344054}
+.column.drop-target{outline:2px dashed #d0d5dd; outline-offset: -6px}
 .card-mini{border-radius:12px;padding:10px;margin:6px 4px}
+.card-mini[draggable="true"]{cursor:grab}
+.card-mini.dragging{opacity:.6; transform: scale(.98)}
 .actions-row{display:flex;gap:8px;margin-top:8px}
 .icon-btn{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:8px;cursor:pointer}
 .icon-btn:hover{border-color:#d0d5dd}
@@ -139,17 +137,18 @@
       <div class="actions">
         <button class="btn" id="f_clear" type="button">Limpiar</button>
         <button class="btn primary" id="f_apply" type="button">Filtrar</button>
+        <button class="btn" id="btn_csv" type="button">Exportar CSV</button>
       </div>
     </div>
   </section>
 
-  <!-- Kanban -->
+  <!-- Kanban (drag & drop) -->
   <section class="kanban" id="kanban">
-    <div class="column" data-col="CONTACTO"><h4>Contacto</h4></div>
-    <div class="column" data-col="REUNION"><h4>Reunión</h4></div>
-    <div class="column" data-col="BUSQUEDA"><h4>Búsqueda</h4></div>
-    <div class="column" data-col="COMPRAVENTA"><h4>Compraventa</h4></div>
-    <div class="column" data-col="NOTARIA"><h4>Notaría</h4></div>
+    <div class="column" data-col="CONTACTO" data-drop="1"><h4>Contacto</h4></div>
+    <div class="column" data-col="REUNION" data-drop="1"><h4>Reunión</h4></div>
+    <div class="column" data-col="BUSQUEDA" data-drop="1"><h4>Búsqueda</h4></div>
+    <div class="column" data-col="COMPRAVENTA" data-drop="1"><h4>Compraventa</h4></div>
+    <div class="column" data-col="NOTARIA" data-drop="1"><h4>Notaría</h4></div>
   </section>
 
   <!-- Toggle tabla -->
@@ -184,6 +183,7 @@
       <div class="pill" id="dv_fase">Fase: —</div>
       <div class="pill" id="dv_tipo">Tipo: —</div>
       <div class="pill" id="dv_obj">Objetivo: —</div>
+      <div class="pill" id="dv_evals">Evaluaciones: 0</div>
     </div>
 
     <div class="field"><label>Nombre</label><input id="dv_nombre"></div>
@@ -213,6 +213,7 @@
       <button class="btn" id="dv_contract_btn" type="button">Enviar contrato</button>
       <button class="btn" id="dv_whatsapp_btn" type="button">WhatsApp</button>
       <button class="btn" id="dv_meeting_btn" type="button">Completar datos de reunión</button>
+      <button class="btn" id="dv_evals_btn" type="button">Ver evaluaciones</button>
       <button class="btn" id="dv_delete" type="button">Eliminar</button>
       <button class="btn primary" id="dv_save" type="button">Guardar</button>
       <button class="btn primary" id="dv_adv_btn" type="button">Avanzar fase</button>
