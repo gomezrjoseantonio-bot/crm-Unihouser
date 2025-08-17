@@ -6,19 +6,37 @@
   <title>Unihouser — Evaluaciones</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
+    /* Refuerzo visual mínimo, respetando tu look general */
     .kpis{display:grid;gap:10px;grid-template-columns:repeat(4,1fr)}
     @media(max-width:980px){.kpis{grid-template-columns:1fr 1fr}}
     .kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
     .kpi .lab{font-size:12px;color:#667085}
     .kpi .val{font-weight:800;font-size:20px;margin-top:4px}
-    .filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto auto}
+    .filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
     @media(max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
     table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
     .table th,.table td{padding:10px 12px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px;white-space:nowrap}
     .table th{background:#f8fafc;color:#111827;cursor:pointer}
     .table tr:last-child td{border-bottom:none}
+    .table tr{cursor:pointer}
     .btn.sm{padding:8px 10px;font-size:13px;border-radius:10px}
     .pill{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#f1f5f9;font-size:12px}
+    /* Drawer asignación */
+    .overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
+    .overlay.open{display:block}
+    .drawer{position:fixed;top:0;right:-480px;height:100%;width:480px;max-width:100%;background:#fff;border-left:1px solid #e5e7eb;box-shadow:0 10px 24px rgba(0,0,0,.25);transition:right .2s ease;z-index:90}
+    .drawer.open{right:0}
+    .drawer .head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #eef2f7}
+    .drawer .body{padding:16px 16px 24px;overflow:auto;height:calc(100% - 60px)}
+    .meta{font-size:12px;color:#667085;margin-bottom:8px}
+    .kv{display:flex;justify-content:space-between;border-bottom:1px dashed #eef2f7;padding:6px 0}
+    .kv .k{color:#667085}.kv .v{font-weight:700}
+    .list-pros label{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #f3f4f6}
+    .drawer .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    /* Toasts */
+    .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
+    .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
+    .toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
   </style>
 </head>
 <body>
@@ -39,32 +57,33 @@
   <section class="card">
     <h2>Evaluaciones</h2>
 
-    <div class="kpis" id="kpis">
+    <!-- KPIs -->
+    <div class="kpis">
       <div class="kpi"><div class="lab">Total evaluaciones</div><div class="val" id="k_total">0</div></div>
       <div class="kpi"><div class="lab">Asignadas</div><div class="val" id="k_asig">0</div></div>
       <div class="kpi"><div class="lab">Bruta media</div><div class="val" id="k_bruta">0,0 %</div></div>
       <div class="kpi"><div class="lab">Neta media</div><div class="val" id="k_neta">0,0 %</div></div>
     </div>
 
-    <div class="card filters" style="margin-top:12px">
+    <!-- Filtros -->
+    <div class="card" style="margin-top:12px">
       <h3 style="margin:0 0 8px">Filtros</h3>
-      <div class="row">
-        <div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad o calle"></div>
-        <div class="field"><label>Tipo</label>
-          <select id="f_tipo">
-            <option value="">Todos</option>
-            <option>Tradicional</option>
-            <option>Habitaciones</option>
-          </select>
+      <div class="filters">
+        <div class="row">
+          <div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad o calle"></div>
+          <div class="field"><label>Tipo</label>
+            <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
+          </div>
+          <div class="field"><label>Desde</label><input id="f_desde" type="date"></div>
+          <div class="field"><label>Hasta</label><input id="f_hasta" type="date"></div>
+          <div class="field" style="align-self:end"><button class="btn" id="b_limpiar">Limpiar</button></div>
+          <div class="field" style="align-self:end"><button class="btn primary" id="b_filtrar">Filtrar</button></div>
+          <div class="field" style="align-self:end"><button class="btn" id="b_export">Exportar CSV</button></div>
         </div>
-        <div class="field"><label>Desde</label><input id="f_desde" type="date"></div>
-        <div class="field"><label>Hasta</label><input id="f_hasta" type="date"></div>
-        <div class="field"><label>&nbsp;</label><button class="btn" id="b_limpiar">Limpiar</button></div>
-        <div class="field"><label>&nbsp;</label><button class="btn primary" id="b_filtrar">Filtrar</button></div>
-        <div class="field"><label>&nbsp;</label><button class="btn" id="b_export">Exportar CSV</button></div>
       </div>
     </div>
 
+    <!-- Tabla -->
     <div class="card" style="margin-top:12px">
       <table class="table" id="tbl">
         <thead>
@@ -73,13 +92,13 @@
             <th data-k="loc">Localidad</th>
             <th data-k="calle">Calle</th>
             <th data-k="tipo">Tipo</th>
-            <th data-k="precio">Precio</th>
-            <th data-k="alq">Alquiler</th>
-            <th data-k="kpi_bruta">Bruta %</th>
-            <th data-k="kpi_neta">Neta %</th>
-            <th data-k="kpi_flujo">Flujo</th>
-            <th data-k="pmax">P. máx</th>
-            <th data-k="asig">Asignados</th>
+            <th data-k="precio" style="text-align:right">Precio</th>
+            <th data-k="alq" style="text-align:right">Alquiler</th>
+            <th data-k="kpi_bruta" style="text-align:right">Bruta %</th>
+            <th data-k="kpi_neta" style="text-align:right">Neta %</th>
+            <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
+            <th data-k="pmax" style="text-align:right">P. máx</th>
+            <th data-k="asig" style="text-align:center">Asignados</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -91,7 +110,43 @@
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
-<!-- OJO: solo esta línea, nada de JS “pegado” como texto -->
+<!-- Drawer + overlay -->
+<div id="overlay" class="overlay"></div>
+<aside id="drawer" class="drawer" aria-hidden="true">
+  <div class="head">
+    <strong>Detalle de evaluación</strong>
+    <button class="btn" id="d_cerrar">Cerrar</button>
+  </div>
+  <div class="body">
+    <div class="meta" id="d_fecha">—</div>
+
+    <div class="kv"><div class="k">Localidad</div><div class="v" id="d_loc">—</div></div>
+    <div class="kv"><div class="k">Calle</div><div class="v" id="d_calle">—</div></div>
+    <div class="kv"><div class="k">Tipo</div><div class="v" id="d_tipo">—</div></div>
+
+    <div class="kv"><div class="k">Precio</div><div class="v" id="d_precio">—</div></div>
+    <div class="kv"><div class="k">Alquiler</div><div class="v" id="d_alq">—</div></div>
+    <div class="kv"><div class="k">Bruta</div><div class="v" id="d_bruta">—</div></div>
+    <div class="kv"><div class="k">Neta</div><div class="v" id="d_neta">—</div></div>
+    <div class="kv"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
+    <div class="kv"><div class="k">Precio máx.</div><div class="v" id="d_pmax">—</div></div>
+    <div class="kv"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
+    <div class="kv"><div class="k">URL</div><div class="v" id="d_url">—</div></div>
+
+    <h3 style="margin:14px 0 8px">Asignar a prospects</h3>
+    <div id="p_list" class="list-pros">—</div>
+
+    <div class="actions">
+      <button class="btn primary" id="d_guardar">Guardar asignación</button>
+      <button class="btn" id="d_pdf">PDF</button>
+      <button class="btn" id="d_editar">Abrir en Evaluar</button>
+    </div>
+  </div>
+</aside>
+
+<!-- Toasts -->
+<div id="toasts" class="toast-wrap"></div>
+
 <script defer src="js/evaluaciones.js"></script>
 </body>
 </html>
