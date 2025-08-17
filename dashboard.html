@@ -71,7 +71,7 @@
 /* Modal reunión ampliado */
 .modal{position:fixed;inset:0;background:rgba(16,24,40,.5);display:none;align-items:center;justify-content:center;z-index:60}
 .modal.open{display:flex}
-.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:880px;max-width:98vw;padding:16px}
+.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:920px;max-width:98vw;padding:16px}
 .modal-card h3{margin:0 0 8px}
 .section{margin:8px 0 12px}
 .section h4{margin:0 0 8px;color:#344054}
@@ -220,13 +220,13 @@ small.hint{color:#667085}
       <button class="btn" id="dv_meeting_btn" type="button">Completar datos de reunión</button>
       <button class="btn" id="dv_evals_btn" type="button">Ver evaluaciones</button>
       <button class="btn" id="dv_delete" type="button">Eliminar</button>
-      <button class="btn primary" id="dv_save" type="button">Guardar</button>
+      <button class="btn" id="dv_save" type="button">Guardar</button>
       <button class="btn primary" id="dv_adv_btn" type="button">Avanzar fase</button>
     </div>
   </div>
 </aside>
 
-<!-- Modal Reunión (versión completa, espejo de Prospectos) -->
+<!-- Modal Reunión (espejo completo de Prospectos + autocalcs) -->
 <div class="modal" id="meetModal" aria-hidden="true">
   <div class="modal-card">
     <h3>Completar datos de reunión</h3>
@@ -254,19 +254,12 @@ small.hint{color:#667085}
       </div>
       <div class="row four">
         <div class="field"><label>Nº de activos</label><input id="m_nact" inputmode="numeric" value="1"></div>
-        <div class="field">
-          <label>¿Ascensor?</label>
-          <select id="m_asc"><option>Sí</option><option>No</option></select>
-        </div>
+        <div class="field"><label>¿Ascensor?</label><select id="m_asc"><option>Sí</option><option>No</option></select></div>
         <div class="field"><label>Altura máxima</label><input id="m_altmax" inputmode="numeric" value="1"></div>
-        <div class="field">
-          <label>¿Bajo?</label>
-          <select id="m_bajo"><option>No</option><option>Sí</option></select>
-        </div>
+        <div class="field"><label>¿Bajo?</label><select id="m_bajo"><option>No</option><option>Sí</option></select></div>
       </div>
       <div class="row three">
-        <div class="field">
-          <label>Acepta reforma</label>
+        <div class="field"><label>Acepta reforma</label>
           <select id="m_ref"><option>No</option><option>Lavado de cara</option><option>Integral</option></select>
         </div>
         <div class="field"><label>Mes inicio búsqueda</label><input id="m_mesini" type="month"></div>
@@ -278,28 +271,31 @@ small.hint{color:#667085}
       <h4>3) Presupuesto y precio máximo de compra</h4>
       <div class="row three">
         <div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric" data-money></div>
-        <div class="field">
-          <label>Incluir honorarios (PSI)</label>
+        <div class="field"><label>Incluir honorarios (PSI)</label>
           <select id="m_inchonor"><option value="si">Sí</option><option value="no">No</option></select>
         </div>
         <div class="field"><label>Precio máx. compra (auto)</label><input id="m_pmax" disabled></div>
       </div>
-      <small class="hint">El precio máx. se calcula con tu Configuración (ITP, Notaría, Honorarios si procede).</small>
+      <small class="hint">Se calcula con tu Configuración (ITP, Notaría y Honorarios si marcas “Sí”).</small>
     </div>
 
     <div class="section">
       <h4>4) Financiación</h4>
       <div class="row three">
-        <div class="field">
-          <label>Financiación</label>
+        <div class="field"><label>Financiación</label>
           <select id="m_fin"><option>Sí</option><option>No</option></select>
         </div>
-        <div class="field">
-          <label>¿Necesita broker?</label>
+        <div class="field"><label>¿Necesita broker?</label>
           <select id="m_broker"><option>No</option><option>Sí</option></select>
         </div>
         <div class="field"><label>% financiación</label><input id="m_finp" inputmode="numeric" value="80"></div>
       </div>
+      <div class="row three">
+        <div class="field"><label>Importe financiado (auto)</label><input id="m_fin_eur" disabled></div>
+        <div class="field"><label>Fondos propios (auto)</label><input id="m_propios_eur" disabled></div>
+        <div class="field"><label>—</label><input disabled style="opacity:.4" placeholder="Autocalculado"></div>
+      </div>
+      <small class="hint">El % de financiación se aplica solo al <b>precio del inmueble</b> (no a ITP/Notaría/Honorarios).</small>
     </div>
 
     <div class="section">
@@ -312,7 +308,7 @@ small.hint{color:#667085}
         <div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
         <div class="field"><label>Alquiler mensual sugerido (auto)</label><input id="m_alq_sug" disabled></div>
       </div>
-      <small class="hint">Si el objetivo es “bruta %”, sugerimos un alquiler en base al coste total estimado.</small>
+      <small class="hint">Si el objetivo es “bruta %”, sugerimos un alquiler usando el coste total (presupuesto).</small>
     </div>
 
     <div class="actions" style="margin-top:10px">
