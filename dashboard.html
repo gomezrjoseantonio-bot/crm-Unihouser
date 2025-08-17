@@ -5,93 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Dashboard</title>
 <link rel="stylesheet" href="css/style.css">
+<!-- Favicon inline para evitar 404 -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff6a3d'/%3E%3Cpath d='M18 38l6-10 6 10 6-10 6 10' stroke='white' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
 <style>
-/* Tema claro local al dashboard */
-.theme-light{
-  --bg:#ffffff; --card:#ffffff; --text:#111827; --muted:#667085; --border:#e5e7eb;
+/* ===== Ajustes mínimos para tema claro y modal compacto ===== */
+:root{
   --accent:#ff6a3d; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
-  background:#fff; color:var(--text);
+  --text:#101828; --muted:#667085; --border:#e5e7eb; --bg:#ffffff; --chip:#f2f4f7;
 }
+body.theme-light{ background:#fff; color:var(--text); }
 .theme-light .topbar{ background:#fff; border-bottom:1px solid var(--border); }
-.theme-light h1,.theme-light h2,.theme-light h3,.theme-light h4{ color:#101828; }
-.theme-light label, .theme-light small.hint{ color:#667085; }
-.theme-light input, .theme-light select{ background:#fff; color:#101828; border:1px solid var(--border); }
-.theme-light .btn{ background:#f9fafb; border:1px solid var(--border); color:#101828; cursor:pointer; }
-.theme-light .btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
-.theme-light .card,.theme-light .kpi-card,.theme-light .column,.theme-light .card-mini{
-  background:#fff; border:1px solid var(--border); box-shadow:0 1px 2px rgba(16,24,40,.04);
+.theme-light .page-title{ color:#101828; font-size:1.6rem; font-weight:700; margin:16px 0 10px; }
+.theme-light .card, .theme-light .kpi, .theme-light .column, .theme-light .table{
+  background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.04);
 }
-.theme-light .badge{ background:#f2f4f7; color:#344054; border:1px solid #e4e7ec; }
-.theme-light .tag{ background:#f9fafb; color:#344054; border:1px solid #e5e7eb; }
-.theme-light .table{ background:#fff; border:1px solid var(--border); }
-.theme-light .table th{ background:#f9fafb; color:#344054; border-bottom:1px solid var(--border); }
-.theme-light .table td{ border-bottom:1px solid #f2f4f7; }
+.theme-light .btn{ background:#f9fafb; border:1px solid var(--border); color:#101828; padding:10px 14px; border-radius:10px; cursor:pointer }
+.theme-light .btn.primary{ background:var(--accent); color:#fff; border-color:transparent }
+.badge{ background:#f2f4f7; color:#344054; border:1px solid #e4e7ec; border-radius:999px; padding:2px 8px; font-weight:700; }
+.tag{ background:#f9fafb; color:#344054; border:1px solid var(--border); border-radius:999px; padding:2px 8px; font-size:12px }
 
-/* Título coherente */
-.page-header{ margin:18px 0 10px; }
-.page-title{ font-size:1.6rem; font-weight:700; margin:0; color:#101828; }
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:900px){.kpis{grid-template-columns:repeat(6,1fr)}}
+.kpi{padding:12px}.kpi .lab{font-size:12px;color:var(--muted)}.kpi .val{font-size:22px;font-weight:800;margin-top:4px}
 
-/* KPIs / filtros / kanban */
-.kpi-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
-@media(min-width:920px){.kpi-grid{grid-template-columns:repeat(6,1fr)}}
-.kpi-card .lab{font-size:12px;color:var(--muted)}
-.kpi-card .val{font-size:22px;font-weight:800;margin-top:4px}
-
-.filter-bar{display:grid;gap:10px;grid-template-columns:1fr}
-@media(min-width:1000px){.filter-bar{grid-template-columns:1.2fr .8fr .8fr 1fr .8fr .6fr .6fr}}
-.filter-bar .btn{height:44px}
+.filters{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:1000px){.filters{grid-template-columns:1.2fr .8fr .8fr 1fr .8fr .6fr .6fr}}
+.filters .btn{height:44px}
 
 .kanban{display:grid;gap:12px;grid-template-columns:1fr}
 @media(min-width:1100px){.kanban{grid-template-columns:repeat(5,1fr)}}
-.column{border-radius:14px;min-height:260px;padding:8px}
+.column{min-height:260px;padding:8px}
 .column h4{margin:2px 6px 8px;color:#344054}
-.column.drop-target{outline:2px dashed #d0d5dd; outline-offset:-6px}
-.card-mini{border-radius:12px;padding:10px;margin:6px 4px}
+.drop-target{outline:2px dashed #d0d5dd; outline-offset:-6px}
+.card-mini{padding:10px;margin:6px 4px;border:1px solid var(--border);border-radius:12px}
 .card-mini[draggable="true"]{cursor:grab}
 .card-mini.dragging{opacity:.6; transform:scale(.98)}
-.actions-row{display:flex;gap:8px;margin-top:8px}
-.icon-btn{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:8px;cursor:pointer}
-.icon-btn:hover{border-color:#d0d5dd}
-.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:700;font-size:12px}
-.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.tag{border-radius:999px;padding:2px 8px;font-size:12px}
+.actions-row{display:flex;gap:8px;margin-top:6px}
+.icon-btn{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:6px 8px;cursor:pointer}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
 .dot.green{background:var(--ok)} .dot.amber{background:var(--warn)} .dot.red{background:var(--bad)} .dot.gray{background:#d0d5dd}
 
-/* Drawer */
-.drawer{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:92vw;background:var(--card);
-  border-left:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);
-  transition:.25s;z-index:50}
+.table-wrap{margin-top:12px}
+.table{width:100%;border-collapse:separate;border-spacing:0;border-radius:12px;overflow:hidden}
+.table th,.table td{padding:10px 12px;border-bottom:1px solid #f2f4f7;text-align:left}
+.table th{background:#f9fafb;color:#344054}
+
+.drawer{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:92vw;background:#fff;border-left:1px solid var(--border);
+  box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);transition:.25s;z-index:50}
 .drawer.open{transform:translateX(0)}
-.drawer-header{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid var(--border)}
-.drawer-body{padding:14px}
-.pills{display:flex;gap:8px;flex-wrap:wrap}
+.drawer-header{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid var(--border)}
+.drawer-body{padding:12px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#f9fafb;color:#344054}
 
-/* Modal reunión (espejo prospectos) */
 .modal{position:fixed;inset:0;background:rgba(16,24,40,.5);display:none;align-items:center;justify-content:center;z-index:60}
 .modal.open{display:flex}
-.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:900px;max-width:98vw;padding:16px}
-.modal-card h3{margin:0 0 8px}
-.section{margin:8px 0 12px}
-.section h4{margin:0 0 8px;color:#344054}
-.row{display:grid;gap:10px;grid-template-columns:1fr}
+.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);
+  width:920px;max-width:98vw;max-height:90vh;display:flex;flex-direction:column}
+.modal-head{padding:12px 16px;border-bottom:1px solid var(--border)}
+.modal-body{padding:12px 16px;overflow:auto}
+.modal-actions{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 16px;background:#fff;border-top:1px solid var(--border)}
+.section{margin:6px 0 10px}
+.section h4{margin:0 0 6px;color:#344054}
+.row{display:grid;gap:8px;grid-template-columns:1fr}
 @media (min-width:680px){ .row.two{grid-template-columns:1fr 1fr} .row.three{grid-template-columns:1fr 1fr 1fr} .row.four{grid-template-columns:1fr 1fr 1fr 1fr} }
-.field label{display:block;font-size:12px;color:#667085;margin-bottom:4px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
 small.hint{color:#667085}
-
-/* Tabla toggle */
-.toggle-row{display:flex;justify-content:flex-end;margin:12px 0}
-
-/* Toasts */
 .toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:80}
 .toast{background:#111827;color:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 10px 24px rgba(0,0,0,.25);opacity:.96}
 .toast.ok{background:#15803d} .toast.warn{background:#b45309} .toast.bad{background:#b91c1c}
 </style>
 </head>
-
 <body class="theme-light">
+
 <header class="topbar">
   <div class="container flex between center">
     <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
@@ -106,22 +93,20 @@ small.hint{color:#667085}
 </header>
 
 <main class="container">
-  <div class="page-header"><h2 class="page-title">Dashboard</h2></div>
+  <h2 class="page-title">Dashboard</h2>
 
-  <!-- KPIs -->
-  <section class="kpi-grid">
-    <div class="kpi-card"><div class="lab">Prospectos activos</div><div class="val" id="k_total">—</div></div>
-    <div class="kpi-card"><div class="lab">Contacto</div><div class="val" id="k_contacto">—</div></div>
-    <div class="kpi-card"><div class="lab">Reunión</div><div class="val" id="k_reunion">—</div></div>
-    <div class="kpi-card"><div class="lab">Búsqueda</div><div class="val" id="k_busqueda">—</div></div>
-    <div class="kpi-card"><div class="lab">Compraventa</div><div class="val" id="k_compra">—</div></div>
-    <div class="kpi-card"><div class="lab">Notaría</div><div class="val" id="k_notaria">—</div></div>
+  <section class="kpis">
+    <div class="kpi"><div class="lab">Prospectos activos</div><div class="val" id="k_total">—</div></div>
+    <div class="kpi"><div class="lab">Contacto</div><div class="val" id="k_contacto">—</div></div>
+    <div class="kpi"><div class="lab">Reunión</div><div class="val" id="k_reunion">—</div></div>
+    <div class="kpi"><div class="lab">Búsqueda</div><div class="val" id="k_busqueda">—</div></div>
+    <div class="kpi"><div class="lab">Compraventa</div><div class="val" id="k_compra">—</div></div>
+    <div class="kpi"><div class="lab">Notaría</div><div class="val" id="k_notaria">—</div></div>
   </section>
 
-  <!-- Filtros -->
   <section class="card" style="margin-top:12px">
     <h2 style="margin:0 0 10px">Filtros</h2>
-    <div class="filter-bar">
+    <div class="filters">
       <div class="field"><label>Buscar</label><input id="f_q" placeholder="Nombre, email o teléfono"></div>
       <div class="field"><label>Fase</label>
         <select id="f_fase">
@@ -148,7 +133,6 @@ small.hint{color:#667085}
     </div>
   </section>
 
-  <!-- Kanban -->
   <section class="kanban" id="kanban">
     <div class="column" data-col="CONTACTO" data-drop="1"><h4>Contacto</h4></div>
     <div class="column" data-col="REUNION" data-drop="1"><h4>Reunión</h4></div>
@@ -157,14 +141,8 @@ small.hint{color:#667085}
     <div class="column" data-col="NOTARIA" data-drop="1"><h4>Notaría</h4></div>
   </section>
 
-  <!-- Toggle tabla -->
-  <div class="toggle-row">
-    <button class="btn" id="toggleTable">Mostrar tabla (avanzado)</button>
-  </div>
-
-  <!-- Tabla -->
-  <section class="table-wrap card" id="tableWrap" style="display:none">
-    <h2 style="margin:0 0 10px">Listado</h2>
+  <div class="card table-wrap" id="tableWrap" style="display:none">
+    <h2 style="margin:10px">Listado</h2>
     <table class="table" id="tab">
       <thead><tr>
         <th>Nombre</th><th>Email</th><th>Teléfono</th>
@@ -175,7 +153,7 @@ small.hint{color:#667085}
         <tr><td colspan="10" style="text-align:center;color:var(--muted)">Sin datos</td></tr>
       </tbody>
     </table>
-  </section>
+  </div>
 </main>
 
 <!-- Drawer lateral -->
@@ -185,7 +163,7 @@ small.hint{color:#667085}
     <button class="btn" id="dv_close" type="button">Cerrar</button>
   </div>
   <div class="drawer-body">
-    <div class="pills" style="margin-bottom:10px">
+    <div class="pills">
       <div class="pill" id="dv_fase">Fase: —</div>
       <div class="pill" id="dv_tipo">Tipo: —</div>
       <div class="pill" id="dv_obj">Objetivo: —</div>
@@ -214,7 +192,7 @@ small.hint{color:#667085}
       </div>
     </div>
 
-    <div class="actions" style="margin-top:12px">
+    <div class="actions" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
       <button class="btn" id="dv_email_btn" type="button">Enviar resumen</button>
       <button class="btn" id="dv_contract_btn" type="button">Enviar contrato</button>
       <button class="btn" id="dv_whatsapp_btn" type="button">WhatsApp</button>
@@ -227,113 +205,102 @@ small.hint{color:#667085}
   </div>
 </aside>
 
-<!-- Modal Reunión (espejo Prospectos con autocálculos) -->
+<!-- Modal Reunión -->
 <div class="modal" id="meetModal" aria-hidden="true">
   <div class="modal-card">
-    <h3>Completar datos de reunión</h3>
+    <div class="modal-head"><h3 style="margin:0">Completar datos de reunión</h3></div>
 
-    <div class="section">
-      <h4>1) Datos personales</h4>
-      <div class="row two">
-        <div class="field"><label>DNI</label><input id="m_dni"></div>
-        <div class="field"><label>Dirección</label><input id="m_dir"></div>
+    <div class="modal-body">
+      <div class="section">
+        <h4>1) Datos personales</h4>
+        <div class="row two">
+          <div class="field"><label>DNI</label><input id="m_dni"></div>
+          <div class="field"><label>Dirección</label><input id="m_dir"></div>
+        </div>
+        <div class="row three">
+          <div class="field"><label>Localidad (residencia)</label><input id="m_locres"></div>
+          <div class="field"><label>Email</label><input id="m_email"></div>
+          <div class="field"><label>Teléfono</label><input id="m_tel"></div>
+        </div>
       </div>
-      <div class="row three">
-        <div class="field"><label>Localidad (residencia)</label><input id="m_locres"></div>
-        <div class="field"><label>Email</label><input id="m_email"></div>
-        <div class="field"><label>Teléfono</label><input id="m_tel"></div>
+
+      <div class="section">
+        <h4>2) Características del activo deseado</h4>
+        <div class="row two">
+          <div class="field">
+            <label>Tipo alquiler</label>
+            <select id="m_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
+          </div>
+          <div class="field"><label>Localidades objetivo</label><input id="m_locsobj" placeholder="Oviedo, Gijón…"></div>
+        </div>
+        <div class="row four">
+          <div class="field"><label>Nº de activos</label><input id="m_nact" inputmode="numeric" value="1"></div>
+          <div class="field"><label>¿Ascensor?</label><select id="m_asc"><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label>Altura máxima</label><input id="m_altmax" inputmode="numeric" value="1"></div>
+          <div class="field"><label>¿Bajo?</label><select id="m_bajo"><option>No</option><option>Sí</option></select></div>
+        </div>
+        <div class="row three">
+          <div class="field"><label>Acepta reforma</label>
+            <select id="m_ref"><option>No</option><option>Lavado de cara</option><option>Integral</option></select>
+          </div>
+          <div class="field"><label>Mes inicio búsqueda</label><input id="m_mesini" type="month"></div>
+          <div class="field"><label>Mes fin (auto +5)</label><input id="m_mesfin" type="month" disabled></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>3) Presupuesto y precio máximo de compra</h4>
+        <div class="row three">
+          <div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric" data-money-live></div>
+          <div class="field"><label>Incluir honorarios (PSI)</label>
+            <select id="m_inchonor"><option value="si">Sí</option><option value="no">No</option></select>
+          </div>
+          <div class="field"><label>Precio máx. compra (auto)</label><input id="m_pmax" disabled></div>
+        </div>
+        <small class="hint">El p. máx. usa tu Configuración (ITP, Notaría y, si marcas, Honorarios).</small>
+      </div>
+
+      <div class="section">
+        <h4>4) Financiación</h4>
+        <div class="row three">
+          <div class="field"><label>Financiación</label><select id="m_fin"><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label>¿Necesita broker?</label><select id="m_broker"><option>No</option><option>Sí</option></select></div>
+          <div class="field"><label>% financiación (sobre precio)</label><input id="m_finp" inputmode="numeric" value="80"></div>
+        </div>
+        <div class="row two">
+          <div class="field"><label>Financiado estimado (€)</label><input id="m_fin_imp" disabled></div>
+          <div class="field"><label>Aportación propia estimada (€)</label><input id="m_aport" disabled></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>5) Objetivo del cliente</h4>
+        <div class="row three">
+          <div class="field"><label>Objetivo principal</label>
+            <select id="m_objt">
+              <option value="bruta">Rentabilidad bruta %</option>
+              <option value="neta">Rentabilidad neta %</option>
+              <option value="flujo">Flujo de caja €</option>
+            </select>
+          </div>
+          <div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
+          <div class="field"><label>Alquiler mensual sugerido (auto)</label><input id="m_alq_sug" disabled></div>
+        </div>
+        <small class="hint">Si el objetivo es “bruta %”, sugerimos alquiler en base al coste total <strong>sin honorarios</strong>.</small>
       </div>
     </div>
 
-    <div class="section">
-      <h4>2) Características del activo deseado</h4>
-      <div class="row two">
-        <div class="field">
-          <label>Tipo alquiler</label>
-          <select id="m_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
-        </div>
-        <div class="field"><label>Localidades objetivo</label><input id="m_locsobj" placeholder="Oviedo, Gijón…"></div>
-      </div>
-      <div class="row four">
-        <div class="field"><label>Nº de activos</label><input id="m_nact" inputmode="numeric" value="1"></div>
-        <div class="field">
-          <label>¿Ascensor?</label>
-          <select id="m_asc"><option>Sí</option><option>No</option></select>
-        </div>
-        <div class="field"><label>Altura máxima</label><input id="m_altmax" inputmode="numeric" value="1"></div>
-        <div class="field">
-          <label>¿Bajo?</label>
-          <select id="m_bajo"><option>No</option><option>Sí</option></select>
-        </div>
-      </div>
-      <div class="row three">
-        <div class="field">
-          <label>Acepta reforma</label>
-          <select id="m_ref"><option>No</option><option>Lavado de cara</option><option>Integral</option></select>
-        </div>
-        <div class="field"><label>Mes inicio búsqueda</label><input id="m_mesini" type="month"></div>
-        <div class="field"><label>Mes fin (auto +5)</label><input id="m_mesfin" type="month" disabled></div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h4>3) Presupuesto y precio máximo de compra</h4>
-      <div class="row three">
-        <div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric" data-money-live></div>
-        <div class="field">
-          <label>Incluir honorarios (PSI)</label>
-          <select id="m_inchonor"><option value="si">Sí</option><option value="no">No</option></select>
-        </div>
-        <div class="field"><label>Precio máx. compra (auto)</label><input id="m_pmax" disabled></div>
-      </div>
-      <small class="hint">El precio máx. se calcula con tu Configuración (ITP, Notaría y, si marcas, Honorarios).</small>
-    </div>
-
-    <div class="section">
-      <h4>4) Financiación</h4>
-      <div class="row three">
-        <div class="field">
-          <label>Financiación</label>
-          <select id="m_fin"><option>Sí</option><option>No</option></select>
-        </div>
-        <div class="field">
-          <label>¿Necesita broker?</label>
-          <select id="m_broker"><option>No</option><option>Sí</option></select>
-        </div>
-        <div class="field"><label>% financiación (sobre precio)</label><input id="m_finp" inputmode="numeric" value="80"></div>
-      </div>
-      <div class="row two">
-        <div class="field"><label>Financiado estimado (€)</label><input id="m_fin_imp" disabled></div>
-        <div class="field"><label>Aportación propia estimada (€)</label><input id="m_aport" disabled></div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h4>5) Objetivo del cliente</h4>
-      <div class="row three">
-        <div class="field">
-          <label>Objetivo principal</label>
-          <select id="m_objt"><option value="bruta">Rentabilidad bruta %</option><option value="neta">Rentabilidad neta %</option><option value="flujo">Flujo de caja €</option></select>
-        </div>
-        <div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
-        <div class="field"><label>Alquiler mensual sugerido (auto)</label><input id="m_alq_sug" disabled></div>
-      </div>
-      <small class="hint">Si el objetivo es “bruta %”, sugerimos alquiler en base al coste total (presupuesto).</small>
-    </div>
-
-    <div class="actions" style="margin-top:10px">
+    <div class="modal-actions">
       <button class="btn" id="m_cancel" type="button">Cancelar</button>
       <button class="btn primary" id="m_save" type="button">Guardar</button>
     </div>
   </div>
 </div>
 
-<!-- Toasts -->
 <div class="toast-wrap" id="toasts"></div>
-
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
 <script defer src="js/app.js"></script>
-<script defer src="js/dashboard.js"></script>
+<script defer src="js/dashboard.js?v=20250817-1"></script>
 </body>
 </html>
