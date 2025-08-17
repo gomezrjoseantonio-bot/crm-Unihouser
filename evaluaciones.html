@@ -1,33 +1,394 @@
-<!DOCTYPE html><html lang="es"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Evaluaciones</title>
-<link rel="stylesheet" href="css/style.css">
-</head><body>
+<style>
+:root{
+--accent:#ff6a3d; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+--muted:#667085; --border:#e5e7eb; --text:#101828; --bg:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.container{max-width:1100px;margin:0 auto;padding:16px}
+.topbar{background:#fff;border-bottom:1px solid var(--border)}
+.brand .title{font-weight:800}
+.nav a{margin:0 8px;text-decoration:none;color:#475467}
+.nav a.active{color:var(--accent);font-weight:800}
+.page-title{margin:14px 0 8px;color:#101828;font-weight:800;letter-spacing:-.02em;font-size:clamp(22px,2.4vw,28px)}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,.04);padding:12px;margin-bottom:12px}
+.row{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:860px){.row.four{grid-template-columns:1.2fr .8fr .8fr .8fr}}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+input,select,button{padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px}
+.btn{background:#f9fafb;border:1px solid var(--border);color:#111;font-weight:700;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table th,.table td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
+.table th{background:#f9fafb;color:#344054;cursor:pointer;user-select:none}
+.table tr:last-child td{border-bottom:none}
+
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+.kpi .box{border:1px solid var(--border);border-radius:12px;padding:10px;background:#fff}
+.kpi .lab{font-size:12px;color:#667085}
+.kpi .val{font-size:20px;font-weight:800;margin-top:2px}
+
+.drawer{position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100%;background:#fff;border-left:1px solid var(--border);box-shadow:-12px 0 24px rgba(16,24,40,.18);transform:translateX(100%);transition:.25s;z-index:80;display:flex;flex-direction:column}
+.drawer.open{transform:translateX(0)}
+.drawer .head{padding:16px;border-bottom:1px solid var(--border);font-weight:800}
+.drawer .body{padding:14px;overflow:auto}
+.grid2{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.muted{color:#667085;font-size:12px}
+.meta{display:grid;gap:8px;grid-template-columns:1fr}
+.meta .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.foot{text-align:center;color:#667085;margin:20px 0 10px}
+.toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:120}
+.toast{background:#111827;color:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 10px 24px rgba(0,0,0,.25);opacity:.96}
+.toast.ok{background:#15803d} .toast.warn{background:#b45309} .toast.bad{background:#b91c1c}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;background:#f1f5f9;border:1px solid #e2e8f0}
+</style>
+</head>
+<body>
 <header class="topbar">
-  <div class="container flex between center">
-    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
-    <nav class="nav">
-      <a href="evaluar.html">Evaluar</a>
-      <a href="evaluaciones.html" class="active">Evaluaciones</a>
-      <a href="prospectos.html">Prospectos</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="configuracion.html">Configuración</a>
-    </nav>
-  </div>
+<div class="container" style="display:flex;justify-content:space-between;align-items:center">
+<div class="brand"><div class="title">Unihouser — CRM & BuyBox</div></div>
+<nav class="nav">
+<a href="evaluar.html">Evaluar</a>
+<a href="evaluaciones.html" class="active">Evaluaciones</a>
+<a href="prospectos.html">Prospectos</a>
+<a href="dashboard.html">Dashboard</a>
+<a href="configuracion.html">Configuración</a>
+</nav>
+</div>
 </header>
 
 <main class="container">
+<h2 class="page-title">Evaluaciones</h2>
+
+<section class="kpi">
+<div class="box"><div class="lab">Total evaluaciones</div><div class="val" id="k_total">0</div></div>
+<div class="box"><div class="lab">Asignadas</div><div class="val" id="k_asig">0</div></div>
+<div class="box"><div class="lab">Bruta media</div><div class="val" id="k_bru">0,0 %</div></div>
+<div class="box"><div class="lab">Neta media</div><div class="val" id="k_net">0,0 %</div></div>
+</section>
+
 <section class="card">
-  <h2>Evaluaciones guardadas</h2>
-  <div class="actions"><button class="btn" id="ev_clear">Borrar todas</button></div>
-  <table class="table">
-    <thead><tr><th>Referencia</th><th>Localidad</th><th>Bruta</th><th>Neta</th><th>Flujo</th><th>Asignado a</th><th>Acciones</th></tr></thead>
-    <tbody id="ev_body"></tbody>
-  </table>
+<h3 style="margin:0 0 8px">Filtros</h3>
+<div class="row four">
+<div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad, calle..."></div>
+<div class="field"><label>Tipo</label>
+<select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
+</div>
+<div class="field"><label>Desde</label><input id="f_desde" type="date"></div>
+<div class="field"><label>Hasta</label><input id="f_hasta" type="date"></div>
+</div>
+<div class="actions">
+<button class="btn" id="b_limpiar">Limpiar</button>
+<button class="btn primary" id="b_filtrar">Filtrar</button>
+<button class="btn" id="b_export">Exportar CSV</button>
+</div>
+</section>
+
+<section class="card">
+<table class="table" id="tbl">
+<thead>
+<tr>
+<th data-k="ts">Fecha</th>
+<th data-k="loc">Localidad</th>
+<th data-k="tipo">Tipo</th>
+<th data-k="precio" style="text-align:right">Precio</th>
+<th data-k="alq" style="text-align:right">Alquiler</th>
+<th data-k="kpi_bruta" style="text-align:right">Bruta %</th>
+<th data-k="kpi_neta" style="text-align:right">Neta %</th>
+<th data-k="kpi_flujo" style="text-align:right">Flujo</th>
+<th data-k="pmax" style="text-align:right">P. máx</th>
+<th data-k="asig" style="text-align:center">Asignados</th>
+<th style="width:160px">Acciones</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
 </section>
 </main>
 
-<footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
-<script defer src="js/app.js"></script>
-<script defer src="js/evaluaciones.js"></script>
-</body></html>
+<!-- Drawer detalle -->
+<aside class="drawer" id="drawer">
+<div class="head">Detalle evaluación</div>
+<div class="body">
+<div class="meta">
+<div class="row">
+<div><div class="muted">Fecha</div><div id="d_fecha">—</div></div>
+<div><div class="muted">Tipo</div><div id="d_tipo">—</div></div>
+</div>
+<div class="row">
+<div><div class="muted">Localidad</div><div id="d_loc">—</div></div>
+<div><div class="muted">Calle</div><div id="d_calle">—</div></div>
+</div>
+<div class="row">
+<div><div class="muted">Precio compra</div><div id="d_precio">—</div></div>
+<div><div class="muted">Alquiler</div><div id="d_alq">—</div></div>
+</div>
+<div class="row">
+<div><div class="muted">Bruta</div><div id="d_bruta">—</div></div>
+<div><div class="muted">Neta</div><div id="d_neta">—</div></div>
+</div>
+<div class="row">
+<div><div class="muted">Flujo anual</div><div id="d_flujo">—</div></div>
+<div><div class="muted">P. máx compra</div><div id="d_pmax">—</div></div>
+</div>
+<div class="row">
+<div><div class="muted">Inversión total</div><div id="d_inv">—</div></div>
+<div><div class="muted">URL Idealista</div><div id="d_url">—</div></div>
+</div>
+</div>
+
+<hr style="margin:12px 0;border:none;border-top:1px solid var(--border)">
+
+<h4 style="margin:0 0 8px">Asignar a prospects</h4>
+<div id="p_list" style="display:flex;flex-direction:column;gap:6px"></div>
+
+<div class="actions" style="margin-top:12px">
+<button class="btn primary" id="d_guardar">Guardar asignación</button>
+<button class="btn" id="d_cerrar">Cerrar</button>
+</div>
+</div>
+</aside>
+
+<div class="toast-wrap" id="toasts"></div>
+<footer class="foot"><div class="container">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ===== Utils & Store ===== */
+const fmtN0=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+const fmtN1=new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
+const fmtE0=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+function id(x){return document.getElementById(x)}
+function el(tag,cls){const n=document.createElement(tag); if(cls) n.className=cls; return n;}
+function text(n,t){if(id(n)) id(n).textContent=t}
+function toast(msg,kind){const w=id("toasts");const d=el("div","toast "+(kind||""));d.textContent=msg;w.appendChild(d);setTimeout(()=>d.style.opacity="0",1600);setTimeout(()=>w.removeChild(d),2200)}
+function parseNum(t){return Number(String(t||'').replace(/[^\d.,-]/g,'').replace(/\./g,'').replace(',', '.'))||0}
+const Store={get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},set evals(v){localStorage.setItem('evals',JSON.stringify(v))},get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}},set pros(v){localStorage.setItem('pros',JSON.stringify(v))}};
+
+/* ===== Estado tabla & filtros ===== */
+let data=[], view=[], sortKey='ts', sortAsc=false, openId=null;
+
+function load(){
+data=(Store.evals||[]).slice().map(e=>({
+...e,
+asig:(e.prospect_ids||[]).length,
+}));
+applyFilters();
+}
+function applyFilters(){
+const q=(id('f_text').value||'').toLowerCase().trim();
+const t=id('f_tipo').value||'';
+const d=id('f_desde').value?new Date(id('f_desde').value+'T00:00:00Z').getTime():0;
+const h=id('f_hasta').value?new Date(id('f_hasta').value+'T23:59:59Z').getTime():Infinity;
+
+view=data.filter(e=>{
+const hitQ = !q || (String(e.loc||'').toLowerCase().includes(q) || String(e.calle||'').toLowerCase().includes(q));
+const hitT = !t || e.tipo===t;
+const ts=new Date(e.ts||e.id?.slice(3)).getTime();
+const hitF = ts>=d && ts<=h;
+return hitQ&&hitT&&hitF;
+});
+sort();
+render();
+kpis();
+}
+function sort(){
+view.sort((a,b)=>{
+const va=get(a,sortKey), vb=get(b,sortKey);
+if(va<vb) return sortAsc?-1:1;
+if(va>vb) return sortAsc?1:-1;
+return 0;
+});
+}
+function get(o,k){
+if(k==='ts') return new Date(o.ts||o.id?.slice(3)).getTime();
+if(k==='precio') return Number(o.precio||0);
+if(k==='alq') return Number(o.alq||0);
+if(k==='kpi_bruta') return Number(parseNum(o.kpi_bruta));
+if(k==='kpi_neta') return Number(parseNum(o.kpi_neta));
+if(k==='kpi_flujo') return Number(parseNum(o.kpi_flujo));
+if(k==='pmax') return Number(o.pmax||0);
+if(k==='asig') return Number(o.asig||0);
+return (o[k]||'').toString().toLowerCase();
+}
+
+/* ===== Render tabla ===== */
+function render(){
+const tb=id('tbody'); tb.innerHTML='';
+view.forEach(e=>{
+const tr=el('tr');
+const fecha=new Date(e.ts||e.id?.slice(3));
+const fstr=fecha.toLocaleDateString('es-ES',{year:'numeric',month:'2-digit',day:'2-digit'});
+tr.innerHTML=`
+<td>${fstr}</td>
+<td>${esc(e.loc)}</td>
+<td><span class="badge">${esc(e.tipo||'-')}</span></td>
+<td style="text-align:right">${fmtE0.format(e.precio||0)}</td>
+<td style="text-align:right">${fmtE0.format((e.alq||0))}</td>
+<td style="text-align:right">${fmtN1.format(Number(parseNum(e.kpi_bruta)))} %</td>
+<td style="text-align:right">${fmtN1.format(Number(parseNum(e.kpi_neta)))} %</td>
+<td style="text-align:right">${fmtE0.format(Number(parseNum(e.kpi_flujo)))}</td>
+<td style="text-align:right">${fmtE0.format(e.pmax||0)}</td>
+<td style="text-align:center">${(e.prospect_ids||[]).length}</td>
+<td>
+<button class="btn" data-a="open" data-id="${e.id}">Abrir</button>
+<button class="btn" data-a="dup" data-id="${e.id}">Duplicar</button>
+<button class="btn" data-a="del" data-id="${e.id}">Eliminar</button>
+</td>`;
+tb.appendChild(tr);
+});
+}
+function esc(s){return (s??'').toString().replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]))}
+
+/* ===== KPIs ===== */
+function kpis(){
+text('k_total', String(data.length));
+const asig = data.reduce((a,b)=>a+(b.asig||0),0);
+text('k_asig', String(asig));
+const bru = avg(data.map(x=>Number(parseNum(x.kpi_bruta))));
+const net = avg(data.map(x=>Number(parseNum(x.kpi_neta))));
+text('k_bru', fmtN1.format(bru)+' %');
+text('k_net', fmtN1.format(net)+' %');
+}
+function avg(arr){if(!arr.length) return 0; const s=arr.reduce((a,b)=>a+(b||0),0); return s/arr.length}
+
+/* ===== Drawer detalle & asignación ===== */
+function openDrawer(idEv){
+openId=idEv;
+const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e) return;
+
+const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
+text('d_fecha', fecha);
+text('d_tipo', e.tipo||'-');
+text('d_loc', e.loc||'-');
+text('d_calle', e.calle||'-');
+text('d_precio', fmtE0.format(e.precio||0));
+text('d_alq', fmtE0.format(e.alq||0));
+text('d_bruta', fmtN1.format(Number(parseNum(e.kpi_bruta)))+' %');
+text('d_neta', fmtN1.format(Number(parseNum(e.kpi_neta)))+' %');
+text('d_flujo', fmtE0.format(Number(parseNum(e.kpi_flujo))));
+text('d_pmax', fmtE0.format(e.pmax||0));
+text('d_inv', fmtE0.format(e.inv_total||0));
+const url = e.url?`<a href="${e.url}" target="_blank" rel="noopener">Abrir</a>`:'—';
+id('d_url').innerHTML = url;
+
+// prospects
+const wrap=id('p_list'); wrap.innerHTML='';
+const pros=Store.pros||[];
+const set=new Set(e.prospect_ids||[]);
+if(!pros.length){
+wrap.textContent='No hay prospects guardados.';
+}else{
+pros.forEach(p=>{
+const line=el('label');
+line.style.display='flex'; line.style.gap='8px'; line.style.alignItems='center';
+const cb=el('input'); cb.type='checkbox'; cb.value=p.id||p.email||p.nombre;
+cb.checked=set.has(cb.value);
+const span=el('span'); span.textContent=`${p.nombre||'—'} · ${p.pref_tipo||'-'} · ${p.locs_text||''}`;
+line.appendChild(cb); line.appendChild(span); wrap.appendChild(line);
+});
+}
+
+id('drawer').classList.add('open');
+}
+function closeDrawer(){id('drawer').classList.remove('open'); openId=null}
+
+function saveAssign(){
+if(!openId) return;
+const list=Store.evals||[];
+const idx=list.findIndex(x=>x.id===openId); if(idx<0) return;
+const ch=Array.from(id('p_list').querySelectorAll('input[type=checkbox]'));
+list[idx].prospect_ids = ch.filter(c=>c.checked).map(c=>c.value);
+Store.evals=list;
+toast('Asignación guardada','ok');
+closeDrawer();
+load();
+}
+
+/* ===== Acciones tabla ===== */
+function onTableClick(e){
+const b=e.target.closest('button'); if(!b) return;
+const id=b.dataset.id, act=b.dataset.a;
+if(act==='open') openDrawer(id);
+if(act==='del') delEval(id);
+if(act==='dup') dupEval(id);
+}
+function delEval(id){
+const list=Store.evals||[]; const idx=list.findIndex(x=>x.id===id); if(idx<0) return;
+list.splice(idx,1); Store.evals=list; toast('Eliminado','ok'); load();
+}
+function dupEval(id){
+const list=Store.evals||[]; const it=list.find(x=>x.id===id); if(!it) return;
+const cp=JSON.parse(JSON.stringify(it)); cp.id='ev_'+Date.now(); cp.ts=new Date().toISOString();
+list.unshift(cp); Store.evals=list; toast('Duplicado','ok'); load();
+}
+
+/* ===== Export CSV ===== */
+function toCSV(rows){
+const headers=["Fecha","Localidad","Tipo","Precio","Alquiler","Bruta%","Neta%","Flujo","Pmax","Asignados"];
+const lines=[headers.join(';')];
+rows.forEach(e=>{
+const f=new Date(e.ts||e.id?.slice(3)).toLocaleDateString('es-ES');
+lines.push([
+f,
+safe(e.loc),
+safe(e.tipo),
+numfmt(e.precio),
+numfmt(e.alq),
+pctfmt(e.kpi_bruta),
+pctfmt(e.kpi_neta),
+numfmt(e.kpi_flujo),
+numfmt(e.pmax),
+(e.prospect_ids||[]).length
+].join(';'));
+});
+return lines.join('\n');
+}
+function numfmt(v){return fmtN0.format(Number(parseNum(v)||v||0))}
+function pctfmt(v){return fmtN1.format(Number(parseNum(v)||0))}
+function safe(s){return (s??'').toString().replace(/;/g,',')}
+function download(name,content){
+const blob=new Blob([content],{type:'text/csv;charset=utf-8;'});
+const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
+}
+
+/* ===== Helpers ===== */
+function bindSort(){
+id('tbl').querySelectorAll('th[data-k]').forEach(th=>{
+th.addEventListener('click',()=>{
+const k=th.dataset.k;
+if(sortKey===k) sortAsc=!sortAsc; else{sortKey=k; sortAsc=true;}
+sort(); render();
+});
+});
+}
+
+/* ===== Eventos ===== */
+function attach(){
+id('b_filtrar').addEventListener('click',applyFilters);
+id('b_limpiar').addEventListener('click',()=>{id('f_text').value='';id('f_tipo').value='';id('f_desde').value='';id('f_hasta').value='';applyFilters()});
+id('b_export').addEventListener('click',()=>{if(!view.length){toast('Nada que exportar','warn');return;} download('evaluaciones.csv',toCSV(view))});
+id('tbody').addEventListener('click',onTableClick);
+id('d_cerrar').addEventListener('click',closeDrawer);
+id('d_guardar').addEventListener('click',saveAssign);
+bindSort();
+load();
+}
+
+/* ===== Start ===== */
+document.addEventListener('DOMContentLoaded',attach);
+})();
+</script>
+</body>
+</html>
