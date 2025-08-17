@@ -16,6 +16,8 @@
 .step.active .dot{background:#fff}
 .step.done{background:#0f2318;color:#86efac;border-color:#14532d}
 .step.done .dot{background:#22c55e}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:800;font-size:12px}
+.badge.note{background:#0b0d0e;color:#9aa5af;border:1px solid #2b343a}
 </style>
 </head><body>
 <header class="topbar">
@@ -65,7 +67,7 @@
       <div class="field"><label>Nº de activos deseados</label><input id="p_num_activos" inputmode="numeric" placeholder="1"></div>
     </div>
     <div class="row three">
-      <div class="field"><label>Sin ascensor</label><select id="p_sin_asc"><option>No</option><option>Sí</option></select></div>
+      <div class="field"><label>¿Ascensor?</label><select id="p_asc"><option>Sí</option><option>No</option></select></div>
       <div class="field"><label>Altura máxima (planta)</label><input id="p_alt_max" inputmode="numeric" placeholder="3"></div>
       <div class="field"><label>¿Bajos?</label><select id="p_bajos"><option>No</option><option>Sí</option></select></div>
     </div>
@@ -91,6 +93,11 @@
       <div class="field"><label>¿Necesita broker?</label><select id="p_broker"><option>No</option><option>Sí</option></select></div>
       <div class="field"><label>% financiación habitual</label><input id="p_pct_fin" placeholder="80,0"></div>
     </div>
+    <div class="row three">
+      <div class="field"><label>Hipoteca estimada (auto)</label><input id="p_hipoteca" data-money disabled></div>
+      <div class="field"><label>Fondos propios (auto)</label><input id="p_propios" data-money disabled></div>
+      <div class="field"><span class="badge note">El % se aplica sobre el <b>precio máx. de compra</b></span></div>
+    </div>
   </div>
 
   <!-- 4. Objetivos -->
@@ -107,9 +114,17 @@
       <div class="field"><label>Valor objetivo</label><input id="p_obj_val" placeholder="7,5 o 300"></div>
       <div class="field"><label>Periodo de búsqueda</label>
         <div class="row two">
-          <input id="p_mes_ini" placeholder="Mes inicio (MM/AAAA)">
-          <input id="p_mes_fin" placeholder="Mes fin (MM/AAAA)">
+          <input id="p_mes_ini" placeholder="MM/AAAA">
+          <input id="p_mes_fin" placeholder="MM/AAAA">
         </div>
+        <small class="hint">Si indicas inicio, el fin se autocompleta +5 meses.</small>
+      </div>
+    </div>
+    <div class="row three" id="row_alquiler_max" hidden>
+      <div class="field">
+        <label>Alquiler máx. (orientativo) para la rentabilidad bruta (€ / mes)</label>
+        <input id="p_alq_max" data-money disabled>
+        <small class="hint">Calculado como Rb% × (Presupuesto TOTAL / 12).</small>
       </div>
     </div>
   </div>
@@ -118,32 +133,16 @@
   <div class="actions">
     <button class="btn primary" id="p_save" type="button">Guardar</button>
     <button class="btn ghost" id="p_clear" type="button">Limpiar</button>
+    <button class="btn" id="p_mail_contacto" type="button">Email: contacto</button>
+    <button class="btn" id="p_mail_resumen" type="button">Email: resumen reunión</button>
+    <button class="btn" id="p_mail_contrato" type="button">Email: contrato</button>
   </div>
   <div id="p_toast" class="toast success" hidden>✅ Prospecto guardado</div>
 
   <div class="hr"></div>
 
-  <!-- Listado + filtros -->
-  <div class="section">
-    <h3>Listado de prospectos</h3>
-    <div class="row three">
-      <div class="field"><label>Filtrar por fase</label>
-        <select id="f_fase">
-          <option value="">Todas</option>
-          <option value="CONTACTO">Contacto</option>
-          <option value="REUNION">Reunión</option>
-          <option value="BUSQUEDA">Búsqueda</option>
-          <option value="COMPRAVENTA">Compraventa</option>
-          <option value="NOTARIA">Notaría</option>
-        </select>
-      </div>
-      <div class="field"><label>Filtrar por tipo</label>
-        <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
-      </div>
-      <div class="field"><label>Buscar</label><input id="f_q" placeholder="Nombre / localidad"></div>
-    </div>
-  </div>
-
+  <!-- Listado (sin filtros; los pasamos a Dashboard) -->
+  <div class="section"><h3>Listado de prospectos</h3></div>
   <table class="table">
     <thead><tr>
       <th>Nombre</th><th>Email</th><th>Teléfono</th>
