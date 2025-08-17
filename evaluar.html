@@ -3,33 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unihouser — Evaluaciones</title>
+<title>Unihouser — Evaluar</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-/* mínimos locales para drawer/toasts (respetando tu estilo base) */
-.uh-overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
-.uh-overlay.open{display:block}
-.uh-drawer{position:fixed;top:0;right:-520px;height:100%;width:520px;max-width:100%;background:#fff;border-left:1px solid #e5e7eb;box-shadow:0 10px 24px rgba(0,0,0,.2);transition:right .2s ease;z-index:90}
-.uh-drawer.open{right:0}
-.uh-d-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #eef2f7}
-.uh-d-body{padding:16px 16px 24px;overflow:auto;height:calc(100% - 60px)}
-.uh-meta{font-size:12px;color:#667085;margin-bottom:8px}
-.uh-kv{display:flex;justify-content:space-between;border-bottom:1px dashed #eef2f7;padding:6px 0}
-.uh-kv .k{color:#667085}.uh-kv .v{font-weight:700}
-.uh-list-pros label{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #f3f4f6}
-.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
-.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
-.toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
-.pill{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#f1f5f9;font-size:12px}
-.filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
-@media(max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
-table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
-.table th,.table td{padding:10px 12px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px;white-space:nowrap}
-.table th{background:#f8fafc;color:#111827;cursor:pointer}
-.table tr:last-child td{border-bottom:none}
-.table tr{cursor:pointer}
+/* estilos mínimos locales */
+.grid3{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
+@media(max-width:1100px){.grid3{grid-template-columns:1fr}}
+.kpis{display:grid;gap:10px;grid-template-columns:repeat(5,1fr)}
+.kpi .lab{color:#667085;font-size:12px}.kpi .val{font-weight:800}
+.dot{display:inline-block;width:8px;height:8px;border-radius:999px;margin-left:6px;vertical-align:middle;background:#d1d5db}
+.dot.ok{background:#16a34a}.dot.warn{background:#f59e0b}.dot.bad{background:#ef4444}
+.muted{color:#667085}
+.hint{color:#667085;font-size:12px}
 .btn.sm{padding:8px 10px;font-size:13px;border-radius:10px}
-.empty{padding:14px;border:1px dashed #e2e8f0;border-radius:12px;color:#667085;margin-top:10px}
 </style>
 </head>
 <body>
@@ -37,8 +23,8 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
   <div class="container flex between center">
     <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
     <nav class="nav">
-      <a href="evaluar.html">Evaluar</a>
-      <a href="evaluaciones.html" class="active">Evaluaciones</a>
+      <a href="evaluar.html" class="active">Evaluar</a>
+      <a href="evaluaciones.html">Evaluaciones</a>
       <a href="prospectos.html">Prospectos</a>
       <a href="dashboard.html">Dashboard</a>
       <a href="configuracion.html">Configuración</a>
@@ -48,393 +34,308 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 
 <main class="container">
 <section class="card">
-  <h2>Evaluaciones</h2>
+  <h2>Evaluar Activo</h2>
 
-  <div class="kpis" style="margin-top:6px;display:grid;gap:10px;grid-template-columns:repeat(4,1fr)">
-    <div class="kpi"><div class="lab">Total evaluaciones</div><div class="val" id="k_total">0</div></div>
-    <div class="kpi"><div class="lab">Asignadas</div><div class="val" id="k_asig">0</div></div>
-    <div class="kpi"><div class="lab">Bruta media</div><div class="val" id="k_bruta">0,0 %</div></div>
-    <div class="kpi"><div class="lab">Neta media</div><div class="val" id="k_neta">0,0 %</div></div>
-  </div>
+  <!-- DATOS INMUEBLE -->
+  <div class="section">
+    <h3>Datos del inmueble</h3>
+    <div class="grid3">
+      <div class="field"><label>Localidad</label>
+        <select id="e_loc">
+          <option>Oviedo</option><option>Gijón</option><option>Avilés</option>
+          <option>Mieres</option><option>Langreo</option><option>Allande</option>
+        </select></div>
+      <div class="field"><label>Calle</label><input id="e_calle" placeholder="C/ Ejemplo 1"></div>
+      <div class="field"><label>URL Idealista (opcional)</label><input id="e_url" placeholder="https://..."></div>
 
-  <div class="card" style="margin-top:12px">
-    <h3 style="margin:0 0 6px">Filtros</h3>
-    <div class="filters">
-      <div class="row">
-        <div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad o calle"></div>
-        <div class="field"><label>Tipo</label>
-          <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
-        </div>
-        <div class="field"><label>Desde</label><input id="f_desde" type="date"></div>
-        <div class="field"><label>Hasta</label><input id="f_hasta" type="date"></div>
-        <div class="field" style="align-self:end"><button class="btn" id="b_limpiar">Limpiar</button></div>
-        <div class="field" style="align-self:end"><button class="btn primary" id="b_filtrar">Filtrar</button></div>
-        <div class="field" style="align-self:end"><button class="btn" id="b_export">Exportar CSV</button></div>
-      </div>
+      <div class="field"><label>Año construcción — opcional</label><input id="e_anio" inputmode="numeric" placeholder="1975"></div>
+      <div class="field"><label>Superficie (m²) — opcional</label><input id="e_m2" inputmode="numeric" placeholder="72"></div>
+      <div class="field"><label>Necesita reforma</label>
+        <select id="e_ref"><option>No</option><option>Lavado de cara</option><option>Integral</option></select></div>
+
+      <div class="field"><label>Altura (planta)</label><input id="e_alt" inputmode="numeric" value="1"></div>
+      <div class="field"><label>¿Ascensor?</label><select id="e_asc"><option>Sí</option><option>No</option></select></div>
+      <div class="field"><label>¿Es bajo?</label><select id="e_bajo"><option>No</option><option>Sí</option></select></div>
+
+      <div class="field"><label>Habitaciones</label><input id="e_habs" inputmode="numeric" placeholder="3"></div>
+      <div class="field"><label>Baños</label><input id="e_banos" inputmode="numeric" placeholder="1"></div>
+      <div></div>
     </div>
   </div>
 
-  <div class="card" style="margin-top:12px">
-    <div id="empty" class="empty" style="display:none">No hay evaluaciones guardadas aún. Ve a <strong>Evaluar</strong>, calcula y pulsa “Guardar”.</div>
-    <table class="table" id="tbl" style="display:none">
-      <thead>
-        <tr>
-          <th data-k="ts">Fecha</th>
-          <th data-k="loc">Localidad</th>
-          <th data-k="calle">Calle</th>
-          <th data-k="tipo">Tipo</th>
-          <th data-k="precio" style="text-align:right">Precio</th>
-          <th data-k="alq" style="text-align:right">Alquiler</th>
-          <th data-k="kpi_bruta" style="text-align:right">Bruta %</th>
-          <th data-k="kpi_neta" style="text-align:right">Neta %</th>
-          <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
-          <th data-k="pmax" style="text-align:right">P. máx</th>
-          <th data-k="asig" style="text-align:center">Asignados</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
+  <!-- ADQUISICIÓN -->
+  <div class="section">
+    <h3>Gastos de adquisición</h3>
+    <div class="grid3">
+      <div class="field"><label>Precio de compra (€)</label><input id="e_precio" data-money></div>
+      <div class="field"><label>ITP (€ — auto)</label><input id="e_itp_eur" data-money disabled></div>
+      <div class="field"><label>Notaría y Registro (€ — auto)</label><input id="e_notaria" data-money disabled></div>
+
+      <div class="field"><label>Reforma (€)</label><input id="e_reforma" value="0" data-money></div>
+      <div class="field"><label>Incluir honorarios PSI (con IVA)</label><select id="e_honor"><option>Sí</option><option>No</option></select></div>
+      <div class="field"><label>Precio máx. compra (para cumplir BRUTA)</label><input id="e_pmax" data-money disabled></div>
+    </div>
+    <div class="hint">Se toma el objetivo de <strong>rentabilidad bruta</strong> definido en Configuración para el tipo elegido.</div>
+  </div>
+
+  <!-- MANTENIMIENTO -->
+  <div class="section">
+    <h3>Gastos de mantenimiento</h3>
+    <div class="grid3">
+      <div class="field"><label>Comunidad (€/año)</label><input id="e_comunidad" value="0" data-money></div>
+      <div class="field"><label>IBI (€/año)</label><input id="e_ibi" value="0" data-money></div>
+      <div class="field"><label>Seguro hogar (€/año — auto)</label><input id="e_hogar" value="0" data-money></div>
+
+      <div class="field"><label>Seguro impago (€/año — auto)</label><input id="e_impago" value="0" data-money></div>
+      <div class="field"><label>Gestión (€/año — auto)</label><input id="e_gestion" value="0" data-money></div>
+      <div class="field"><small class="hint">Hogar/impago/gestión se autocalculan al indicar alquiler, según Config. Editables.</small></div>
+    </div>
+  </div>
+
+  <!-- EXPLOTACIÓN -->
+  <div class="section">
+    <h3>Tipo de explotación e ingresos</h3>
+    <div class="grid3">
+      <div class="field"><label>Tipo de alquiler</label><select id="e_tipo"><option>Tradicional</option><option>Habitaciones</option></select></div>
+      <div class="field"><label>Alquiler mensual (€)</label><input id="e_alq" data-money></div>
+      <div></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn primary" id="e_calc">Calcular</button>
+    <button class="btn ghost" id="e_clean">Limpiar</button>
+  </div>
+
+  <!-- RESULTADOS -->
+  <div id="e_result" class="section" hidden>
+    <h3>Resultados</h3>
+    <div class="kpis">
+      <div class="kpi"><div class="lab">Inversión total</div><div class="val" id="r_inv">—</div></div>
+      <div class="kpi"><div class="lab">Rentabilidad bruta <span id="sb" class="dot"></span></div><div class="val"><span id="r_bruta">—</span></div></div>
+      <div class="kpi"><div class="lab">Rentabilidad neta <span id="sn" class="dot"></span></div><div class="val"><span id="r_neta">—</span></div></div>
+      <div class="kpi"><div class="lab">Flujo de caja anual <span id="sf" class="dot"></span></div><div class="val" id="r_flujo">—</div></div>
+      <div class="kpi"><div class="lab">Precio máx. compra</div><div class="val" id="r_pmax">—</div></div>
+    </div>
+
+    <div class="actions" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn primary" id="save_only">Guardar evaluación</button>
+    </div>
   </div>
 </section>
 </main>
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
-<div id="uhOverlay" class="uh-overlay"></div>
-<aside id="uhDrawer" class="uh-drawer" aria-hidden="true">
-  <div class="uh-d-head">
-    <strong>Detalle de evaluación</strong>
-    <button class="btn" id="d_cerrar">Cerrar</button>
-  </div>
-  <div class="uh-d-body">
-    <div class="uh-meta" id="d_fecha">—</div>
-
-    <div class="uh-kv"><div class="k">Localidad</div><div class="v" id="d_loc">—</div></div>
-    <div class="uh-kv"><div class="k">Calle</div><div class="v" id="d_calle">—</div></div>
-    <div class="uh-kv"><div class="k">Tipo</div><div class="v" id="d_tipo">—</div></div>
-
-    <div class="uh-kv"><div class="k">Precio</div><div class="v" id="d_precio">—</div></div>
-    <div class="uh-kv"><div class="k">Alquiler</div><div class="v" id="d_alq">—</div></div>
-    <div class="uh-kv"><div class="k">Bruta</div><div class="v" id="d_bruta">—</div></div>
-    <div class="uh-kv"><div class="k">Neta</div><div class="v" id="d_neta">—</div></div>
-    <div class="uh-kv"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
-    <div class="uh-kv"><div class="k">Precio máx.</div><div class="v" id="d_pmax">—</div></div>
-    <div class="uh-kv"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
-    <div class="uh-kv"><div class="k">URL</div><div class="v" id="d_url">—</div></div>
-
-    <h3 style="margin:14px 0 8px">Asignar a prospects</h3>
-    <div id="p_list" class="uh-list-pros">—</div>
-
-    <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <button class="btn primary" id="d_guardar">Guardar asignación</button>
-      <button class="btn" id="d_pdf">PDF</button>
-      <button class="btn" id="d_editar">Abrir en Evaluar</button>
-    </div>
-  </div>
-</aside>
-
-<div id="toasts" class="toast-wrap"></div>
-
 <script>
 (function(){
 "use strict";
 
-/* ===== Utils ===== */
-var $ = function(x){return document.getElementById(x)};
-var fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
-var fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
-var fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
-function e0(v){return fmtE0.format(Number(v||0))}
-function pct(v){return fmtN1.format(Number(v||0))+' %'}
-function parseNum(v){return Number(String(v==null?'':v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0}
-function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,function(m){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])})}
-function toast(msg,kind){
-  var wrap=$('toasts'); if(!wrap) return;
-  var el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
-  wrap.appendChild(el); setTimeout(function(){el.style.opacity='0'},1600);
-  setTimeout(function(){try{wrap.removeChild(el)}catch(e){}},2200);
-}
-function toPct(raw){ var v=Number(raw||0); if(v>0&&v<=1) v*=100; if(v>200) v/=10; return v; } // defensivo
-
-/* ===== Store con migración ===== */
-function readJSON(key){
-  try{ return JSON.parse(localStorage.getItem(key)||'null') }catch(_){ return null }
-}
-function migrateEvals(){
-  var pools = [];
-  var keys = ['evals','evaluaciones','evaluaciones_list','buybox_evals'];
-  keys.forEach(function(k){
-    var v = readJSON(k);
-    if(Array.isArray(v) && v.length) pools.push(v);
-  });
-  // último cartucho: buscar arrays “parecidos” en localStorage
-  try{
-    for(var i=0;i<localStorage.length;i++){
-      var k = localStorage.key(i);
-      if(!k) continue;
-      var v = readJSON(k);
-      if(Array.isArray(v) && v.length && typeof v[0]==='object' && ('precio' in v[0] || 'alq' in v[0])){
-        pools.push(v);
-      }
-    }
-  }catch(_){}
-  // aplanar + deduplicar por id o ts
-  var map = {};
-  pools.forEach(function(arr){
-    arr.forEach(function(e){
-      var id = e.id || ('ev_'+(e.ts||Date.now()));
-      if(!map[id]){ map[id]=Object.assign({id:id},e); }
-    });
-  });
-  var out = Object.keys(map).map(function(k){return map[k]});
-  if(out.length){
-    try{ localStorage.setItem('evals', JSON.stringify(out)); }catch(_){}
-  }
-  return out;
-}
-var Store={
-  get evals(){
-    var v = readJSON('evals');
-    if(Array.isArray(v) && v.length) return v;
-    return migrateEvals();
-  },
-  set evals(val){ localStorage.setItem('evals', JSON.stringify(val)); },
-  get pros(){ return readJSON('pros') || []; },
-  set pros(v){ localStorage.setItem('pros', JSON.stringify(v)); }
+/* ===== Utils/Store ===== */
+const id=x=>document.getElementById(x);
+const fmtE0=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const fmtN0=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+const fmtN1=new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
+const e0=v=>fmtE0.format(Number(v||0));
+const pct=v=>fmtN1.format(Number(v||0))+' %';
+const parseEs=s=>Number(String(s??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'))||0;
+const Store={
+  get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
+  set cfg(v){ localStorage.setItem('cfg',JSON.stringify(v)); },
+  get evals(){ try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]} },
+  set evals(v){ localStorage.setItem('evals',JSON.stringify(v)); }
+};
+/* robustez: lee múltiples nombres posibles de config */
+const CFG=(k,def)=>{
+  const c=Store.cfg||{};
+  const cand=[k,k.toLowerCase(),k.toUpperCase(),
+    {itp_pct:'itp_pct',notaria:'notaria',
+     hogar_pct:'hogar_pct',impago_trad_pct:'impago_trad_pct',impago_hab_pct:'impago_hab_pct',
+     gestion_trad_pct:'gestion_trad_pct',gestion_hab_pct:'gestion_hab_pct',
+     obj_bruta_trad:'obj_bruta_trad',obj_bruta_hab:'obj_bruta_hab'}[k]];
+  for(const key of cand){ if(key!=null && c[key]!=null) return Number(c[key]); }
+  return Number(def);
 };
 
-/* ===== Estado ===== */
-var data=[], view=[], sortKey='ts', sortAsc=true, openId=null;
-
-/* ===== Carga + KPIs ===== */
-function load(){
-  var list = Store.evals || [];
-  data = list.map(function(e){ return Object.assign({},e,{asig:(e.prospect_ids||[]).length})});
-  var empty = !data.length;
-  $('empty').style.display = empty?'block':'none';
-  $('tbl').style.display   = empty?'none':'table';
-  applyFilters(); kpis();
-}
-function kpis(){
-  $('k_total').textContent = data.length;
-  $('k_asig').textContent = data.reduce(function(a,b){return a+(b.asig||0)},0);
-  $('k_bruta').textContent = pct(avg(data.map(function(x){return toPct(x.kpi_bruta)})));
-  $('k_neta').textContent  = pct(avg(data.map(function(x){return toPct(x.kpi_neta)})));
-}
-function avg(arr){return arr.length? arr.reduce(function(a,b){return a+Number(b||0)},0)/arr.length : 0}
-
-/* ===== Filtros/orden ===== */
-function applyFilters(){
-  var q=($('f_text').value||'').toLowerCase().trim();
-  var t=$('f_tipo').value||'';
-  var d=$('f_desde').value? new Date($('f_desde').value+'T00:00:00Z').getTime():0;
-  var h=$('f_hasta').value? new Date($('f_hasta').value+'T23:59:59Z').getTime():Infinity;
-  view=data.filter(function(e){
-    var ts=new Date(e.ts|| (e.id&&e.id.slice?e.id.slice(3):Date.now())).getTime();
-    var txt=((e.loc||'')+' '+(e.calle||'')).toLowerCase();
-    return (!q || txt.indexOf(q)>-1) && (!t || e.tipo===t) && ts>=d && ts<=h;
-  });
-  sort(); render();
-}
-function sort(){
-  view.sort(function(a,b){
-    var va=get(a,sortKey), vb=get(b,sortKey);
-    return (va<vb? -1: va>vb? 1: 0) * (sortAsc?1:-1);
-  });
-}
-function get(o,k){
-  if(k==='ts') return new Date(o.ts|| (o.id&&o.id.slice?o.id.slice(3):Date.now())).getTime();
-  if(k==='asig') return (o.prospect_ids||[]).length;
-  if(k==='kpi_bruta') return toPct(o.kpi_bruta);
-  if(k==='kpi_neta') return toPct(o.kpi_neta);
-  if(k==='kpi_flujo') return Number(parseNum(o.kpi_flujo));
-  if(k==='pmax') return Number(o.pmax||0);
-  if(k==='precio') return Number(o.precio||0);
-  if(k==='alq') return Number(o.alq||0);
-  if(k==='calle') return (o.calle||'').toLowerCase();
-  return (o[k]||'').toString().toLowerCase();
-}
-
-/* ===== Render tabla ===== */
-function render(){
-  var tb=$('tbody'); tb.innerHTML='';
-  view.forEach(function(e){
-    var tr=document.createElement('tr'); tr.dataset.id=e.id;
-    var f=new Date(e.ts|| (e.id&&e.id.slice?e.id.slice(3):Date.now())).toLocaleDateString('es-ES');
-    tr.innerHTML=
-      '<td>'+f+'</td>'+
-      '<td>'+esc(e.loc||'')+'</td>'+
-      '<td>'+esc(e.calle||'')+'</td>'+
-      '<td><span class="pill">'+esc(e.tipo||'-')+'</span></td>'+
-      '<td style="text-align:right">'+e0(e.precio)+'</td>'+
-      '<td style="text-align:right">'+e0(e.alq)+'</td>'+
-      '<td style="text-align:right">'+fmtN1.format(toPct(e.kpi_bruta))+' %</td>'+
-      '<td style="text-align:right">'+fmtN1.format(toPct(e.kpi_neta))+' %</td>'+
-      '<td style="text-align:right">'+e0(e.kpi_flujo)+'</td>'+
-      '<td style="text-align:right">'+e0(e.pmax)+'</td>'+
-      '<td style="text-align:center">'+(e.prospect_ids||[]).length+'</td>'+
-      '<td><button class="btn sm" data-act="ver">Ver</button> '+
-      '<button class="btn sm" data-act="del">Borrar</button></td>';
-    tb.appendChild(tr);
-  });
-}
-
-/* ===== Drawer detalle + asignación ===== */
-function openDrawer(idEv){
-  openId=idEv;
-  var list=Store.evals||[];
-  var e=list.find(function(x){return x.id===idEv}); if(!e) return;
-
-  $('d_fecha').textContent=new Date(e.ts|| (e.id&&e.id.slice?e.id.slice(3):Date.now())).toLocaleString('es-ES');
-  $('d_loc').textContent =e.loc||'—';
-  $('d_calle').textContent=e.calle||'—';
-  $('d_tipo').textContent =e.tipo||'—';
-  $('d_precio').textContent=e0(e.precio);
-  $('d_alq').textContent =e0(e.alq);
-  $('d_bruta').textContent =fmtN1.format(toPct(e.kpi_bruta))+' %';
-  $('d_neta').textContent =fmtN1.format(toPct(e.kpi_neta))+' %';
-  $('d_flujo').textContent =e0(e.kpi_flujo);
-  $('d_pmax').textContent =e0(e.pmax);
-  $('d_inv').textContent =e0(e.inv_total);
-  $('d_url').innerHTML = e.url ? '<a href="'+e.url+'" target="_blank" rel="noopener">Abrir</a>' : '—';
-
-  var wrap=$('p_list'); wrap.innerHTML='';
-  var pros=Store.pros||[]; var set=new Set(e.prospect_ids||[]);
-  if(!pros.length){ wrap.textContent='No hay prospects guardados.'; }
-  else{
-    pros.forEach(function(p){
-      var row=document.createElement('label');
-      var cb=document.createElement('input'); cb.type='checkbox';
-      cb.value=p.id||p.email||p.nombre; cb.checked=set.has(cb.value);
-      var sp=document.createElement('span');
-      sp.textContent=(p.nombre||'—')+' · '+(p.pref_tipo||'-')+' · '+(p.locs_text||'');
-      row.appendChild(cb); row.appendChild(sp);
-      wrap.appendChild(row);
+/* ===== Money live formatting ===== */
+function setupMoneyLive(){
+  document.querySelectorAll('input[data-money]').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const digits=(inp.value||'').replace(/[^\d]/g,'');
+      if(!digits){inp.value='';return;}
+      inp.value=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(Number(digits));
+      if(inp.id==='e_alq') autoFromRent();          // autocalcula gastos desde alquiler
+      if(inp.id==='e_precio') autoFromPrice();      // itp/notaria y pmax
     });
-  }
-
-  $('uhOverlay').classList.add('open');
-  $('uhDrawer').classList.add('open');
-
-  $('d_guardar').onclick = saveAssign;
-  $('d_pdf').onclick = function(){ quickPDF(e.id) };
-  $('d_editar').onclick = function(){ goEvaluar(e.id) };
+    inp.addEventListener('blur',()=>{
+      const n=parseEs(inp.value);
+      inp.value=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(Math.round(n));
+    });
+  });
 }
-function closeDrawer(){
-  $('uhOverlay').classList.remove('open');
-  $('uhDrawer').classList.remove('open');
-  openId=null;
+
+/* ===== Autocalculados ===== */
+function autoFromPrice(){
+  const precio=parseEs(id('e_precio').value);
+  const itp_pct = CFG('itp_pct', 8);
+  id('e_itp_eur').value = fmtN0.format(Math.round(precio*itp_pct/100));
+  id('e_notaria').value = fmtN0.format(Math.round(CFG('notaria',1500)));
+  recalcPmax();
 }
-function saveAssign(){
-  if(!openId) return;
-  var list=Store.evals||[];
-  var idx=list.findIndex(function(x){return x.id===openId}); if(idx<0) return;
-  var choices=[].slice.call($('p_list').querySelectorAll('input[type=checkbox]'));
-  list[idx].prospect_ids = choices.filter(function(c){return c.checked}).map(function(c){return c.value});
+function autoFromRent(){
+  const alq=parseEs(id('e_alq').value);
+  const anual=alq*12;
+  const tipo=id('e_tipo').value||'Tradicional';
+  const hogar_pct   = CFG('hogar_pct',   3);  // %
+  const impago_pct  = tipo==='Habitaciones'? CFG('impago_hab_pct',10): CFG('impago_trad_pct',5);
+  const gestion_pct = tipo==='Habitaciones'? CFG('gestion_hab_pct',20): CFG('gestion_trad_pct',12);
+  id('e_hogar').value   = fmtN0.format(Math.round(anual*hogar_pct/100));
+  id('e_impago').value  = fmtN0.format(Math.round(anual*impago_pct/100));
+  id('e_gestion').value = fmtN0.format(Math.round(anual*gestion_pct/100));
+  recalcPmax();
+}
+function psiCost(){ return (id('e_honor').value==='Sí')? 4235 : 0; }
+
+function recalcPmax(){
+  const alqM=parseEs(id('e_alq').value);
+  if(!alqM) { id('e_pmax').value=''; return; }
+  const anual = alqM*12;
+  const itp_pct = CFG('itp_pct',8)/100;
+  const notaria = CFG('notaria',1500);
+  const reforma = parseEs(id('e_reforma').value||0);
+  const psi = psiCost();
+  const tipo=id('e_tipo').value||'Tradicional';
+  const obj = (tipo==='Habitaciones')? CFG('obj_bruta_hab',12) : CFG('obj_bruta_trad',10); // %
+  const invTarget = anual/(obj/100);
+  const fijo = notaria + reforma + psi;
+  const pmax = Math.max(0, (invTarget - fijo) / (1+itp_pct));
+  id('e_pmax').value = fmtN0.format(Math.round(pmax));
+}
+
+/* ===== Cálculo KPIs ===== */
+function calcular(){
+  // entradas
+  const precio=parseEs(id('e_precio').value);
+  const itp   = parseEs(id('e_itp_eur').value);
+  const nota  = parseEs(id('e_notaria').value);
+  const ref   = parseEs(id('e_reforma').value);
+  const psi   = psiCost();
+  const comunidad=parseEs(id('e_comunidad').value);
+  const ibi=parseEs(id('e_ibi').value);
+  const hogar=parseEs(id('e_hogar').value);
+  const impago=parseEs(id('e_impago').value);
+  const gestion=parseEs(id('e_gestion').value);
+  const alqM=parseEs(id('e_alq').value);
+
+  const inv = precio + itp + nota + ref + psi;
+  const anual = alqM*12;
+  const gastos = comunidad+ibi+hogar+impago+gestion;
+  const flujo = anual - gastos;
+  const bruta = inv>0 ? (anual/inv*100) : 0;
+  const neta  = inv>0 ? (flujo/inv*100) : 0;
+
+  id('r_inv').textContent = e0(inv);
+  id('r_bruta').textContent = pct(bruta);
+  id('r_neta').textContent  = pct(neta);
+  id('r_flujo').textContent = e0(flujo);
+  id('r_pmax').textContent  = fmtE0.format(parseEs(id('e_pmax').value)||0);
+
+  // semáforos vs objetivo
+  const tipo=id('e_tipo').value||'Tradicional';
+  const goal = (tipo==='Habitaciones')? CFG('obj_bruta_hab',12) : CFG('obj_bruta_trad',10);
+  const setDot=(el,val)=>{ el.classList.remove('ok','warn','bad');
+    if(val>=goal) el.classList.add('ok');
+    else if(val>=goal-1) el.classList.add('warn');
+    else el.classList.add('bad'); };
+  setDot(id('sb'),bruta);
+  setDot(id('sn'),neta);
+  setDot(id('sf'),flujo>=0?100:0);
+
+  id('e_result').hidden=false;
+}
+
+/* ===== Guardar evaluación ===== */
+function collect(){
+  const get = k=>document.getElementById(k);
+  const o={
+    id: (get('e_id')?.value)||('ev_'+Date.now()),
+    ts: Date.now(),
+    loc: get('e_loc').value, calle:get('e_calle').value, url:get('e_url').value,
+    anio:get('e_anio').value, m2:get('e_m2').value, ref:get('e_ref').value,
+    alt:get('e_alt').value, asc:get('e_asc').value, bajo:get('e_bajo').value,
+    habs:get('e_habs').value, banos:get('e_banos').value,
+    tipo:get('e_tipo').value,
+    precio: parseEs(get('e_precio').value),
+    itp_eur: parseEs(get('e_itp_eur').value),
+    notaria: parseEs(get('e_notaria').value),
+    reforma: parseEs(get('e_reforma').value),
+    honor: get('e_honor').value,
+    pmax: parseEs(get('e_pmax').value),
+    comunidad: parseEs(get('e_comunidad').value),
+    ibi: parseEs(get('e_ibi').value),
+    hogar: parseEs(get('e_hogar').value),
+    impago: parseEs(get('e_impago').value),
+    gestion: parseEs(get('e_gestion').value),
+    alq: parseEs(get('e_alq').value),
+    inv_total: parseEs((id('r_inv').textContent||'').replace(/[^\d,.-]/g,'')),
+    kpi_bruta: Number(String(id('r_bruta').textContent).replace(/[^\d,.-]/g,'').replace(',','.')),
+    kpi_neta:  Number(String(id('r_neta').textContent ).replace(/[^\d,.-]/g,'').replace(',','.')),
+    kpi_flujo: parseEs((id('r_flujo').textContent||'').replace(/[^\d,.-]/g,'')),
+    prospect_ids: []
+  };
+  return o;
+}
+function guardar(){
+  const list=Store.evals||[];
+  const data=collect();
+  const ix=list.findIndex(x=>x.id===data.id);
+  if(ix>=0) list[ix]=data; else list.push(data);
   Store.evals=list;
-  toast('Asignación guardada','ok');
-  closeDrawer(); load();
+  alert('Evaluación guardada');
 }
 
-/* ===== Abrir en Evaluar ===== */
-function goEvaluar(idEv){
-  try{ localStorage.setItem('last_eval_id', idEv); }catch(_){}
-  location.href = 'evaluar.html?id='+encodeURIComponent(idEv);
+/* ===== Limpiar ===== */
+function limpiar(){
+  document.querySelectorAll('input').forEach(i=>{ if(i.disabled) return; i.value=''; });
+  id('e_honor').value='Sí'; id('e_tipo').value='Tradicional';
+  id('e_result').hidden=true;
 }
 
-/* ===== PDF rápido (sin template strings) ===== */
-function quickPDF(idEv){
-  var e=(Store.evals||[]).find(function(x){return x.id===idEv}); if(!e){toast('No encontrado','bad');return;}
-  var fecha=new Date(e.ts|| (e.id&&e.id.slice?e.id.slice(3):Date.now())).toLocaleString('es-ES');
-  var lines=[];
-  lines.push('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — '+esc(e.loc||'')+'</title>');
-  lines.push('<style>body{font-family:Inter,Arial;color:#101828;margin:24px}h1{font-size:22px;margin:0 0 6px}h2{font-size:16px;margin:16px 0 8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.box{border:1px solid #e5e7eb;border-radius:10px;padding:10px}.lab{font-size:12px;color:#667085}.val{font-weight:800}.foot{margin-top:16px;font-size:12px;color:#667085;text-align:center}</style></head><body>');
-  lines.push('<h1>Informe BuyBox — Unihouser</h1>');
-  lines.push('<div class="lab">'+esc(fecha)+'</div>');
-  lines.push('<h2>Resumen financiero</h2>');
-  lines.push('<div class="grid">');
-  lines.push('<div class="box"><div class="lab">Bruta</div><div class="val">'+fmtN1.format(toPct(e.kpi_bruta))+' %</div></div>');
-  lines.push('<div class="box"><div class="lab">Neta</div><div class="val">'+fmtN1.format(toPct(e.kpi_neta))+' %</div></div>');
-  lines.push('<div class="box"><div class="lab">Flujo anual</div><div class="val">'+fmtE0.format(Number(parseNum(e.kpi_flujo)))+'</div></div>');
-  lines.push('<div class="box"><div class="lab">P. máx compra</div><div class="val">'+fmtE0.format(e.pmax||0)+'</div></div>');
-  lines.push('</div>');
-  lines.push('<h2>Datos del inmueble</h2>');
-  lines.push('<div class="grid">');
-  lines.push('<div class="box"><div class="lab">Localidad</div><div class="val">'+esc(e.loc||'-')+'</div></div>');
-  lines.push('<div class="box"><div class="lab">Calle</div><div class="val">'+esc(e.calle||'-')+'</div></div>');
-  lines.push('<div class="box"><div class="lab">Tipo</div><div class="val">'+esc(e.tipo||'-')+'</div></div>');
-  lines.push('<div class="box"><div class="lab">Alquiler</div><div class="val">'+fmtE0.format(e.alq||0)+'</div></div>');
-  lines.push('<div class="box"><div class="lab">Precio</div><div class="val">'+fmtE0.format(e.precio||0)+'</div></div>');
-  lines.push('<div class="box"><div class="lab">Inversión total</div><div class="val">'+fmtE0.format(e.inv_total||0)+'</div></div>');
-  lines.push('</div>');
-  lines.push('<div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>');
-  lines.push('</body></html>');
-  var w=window.open('about:blank','_blank'); w.document.open(); w.document.write(lines.join('')); w.document.close();
-  var tryPrint=function(){ try{ w.focus(); w.print(); }catch(_){ } };
-  w.onload = tryPrint; setTimeout(tryPrint, 600);
+/* ===== Carga previa desde _load_eval_ o #open=ID ===== */
+function loadIfRequested(){
+  const hashId=(location.hash||'').split('open=')[1]; 
+  const stored=localStorage.getItem('_load_eval_')||'';
+  const target = hashId? decodeURIComponent(hashId) : stored;
+  if(!target) return;
+  const e=(Store.evals||[]).find(x=>x.id===target); if(!e) return;
+  // vuelca en formulario
+  const set=(k,v)=>{const el=id(k); if(!el) return; el.value=(String(v??'')); if(el.hasAttribute('data-money')) el.dispatchEvent(new Event('input'));};
+  set('e_loc',e.loc); set('e_calle',e.calle); set('e_url',e.url);
+  set('e_anio',e.anio); set('e_m2',e.m2); set('e_ref',e.ref);
+  set('e_alt',e.alt); set('e_asc',e.asc); set('e_bajo',e.bajo);
+  set('e_habs',e.habs); set('e_banos',e.banos);
+  set('e_tipo',e.tipo);
+  set('e_precio',fmtN0.format(e.precio)); autoFromPrice();
+  set('e_reforma',fmtN0.format(e.reforma)); set('e_honor',e.honor);
+  set('e_comunidad',fmtN0.format(e.comunidad)); set('e_ibi',fmtN0.format(e.ibi));
+  set('e_hogar',fmtN0.format(e.hogar)); set('e_impago',fmtN0.format(e.impago)); set('e_gestion',fmtN0.format(e.gestion));
+  set('e_alq',fmtN0.format(e.alq)); autoFromRent();
+  // id oculto para sobrescribir al guardar
+  let hid=document.getElementById('e_id'); if(!hid){ hid=document.createElement('input'); hid.type='hidden'; hid.id='e_id'; document.body.appendChild(hid); }
+  hid.value=e.id;
 }
 
-/* ===== CSV extendido ===== */
-function toCSV(rows){
-  var headers=["Fecha","Localidad","Calle","Tipo","Precio","Alquiler","Bruta%","Neta%","Flujo","Pmax","Inversion","ITP","Notaria","Reforma","Comunidad","IBI","Hogar","Impago","Gestion","m2","Anio","Ascensor","Bajo","Altura","Habs","Banos","URL","Asignados"];
-  var out=[headers.join(';')];
-  rows.forEach(function(e){
-    var f=new Date(e.ts|| (e.id&&e.id.slice?e.id.slice(3):Date.now())).toLocaleDateString('es-ES');
-    var row=[
-      f, safe(e.loc), safe(e.calle), safe(e.tipo),
-      numfmt(e.precio), numfmt(e.alq),
-      pctfmt(toPct(e.kpi_bruta)), pctfmt(toPct(e.kpi_neta)),
-      numfmt(e.kpi_flujo), numfmt(e.pmax), numfmt(e.inv_total),
-      numfmt(e.itp_eur), numfmt(e.notaria), numfmt(e.reforma), numfmt(e.comunidad),
-      numfmt(e.ibi), numfmt(e.hogar), numfmt(e.impago), numfmt(e.gestion),
-      safe(e.m2), safe(e.anio), safe(e.asc?'Sí':'No'), safe(e.bajo?'Sí':'No'),
-      safe(e.alt), safe(e.habs), safe(e.banos), safe(e.url),
-      (e.prospect_ids||[]).length
-    ];
-    out.push(row.join(';'));
-  });
-  return out.join('\n');
-}
-function numfmt(v){return fmtN0.format(Number(parseNum(v)||v||0))}
-function pctfmt(v){return fmtN1.format(Number(v||0))}
-function safe(s){return (s==null?'':String(s)).replace(/;/g,',')}
-function download(name,content){
-  var blob=new Blob([content],{type:'text/csv;charset=utf-8;'});
-  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click();
-  setTimeout(function(){URL.revokeObjectURL(a.href); a.remove();},0);
-}
-
-/* ===== Eventos ===== */
-function onTableClick(ev){
-  var btn=ev.target.closest('button[data-act]'); var tr=ev.target.closest('tr');
-  if(!tr) return; var idEv=tr.dataset.id;
-  if(btn){
-    var act=btn.dataset.act;
-    if(act==='ver') openDrawer(idEv);
-    if(act==='del'){ if(confirm('¿Borrar esta evaluación?')){ Store.evals=(Store.evals||[]).filter(function(x){return x.id!==idEv}); load(); } }
-  }else{
-    openDrawer(idEv);
-  }
-}
-function bindSort(){
-  [].slice.call(document.querySelectorAll('#tbl th[data-k]')).forEach(function(th){
-    th.addEventListener('click',function(){
-      var k=th.dataset.k;
-      if(sortKey===k) sortAsc=!sortAsc; else{sortKey=k; sortAsc=true;}
-      sort(); render();
-    });
-  });
-}
 function attach(){
-  $('b_filtrar').addEventListener('click',applyFilters);
-  $('b_limpiar').addEventListener('click',function(){ $('f_text').value=''; $('f_tipo').value=''; $('f_desde').value=''; $('f_hasta').value=''; applyFilters();});
-  $('b_export').addEventListener('click',function(){ if(!view.length){toast('Nada que exportar','warn');return;} download('evaluaciones.csv',toCSV(view)); });
-  $('tbody').addEventListener('click',onTableClick);
-  $('d_cerrar').addEventListener('click',closeDrawer);
-  $('uhOverlay').addEventListener('click',closeDrawer);
-  bindSort(); load();
+  setupMoneyLive();
+  document.getElementById('e_tipo').addEventListener('change',()=>{autoFromRent();recalcPmax();});
+  id('e_honor').addEventListener('change',recalcPmax);
+  id('e_alq').addEventListener('input',recalcPmax);
+  id('e_reforma').addEventListener('input',recalcPmax);
+  id('e_calc').addEventListener('click',calcular);
+  id('e_clean').addEventListener('click',limpiar);
+  id('save_only').addEventListener('click',guardar);
+  // inicializaciones
+  autoFromPrice(); loadIfRequested();
 }
 document.addEventListener('DOMContentLoaded',attach);
 })();
