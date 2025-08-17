@@ -1,7 +1,7 @@
 (function(){
   "use strict";
 
-  // ===== Store =====
+  /* ========= Store ========= */
   var Store = window.Store || {
     get pros(){ try{return JSON.parse(localStorage.getItem("pros")||"[]");}catch(e){return[];} },
     set pros(v){ localStorage.setItem("pros", JSON.stringify(v)); },
@@ -11,7 +11,7 @@
     set cfg(v){ localStorage.setItem("cfg", JSON.stringify(v)); }
   };
 
-  // ===== Utils =====
+  /* ========= Utils ========= */
   var fmtN0 = new Intl.NumberFormat("es-ES",{maximumFractionDigits:0});
   var fmtN1 = new Intl.NumberFormat("es-ES",{maximumFractionDigits:1});
   function $(id){ return document.getElementById(id); }
@@ -24,8 +24,6 @@
     box.appendChild(d); setTimeout(function(){ d.style.opacity="0"; }, 1800);
     setTimeout(function(){ box.removeChild(d); }, 2400);
   }
-
-  // Miles en vivo (inputs con data-money-live)
   function attachMoneyLive(){
     document.addEventListener("input", function(e){
       var t=e.target; if(!t||!t.matches||!t.matches("input[data-money-live]")) return;
@@ -38,7 +36,7 @@
     }, true);
   }
 
-  // ===== Fases =====
+  /* ========= Fases ========= */
   var phases=["CONTACTO","REUNION","BUSQUEDA","COMPRAVENTA","NOTARIA"];
   var subestados={
     CONTACTO:["Pendiente contactar","Contactado","Descartado"],
@@ -49,7 +47,7 @@
   };
   function nextPhase(f){ var i=phases.indexOf(f||"CONTACTO"); if(i<0)i=0; return (i>=phases.length-1)?phases[i]:phases[i+1]; }
 
-  // ===== IDs & Evaluaciones =====
+  /* ========= IDs & Eval ========= */
   function ensureIds(){
     var ps=Store.pros||[], ch=false; for(var i=0;i<ps.length;i++){ if(!ps[i].id){ ps[i].id=uid(); ch=true; } }
     if(ch) Store.pros=ps;
@@ -69,7 +67,7 @@
     else{ if(val>=goal) return "green"; if(val>=goal-1) return "amber"; return "red"; }
   }
 
-  // ===== Filtros =====
+  /* ========= Filtros ========= */
   function readFilters(){
     return {
       q:   ($("f_q")?.value||"").trim().toLowerCase(),
@@ -94,7 +92,7 @@
     return out;
   }
 
-  // ===== KPIs =====
+  /* ========= KPIs ========= */
   function renderKPIs(rows){
     if(!$("k_total")) return;
     var tot=rows.length, i,f; var c={CONTACTO:0,REUNION:0,BUSQUEDA:0,COMPRAVENTA:0,NOTARIA:0};
@@ -107,7 +105,7 @@
     $("k_notaria").textContent=String(c.NOTARIA||0);
   }
 
-  // ===== Kanban =====
+  /* ========= Kanban ========= */
   function cardHTML(p, idx){
     var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
     var dot=scoreDotFor(p);
@@ -143,7 +141,7 @@
     }
   }
 
-  // ===== Tabla =====
+  /* ========= Tabla ========= */
   function renderTable(rows){
     var tb=$("tbody"); if(!tb) return;
     var html="", i,p,objTxt;
@@ -166,7 +164,7 @@
     tb.innerHTML=html;
   }
 
-  // ===== Drawer =====
+  /* ========= Drawer ========= */
   function fillSubestadosSel(fase,current){
     var sel=$("dv_sub_sel"); if(!sel) return;
     sel.innerHTML=""; var arr=subestados[fase]||["—"];
@@ -188,13 +186,14 @@
     $("dv_fase_sel").value=p.fase||"CONTACTO"; fillSubestadosSel(p.fase||"CONTACTO", p.sub||"");
 
     $("dv_email_btn").dataset.to=p.email||""; $("dv_contract_btn").dataset.to=p.email||""; $("dv_whatsapp_btn").dataset.tel=p.tel||"";
-    $("dv_adv_btn").dataset.idx=p._idx; $("dv_save").dataset.idx=p.idx; $("dv_delete").dataset.idx=p.idx; $("dv_meeting_btn").dataset.idx=p._idx; $("dv_evals_btn").dataset.pid=p.id||"";
+    $("dv_adv_btn").dataset.idx=p._idx; $("dv_save").dataset.idx=p.idx; $("dv_delete").dataset.idx=p._idx; 
+    $("dv_meeting_btn").dataset.idx=p.__idx; $("dv_evals_btn").dataset.pid=p.id||"";
 
     $("drawer").classList.add("open"); $("drawer").setAttribute("aria-hidden","false");
   }
   function closeDrawer(){ $("drawer")?.classList.remove("open"); $("drawer")?.setAttribute("aria-hidden","true"); }
 
-  // ===== Config & cálculos =====
+  /* ========= Config & Cálculos ========= */
   function cfgOrDefaults(){
     var c=Store.cfg||{};
     return { itp_pct: toNum(c.itp_pct)||8, not_eur: toNum(c.notaria)||1500, honor_eur: toNum(c.honorarios)||0 };
@@ -216,7 +215,7 @@
     return y+"-"+(m<10?("0"+m):m);
   }
 
-  // ===== Modal Reunión =====
+  /* ========= Modal Reunión ========= */
   function openMeeting(p){
     if(!$("meetModal")) return;
     // Personales
@@ -272,7 +271,7 @@
     if(mi){ $("m_mesfin").value = monthPlus5(mi); }
   }
 
-  // ===== Render principal =====
+  /* ========= Render principal ========= */
   function renderAll(){
     ensureIds();
     var all=Store.pros||[]; for(var k=0;k<all.length;k++){ all[k].__idx=k; }
@@ -280,7 +279,7 @@
     renderKPIs(rows); renderKanban(rows); renderTable(rows);
   }
 
-  // ===== Delegación de eventos =====
+  /* ========= Delegación de eventos ========= */
   function onClick(sel, handler){
     document.addEventListener("click", function(ev){
       var t=ev.target; while(t && t!==document){ if(t.matches && t.matches(sel)){ handler.call(t,ev); return; } t=t.parentNode; }
@@ -334,10 +333,28 @@
     onClick("#dv_adv_btn", function(){ var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return; p.fase=nextPhase(p.fase||"CONTACTO"); var subs=subestados[p.fase]||[]; p.sub=subs.length?subs[0]:""; Store.pros=arr; closeDrawer(); renderAll(); toast("Fase: "+p.fase,"ok"); });
     onClick("#dv_delete", function(){ var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return; if(confirm("¿Eliminar a "+(p.nombre||"este prospecto")+"?")){ arr.splice(idx,1); Store.pros=arr; closeDrawer(); renderAll(); toast("Prospecto eliminado","ok"); } });
     onClick("#dv_save", function(){ var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return; p.nombre=$("dv_nombre")?.value||""; p.email=$("dv_email")?.value||""; p.tel=$("dv_tel")?.value||""; p.locs_text=$("dv_locs")?.value||""; p.fase=$("dv_fase_sel")?.value||"CONTACTO"; p.sub=$("dv_sub_sel")?.value||""; Store.pros=arr; closeDrawer(); renderAll(); toast("Guardado","ok"); });
-    onClick("#dv_meeting_btn", function(){ var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return; p.__idx=idx; openMeeting(p); });
+
+    // Abrir modal reunión (robusto con fallback)
+    onClick("#dv_meeting_btn", function(){
+      try{
+        var idxStr = this.dataset.idx || "-1";
+        var idx = parseInt(idxStr, 10);
+        if (isNaN(idx) || idx < 0) {
+          var arr = Store.pros || [];
+          var name = $("dv_nombre")?.value||"", email=$("dv_email")?.value||"", tel=$("dv_tel")?.value||"";
+          var found=-1; for(var i=0;i<arr.length;i++){ var P=arr[i]||{}; if((name&&P.nombre===name)||(email&&P.email===email)||(tel&&P.tel===tel)){ found=i; break; } }
+          if(found<0){ toast("Abre el prospecto desde Kanban o Tabla y vuelve a pulsar “Completar datos de reunión”.","warn"); return; }
+          idx=found;
+        }
+        var list=Store.pros||[], sel=list[idx]; if(!sel){ toast("Prospecto no encontrado.","bad"); return; }
+        sel.__idx=idx; openMeeting(sel);
+      }catch(e){ console.error(e); toast("No se pudo abrir el formulario de reunión.","bad"); }
+    });
+
+    // Ver evaluaciones
     onClick("#dv_evals_btn", function(){ var pid=this.dataset.pid||""; if(!pid) return; window.location.href="evaluaciones.html?prospect="+encodeURIComponent(pid); });
 
-    // Modal reunión: listeners
+    // Modal reunión: listeners recalculo
     ["m_budget","m_inchonor","m_objt","m_objv","m_fin","m_finp","m_mesini"].forEach(function(id){
       var el=$(id); if(el){ ["input","change","blur"].forEach(function(ev){ el.addEventListener(ev, recalcMeeting); }); }
     });
@@ -356,7 +373,7 @@
       P.altura_max=toNum($("m_altmax")?.value); P.bajo=$("m_bajo")?.value||"No";
       P.reforma=$("m_ref")?.value||"No"; P.mes_ini=$("m_mesini")?.value||""; P.mes_fin=$("m_mesfin")?.value||"";
 
-      // Presupuesto / precio max
+      // Presupuesto / pmax
       P.budget=toNum($("m_budget")?.value); P.incluir_honor=$("m_inchonor")?.value||"si";
       P.pmax_compra=toNum(($("m_pmax")?.value||"").replace(/\./g,""));
 
@@ -376,7 +393,7 @@
     var faseSel=$("dv_fase_sel"); if(faseSel) faseSel.addEventListener("change", function(){ var v=this.value||"CONTACTO"; fillSubestadosSel(v,""); });
   }
 
-  // ===== Drag & Drop =====
+  /* ========= Drag & Drop ========= */
   function attachDragDrop(){
     document.addEventListener("dragstart", function(e){
       var card=e.target.closest(".card-mini"); if(!card) return;
@@ -408,7 +425,7 @@
     });
   }
 
-  // ===== CSV =====
+  /* ========= CSV ========= */
   function toCSV(rows){
     var esc=function(s){ if(s==null) return ""; s=String(s); if(s.includes('"')||s.includes(',')||s.includes('\n')) return '"'+s.replace(/"/g,'""')+'"'; return s; };
     var head=["Nombre","Email","Teléfono","Fase","Subestado","Tipo","Localidades","Objetivo","Objetivo_valor","Presupuesto","ID"];
@@ -428,6 +445,7 @@
     toast("CSV exportado","ok");
   }
 
+  /* ========= Init ========= */
   document.addEventListener("DOMContentLoaded", function(){
     ensureIds();
     attach();
