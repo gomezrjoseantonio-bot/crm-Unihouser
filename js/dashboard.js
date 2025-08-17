@@ -14,6 +14,17 @@
   function normPhone(t){ return t?String(t).replace(/[^\d+]/g,""):""; }
   function toNum(x){ var s=String(x||"").replace(/\./g,"").replace(",","."); var n=Number(s); return Number.isFinite(n)?n:0; }
 
+  // Toasts
+  function toast(msg, type){
+    var box = $("toasts"); if(!box) return;
+    var d = document.createElement("div");
+    d.className = "toast "+(type||"");
+    d.textContent = msg;
+    box.appendChild(d);
+    setTimeout(function(){ d.style.opacity="0"; }, 2200);
+    setTimeout(function(){ box.removeChild(d); }, 2700);
+  }
+
   // Fases y subestados
   var phases = ["CONTACTO","REUNION","BUSQUEDA","COMPRAVENTA","NOTARIA"];
   var subestados = {
@@ -195,7 +206,7 @@
     $("m_nact").value = p.n_activos||1;
     $("m_objt").value = p.obj_tipo||"bruta";
     $("m_objv").value = p.obj_raw||"";
-    $("m_budget").value = p.budget||"";
+    $("m_budget").value = p.budget?fmtN0.format(p.budget):"";
     $("m_fin").value = p.financia||"";
     $("m_finp").value = p.fin_pct||"80";
     $("m_save").dataset.idx = p.__idx;
@@ -222,11 +233,9 @@
   }
 
   // ===== Delegación de eventos (robusta) =====
-  function onClick(e, selector, handler){
+  function onClick(selector, handler){
     document.addEventListener("click", function(ev){
       var t = ev.target;
-      if(!t) return;
-      // sube hasta encontrar el selector
       while(t && t !== document){
         if(t.matches && t.matches(selector)){ handler.call(t, ev); return; }
         t = t.parentNode;
@@ -235,8 +244,21 @@
   }
 
   function attach(){
+    // Formateo miles en inputs con data-money (solo blur)
+    document.addEventListener("blur", function(ev){
+      var t=ev.target;
+      if(!t || !t.matches || !t.matches("input[data-money]")) return;
+      var n = toNum(t.value);
+      t.value = n?fmtN0.format(Math.round(n)):("");
+    }, true);
+
+    // ESC cierra modal/drawer
+    document.addEventListener("keydown", function(e){
+      if(e.key==="Escape"){ closeMeeting(); closeDrawer(); }
+    });
+
     // Toggle tabla
-    onClick(null, "#toggleTable", function(){
+    onClick("#toggleTable", function(){
       var w=$("tableWrap"); if(!w) return;
       var on=w.style.display!=="none";
       w.style.display = on?"none":"block";
@@ -244,93 +266,106 @@
     });
 
     // Filtros
-    onClick(null, "#f_clear", function(){ 
-      if($("f_q")) $("f_q").value="";
-      if($("f_fase")) $("f_fase").value="";
-      if($("f_tipo")) $("f_tipo").value="";
-      if($("f_loc"))  $("f_loc").value="";
-      if($("f_fin"))  $("f_fin").value="";
+    onClick("#f_clear", function(){ 
+      $("f_q")&&($("f_q").value="");
+      $("f_fase")&&($("f_fase").value="");
+      $("f_tipo")&&($("f_tipo").value="");
+      $("f_loc")&&($("f_loc").value="");
+      $("f_fin")&&($("f_fin").value="");
       renderAll(); 
+      toast("Filtros limpiados","ok");
     });
-    onClick(null, "#f_apply", function(){ renderAll(); });
+    onClick("#f_apply", function(){ renderAll(); toast("Filtros aplicados","ok"); });
 
     // Kanban acciones
-    onClick(null, ".act-mail", function(){
+    onClick(".act-mail", function(){
       var p=(Store.pros||[])[parseInt(this.dataset.i,10)]; if(!p || !p.email) return;
-      var body="Hola "+(p.nombre||"")+",%0D%0ASeguimos con tu búsqueda.%0D%0ASaludos.";
+      var resumen = [];
+      if(p.obj_tipo){ resumen.push("Objetivo: "+p.obj_tipo.toUpperCase()+" "+(p.obj_tipo==="flujo"?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %"))); }
+      if(p.locs_text){ resumen.push("Zonas: "+p.locs_text); }
+      if(p.budget){ resumen.push("Presupuesto total: "+fmtN0.format(p.budget)+" €"); }
+      var body="Hola "+(p.nombre||"")+",%0D%0A%0D%0AResumen:%0D%0A- "+resumen.join("%0D%0A- ")+"%0D%0A%0D%0ASeguimos en contacto.%0D%0ASaludos.";
       window.location.href="mailto:"+encodeURIComponent(p.email)+"?subject="+encodeURIComponent("Unihouser — Seguimiento")+"&body="+body;
     });
-    onClick(null, ".act-wa", function(){
+    onClick(".act-wa", function(){
       var p=(Store.pros||[])[parseInt(this.dataset.i,10)]; if(!p) return;
       var tel = normPhone(p.tel); if(!tel) return;
-      window.open("https://wa.me/"+tel+"?text="+encodeURIComponent("Seguimos con tu búsqueda de inversión."), "_blank");
+      var msg="Hola "+(p.nombre||"")+", te envío resumen por email. Seguimos.";
+      window.open("https://wa.me/"+tel+"?text="+encodeURIComponent(msg), "_blank");
     });
-    onClick(null, ".act-open", function(){
+    onClick(".act-open", function(){
       var p=(Store.pros||[])[parseInt(this.dataset.i,10)]; if(!p) return;
       p.__idx=parseInt(this.dataset.i,10); openDrawer(p);
     });
-    onClick(null, ".act-next", function(){
+    onClick(".act-next", function(){
       var arr=Store.pros||[], idx=parseInt(this.dataset.i,10), p=arr[idx]; if(!p) return;
       p.fase = nextPhase(p.fase||"CONTACTO"); var subs=subestados[p.fase]||[]; p.sub=subs.length?subs[0]:"";
-      Store.pros=arr; renderAll();
+      Store.pros=arr; renderAll(); toast("Fase actualizada a "+p.fase,"ok");
     });
-    onClick(null, ".act-del", function(){
+    onClick(".act-del", function(){
       var arr=Store.pros||[], idx=parseInt(this.dataset.i,10), p=arr[idx]; if(!p) return;
       if(confirm("¿Eliminar a "+(p.nombre||"este prospecto")+"? Esta acción no se puede deshacer.")){
-        arr.splice(idx,1); Store.pros=arr; renderAll();
+        arr.splice(idx,1); Store.pros=arr; renderAll(); toast("Prospecto eliminado","ok");
       }
     });
 
     // Drawer
-    onClick(null, "#dv_close", function(){ closeDrawer(); });
-    onClick(null, ".open-drawer", function(){
+    onClick("#dv_close", function(){ closeDrawer(); });
+    onClick(".open-drawer", function(){
       var p=(Store.pros||[])[parseInt(this.dataset.i,10)]; if(!p) return;
       p.__idx=parseInt(this.dataset.i,10); openDrawer(p);
     });
 
-    onClick(null, "#dv_email_btn", function(){
+    onClick("#dv_email_btn", function(){
       var to = this.dataset.to||""; if(!to) return;
-      var body="Hola,%0D%0ATe comparto el resumen de la reunión.%0D%0ASaludos.";
+      var arr=Store.pros||[]; var idx=$("dv_save")?.dataset.idx?parseInt($("dv_save").dataset.idx,10):-1; var p=arr[idx]||{};
+      var resumen = [];
+      if(p.obj_tipo){ resumen.push("Objetivo: "+p.obj_tipo.toUpperCase()+" "+(p.obj_tipo==="flujo"?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %"))); }
+      if(p.locs_text){ resumen.push("Zonas: "+p.locs_text); }
+      if(p.budget){ resumen.push("Presupuesto total: "+fmtN0.format(p.budget)+" €"); }
+      var body="Hola "+(p.nombre||"")+",%0D%0A%0D%0AResumen reunión:%0D%0A- "+resumen.join("%0D%0A- ")+"%0D%0A%0D%0AQuedo atento.%0D%0ASaludos.";
       window.location.href="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent("Unihouser — Resumen de reunión")+"&body="+body;
     });
-    onClick(null, "#dv_contract_btn", function(){
+    onClick("#dv_contract_btn", function(){
       var to = this.dataset.to||""; if(!to) return;
       var body="Hola,%0D%0AAdjunto contrato para firma. Cualquier duda, dime.%0D%0ASaludos.";
       window.location.href="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent("Unihouser — Contrato de servicios")+"&body="+body;
     });
-    onClick(null, "#dv_whatsapp_btn", function(){
+    onClick("#dv_whatsapp_btn", function(){
       var tel = normPhone(this.dataset.tel||""); if(!tel) return;
       window.open("https://wa.me/"+tel+"?text="+encodeURIComponent("Te envío el resumen/contrato por email. Cualquier duda, dime."), "_blank");
     });
-    onClick(null, "#dv_adv_btn", function(){
+    onClick("#dv_adv_btn", function(){
       var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return;
       p.fase = nextPhase(p.fase||"CONTACTO"); var subs=subestados[p.fase]||[]; p.sub=subs.length?subs[0]:"";
-      Store.pros=arr; closeDrawer(); renderAll();
+      Store.pros=arr; closeDrawer(); renderAll(); toast("Fase actualizada a "+p.fase,"ok");
     });
-    onClick(null, "#dv_delete", function(){
+    onClick("#dv_delete", function(){
       var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return;
       if(confirm("¿Eliminar a "+(p.nombre||"este prospecto")+"? Esta acción no se puede deshacer.")){
-        arr.splice(idx,1); Store.pros=arr; closeDrawer(); renderAll();
+        arr.splice(idx,1); Store.pros=arr; closeDrawer(); renderAll(); toast("Prospecto eliminado","ok");
       }
     });
-    onClick(null, "#dv_save", function(){
+    onClick("#dv_save", function(){
       var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return;
       p.nombre=$("dv_nombre")?.value||""; p.email=$("dv_email")?.value||""; p.tel=$("dv_tel")?.value||"";
       p.locs_text=$("dv_locs")?.value||""; p.fase=$("dv_fase_sel")?.value||"CONTACTO"; p.sub=$("dv_sub_sel")?.value||"";
-      Store.pros=arr; closeDrawer(); renderAll();
+      Store.pros=arr; closeDrawer(); renderAll(); toast("Guardado","ok");
     });
-    onClick(null, "#dv_meeting_btn", function(){
+    onClick("#dv_meeting_btn", function(){
       var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return;
       p.__idx=idx; openMeeting(p);
     });
-    onClick(null, "#m_cancel", function(){ closeMeeting(); });
-    onClick(null, "#m_save", function(){
+
+    // Modal reunión
+    onClick("#m_cancel", function(){ closeMeeting(); });
+    onClick("#m_save", function(){
       var idx=parseInt(this.dataset.idx,10), a=Store.pros||[], P=a[idx]; if(!P) return;
       P.dni=$("m_dni")?.value||""; P.dir=$("m_dir")?.value||""; P.loc_res=$("m_locres")?.value||"";
       P.pref_tipo=$("m_tipo")?.value||"Tradicional"; P.locs_text=$("m_locsobj")?.value||"";
       P.n_activos=toNum($("m_nact")?.value); P.obj_tipo=$("m_objt")?.value||"bruta"; P.obj_raw=toNum($("m_objv")?.value);
       P.budget=toNum($("m_budget")?.value); P.financia=$("m_fin")?.value||""; P.fin_pct=toNum($("m_finp")?.value);
-      Store.pros=a; closeMeeting(); renderAll();
+      Store.pros=a; closeMeeting(); renderAll(); toast("Datos de reunión guardados","ok");
     });
 
     // Fase -> subestados en drawer
