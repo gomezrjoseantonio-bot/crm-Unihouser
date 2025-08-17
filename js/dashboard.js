@@ -4,7 +4,9 @@
   // ===== Store =====
   var Store = window.Store || {
     get pros(){ try{return JSON.parse(localStorage.getItem("pros")||"[]");}catch(e){return[];} },
-    set pros(v){ localStorage.setItem("pros", JSON.stringify(v)); }
+    set pros(v){ localStorage.setItem("pros", JSON.stringify(v)); },
+    get evals(){ try{return JSON.parse(localStorage.getItem("evals")||"[]");}catch(e){return[];} },
+    set evals(v){ localStorage.setItem("evals", JSON.stringify(v)); }
   };
 
   // ===== Utils =====
@@ -13,6 +15,7 @@
   function $(id){ return document.getElementById(id); }
   function normPhone(t){ return t?String(t).replace(/[^\d+]/g,""):""; }
   function toNum(x){ var s=String(x||"").replace(/\./g,"").replace(",","."); var n=Number(s); return Number.isFinite(n)?n:0; }
+  function uid(){ return 'p_'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4); }
 
   // Toasts
   function toast(msg, type){
@@ -21,8 +24,8 @@
     d.className = "toast "+(type||"");
     d.textContent = msg;
     box.appendChild(d);
-    setTimeout(function(){ d.style.opacity="0"; }, 2200);
-    setTimeout(function(){ box.removeChild(d); }, 2700);
+    setTimeout(function(){ d.style.opacity="0"; }, 1800);
+    setTimeout(function(){ box.removeChild(d); }, 2400);
   }
 
   // Fases y subestados
@@ -35,6 +38,46 @@
     NOTARIA    : ["Escritura firmada","Descartado"]
   };
   function nextPhase(f){ var i=phases.indexOf(f||"CONTACTO"); if(i<0)i=0; return (i>=phases.length-1)?phases[i]:phases[i+1]; }
+
+  // ===== Vincular Evaluaciones =====
+  // Supuesto: cada evaluación en Store.evals tiene {id, kpi_tipo:'bruta'|'neta'|'flujo', kpi_val:number, prospect_ids:[prospectId,...]}
+  function ensureIds(){
+    var ps = Store.pros||[], changed=false;
+    for(var i=0;i<ps.length;i++){
+      if(!ps[i].id){ ps[i].id = uid(); changed=true; }
+    }
+    if(changed){ Store.pros = ps; }
+  }
+  function evalsByProspect(prospectId){
+    var evs = Store.evals||[];
+    var out=[]; for(var i=0;i<evs.length;i++){
+      var e=evs[i]; if(Array.isArray(e.prospect_ids) && e.prospect_ids.indexOf(prospectId)>=0){ out.push(e); }
+    }
+    return out;
+  }
+  function scoreDotFor(p){
+    // Si hay evaluaciones asociadas, usamos la mejor (según obj_tipo)
+    var objT = p.obj_tipo, goal = toNum(p.obj_raw);
+    if(!objT || !goal) return "gray";
+    var evs = evalsByProspect(p.id);
+    if(!evs.length) return "gray";
+    // elegir la que coincide en tipo
+    var best=null;
+    for(var i=0;i<evs.length;i++){ if(evs[i].kpi_tipo===objT){ best = evs[i]; break; } }
+    if(!best) best = evs[0];
+    var val = Number(best.kpi_val)||0;
+
+    // Regla simple: verde si >= objetivo; ámbar si entre -10% del objetivo; rojo si peor
+    if(objT==="flujo"){
+      if(val >= goal) return "green";
+      if(val >= goal*0.9) return "amber";
+      return "red";
+    }else{
+      if(val >= goal) return "green";
+      if(val >= goal-1) return "amber"; // tolerancia 1 pp
+      return "red";
+    }
+  }
 
   // ===== Filtros =====
   function readFilters(){
@@ -78,25 +121,16 @@
     $("k_notaria").textContent = String(c.NOTARIA||0);
   }
 
-  // ===== Semáforo placeholder =====
-  function dotFor(p){
-    if(!p || !p.obj_tipo){ return "gray"; }
-    if(p.obj_tipo==="bruta" && p.obj_raw>0) return "green";
-    if(p.obj_tipo==="flujo" && p.obj_raw>0) return "green";
-    if(p.obj_tipo==="neta"  && p.obj_raw>0) return "amber";
-    return "gray";
-  }
-
   // ===== Kanban =====
   function cardHTML(p, idx){
     var objTxt = (p.obj_tipo==="flujo") ? (fmtN0.format(p.obj_raw)+" €")
                                         : (fmtN1.format(p.obj_raw)+" %");
-    var dot = dotFor(p);
+    var dot = scoreDotFor(p);
     var locs = (p.locs_text||"—").split(",").slice(0,2);
     var chips="", i, c;
     for(i=0;i<locs.length;i++){ c=locs[i].trim(); if(c) chips += '<span class="tag">'+c+'</span>'; }
     return ''+
-    '<div class="card-mini" data-i="'+idx+'">'+
+    '<div class="card-mini" draggable="true" data-i="'+idx+'" data-id="'+(p.id||"")+'">'+
       '<div class="flex between"><div><strong>'+(p.nombre||"—")+'</strong></div>'+
       '<span class="badge">'+(p.pref_tipo||"—")+' <span class="dot '+dot+'"></span></span></div>'+
       '<div style="margin-top:4px;font-size:13px;color:#475467">'+((p.obj_tipo||"").toUpperCase()+' '+objTxt)+'</div>'+
@@ -117,6 +151,8 @@
     for(k=0;k<cols.length;k++){
       var h = cols[k].querySelector("h4")?.textContent||"";
       cols[k].innerHTML = "<h4>"+h+"</h4>";
+      // preparar dropzone
+      cols[k].classList.add("dropzone");
     }
     var i, p, fase, col;
     for(i=0;i<rows.length;i++){
@@ -168,6 +204,9 @@
     $("dv_tipo").textContent   = "Tipo: "+(p.pref_tipo||"—");
     var objTxt = (p.obj_tipo==="flujo") ? (fmtN0.format(p.obj_raw)+" €") : (fmtN1.format(p.obj_raw)+" %");
     $("dv_obj").textContent    = "Objetivo: "+(p.obj_tipo||"").toUpperCase()+" "+objTxt;
+    // evaluaciones vinculadas
+    var evs = evalsByProspect(p.id);
+    $("dv_evals").textContent = "Evaluaciones: "+(evs.length||0);
 
     $("dv_nombre").value = p.nombre||"";
     $("dv_email").value  = p.email||"";
@@ -185,6 +224,7 @@
     $("dv_save").dataset.idx = p.__idx;
     $("dv_delete").dataset.idx = p.__idx;
     $("dv_meeting_btn").dataset.idx = p.__idx;
+    $("dv_evals_btn").dataset.pid = p.id||"";
 
     $("drawer").classList.add("open");
     $("drawer").setAttribute("aria-hidden","false");
@@ -221,6 +261,7 @@
 
   // ===== Render principal =====
   function renderAll(){
+    ensureIds();
     var all = Store.pros || [];
     for(var k=0;k<all.length;k++){ all[k].__idx=k; }
 
@@ -243,6 +284,87 @@
     });
   }
 
+  // ===== Drag & Drop =====
+  function attachDragDrop(){
+    // arrastrar tarjetas
+    document.addEventListener("dragstart", function(e){
+      var card = e.target.closest(".card-mini");
+      if(!card) return;
+      card.classList.add("dragging");
+      e.dataTransfer.setData("text/plain", card.dataset.i || "");
+    });
+    document.addEventListener("dragend", function(e){
+      var card = e.target.closest(".card-mini");
+      if(card) card.classList.remove("dragging");
+      document.querySelectorAll(".column").forEach(function(c){ c.classList.remove("drop-target"); });
+    });
+    // permitir soltar en columnas
+    document.addEventListener("dragover", function(e){
+      var col = e.target.closest('.column[data-drop="1"]'); 
+      if(!col) return;
+      e.preventDefault();
+      col.classList.add("drop-target");
+    });
+    document.addEventListener("dragleave", function(e){
+      var col = e.target.closest('.column[data-drop="1"]'); 
+      if(!col) return;
+      col.classList.remove("drop-target");
+    });
+    document.addEventListener("drop", function(e){
+      var col = e.target.closest('.column[data-drop="1"]'); 
+      if(!col) return;
+      e.preventDefault();
+      var idxStr = e.dataTransfer.getData("text/plain");
+      var idx = parseInt(idxStr,10);
+      var arr=Store.pros||[], p=arr[idx]; if(!p) return;
+      var newPhase = col.getAttribute("data-col") || "CONTACTO";
+      if(p.fase!==newPhase){
+        p.fase = newPhase;
+        var subs=subestados[p.fase]||[]; p.sub=subs.length?subs[0]:"";
+        Store.pros = arr;
+        renderAll();
+        toast("Movido a "+newPhase,"ok");
+      }
+    });
+  }
+
+  // ===== CSV =====
+  function toCSV(rows){
+    var esc = function(s){
+      if(s==null) return "";
+      s = String(s);
+      if(s.includes('"') || s.includes(',') || s.includes('\n')) return '"'+s.replace(/"/g,'""')+'"';
+      return s;
+    };
+    var head = ["Nombre","Email","Teléfono","Fase","Subestado","Tipo","Localidades","Objetivo","Objetivo_valor","Presupuesto","ID"];
+    var lines = [head.join(",")];
+    for(var i=0;i<rows.length;i++){
+      var p=rows[i], objTxt=(p.obj_tipo||"").toUpperCase();
+      var objVal=(p.obj_tipo==="flujo")? (fmtN0.format(p.obj_raw)) : (fmtN1.format(p.obj_raw));
+      lines.push([
+        esc(p.nombre||""), esc(p.email||""), esc(p.tel||""),
+        esc(p.fase||"CONTACTO"), esc(p.sub||""), esc(p.pref_tipo||""),
+        esc(p.locs_text||""), esc(objTxt), esc(objVal),
+        esc(p.budget?fmtN0.format(p.budget):""), esc(p.id||"")
+      ].join(","));
+    }
+    return lines.join("\n");
+  }
+  function downloadCSV(){
+    var all = Store.pros||[];
+    var rows = applyFilters(all, readFilters());
+    var csv = toCSV(rows);
+    var blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "unihouser_prospectos.csv";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); document.body.removeChild(a); }, 500);
+    toast("CSV exportado","ok");
+  }
+
+  // ===== Eventos =====
   function attach(){
     // Formateo miles en inputs con data-money (solo blur)
     document.addEventListener("blur", function(ev){
@@ -276,6 +398,9 @@
       toast("Filtros limpiados","ok");
     });
     onClick("#f_apply", function(){ renderAll(); toast("Filtros aplicados","ok"); });
+
+    // Export CSV
+    onClick("#btn_csv", function(){ downloadCSV(); });
 
     // Kanban acciones
     onClick(".act-mail", function(){
@@ -356,6 +481,12 @@
       var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return;
       p.__idx=idx; openMeeting(p);
     });
+    onClick("#dv_evals_btn", function(){
+      var pid = this.dataset.pid||"";
+      if(!pid) return;
+      // abrimos evaluaciones filtradas por prospecto (si existe esa página, usa query param)
+      window.location.href = "evaluaciones.html?prospect="+encodeURIComponent(pid);
+    });
 
     // Modal reunión
     onClick("#m_cancel", function(){ closeMeeting(); });
@@ -374,7 +505,9 @@
   }
 
   document.addEventListener("DOMContentLoaded", function(){
+    ensureIds();
     attach();
+    attachDragDrop();
     renderAll();
   });
 })();
