@@ -7,7 +7,7 @@
     set pros(v){ localStorage.setItem("pros", JSON.stringify(v)); }
   };
 
-  // ===== Utiles =====
+  // ===== Utils =====
   var fmtN0 = new Intl.NumberFormat("es-ES",{maximumFractionDigits:0});
   var fmtN1 = new Intl.NumberFormat("es-ES",{maximumFractionDigits:1});
   function $(id){ return document.getElementById(id); }
@@ -28,11 +28,11 @@
   // ===== Filtros =====
   function readFilters(){
     return {
-      q:   ($("f_q").value||"").trim().toLowerCase(),
-      fase:$("f_fase").value||"",
-      tipo:$("f_tipo").value||"",
-      loc: ($("f_loc").value||"").trim().toLowerCase(),
-      fin: ($("f_fin").value||"")
+      q:   ($("f_q")?.value||"").trim().toLowerCase(),
+      fase:$("f_fase")?.value||"",
+      tipo:$("f_tipo")?.value||"",
+      loc: ($("f_loc")?.value||"").trim().toLowerCase(),
+      fin: ($("f_fin")?.value||"")
     };
   }
   function applyFilters(rows, f){
@@ -55,6 +55,7 @@
 
   // ===== KPIs =====
   function renderKPIs(rows){
+    if(!$("k_total")) return;
     var tot = rows.length, i, f;
     var c = {CONTACTO:0, REUNION:0, BUSQUEDA:0, COMPRAVENTA:0, NOTARIA:0};
     for(i=0;i<rows.length;i++){ f=rows[i].fase||"CONTACTO"; if(c[f]==null) c[f]=0; c[f]++; }
@@ -66,7 +67,7 @@
     $("k_notaria").textContent = String(c.NOTARIA||0);
   }
 
-  // ===== Semáforo placeholder (se refina con evaluaciones) =====
+  // ===== Semáforo placeholder =====
   function dotFor(p){
     if(!p || !p.obj_tipo){ return "gray"; }
     if(p.obj_tipo==="bruta" && p.obj_raw>0) return "green";
@@ -99,22 +100,25 @@
     '</div>';
   }
   function renderKanban(rows){
-    var cols = document.querySelectorAll(".kanban .column"), k;
+    var wrap = document.getElementById("kanban");
+    if(!wrap) return;
+    var cols = wrap.querySelectorAll(".column"), k;
     for(k=0;k<cols.length;k++){
-      var h = cols[k].querySelector("h4").textContent;
+      var h = cols[k].querySelector("h4")?.textContent||"";
       cols[k].innerHTML = "<h4>"+h+"</h4>";
     }
     var i, p, fase, col;
     for(i=0;i<rows.length;i++){
       p=rows[i]; p.__idx=i; fase=(p.fase||"CONTACTO");
-      col = document.querySelector('.kanban .column[data-col="'+fase+'"]');
+      col = wrap.querySelector('.column[data-col="'+fase+'"]');
       if(col) col.insertAdjacentHTML("beforeend", cardHTML(p, i));
     }
   }
 
   // ===== Tabla (opcional) =====
   function renderTable(rows){
-    var tb = $("tbody"), html="", i, p, objTxt;
+    var tb = $("tbody"); if(!tb) return;
+    var html="", i, p, objTxt;
     if(!rows.length){ tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--muted)">Sin datos</td></tr>'; return; }
     for(i=0;i<rows.length;i++){
       p=rows[i];
@@ -137,7 +141,8 @@
 
   // ===== Drawer & Subestados =====
   function fillSubestadosSel(fase, current){
-    var sel = $("dv_sub_sel"); sel.innerHTML="";
+    var sel = $("dv_sub_sel"); if(!sel) return;
+    sel.innerHTML="";
     var arr = subestados[fase]||["—"];
     for(var i=0;i<arr.length;i++){
       var opt=document.createElement("option"); opt.value=arr[i]; opt.textContent=arr[i];
@@ -146,6 +151,7 @@
     }
   }
   function openDrawer(p){
+    if(!$("drawer")) return;
     $("dv_title").textContent = p.nombre||"Prospecto";
     $("dv_fase").textContent   = "Fase: "+(p.fase||"CONTACTO");
     $("dv_tipo").textContent   = "Tipo: "+(p.pref_tipo||"—");
@@ -160,7 +166,7 @@
     $("dv_fase_sel").value = p.fase||"CONTACTO";
     fillSubestadosSel(p.fase||"CONTACTO", p.sub||"");
 
-    // acciones contextualizadas
+    // datasets
     $("dv_email_btn").dataset.to = p.email||"";
     $("dv_contract_btn").dataset.to = p.email||"";
     $("dv_whatsapp_btn").dataset.tel = p.tel||"";
@@ -170,11 +176,17 @@
     $("dv_meeting_btn").dataset.idx = p.__idx;
 
     $("drawer").classList.add("open");
+    $("drawer").setAttribute("aria-hidden","false");
   }
-  function closeDrawer(){ $("drawer").classList.remove("open"); }
+  function closeDrawer(){
+    if(!$("drawer")) return;
+    $("drawer").classList.remove("open");
+    $("drawer").setAttribute("aria-hidden","true");
+  }
 
   // ===== Overlay reunión =====
   function openMeeting(p){
+    if(!$("meetModal")) return;
     $("m_dni").value = p.dni||"";
     $("m_dir").value = p.dir||"";
     $("m_locres").value = p.loc_res||"";
@@ -188,8 +200,13 @@
     $("m_finp").value = p.fin_pct||"80";
     $("m_save").dataset.idx = p.__idx;
     $("meetModal").classList.add("open");
+    $("meetModal").setAttribute("aria-hidden","false");
   }
-  function closeMeeting(){ $("meetModal").classList.remove("open"); }
+  function closeMeeting(){
+    if(!$("meetModal")) return;
+    $("meetModal").classList.remove("open");
+    $("meetModal").setAttribute("aria-hidden","true");
+  }
 
   // ===== Render principal =====
   function renderAll(){
@@ -202,125 +219,123 @@
     renderKPIs(rows);
     renderKanban(rows);
     renderTable(rows);
-
-    var opens = document.querySelectorAll(".open-drawer");
-    for(var i=0;i<opens.length;i++){
-      opens[i].addEventListener("click", function(){
-        var idx = parseInt(this.dataset.i,10);
-        var list = Store.pros||[];
-        if(list[idx]){ list[idx].__idx=idx; openDrawer(list[idx]); }
-      });
-    }
   }
 
-  // ===== Eventos =====
-  function attach(){
+  // ===== Delegación de eventos (robusta) =====
+  function onClick(e, selector, handler){
     document.addEventListener("click", function(ev){
-      var t=ev.target; if(!t) return;
-
-      // Toggle tabla
-      if(t.id==="toggleTable"){
-        var w=$("tableWrap"); var on=w.style.display!=="none";
-        w.style.display = on?"none":"block";
-        t.textContent = on?"Mostrar tabla (avanzado)":"Ocultar tabla";
-        return;
-      }
-
-      // Drawer
-      if(t.id==="dv_close"){ closeDrawer(); return; }
-      if(t.id==="f_clear"){ $("f_q").value=""; $("f_fase").value=""; $("f_tipo").value=""; $("f_loc").value=""; $("f_fin").value=""; renderAll(); return; }
-      if(t.id==="f_apply"){ renderAll(); return; }
-
-      // Acciones kanban
-      if(t.classList && t.classList.contains("act-mail")){
-        var p = (Store.pros||[])[parseInt(t.dataset.i,10)]; if(!p || !p.email) return;
-        var body="Hola "+(p.nombre||"")+",%0D%0ASeguimos con tu búsqueda.%0D%0ASaludos.";
-        window.location.href="mailto:"+encodeURIComponent(p.email)+"?subject="+encodeURIComponent("Unihouser — Seguimiento")+"&body="+body; return;
-      }
-      if(t.classList && t.classList.contains("act-wa")){
-        var p2 = (Store.pros||[])[parseInt(t.dataset.i,10)]; if(!p2) return;
-        var tel = normPhone(p2.tel); if(!tel) return;
-        window.open("https://wa.me/"+tel+"?text="+encodeURIComponent("Seguimos con tu búsqueda de inversión."), "_blank"); return;
-      }
-      if(t.classList && t.classList.contains("act-open")){
-        var p3 = (Store.pros||[])[parseInt(t.dataset.i,10)]; if(!p3) return;
-        p3.__idx=parseInt(t.dataset.i,10); openDrawer(p3); return;
-      }
-      if(t.classList && t.classList.contains("act-next")){
-        var arr=Store.pros||[], p4=arr[parseInt(t.dataset.i,10)]; if(!p4) return;
-        p4.fase = nextPhase(p4.fase||"CONTACTO");
-        var subs=subestados[p4.fase]||[]; p4.sub=subs.length?subs[0]:"";
-        Store.pros=arr; renderAll(); return;
-      }
-      if(t.classList && t.classList.contains("act-del")){
-        var arr2=Store.pros||[], idx=parseInt(t.dataset.i,10), p5=arr2[idx]; if(!p5) return;
-        if(confirm("¿Eliminar a "+(p5.nombre||"este prospecto")+"? Esta acción no se puede deshacer.")){
-          arr2.splice(idx,1); Store.pros=arr2; renderAll();
-        }
-        return;
-      }
-
-      // Drawer buttons
-      if(t.id==="dv_email_btn"){
-        var to = t.dataset.to||""; if(!to) return;
-        var body="Hola,%0D%0ATe comparto el resumen de la reunión.%0D%0ASaludos.";
-        window.location.href="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent("Unihouser — Resumen de reunión")+"&body="+body; return;
-      }
-      if(t.id==="dv_contract_btn"){
-        var to2 = t.dataset.to||""; if(!to2) return;
-        var body2="Hola,%0D%0AAdjunto contrato para firma. Cualquier duda, dime.%0D%0ASaludos.";
-        window.location.href="mailto:"+encodeURIComponent(to2)+"?subject="+encodeURIComponent("Unihouser — Contrato de servicios")+"&body="+body2; return;
-      }
-      if(t.id==="dv_whatsapp_btn"){
-        var tel = normPhone(t.dataset.tel||""); if(!tel) return;
-        window.open("https://wa.me/"+tel+"?text="+encodeURIComponent("Te envío el resumen/contrato por email. Cualquier duda, dime."), "_blank"); return;
-      }
-      if(t.id==="dv_adv_btn"){
-        var idxA=parseInt(t.dataset.idx,10), arrA=Store.pros||[], pA=arrA[idxA]; if(!pA) return;
-        pA.fase = nextPhase(pA.fase||"CONTACTO"); var subsA=subestados[pA.fase]||[]; pA.sub=subsA.length?subsA[0]:"";
-        Store.pros=arrA; closeDrawer(); renderAll(); return;
-      }
-      if(t.id==="dv_delete"){
-        var idxD=parseInt(t.dataset.idx,10), arrD=Store.pros||[], pD=arrD[idxD]; if(!pD) return;
-        if(confirm("¿Eliminar a "+(pD.nombre||"este prospecto")+"? Esta acción no se puede deshacer.")){
-          arrD.splice(idxD,1); Store.pros=arrD; closeDrawer(); renderAll();
-        }
-        return;
-      }
-      if(t.id==="dv_save"){
-        var idxS=parseInt(t.dataset.idx,10), arrS=Store.pros||[], pS=arrS[idxS]; if(!pS) return;
-        pS.nombre=$("dv_nombre").value||""; pS.email=$("dv_email").value||""; pS.tel=$("dv_tel").value||"";
-        pS.locs_text=$("dv_locs").value||""; pS.fase=$("dv_fase_sel").value||"CONTACTO"; pS.sub=$("dv_sub_sel").value||"";
-        Store.pros=arrS; closeDrawer(); renderAll(); return;
-      }
-      if(t.id==="dv_meeting_btn"){
-        var idxM=parseInt(t.dataset.idx,10), arrM=Store.pros||[], pM=arrM[idxM]; if(!pM) return;
-        pM.__idx=idxM; openMeeting(pM); return;
-      }
-
-      // Modal reunión
-      if(t.id==="m_cancel"){ closeMeeting(); return; }
-      if(t.id==="m_save"){
-        var idxm=parseInt(t.dataset.idx,10), a=Store.pros||[], P=a[idxm]; if(!P) return;
-        P.dni=$("m_dni").value||""; P.dir=$("m_dir").value||""; P.loc_res=$("m_locres").value||"";
-        P.pref_tipo=$("m_tipo").value||"Tradicional"; P.locs_text=$("m_locsobj").value||"";
-        P.n_activos=toNum($("m_nact").value); P.obj_tipo=$("m_objt").value||"bruta"; P.obj_raw=toNum($("m_objv").value);
-        P.budget=toNum($("m_budget").value); P.financia=$("m_fin").value||""; P.fin_pct=toNum($("m_finp").value);
-        Store.pros=a; closeMeeting(); renderAll(); return;
+      var t = ev.target;
+      if(!t) return;
+      // sube hasta encontrar el selector
+      while(t && t !== document){
+        if(t.matches && t.matches(selector)){ handler.call(t, ev); return; }
+        t = t.parentNode;
       }
     });
+  }
 
-    // Fase -> subestados en drawer
-    $("dv_fase_sel").addEventListener("change", function(){ 
-      var v=this.value||"CONTACTO"; fillSubestadosSel(v,""); 
-    });
-
+  function attach(){
     // Toggle tabla
-    $("toggleTable").addEventListener("click", function(){
-      var w=$("tableWrap"); var on=w.style.display!=="none";
+    onClick(null, "#toggleTable", function(){
+      var w=$("tableWrap"); if(!w) return;
+      var on=w.style.display!=="none";
       w.style.display = on?"none":"block";
       this.textContent = on?"Mostrar tabla (avanzado)":"Ocultar tabla";
     });
+
+    // Filtros
+    onClick(null, "#f_clear", function(){ 
+      if($("f_q")) $("f_q").value="";
+      if($("f_fase")) $("f_fase").value="";
+      if($("f_tipo")) $("f_tipo").value="";
+      if($("f_loc"))  $("f_loc").value="";
+      if($("f_fin"))  $("f_fin").value="";
+      renderAll(); 
+    });
+    onClick(null, "#f_apply", function(){ renderAll(); });
+
+    // Kanban acciones
+    onClick(null, ".act-mail", function(){
+      var p=(Store.pros||[])[parseInt(this.dataset.i,10)]; if(!p || !p.email) return;
+      var body="Hola "+(p.nombre||"")+",%0D%0ASeguimos con tu búsqueda.%0D%0ASaludos.";
+      window.location.href="mailto:"+encodeURIComponent(p.email)+"?subject="+encodeURIComponent("Unihouser — Seguimiento")+"&body="+body;
+    });
+    onClick(null, ".act-wa", function(){
+      var p=(Store.pros||[])[parseInt(this.dataset.i,10)]; if(!p) return;
+      var tel = normPhone(p.tel); if(!tel) return;
+      window.open("https://wa.me/"+tel+"?text="+encodeURIComponent("Seguimos con tu búsqueda de inversión."), "_blank");
+    });
+    onClick(null, ".act-open", function(){
+      var p=(Store.pros||[])[parseInt(this.dataset.i,10)]; if(!p) return;
+      p.__idx=parseInt(this.dataset.i,10); openDrawer(p);
+    });
+    onClick(null, ".act-next", function(){
+      var arr=Store.pros||[], idx=parseInt(this.dataset.i,10), p=arr[idx]; if(!p) return;
+      p.fase = nextPhase(p.fase||"CONTACTO"); var subs=subestados[p.fase]||[]; p.sub=subs.length?subs[0]:"";
+      Store.pros=arr; renderAll();
+    });
+    onClick(null, ".act-del", function(){
+      var arr=Store.pros||[], idx=parseInt(this.dataset.i,10), p=arr[idx]; if(!p) return;
+      if(confirm("¿Eliminar a "+(p.nombre||"este prospecto")+"? Esta acción no se puede deshacer.")){
+        arr.splice(idx,1); Store.pros=arr; renderAll();
+      }
+    });
+
+    // Drawer
+    onClick(null, "#dv_close", function(){ closeDrawer(); });
+    onClick(null, ".open-drawer", function(){
+      var p=(Store.pros||[])[parseInt(this.dataset.i,10)]; if(!p) return;
+      p.__idx=parseInt(this.dataset.i,10); openDrawer(p);
+    });
+
+    onClick(null, "#dv_email_btn", function(){
+      var to = this.dataset.to||""; if(!to) return;
+      var body="Hola,%0D%0ATe comparto el resumen de la reunión.%0D%0ASaludos.";
+      window.location.href="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent("Unihouser — Resumen de reunión")+"&body="+body;
+    });
+    onClick(null, "#dv_contract_btn", function(){
+      var to = this.dataset.to||""; if(!to) return;
+      var body="Hola,%0D%0AAdjunto contrato para firma. Cualquier duda, dime.%0D%0ASaludos.";
+      window.location.href="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent("Unihouser — Contrato de servicios")+"&body="+body;
+    });
+    onClick(null, "#dv_whatsapp_btn", function(){
+      var tel = normPhone(this.dataset.tel||""); if(!tel) return;
+      window.open("https://wa.me/"+tel+"?text="+encodeURIComponent("Te envío el resumen/contrato por email. Cualquier duda, dime."), "_blank");
+    });
+    onClick(null, "#dv_adv_btn", function(){
+      var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return;
+      p.fase = nextPhase(p.fase||"CONTACTO"); var subs=subestados[p.fase]||[]; p.sub=subs.length?subs[0]:"";
+      Store.pros=arr; closeDrawer(); renderAll();
+    });
+    onClick(null, "#dv_delete", function(){
+      var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return;
+      if(confirm("¿Eliminar a "+(p.nombre||"este prospecto")+"? Esta acción no se puede deshacer.")){
+        arr.splice(idx,1); Store.pros=arr; closeDrawer(); renderAll();
+      }
+    });
+    onClick(null, "#dv_save", function(){
+      var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return;
+      p.nombre=$("dv_nombre")?.value||""; p.email=$("dv_email")?.value||""; p.tel=$("dv_tel")?.value||"";
+      p.locs_text=$("dv_locs")?.value||""; p.fase=$("dv_fase_sel")?.value||"CONTACTO"; p.sub=$("dv_sub_sel")?.value||"";
+      Store.pros=arr; closeDrawer(); renderAll();
+    });
+    onClick(null, "#dv_meeting_btn", function(){
+      var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return;
+      p.__idx=idx; openMeeting(p);
+    });
+    onClick(null, "#m_cancel", function(){ closeMeeting(); });
+    onClick(null, "#m_save", function(){
+      var idx=parseInt(this.dataset.idx,10), a=Store.pros||[], P=a[idx]; if(!P) return;
+      P.dni=$("m_dni")?.value||""; P.dir=$("m_dir")?.value||""; P.loc_res=$("m_locres")?.value||"";
+      P.pref_tipo=$("m_tipo")?.value||"Tradicional"; P.locs_text=$("m_locsobj")?.value||"";
+      P.n_activos=toNum($("m_nact")?.value); P.obj_tipo=$("m_objt")?.value||"bruta"; P.obj_raw=toNum($("m_objv")?.value);
+      P.budget=toNum($("m_budget")?.value); P.financia=$("m_fin")?.value||""; P.fin_pct=toNum($("m_finp")?.value);
+      Store.pros=a; closeMeeting(); renderAll();
+    });
+
+    // Fase -> subestados en drawer
+    var faseSel = $("dv_fase_sel");
+    if(faseSel) faseSel.addEventListener("change", function(){ fillSubestadosSel(this.value||"CONTACTO",""); });
   }
 
   document.addEventListener("DOMContentLoaded", function(){
