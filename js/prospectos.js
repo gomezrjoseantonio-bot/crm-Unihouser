@@ -85,15 +85,31 @@
     form.propios.value  = fmtN0.format(propios);
   }
   function recalcAlquilerMax(){
-    var row = $("row_alquiler_max");
-    var isBruta = (form.obj_tipo.value==="bruta");
-    if(row) row.hidden = !isBruta;
-    if(!isBruta){ form.alq_max.value=""; return; }
-    var rb = parseEs(form.obj_val.value);
-    var presupuesto = parseEs(form.budget.value)||0;
-    if(!isFinite(rb)||!presupuesto){ form.alq_max.value=""; return; }
-    var alq = Math.max(0, (rb/100)*presupuesto/12);
-    form.alq_max.value = fmtN0.format(Math.round(alq));
+  // Mostrar/ocultar fila según objetivo
+  var row = $("row_alquiler_max");
+  var isBruta = (form.obj_tipo.value === "bruta");
+  if(row) row.hidden = !isBruta;
+  if(!isBruta){ form.alq_max.value = ""; return; }
+
+  // % objetivo
+  var rb = parseEs(form.obj_val.value); // ej. 10 => 10%
+  if(!isFinite(rb) || rb <= 0){ form.alq_max.value = ""; return; }
+
+  // COSTE TOTAL = Compra + ITP + Notaría + Honorarios
+  // Tomamos compra = "Precio máx. COMPRA" ya calculado en base a presupuesto/config
+  var cfg   = Store.cfg || {};
+  var itp   = ((cfg.c_itp != null ? cfg.c_itp : 8)) / 100;
+  var not   = (cfg.c_notaria != null ? cfg.c_notaria : 1500);
+  var honor = 3500 * 1.21; // fijo v1 (PSI + IVA)
+  var compra = parseEs(form.max_compra.value) || 0;
+
+  var costeTotal = compra * (1 + itp) + not + honor;
+  if(costeTotal <= 0){ form.alq_max.value = ""; return; }
+
+  // Alquiler mensual orientativo = (Rb% * Coste total) / 12
+  var alq = Math.max(0, (rb / 100) * costeTotal / 12);
+  form.alq_max.value = fmtN0.format(Math.round(alq));
+
   }
   function autoMesFin(){
     var s=(form.mes_ini.value||"").trim();
