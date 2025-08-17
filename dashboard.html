@@ -4,28 +4,31 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Dashboard</title>
-<link rel="stylesheet" href="css/style.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff6a3d'/%3E%3C/svg%3E">
 <style>
-/* Refuerzos visuales mínimos para que se vea aunque falte style.css */
-:root{--accent:#ff6a3d;--ok:#16a34a;--warn:#f59e0b;--bad:#ef4444;--muted:#667085;--border:#e5e7eb}
-body{background:#fff;color:#101828;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0}
+/* Base elegante en blanco corporativo Unihouser */
+:root{--accent:#ff6a3d;--ok:#16a34a;--warn:#f59e0b;--bad:#ef4444;--muted:#667085;--border:#e5e7eb;--text:#101828}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#fff;color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
 .container{max-width:1100px;margin:0 auto;padding:16px}
 .topbar{background:#fff;border-bottom:1px solid var(--border)}
-.topbar .title{font-weight:800}
+.brand .title{font-weight:800}
 .nav a{margin:0 8px;text-decoration:none;color:#475467}
-.nav a.active{color:#101828;font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:4px}
-.page-title{color:#101828;font-size:1.6rem;font-weight:700;margin:16px 0 10px}
+.nav a.active{color:var(--text);font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:4px}
+.page-title{color:var(--text);font-size:1.6rem;font-weight:700;margin:16px 0 10px}
+
 .card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,.04);padding:12px}
 .kpis{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
 @media(min-width:900px){.kpis{grid-template-columns:repeat(6,1fr)}}
 .kpi .lab{font-size:12px;color:var(--muted)} .kpi .val{font-size:22px;font-weight:800;margin-top:4px}
+
 .filters{display:grid;gap:10px;grid-template-columns:1fr}
 @media(min-width:1000px){.filters{grid-template-columns:1.2fr .8fr .8fr 1fr .8fr .6fr .6fr}}
 .field label{display:block;font-size:12px;color:#667085;margin-bottom:4px}
-input,select,button{padding:10px;border:1px solid var(--border);border-radius:10px}
-.btn{background:#f9fafb;border:1px solid var(--border);color:#101828;font-weight:700;cursor:pointer}
+input,select,button{padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px}
+.btn{background:#f9fafb;border:1px solid var(--border);color:var(--text);font-weight:700;cursor:pointer}
 .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+
 .kanban{display:grid;gap:12px;grid-template-columns:1fr}
 @media(min-width:1100px){.kanban{grid-template-columns:repeat(5,1fr)}}
 .column{min-height:260px;padding:8px}
@@ -34,20 +37,24 @@ input,select,button{padding:10px;border:1px solid var(--border);border-radius:10
 .card-mini[draggable="true"]{cursor:grab}.card-mini.dragging{opacity:.6;transform:scale(.98)}
 .badge{background:#f2f4f7;color:#344054;border:1px solid #e4e7ec;border-radius:999px;padding:2px 8px;font-weight:700}
 .tag{background:#f9fafb;color:#344054;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px}
-.actions-row{display:flex;gap:8px;margin-top:6px}
+.actions-row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
 .icon-btn{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:6px 8px;cursor:pointer}
+
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
 .dot.green{background:var(--ok)} .dot.amber{background:var(--warn)} .dot.red{background:var(--bad)} .dot.gray{background:#d0d5dd}
+
 .table-wrap{margin-top:12px}
 .table{width:100%;border-collapse:separate;border-spacing:0;border-radius:12px;overflow:hidden}
 .table th,.table td{padding:10px 12px;border-bottom:1px solid #f2f4f7;text-align:left}
 .table th{background:#f9fafb;color:#344054}
+
 .drawer{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:92vw;background:#fff;border-left:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);transition:.25s;z-index:50}
 .drawer.open{transform:translateX(0)}
 .drawer-header{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid var(--border)}
 .drawer-body{padding:12px}
 .pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#f9fafb;color:#344054}
+
 .modal{position:fixed;inset:0;background:rgba(16,24,40,.5);display:none;align-items:center;justify-content:center;z-index:60}
 .modal.open{display:flex}
 .modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:920px;max-width:98vw;max-height:90vh;display:flex;flex-direction:column}
@@ -57,230 +64,231 @@ input,select,button{padding:10px;border:1px solid var(--border);border-radius:10
 .section{margin:6px 0 10px}.section h4{margin:0 0 6px;color:#344054}
 .row{display:grid;gap:8px;grid-template-columns:1fr}
 @media (min-width:680px){ .row.two{grid-template-columns:1fr 1fr} .row.three{grid-template-columns:1fr 1fr 1fr} .row.four{grid-template-columns:1fr 1fr 1fr 1fr} }
+
 .toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:80}
 .toast{background:#111827;color:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 10px 24px rgba(0,0,0,.25);opacity:.96}
 .toast.ok{background:#15803d} .toast.warn{background:#b45309} .toast.bad{background:#b91c1c}
-.muted{color:#667085}
 .flex{display:flex}.between{justify-content:space-between}.center{align-items:center}
+.hint{color:#667085;font-size:12px}
 </style>
 </head>
-<body class="theme-light">
-
+<body>
 <header class="topbar">
-  <div class="container flex between center">
-    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
-    <nav class="nav">
-      <a href="evaluar.html">Evaluar</a>
-      <a href="evaluaciones.html">pRUEBA</a>
-      <a href="prospectos.html">Prospectos</a>
-      <a href="dashboard.html" class="active">Dashboard</a>
-      <a href="configuracion.html">Configuración</a>
-    </nav>
-  </div>
+<div class="container flex between center">
+<div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
+<nav class="nav">
+<a href="evaluar.html">Evaluar</a>
+<a href="evaluaciones.html">Evaluaciones</a>
+<a href="prospectos.html">Prospectos</a>
+<a href="dashboard.html" class="active">Dashboard</a>
+<a href="configuracion.html">Configuración</a>
+</nav>
+</div>
 </header>
 
 <main class="container">
-  <h2 class="page-title">Dashboard</h2>
+<h2 class="page-title">Dashboard</h2>
 
-  <section class="kpis">
-    <div class="kpi card"><div class="lab">Prospectos activos</div><div class="val" id="k_total">—</div></div>
-    <div class="kpi card"><div class="lab">Contacto</div><div class="val" id="k_contacto">—</div></div>
-    <div class="kpi card"><div class="lab">Reunión</div><div class="val" id="k_reunion">—</div></div>
-    <div class="kpi card"><div class="lab">Búsqueda</div><div class="val" id="k_busqueda">—</div></div>
-    <div class="kpi card"><div class="lab">Compraventa</div><div class="val" id="k_compra">—</div></div>
-    <div class="kpi card"><div class="lab">Notaría</div><div class="val" id="k_notaria">—</div></div>
-  </section>
+<section class="kpis">
+<div class="kpi card"><div class="lab">Prospectos activos</div><div class="val" id="k_total">—</div></div>
+<div class="kpi card"><div class="lab">Contacto</div><div class="val" id="k_contacto">—</div></div>
+<div class="kpi card"><div class="lab">Reunión</div><div class="val" id="k_reunion">—</div></div>
+<div class="kpi card"><div class="lab">Búsqueda</div><div class="val" id="k_busqueda">—</div></div>
+<div class="kpi card"><div class="lab">Compraventa</div><div class="val" id="k_compra">—</div></div>
+<div class="kpi card"><div class="lab">Notaría</div><div class="val" id="k_notaria">—</div></div>
+</section>
 
-  <section class="card" style="margin-top:12px">
-    <h2 style="margin:0 0 10px">Filtros</h2>
-    <div class="filters">
-      <div class="field"><label>Buscar</label><input id="f_q" placeholder="Nombre, email o teléfono"></div>
-      <div class="field"><label>Fase</label>
-        <select id="f_fase">
-          <option value="">Todas</option>
-          <option value="CONTACTO">Contacto</option>
-          <option value="REUNION">Reunión</option>
-          <option value="BUSQUEDA">Búsqueda</option>
-          <option value="COMPRAVENTA">Compraventa</option>
-          <option value="NOTARIA">Notaría</option>
-        </select>
-      </div>
-      <div class="field"><label>Tipo</label>
-        <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
-      </div>
-      <div class="field"><label>Localidades contiene</label><input id="f_loc" placeholder="Oviedo, Gijón…"></div>
-      <div class="field"><label>Financiación</label>
-        <select id="f_fin"><option value="">Todas</option><option>Sí</option><option>No</option></select>
-      </div>
-      <div class="actions">
-        <button class="btn" id="f_clear" type="button">Limpiar</button>
-        <button class="btn primary" id="f_apply" type="button">Filtrar</button>
-        <button class="btn" id="btn_csv" type="button">Exportar CSV</button>
-      </div>
-    </div>
-  </section>
+<section class="card" style="margin-top:12px">
+<h2 style="margin:0 0 10px">Filtros</h2>
+<div class="filters">
+<div class="field"><label>Buscar</label><input id="f_q" placeholder="Nombre, email o teléfono"></div>
+<div class="field"><label>Fase</label>
+<select id="f_fase">
+<option value="">Todas</option>
+<option value="CONTACTO">Contacto</option>
+<option value="REUNION">Reunión</option>
+<option value="BUSQUEDA">Búsqueda</option>
+<option value="COMPRAVENTA">Compraventa</option>
+<option value="NOTARIA">Notaría</option>
+</select>
+</div>
+<div class="field"><label>Tipo</label>
+<select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
+</div>
+<div class="field"><label>Localidades contiene</label><input id="f_loc" placeholder="Oviedo, Gijón…"></div>
+<div class="field"><label>Financiación</label>
+<select id="f_fin"><option value="">Todas</option><option>Sí</option><option>No</option></select>
+</div>
+<div class="actions">
+<button class="btn" id="f_clear" type="button">Limpiar</button>
+<button class="btn primary" id="f_apply" type="button">Filtrar</button>
+<button class="btn" id="btn_csv" type="button">Exportar CSV</button>
+<button class="btn" id="btn_seed" type="button" title="Cargar demo si no hay datos">Cargar demo</button>
+</div>
+</div>
+</section>
 
-  <section class="kanban" id="kanban">
-    <div class="column card" data-col="CONTACTO" data-drop="1"><h4>Contacto</h4></div>
-    <div class="column card" data-col="REUNION" data-drop="1"><h4>Reunión</h4></div>
-    <div class="column card" data-col="BUSQUEDA" data-drop="1"><h4>Búsqueda</h4></div>
-    <div class="column card" data-col="COMPRAVENTA" data-drop="1"><h4>Compraventa</h4></div>
-    <div class="column card" data-col="NOTARIA" data-drop="1"><h4>Notaría</h4></div>
-  </section>
+<section class="kanban" id="kanban">
+<div class="column card" data-col="CONTACTO" data-drop="1"><h4>Contacto</h4></div>
+<div class="column card" data-col="REUNION" data-drop="1"><h4>Reunión</h4></div>
+<div class="column card" data-col="BUSQUEDA" data-drop="1"><h4>Búsqueda</h4></div>
+<div class="column card" data-col="COMPRAVENTA" data-drop="1"><h4>Compraventa</h4></div>
+<div class="column card" data-col="NOTARIA" data-drop="1"><h4>Notaría</h4></div>
+</section>
 
-  <div class="card table-wrap" id="tableWrap" style="display:none">
-    <h2 style="margin:10px">Listado</h2>
-    <table class="table" id="tab">
-      <thead><tr>
-        <th>Nombre</th><th>Email</th><th>Teléfono</th>
-        <th>Fase</th><th>Subestado</th><th>Tipo</th>
-        <th>Localidades</th><th>Objetivo</th><th>Presupuesto</th><th>Acciones</th>
-      </tr></thead>
-      <tbody id="tbody">
-        <tr><td colspan="10" style="text-align:center;color:#667085">Sin datos</td></tr>
-      </tbody>
-    </table>
-  </div>
+<div class="card table-wrap" id="tableWrap" style="display:none">
+<h2 style="margin:10px">Listado</h2>
+<table class="table" id="tab">
+<thead><tr>
+<th>Nombre</th><th>Email</th><th>Teléfono</th>
+<th>Fase</th><th>Subestado</th><th>Tipo</th>
+<th>Localidades</th><th>Objetivo</th><th>Presupuesto</th><th>Acciones</th>
+</tr></thead>
+<tbody id="tbody">
+<tr><td colspan="10" style="text-align:center;color:#667085">Sin datos</td></tr>
+</tbody>
+</table>
+</div>
 </main>
 
 <!-- Drawer lateral -->
 <aside class="drawer" id="drawer" aria-hidden="true">
-  <div class="drawer-header">
-    <strong id="dv_title">Prospecto</strong>
-    <button class="btn" id="dv_close" type="button">Cerrar</button>
-  </div>
-  <div class="drawer-body">
-    <div class="pills">
-      <div class="pill" id="dv_fase">Fase: —</div>
-      <div class="pill" id="dv_tipo">Tipo: —</div>
-      <div class="pill" id="dv_obj">Objetivo: —</div>
-      <div class="pill" id="dv_evals">Evaluaciones: 0</div>
-    </div>
+<div class="drawer-header">
+<strong id="dv_title">Prospecto</strong>
+<button class="btn" id="dv_close" type="button">Cerrar</button>
+</div>
+<div class="drawer-body">
+<div class="pills">
+<div class="pill" id="dv_fase">Fase: —</div>
+<div class="pill" id="dv_tipo">Tipo: —</div>
+<div class="pill" id="dv_obj">Objetivo: —</div>
+<div class="pill" id="dv_evals">Evaluaciones: 0</div>
+</div>
 
-    <div class="field"><label>Nombre</label><input id="dv_nombre"></div>
-    <div class="field"><label>Email</label><input id="dv_email"></div>
-    <div class="field"><label>Teléfono</label><input id="dv_tel"></div>
-    <div class="field"><label>Localidades</label><input id="dv_locs"></div>
+<div class="field"><label>Nombre</label><input id="dv_nombre"></div>
+<div class="field"><label>Email</label><input id="dv_email"></div>
+<div class="field"><label>Teléfono</label><input id="dv_tel"></div>
+<div class="field"><label>Localidades</label><input id="dv_locs"></div>
 
-    <div class="row two" style="margin-top:8px">
-      <div class="field">
-        <label>Fase</label>
-        <select id="dv_fase_sel">
-          <option value="CONTACTO">Contacto</option>
-          <option value="REUNION">Reunión</option>
-          <option value="BUSQUEDA">Búsqueda</option>
-          <option value="COMPRAVENTA">Compraventa</option>
-          <option value="NOTARIA">Notaría</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Subestado</label>
-        <select id="dv_sub_sel"></select>
-      </div>
-    </div>
+<div class="row two" style="margin-top:8px">
+<div class="field">
+<label>Fase</label>
+<select id="dv_fase_sel">
+<option value="CONTACTO">Contacto</option>
+<option value="REUNION">Reunión</option>
+<option value="BUSQUEDA">Búsqueda</option>
+<option value="COMPRAVENTA">Compraventa</option>
+<option value="NOTARIA">Notaría</option>
+</select>
+</div>
+<div class="field">
+<label>Subestado</label>
+<select id="dv_sub_sel"></select>
+</div>
+</div>
 
-    <div class="actions" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
-      <button class="btn" id="dv_email_btn" type="button">Enviar resumen</button>
-      <button class="btn" id="dv_contract_btn" type="button">Enviar contrato</button>
-      <button class="btn" id="dv_whatsapp_btn" type="button">WhatsApp</button>
-      <button class="btn" id="dv_meeting_btn" type="button">Completar datos de reunión</button>
-      <button class="btn" id="dv_evals_btn" type="button">Ver evaluaciones</button>
-      <button class="btn" id="dv_delete" type="button">Eliminar</button>
-      <button class="btn primary" id="dv_save" type="button">Guardar</button>
-      <button class="btn primary" id="dv_adv_btn" type="button">Avanzar fase</button>
-    </div>
-  </div>
+<div class="actions" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
+<button class="btn" id="dv_email_btn" type="button">Enviar resumen</button>
+<button class="btn" id="dv_contract_btn" type="button">Enviar contrato</button>
+<button class="btn" id="dv_whatsapp_btn" type="button">WhatsApp</button>
+<button class="btn" id="dv_meeting_btn" type="button">Completar datos de reunión</button>
+<button class="btn" id="dv_evals_btn" type="button">Ver evaluaciones</button>
+<button class="btn" id="dv_delete" type="button">Eliminar</button>
+<button class="btn primary" id="dv_save" type="button">Guardar</button>
+<button class="btn primary" id="dv_adv_btn" type="button">Avanzar fase</button>
+</div>
+</div>
 </aside>
 
 <!-- Modal Reunión -->
 <div class="modal" id="meetModal" aria-hidden="true">
-  <div class="modal-card">
-    <div class="modal-head"><h3 style="margin:0">Completar datos de reunión</h3></div>
-    <div class="modal-body">
-      <div class="section">
-        <h4>1) Datos personales</h4>
-        <div class="row two">
-          <div class="field"><label>DNI</label><input id="m_dni"></div>
-          <div class="field"><label>Dirección</label><input id="m_dir"></div>
-        </div>
-        <div class="row three">
-          <div class="field"><label>Localidad (residencia)</label><input id="m_locres"></div>
-          <div class="field"><label>Email</label><input id="m_email"></div>
-          <div class="field"><label>Teléfono</label><input id="m_tel"></div>
-        </div>
-      </div>
+<div class="modal-card">
+<div class="modal-head"><h3 style="margin:0">Completar datos de reunión</h3></div>
+<div class="modal-body">
+<div class="section">
+<h4>1) Datos personales</h4>
+<div class="row two">
+<div class="field"><label>DNI</label><input id="m_dni"></div>
+<div class="field"><label>Dirección</label><input id="m_dir"></div>
+</div>
+<div class="row three">
+<div class="field"><label>Localidad (residencia)</label><input id="m_locres"></div>
+<div class="field"><label>Email</label><input id="m_email"></div>
+<div class="field"><label>Teléfono</label><input id="m_tel"></div>
+</div>
+</div>
 
-      <div class="section">
-        <h4>2) Características del activo deseado</h4>
-        <div class="row two">
-          <div class="field">
-            <label>Tipo alquiler</label>
-            <select id="m_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
-          </div>
-          <div class="field"><label>Localidades objetivo</label><input id="m_locsobj" placeholder="Oviedo, Gijón…"></div>
-        </div>
-        <div class="row four">
-          <div class="field"><label>Nº de activos</label><input id="m_nact" inputmode="numeric" value="1"></div>
-          <div class="field"><label>¿Ascensor?</label><select id="m_asc"><option>Sí</option><option>No</option></select></div>
-          <div class="field"><label>Altura máxima</label><input id="m_altmax" inputmode="numeric" value="1"></div>
-          <div class="field"><label>¿Bajo?</label><select id="m_bajo"><option>No</option><option>Sí</option></select></div>
-        </div>
-        <div class="row three">
-          <div class="field"><label>Acepta reforma</label>
-            <select id="m_ref"><option>No</option><option>Lavado de cara</option><option>Integral</option></select>
-          </div>
-          <div class="field"><label>Mes inicio búsqueda</label><input id="m_mesini" type="month"></div>
-          <div class="field"><label>Mes fin (auto +5)</label><input id="m_mesfin" type="month" disabled></div>
-        </div>
-      </div>
+<div class="section">
+<h4>2) Características del activo deseado</h4>
+<div class="row two">
+<div class="field">
+<label>Tipo alquiler</label>
+<select id="m_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
+</div>
+<div class="field"><label>Localidades objetivo</label><input id="m_locsobj" placeholder="Oviedo, Gijón…"></div>
+</div>
+<div class="row four">
+<div class="field"><label>Nº de activos</label><input id="m_nact" inputmode="numeric" value="1"></div>
+<div class="field"><label>¿Ascensor?</label><select id="m_asc"><option>Sí</option><option>No</option></select></div>
+<div class="field"><label>Altura máxima</label><input id="m_altmax" inputmode="numeric" value="1"></div>
+<div class="field"><label>¿Bajo?</label><select id="m_bajo"><option>No</option><option>Sí</option></select></div>
+</div>
+<div class="row three">
+<div class="field"><label>Acepta reforma</label>
+<select id="m_ref"><option>No</option><option>Lavado de cara</option><option>Integral</option></select>
+</div>
+<div class="field"><label>Mes inicio búsqueda</label><input id="m_mesini" type="month"></div>
+<div class="field"><label>Mes fin (auto +5)</label><input id="m_mesfin" type="month" disabled></div>
+</div>
+</div>
 
-      <div class="section">
-        <h4>3) Presupuesto y precio máximo de compra</h4>
-        <div class="row three">
-          <div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric" data-money-live></div>
-          <div class="field"><label>Incluir honorarios (PSI)</label>
-            <select id="m_inchonor"><option value="si">Sí</option><option value="no">No</option></select>
-          </div>
-          <div class="field"><label>Precio máx. compra (auto)</label><input id="m_pmax" disabled></div>
-        </div>
-        <small class="muted">Se usan ITP/Notaría/Honorarios de Config.</small>
-      </div>
+<div class="section">
+<h4>3) Presupuesto y precio máximo de compra</h4>
+<div class="row three">
+<div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric" data-money-live></div>
+<div class="field"><label>Incluir honorarios (PSI)</label>
+<select id="m_inchonor"><option value="si">Sí</option><option value="no">No</option></select>
+</div>
+<div class="field"><label>Precio máx. compra (auto)</label><input id="m_pmax" disabled></div>
+</div>
+<small class="hint">Se usan ITP/Notaría/Honorarios de Config.</small>
+</div>
 
-      <div class="section">
-        <h4>4) Financiación</h4>
-        <div class="row three">
-          <div class="field"><label>Financiación</label><select id="m_fin"><option>Sí</option><option>No</option></select></div>
-          <div class="field"><label>¿Necesita broker?</label><select id="m_broker"><option>No</option><option>Sí</option></select></div>
-          <div class="field"><label>% financiación (sobre precio)</label><input id="m_finp" inputmode="numeric" value="80"></div>
-        </div>
-        <div class="row two">
-          <div class="field"><label>Financiado estimado (€)</label><input id="m_fin_imp" disabled></div>
-          <div class="field"><label>Aportación propia estimada (€)</label><input id="m_aport" disabled></div>
-        </div>
-      </div>
+<div class="section">
+<h4>4) Financiación</h4>
+<div class="row three">
+<div class="field"><label>Financiación</label><select id="m_fin"><option>Sí</option><option>No</option></select></div>
+<div class="field"><label>¿Necesita broker?</label><select id="m_broker"><option>No</option><option>Sí</option></select></div>
+<div class="field"><label>% financiación (sobre precio)</label><input id="m_finp" inputmode="numeric" value="80"></div>
+</div>
+<div class="row two">
+<div class="field"><label>Financiado estimado (€)</label><input id="m_fin_imp" disabled></div>
+<div class="field"><label>Aportación propia estimada (€)</label><input id="m_aport" disabled></div>
+</div>
+</div>
 
-      <div class="section">
-        <h4>5) Objetivo del cliente</h4>
-        <div class="row three">
-          <div class="field"><label>Objetivo principal</label>
-            <select id="m_objt">
-              <option value="bruta">Rentabilidad bruta %</option>
-              <option value="neta">Rentabilidad neta %</option>
-              <option value="flujo">Flujo de caja €</option>
-            </select>
-          </div>
-          <div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
-          <div class="field"><label>Alquiler mensual sugerido (auto)</label><input id="m_alq_sug" disabled></div>
-        </div>
-        <small class="muted">El alquiler sugerido para “bruta %” usa coste total <b>sin honorarios</b>.</small>
-      </div>
-    </div>
+<div class="section">
+<h4>5) Objetivo del cliente</h4>
+<div class="row three">
+<div class="field"><label>Objetivo principal</label>
+<select id="m_objt">
+<option value="bruta">Rentabilidad bruta %</option>
+<option value="neta">Rentabilidad neta %</option>
+<option value="flujo">Flujo de caja €</option>
+</select>
+</div>
+<div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
+<div class="field"><label>Alquiler mensual sugerido (auto)</label><input id="m_alq_sug" disabled></div>
+</div>
+<small class="hint">El alquiler sugerido para “bruta %” usa coste total <b>sin honorarios</b>.</small>
+</div>
+</div>
 
-    <div class="modal-actions">
-      <button class="btn" id="m_cancel" type="button">Cancelar</button>
-      <button class="btn primary" id="m_save" type="button">Guardar</button>
-    </div>
-  </div>
+<div class="modal-actions">
+<button class="btn" id="m_cancel" type="button">Cancelar</button>
+<button class="btn primary" id="m_save" type="button">Guardar</button>
+</div>
+</div>
 </div>
 
 <div class="toast-wrap" id="toasts"></div>
@@ -290,13 +298,13 @@ input,select,button{padding:10px;border:1px solid var(--border);border-radius:10
 (function(){
 "use strict";
 /* ===== Store ===== */
-var Store = window.Store || {
-  get pros(){ try{return JSON.parse(localStorage.getItem("pros")||"[]");}catch(_){return[];} },
-  set pros(v){ localStorage.setItem("pros", JSON.stringify(v)); },
-  get evals(){ try{return JSON.parse(localStorage.getItem("evals")||"[]");}catch(_){return[];} },
-  set evals(v){ localStorage.setItem("evals", JSON.stringify(v)); },
-  get cfg(){  try{return JSON.parse(localStorage.getItem("cfg")||"{}");}catch(_){return{};} },
-  set cfg(v){ localStorage.setItem("cfg", JSON.stringify(v)); }
+var Store = {
+get pros(){ try{return JSON.parse(localStorage.getItem("pros")||"[]");}catch(_){return[];} },
+set pros(v){ localStorage.setItem("pros", JSON.stringify(v)); },
+get evals(){ try{return JSON.parse(localStorage.getItem("evals")||"[]");}catch(_){return[];} },
+set evals(v){ localStorage.setItem("evals", JSON.stringify(v)); },
+get cfg(){ try{return JSON.parse(localStorage.getItem("cfg")||"{}");}catch(_){return{};} },
+set cfg(v){ localStorage.setItem("cfg", JSON.stringify(v)); }
 };
 /* ===== Utils ===== */
 var fmtN0=new Intl.NumberFormat("es-ES",{maximumFractionDigits:0});
@@ -304,253 +312,301 @@ var fmtN1=new Intl.NumberFormat("es-ES",{maximumFractionDigits:1});
 function $(id){return document.getElementById(id);}
 function toNum(v){var s=String(v||"").replace(/\./g,"").replace(",","."); var n=Number(s); return Number.isFinite(n)?n:0;}
 function uid(){return "p_"+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);}
-function toast(msg,t){var w=$("toasts"); if(!w) return; var d=document.createElement("div"); d.className="toast "+(t||""); d.textContent=msg; w.appendChild(d); setTimeout(()=>d.style.opacity="0",1800); setTimeout(()=>w.removeChild(d),2400);}
+function toast(msg,t){var w=$("toasts"); if(!w) return; var d=document.createElement("div"); d.className="toast "+(t||""); d.textContent=msg; w.appendChild(d); setTimeout(function(){d.style.opacity="0"},1800); setTimeout(function(){try{w.removeChild(d);}catch(e){}},2400);}
 function normPhone(t){return t?String(t).replace(/[^\d+]/g,""):""}
-function onClick(sel,fn){document.addEventListener("click",e=>{var t=e.target;while(t&&t!==document){if(t.matches&&t.matches(sel)){fn.call(t,e);return} t=t.parentNode;}});}
+function onClick(sel,fn){document.addEventListener("click",function(e){var t=e.target;while(t&&t!==document){if(t.matches&&t.matches(sel)){fn.call(t,e);return} t=t.parentNode;}});}
 function attachMoneyLive(){
-  document.addEventListener("input", e=>{
-    var t=e.target; if(!t.matches||!t.matches("input[data-money-live]")) return;
-    var digits=(t.value||"").replace(/[^\d]/g,""); t.value=digits?fmtN0.format(+digits):"";
-  });
-  document.addEventListener("blur", e=>{
-    var t=e.target; if(!t.matches||!t.matches("input[data-money-live]")) return;
-    t.value = toNum(t.value)?fmtN0.format(toNum(t.value)):"";
-  }, true);
+document.addEventListener("input", function(e){
+var t=e.target; if(!t.matches||!t.matches("input[data-money-live]")) return;
+var digits=(t.value||"").replace(/[^\d]/g,""); t.value=digits?fmtN0.format(+digits):"";
+});
+document.addEventListener("blur", function(e){
+var t=e.target; if(!t.matches||!t.matches("input[data-money-live]")) return;
+t.value = toNum(t.value)?fmtN0.format(toNum(t.value)):"";
+}, true);
 }
 /* ===== Fases ===== */
 var phases=["CONTACTO","REUNION","BUSQUEDA","COMPRAVENTA","NOTARIA"];
 var subestados={
-  CONTACTO:["Pendiente contactar","Contactado","Descartado"],
-  REUNION:["Reunión agendada","Reunión hecha","Descartado"],
-  BUSQUEDA:["Propuesta enviada","Reserva","Arras firmadas","Descartado"],
-  COMPRAVENTA:["Notaría fijada","Pendiente financiación","Descartado"],
-  NOTARIA:["Escritura firmada","Descartado"]
+CONTACTO:["Pendiente contactar","Contactado","Descartado"],
+REUNION:["Reunión agendada","Reunión hecha","Descartado"],
+BUSQUEDA:["Propuesta enviada","Reserva","Arras firmadas","Descartado"],
+COMPRAVENTA:["Notaría fijada","Pendiente financiación","Descartado"],
+NOTARIA:["Escritura firmada","Descartado"]
 };
 function nextPhase(f){var i=phases.indexOf(f||"CONTACTO"); if(i<0)i=0; return (i>=phases.length-1)?phases[i]:phases[i+1];}
 /* ===== IDs & Evals ===== */
 function ensureIds(){var a=Store.pros||[],ch=false; for(var i=0;i<a.length;i++){ if(!a[i].id){a[i].id=uid(); ch=true;} } if(ch) Store.pros=a;}
-function evalsByProspect(pid){var evs=Store.evals||[]; return evs.filter(e=>Array.isArray(e.prospect_ids)&&e.prospect_ids.includes(pid));}
+function evalsByProspect(pid){var evs=Store.evals||[]; return evs.filter(function(e){return Array.isArray(e.prospect_ids)&&e.prospect_ids.indexOf(pid)>-1;});}
 function scoreDotFor(p){
-  var objT=p.obj_tipo, goal=toNum(p.obj_raw); if(!objT||!goal) return "gray";
-  var evs=evalsByProspect(p.id); if(!evs.length) return "gray";
-  var best=evs.find(e=>e.kpi_tipo===objT)||evs[0]; var val=Number(best.kpi_val)||0;
-  if(objT==="flujo"){ if(val>=goal) return "green"; if(val>=goal*0.9) return "amber"; return "red"; }
-  else{ if(val>=goal) return "green"; if(val>=goal-1) return "amber"; return "red"; }
+var objT=p.obj_tipo, goal=toNum(p.obj_raw); if(!objT||!goal) return "gray";
+var evs=evalsByProspect(p.id); if(!evs.length) return "gray";
+var best=null;
+for(var i=0;i<evs.length;i++){if(evs[i].kpi_tipo===objT){best=evs[i];break;}}
+if(!best) best=evs[0];
+var val=Number(best.kpi_val)||0;
+if(objT==="flujo"){ if(val>=goal) return "green"; if(val>=goal*0.9) return "amber"; return "red"; }
+else{ if(val>=goal) return "green"; if(val>=goal-1) return "amber"; return "red"; }
 }
 /* ===== Filtros ===== */
-function readFilters(){return{ q:($("f_q")?.value||"").trim().toLowerCase(), fase:$("f_fase")?.value||"", tipo:$("f_tipo")?.value||"", loc:($("f_loc")?.value||"").trim().toLowerCase(), fin:($("f_fin")?.value||"") };}
+function readFilters(){return{
+q:($("f_q")&&$("f_q").value||"").replace(/\s+$/,"").toLowerCase(),
+fase:$("f_fase")&&$("f_fase").value||"",
+tipo:$("f_tipo")&&$("f_tipo").value||"",
+loc:($("f_loc")&&$("f_loc").value||"").replace(/\s+$/,"").toLowerCase(),
+fin:($("f_fin")&&$("f_fin").value||"")
+};}
 function applyFilters(rows,f){
-  return rows.filter(p=>{
-    if(!p) return false;
-    var hay=((p.nombre||"")+" "+(p.email||"")+" "+(p.tel||"")).toLowerCase();
-    if(f.q && !hay.includes(f.q)) return false;
-    if(f.fase && (p.fase||"CONTACTO")!==f.fase) return false;
-    if(f.tipo && (p.pref_tipo||"")!==f.tipo) return false;
-    if(f.loc && !String(p.locs_text||"").toLowerCase().includes(f.loc)) return false;
-    if(f.fin && (p.financia||"")!==f.fin) return false;
-    return true;
-  });
+var out=[]; for(var i=0;i<rows.length;i++){ var p=rows[i]; if(!p) continue;
+var hay=(String(p.nombre||"")+" "+String(p.email||"")+" "+String(p.tel||"")).toLowerCase();
+if(f.q && hay.indexOf(f.q)===-1) continue;
+if(f.fase && (p.fase||"CONTACTO")!==f.fase) continue;
+if(f.tipo && (p.pref_tipo||"")!==f.tipo) continue;
+if(f.loc && String(p.locs_text||"").toLowerCase().indexOf(f.loc)===-1) continue;
+if(f.fin && (p.financia||"")!==f.fin) continue;
+out.push(p);
+} return out;
 }
 /* ===== KPIs ===== */
 function renderKPIs(rows){
-  var c={CONTACTO:0,REUNION:0,BUSQUEDA:0,COMPRAVENTA:0,NOTARIA:0};
-  rows.forEach(p=>{c[p.fase||"CONTACTO"]=(c[p.fase||"CONTACTO"]||0)+1;});
-  $("k_total").textContent=rows.length||0;
-  $("k_contacto").textContent=c.CONTACTO||0;
-  $("k_reunion").textContent=c.REUNION||0;
-  $("k_busqueda").textContent=c.BUSQUEDA||0;
-  $("k_compra").textContent=c.COMPRAVENTA||0;
-  $("k_notaria").textContent=c.NOTARIA||0;
+var c={CONTACTO:0,REUNION:0,BUSQUEDA:0,COMPRAVENTA:0,NOTARIA:0};
+for(var i=0;i<rows.length;i++){ var f=rows[i].fase||"CONTACTO"; c[f]=(c[f]||0)+1; }
+$("k_total").textContent=rows.length||0;
+$("k_contacto").textContent=c.CONTACTO||0;
+$("k_reunion").textContent=c.REUNION||0;
+$("k_busqueda").textContent=c.BUSQUEDA||0;
+$("k_compra").textContent=c.COMPRAVENTA||0;
+$("k_notaria").textContent=c.NOTARIA||0;
 }
 /* ===== Kanban ===== */
 function cardHTML(p, idx){
-  var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
-  var dot=scoreDotFor(p);
-  var chips=(p.locs_text||"—").split(",").slice(0,2).map(x=>x.trim()).filter(Boolean).map(x=><span class="tag">${x}</span>).join("");
-  return `
-  <div class="card-mini" draggable="true" data-i="${idx}" data-id="${p.id||""}">
-    <div class="flex between"><div><strong>${p.nombre||"—"}</strong></div>
-      <span class="badge">${p.pref_tipo||"—"} <span class="dot ${dot}"></span></span></div>
-    <div style="margin-top:4px;font-size:13px;color:#475467">${(p.obj_tipo||"").toUpperCase()} ${objTxt}</div>
-    <div class="tags">${chips}</div>
-    <div class="actions-row">
-      <button class="icon-btn act-mail" title="Email" data-i="${idx}">✉</button>
-      <button class="icon-btn act-wa" title="WhatsApp" data-i="${idx}">🗨</button>
-      <button class="icon-btn act-open" title="Abrir" data-i="${idx}">➤</button>
-      <button class="icon-btn act-next" title="Avanzar fase" data-i="${idx}">➡</button>
-      <button class="icon-btn act-del" title="Eliminar" data-i="${idx}">🗑</button>
-    </div>
-  </div>`;
+var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
+var dot=scoreDotFor(p);
+var chips=""; if(p.locs_text){ var parts=String(p.locs_text).split(","); for(var k=0;k<parts.length&&k<2;k++){ var x=parts[k].replace(/^\s+|\s+$/g,""); if(x) chips+='<span class="tag">'+x+'</span>'; } }
+var html='';
+html+='<div class="card-mini" draggable="true" data-i="'+idx+'" data-id="'+(p.id||'')+'">';
+html+='<div class="flex between"><div><strong>'+(p.nombre||"—")+'</strong></div>';
+html+='<span class="badge">'+(p.pref_tipo||"—")+' <span class="dot '+dot+'"></span></span></div>';
+html+='<div style="margin-top:4px;font-size:13px;color:#475467">'+String(p.obj_tipo||"").toUpperCase()+' '+objTxt+'</div>';
+html+='<div class="tags">'+(chips||"")+'</div>';
+html+='<div class="actions-row">';
+html+='<button class="icon-btn act-mail" title="Email" data-i="'+idx+'">✉️</button>';
+html+='<button class="icon-btn act-wa" title="WhatsApp" data-i="'+idx+'">🗨️</button>';
+html+='<button class="icon-btn act-open" title="Abrir" data-i="'+idx+'">➤</button>';
+html+='<button class="icon-btn act-next" title="Avanzar fase" data-i="'+idx+'">➡️</button>';
+html+='<button class="icon-btn act-del" title="Eliminar" data-i="'+idx+'">🗑️</button>';
+html+='</div></div>';
+return html;
 }
 function renderKanban(rows){
-  var wrap=$("kanban"); if(!wrap) return;
-  wrap.querySelectorAll(".column").forEach(col=>{
-    var t=col.querySelector("h4")?.textContent||""; col.innerHTML=<h4>${t}</h4>; col.classList.add("dropzone");
-  });
-  rows.forEach((p,i)=>{
-    p.__idx=i; var col=wrap.querySelector(.column[data-col="${p.fase||"CONTACTO"}"]);
-    if(col) col.insertAdjacentHTML("beforeend", cardHTML(p,i));
-  });
-  enableDnD();
+var wrap=$("kanban"); if(!wrap) return;
+var cols=wrap.querySelectorAll(".column"); for(var c=0;c<cols.length;c++){ var h=cols[c].querySelector("h4"); cols[c].innerHTML="<h4>"+h.textContent+"</h4>"; cols[c].classList.add("dropzone"); }
+for(var i=0;i<rows.length;i++){ var p=rows[i]; p.__idx=i; var col=wrap.querySelector('.column[data-col="'+(p.fase||"CONTACTO")+'"]'); if(col){ col.insertAdjacentHTML("beforeend", cardHTML(p,i)); } }
+enableDnD();
 }
 /* ===== Tabla ===== */
 function renderTable(rows){
-  var tb=$("tbody"); if(!tb) return;
-  if(!rows.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#667085">Sin datos</td></tr>'; return;}
-  tb.innerHTML = rows.map((p,i)=>{
-    var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
-    return `<tr>
-      <td>${p.nombre||"—"}</td><td>${p.email||"—"}</td><td>${p.tel||"—"}</td>
-      <td>${p.fase||"CONTACTO"}</td><td>${p.sub||"—"}</td><td>${p.pref_tipo||"—"}</td>
-      <td>${p.locs_text||"—"}</td><td>${(p.obj_tipo||"").toUpperCase()} ${objTxt}</td>
-      <td>${p.budget?fmtN0.format(p.budget):"—"}</td>
-      <td><button class="btn open-drawer" data-i="${i}">Abrir</button></td>
-    </tr>`;
-  }).join("");
+var tb=$("tbody"); if(!tb) return;
+if(!rows.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#667085">Sin datos</td></tr>'; return;}
+var html=""; for(var i=0;i<rows.length;i++){ var p=rows[i]; var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
+html+='<tr>'+
+'<td>'+(p.nombre||"—")+'</td>'+
+'<td>'+(p.email||"—")+'</td>'+
+'<td>'+(p.tel||"—")+'</td>'+
+'<td>'+(p.fase||"CONTACTO")+'</td>'+
+'<td>'+(p.sub||"—")+'</td>'+
+'<td>'+(p.pref_tipo||"—")+'</td>'+
+'<td>'+(p.locs_text||"—")+'</td>'+
+'<td>'+String(p.obj_tipo||"").toUpperCase()+' '+objTxt+'</td>'+
+'<td>'+(p.budget?fmtN0.format(p.budget):"—")+'</td>'+
+'<td><button class="btn open-drawer" data-i="'+i+'">Abrir</button></td>'+
+'</tr>';
+}
+tb.innerHTML=html;
 }
 /* ===== Drawer ===== */
 function fillSubestadosSel(fase,current){
-  var sel=$("dv_sub_sel"); if(!sel) return; sel.innerHTML="";
-  (subestados[fase]||["—"]).forEach(s=>{
-    var o=document.createElement("option"); o.value=s; o.textContent=s; if(s===current) o.selected=true; sel.appendChild(o);
-  });
+var sel=$("dv_sub_sel"); if(!sel) return; sel.innerHTML="";
+var arr=subestados[fase]||["—"]; for(var i=0;i<arr.length;i++){ var o=document.createElement("option"); o.value=arr[i]; o.textContent=arr[i]; if(arr[i]===current) o.selected=true; sel.appendChild(o); }
 }
 function openDrawer(p){
-  $("dv_title").textContent=p.nombre||"Prospecto";
-  $("dv_fase").textContent="Fase: "+(p.fase||"CONTACTO");
-  $("dv_tipo").textContent="Tipo: "+(p.pref_tipo||"—");
-  var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
-  $("dv_obj").textContent="Objetivo: "+(p.obj_tipo||"").toUpperCase()+" "+objTxt;
-  $("dv_evals").textContent="Evaluaciones: "+(evalsByProspect(p.id).length||0);
-  $("dv_nombre").value=p.nombre||""; $("dv_email").value=p.email||""; $("dv_tel").value=p.tel||""; $("dv_locs").value=p.locs_text||"";
-  $("dv_fase_sel").value=p.fase||"CONTACTO"; fillSubestadosSel(p.fase||"CONTACTO", p.sub||"");
-  $("dv_email_btn").dataset.to=p.email||""; $("dv_contract_btn").dataset.to=p.email||""; $("dv_whatsapp_btn").dataset.tel=p.tel||"";
-  $("dv_adv_btn").dataset.idx=p._idx; $("dv_save").dataset.idx=p.idx; $("dv_delete").dataset.idx=p._idx; 
-  $("dv_meeting_btn").dataset.idx=p.__idx; $("dv_evals_btn").dataset.pid=p.id||"";
-  $("drawer").classList.add("open"); $("drawer").setAttribute("aria-hidden","false");
+$("dv_title").textContent=p.nombre||"Prospecto";
+$("dv_fase").textContent="Fase: "+(p.fase||"CONTACTO");
+$("dv_tipo").textContent="Tipo: "+(p.pref_tipo||"—");
+var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
+$("dv_obj").textContent="Objetivo: "+String(p.obj_tipo||"").toUpperCase()+" "+objTxt;
+$("dv_evals").textContent="Evaluaciones: "+(evalsByProspect(p.id).length||0);
+$("dv_nombre").value=p.nombre||""; $("dv_email").value=p.email||""; $("dv_tel").value=p.tel||""; $("dv_locs").value=p.locs_text||"";
+$("dv_fase_sel").value=p.fase||"CONTACTO"; fillSubestadosSel(p.fase||"CONTACTO", p.sub||"");
+$("dv_email_btn").dataset.to=p.email||""; $("dv_contract_btn").dataset.to=p.email||""; $("dv_whatsapp_btn").dataset.tel=p.tel||"";
+$("dv_adv_btn").dataset.idx=p.__idx; $("dv_save").dataset.idx=p.__idx; $("dv_delete").dataset.idx=p.__idx;
+$("dv_meeting_btn").dataset.idx=p.__idx; $("dv_evals_btn").dataset.pid=p.id||"";
+$("drawer").classList.add("open"); $("drawer").setAttribute("aria-hidden","false");
 }
-function closeDrawer(){ $("drawer")?.classList.remove("open"); $("drawer")?.setAttribute("aria-hidden","true"); }
+function closeDrawer(){ var d=$("drawer"); if(d){ d.classList.remove("open"); d.setAttribute("aria-hidden","true"); } }
 /* ===== Config & Cálculos reunión ===== */
 function cfgOrDefaults(){var c=Store.cfg||{}; return {
-  itp_pct: toNum(c.itp_pct)||8, not_eur: toNum(c.notaria)||1500, honor_eur: toNum(c.honorarios)||0
+itp_pct: toNum(c.itp_pct)||8, not_eur: toNum(c.notaria)||1500, honor_eur: toNum(c.honorarios)||0
 };}
 function calcPrecioMaxCompra(budget, includeHonor){
-  var c=cfgOrDefaults(), itp=c.itp_pct/100, not=c.not_eur, hon=c.honor_eur;
-  var num=Math.max(0, budget - not - (includeHonor?hon:0));
-  return Math.max(0, Math.floor(num/(1+itp)));
+var c=cfgOrDefaults(), itp=c.itp_pct/100, not=c.not_eur, hon=c.honor_eur;
+var num=Math.max(0, budget - not - (includeHonor?hon:0));
+return Math.max(0, Math.floor(num/(1+itp)));
 }
-function monthPlus5(v){ if(!v||!/\d{4}-\d{2}/.test(v))return""; var y=+v.slice(0,4), m=+v.slice(5,7)+5; while(m>12){m-=12;y++;} return y+"-"+(m<10?"0"+m:m); }
+function monthPlus5(v){ if(!v||!/^\d{4}-\d{2}$/.test(v))return""; var y=parseInt(v.substr(0,4),10), m=parseInt(v.substr(5,2),10)+5; while(m>12){m-=12;y++;} return y+"-"+(m<10?"0"+m:m); }
 function openMeeting(p){
-  $("m_dni").value=p.dni||""; $("m_dir").value=p.dir||""; $("m_locres").value=p.loc_res||"";
-  $("m_email").value=p.email||""; $("m_tel").value=p.tel||"";
-  $("m_tipo").value=p.pref_tipo||"Tradicional"; $("m_locsobj").value=p.locs_text||"";
-  $("m_nact").value=p.n_activos||1; $("m_asc").value=p.ascensor||"Sí"; $("m_altmax").value=p.altura_max||1; $("m_bajo").value=p.bajo||"No";
-  $("m_ref").value=p.reforma||"No"; $("m_mesini").value=p.mes_ini||""; $("m_mesfin").value=p.mes_fin||"";
-  $("m_budget").value=p.budget?fmtN0.format(p.budget):""; $("m_inchonor").value=p.incluir_honor||"si"; $("m_pmax").value=p.pmax_compra?fmtN0.format(p.pmax_compra):"";
-  $("m_fin").value=p.financia||"Sí"; $("m_broker").value=p.broker||"No"; $("m_finp").value=p.fin_pct||"80";
-  $("m_fin_imp").value=p.fin_importe?fmtN0.format(p.fin_importe):""; $("m_aport").value=p.aportacion?fmtN0.format(p.aportacion):"";
-  $("m_objt").value=p.obj_tipo||"bruta"; $("m_objv").value=p.obj_raw||""; $("m_alq_sug").value=p.alq_sugerido?fmtN0.format(p.alq_sugerido):"";
-  $("m_save").dataset.idx=p.__idx; $("meetModal").classList.add("open"); $("meetModal").setAttribute("aria-hidden","false");
+$("m_dni").value=p.dni||""; $("m_dir").value=p.dir||""; $("m_locres").value=p.loc_res||"";
+$("m_email").value=p.email||""; $("m_tel").value=p.tel||"";
+$("m_tipo").value=p.pref_tipo||"Tradicional"; $("m_locsobj").value=p.locs_text||"";
+$("m_nact").value=p.n_activos||1; $("m_asc").value=p.ascensor||"Sí"; $("m_altmax").value=p.altura_max||1; $("m_bajo").value=p.bajo||"No";
+$("m_ref").value=p.reforma||"No"; $("m_mesini").value=p.mes_ini||""; $("m_mesfin").value=p.mes_fin||"";
+$("m_budget").value=p.budget?fmtN0.format(p.budget):""; $("m_inchonor").value=p.incluir_honor||"si"; $("m_pmax").value=p.pmax_compra?fmtN0.format(p.pmax_compra):"";
+$("m_fin").value=p.financia||"Sí"; $("m_broker").value=p.broker||"No"; $("m_finp").value=p.fin_pct||"80";
+$("m_fin_imp").value=p.fin_importe?fmtN0.format(p.fin_importe):""; $("m_aport").value=p.aportacion?fmtN0.format(p.aportacion):"";
+$("m_objt").value=p.obj_tipo||"bruta"; $("m_objv").value=p.obj_raw||""; $("m_alq_sug").value=p.alq_sugerido?fmtN0.format(p.alq_sugerido):"";
+$("m_save").dataset.idx=p.__idx;
+$("meetModal").classList.add("open"); $("meetModal").setAttribute("aria-hidden","false");
 }
-function closeMeeting(){ $("meetModal")?.classList.remove("open"); $("meetModal")?.setAttribute("aria-hidden","true"); }
+function closeMeeting(){ var m=$("meetModal"); if(m){ m.classList.remove("open"); m.setAttribute("aria-hidden","true"); } }
 function recalcMeeting(){
-  var c=cfgOrDefaults(), itpPct=c.itp_pct/100, not=c.not_eur, hon=c.honor_eur;
-  var budget=toNum($("m_budget")?.value||0), includeHonor=(($("m_inchonor")?.value||"si")==="si");
-  var pmax=calcPrecioMaxCompra(budget, includeHonor); $("m_pmax").value=pmax?fmtN0.format(pmax):"";
-  var itpVal=Math.round(pmax*itpPct), totalSinHonor=pmax+itpVal+not, totalConHonor=totalSinHonor+hon;
-  var fin=( $("m_fin")?.value||"Sí")==="Sí", finp=toNum($("m_finp")?.value||80), financiado=fin?Math.round(pmax*(finp/100)):0;
-  var aport = includeHonor ? Math.max(0,totalConHonor-financiado) : Math.max(0,totalSinHonor-financiado+hon);
-  $("m_fin_imp").value=financiado?fmtN0.format(financiado):""; $("m_aport").value=aport?fmtN0.format(aport):"";
-  var objt=$("m_objt")?.value||"bruta", objv=toNum($("m_objv")?.value||0);
-  if(objt==="bruta" && objv>0){ var anual=Math.round((objv/100)*totalSinHonor); $("m_alq_sug").value=fmtN0.format(Math.max(0,Math.round(anual/12))); }
-  else $("m_alq_sug").value="";
-  var mi=$("m_mesini")?.value||""; if(mi) $("m_mesfin").value=monthPlus5(mi);
+var c=cfgOrDefaults(), itpPct=c.itp_pct/100, not=c.not_eur, hon=c.honor_eur;
+var budget=toNum(($("m_budget")&&$("m_budget").value)||0), includeHonor=((($("m_inchonor")&&$("m_inchonor").value)||"si")==="si");
+var pmax=calcPrecioMaxCompra(budget, includeHonor); if($("m_pmax")) $("m_pmax").value=pmax?fmtN0.format(pmax):"";
+var itpVal=Math.round(pmax*itpPct), totalSinHonor=pmax+itpVal+not, totalConHonor=totalSinHonor+hon;
+var fin=( ($("m_fin")&&$("m_fin").value)||"Sí")==="Sí", finp=toNum(($("m_finp")&&$("m_finp").value)||80), financiado=fin?Math.round(pmax*(finp/100)):0;
+var aport = includeHonor ? Math.max(0,totalConHonor-financiado) : Math.max(0,totalSinHonor-financiado+hon);
+if($("m_fin_imp")) $("m_fin_imp").value=financiado?fmtN0.format(financiado):"";
+if($("m_aport")) $("m_aport").value=aport?fmtN0.format(aport):"";
+var objt=($("m_objt")&&$("m_objt").value)||"bruta", objv=toNum(($("m_objv")&&$("m_objv").value)||0);
+if(objt==="bruta" && objv>0){ var anual=Math.round((objv/100)*totalSinHonor); if($("m_alq_sug")) $("m_alq_sug").value=fmtN0.format(Math.max(0,Math.round(anual/12))); }
+else if($("m_alq_sug")) $("m_alq_sug").value="";
+var mi=($("m_mesini")&&$("m_mesini").value)||""; if(mi && $("m_mesfin")) $("m_mesfin").value=monthPlus5(mi);
 }
 /* ===== Render ===== */
 function renderAll(){
-  ensureIds();
-  var all=(Store.pros||[]).map((p,i)=>{p.__idx=i; return p;});
-  var rows=applyFilters(all, readFilters());
-  renderKPIs(rows); renderKanban(rows); renderTable(rows);
+ensureIds();
+var all=(Store.pros||[]); for(var i=0;i<all.length;i++){ all[i].__idx=i; }
+var rows=applyFilters(all, readFilters());
+renderKPIs(rows); renderKanban(rows); renderTable(rows);
 }
 /* ===== Drag & Drop ===== */
 function enableDnD(){
-  document.querySelectorAll(".card-mini").forEach(card=>{
-    card.addEventListener("dragstart", e=>{ card.classList.add("dragging"); e.dataTransfer.setData("text/plain", card.dataset.i||""); });
-    card.addEventListener("dragend", ()=>{ card.classList.remove("dragging"); document.querySelectorAll(".column").forEach(c=>c.classList.remove("drop-target")); });
-  });
-  document.querySelectorAll(".column[data-drop='1']").forEach(col=>{
-    col.addEventListener("dragover", e=>{ e.preventDefault(); col.classList.add("drop-target"); });
-    col.addEventListener("dragleave", ()=>col.classList.remove("drop-target"));
-    col.addEventListener("drop", e=>{
-      e.preventDefault(); col.classList.remove("drop-target");
-      var idx=+e.dataTransfer.getData("text/plain"); var arr=Store.pros||[]; var p=arr[idx]; if(!p) return;
-      p.fase=col.getAttribute("data-col")||"CONTACTO"; p.sub=""; Store.pros=arr; renderAll(); toast("Movido a "+p.fase,"ok");
-    });
-  });
+var cards=document.querySelectorAll(".card-mini");
+for(var i=0;i<cards.length;i++){
+(function(card){
+card.addEventListener("dragstart", function(e){ card.classList.add("dragging"); e.dataTransfer.setData("text/plain", card.getAttribute("data-i")||""); });
+card.addEventListener("dragend", function(){ card.classList.remove("dragging"); var cc=document.querySelectorAll(".column"); for(var j=0;j<cc.length;j++){ cc[j].classList.remove("drop-target"); }});
+})(cards[i]);
+}
+var cols=document.querySelectorAll(".column[data-drop='1']");
+for(var k=0;k<cols.length;k++){
+(function(col){
+col.addEventListener("dragover", function(e){ e.preventDefault(); col.classList.add("drop-target"); });
+col.addEventListener("dragleave", function(){ col.classList.remove("drop-target"); });
+col.addEventListener("drop", function(e){
+e.preventDefault(); col.classList.remove("drop-target");
+var idx=parseInt(e.dataTransfer.getData("text/plain"),10); var arr=Store.pros||[]; var p=arr[idx]; if(!p) return;
+p.fase=col.getAttribute("data-col")||"CONTACTO"; p.sub=""; Store.pros=arr; renderAll(); toast("Movido a "+p.fase,"ok");
+});
+})(cols[k]);
+}
 }
 /* ===== CSV ===== */
 function downloadCSV(){
-  var rows=applyFilters(Store.pros||[], readFilters()); if(!rows.length){ toast("Nada que exportar","warn"); return; }
-  var lines=[["Nombre","Email","Teléfono","Fase","Subestado","Tipo","Localidades","Objetivo","Valor","Presupuesto"].join(";")];
-  rows.forEach(p=>{
-    lines.push([p.nombre||"",p.email||"",p.tel||"",p.fase||"",p.sub||"",p.pref_tipo||"",String(p.locs_text||"").replace(/;/g,","),(p.obj_tipo||"").toUpperCase(),p.obj_raw||"",p.budget||""].join(";"));
-  });
-  var blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
-  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="prospectos.csv"; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),800);
+var rows=applyFilters(Store.pros||[], readFilters()); if(!rows.length){ toast("Nada que exportar","warn"); return; }
+var lines=[["Nombre","Email","Teléfono","Fase","Subestado","Tipo","Localidades","Objetivo","Valor","Presupuesto"].join(";")];
+for(var i=0;i<rows.length;i++){
+var p=rows[i];
+lines.push([p.nombre||"",p.email||"",p.tel||"",p.fase||"",p.sub||"",p.pref_tipo||"",String(p.locs_text||"").replace(/;/g,","),(p.obj_tipo||"").toUpperCase(),p.obj_raw||"",p.budget||""].join(";"));
+}
+var blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
+var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="prospectos.csv"; a.click(); setTimeout(function(){URL.revokeObjectURL(a.href)},800);
+}
+/* ===== Seed demo ===== */
+function seedIfEmpty(){
+var arr=Store.pros||[]; if(arr.length) return;
+arr=[
+{id:uid(), nombre:"Carlos Pérez", email:"carlos@demo.es", tel:"600111222", fase:"CONTACTO", sub:"Pendiente contactar", pref_tipo:"Tradicional", locs_text:"Oviedo, Gijón", obj_tipo:"bruta", obj_raw:8, budget:120000},
+{id:uid(), nombre:"Laura Gómez", email:"laura@demo.es", tel:"611222333", fase:"REUNION", sub:"Reunión agendada", pref_tipo:"Habitaciones", locs_text:"Gijón", obj_tipo:"flujo", obj_raw:3000, budget:150000},
+{id:uid(), nombre:"Ana Ruiz", email:"ana@demo.es", tel:"622333444", fase:"BUSQUEDA", sub:"Propuesta enviada", pref_tipo:"Tradicional", locs_text:"Avilés", obj_tipo:"neta", obj_raw:6.5, budget:100000}
+];
+Store.pros=arr;
 }
 /* ===== Eventos ===== */
 function attach(){
-  attachMoneyLive();
-  onClick("#f_clear", ()=>{ $("f_q").value=""; $("f_fase").value=""; $("f_tipo").value=""; $("f_loc").value=""; $("f_fin").value=""; renderAll(); toast("Filtros limpiados","ok"); });
-  onClick("#f_apply", ()=>{ renderAll(); toast("Filtros aplicados","ok"); });
-  onClick("#btn_csv", ()=>downloadCSV());
-  onClick(".act-mail", function(){
-    var p=(Store.pros||[])[+this.dataset.i]; if(!p||!p.email) return;
-    var resumen=[]; if(p.obj_tipo){resumen.push("Objetivo: "+p.obj_tipo.toUpperCase()+" "+(p.obj_tipo==="flujo"?fmtN0.format(p.obj_raw)+" €":fmtN1.format(p.obj_raw)+" %")); }
-    if(p.locs_text) resumen.push("Zonas: "+p.locs_text); if(p.budget) resumen.push("Presupuesto: "+fmtN0.format(p.budget)+" €");
-    var body="Hola "+(p.nombre||"")+",%0D%0A%0D%0AResumen:%0D%0A- "+resumen.join("%0D%0A- ")+"%0D%0A%0D%0AUn saludo.";
-    location.href="mailto:"+encodeURIComponent(p.email)+"?subject="+encodeURIComponent("Unihouser — Seguimiento")+"&body="+body;
-  });
-  onClick(".act-wa", function(){ var p=(Store.pros||[])[+this.dataset.i]; if(!p) return; var tel=normPhone(p.tel); if(!tel) return; window.open("https://wa.me/"+tel+"?text="+encodeURIComponent("Te envío el resumen por email. Seguimos."),"_blank"); });
-  onClick(".act-open, .open-drawer", function(){ var p=(Store.pros||[])[+this.dataset.i]; if(!p) return; p.__idx=+this.dataset.i; openDrawer(p); });
-  onClick(".act-next", function(){ var arr=Store.pros||[]; var p=arr[+this.dataset.i]; if(!p) return; p.fase=nextPhase(p.fase||"CONTACTO"); p.sub=""; Store.pros=arr; renderAll(); toast("Movido a "+p.fase,"ok"); });
-  onClick(".act-del", function(){ var arr=Store.pros||[]; var i=+this.dataset.i; if(arr[i] && confirm("Eliminar este prospecto?")){arr.splice(i,1); Store.pros=arr; renderAll(); toast("Eliminado","ok"); }});
-  onClick("#dv_close", ()=>closeDrawer());
-  onClick("#dv_save", function(){ var i=+this.dataset.idx, arr=Store.pros||[]; var p=arr[i]; if(!p) return;
-    p.nombre=$("dv_nombre").value; p.email=$("dv_email").value; p.tel=$("dv_tel").value; p.locs_text=$("dv_locs").value;
-    p.fase=$("dv_fase_sel").value; p.sub=$("dv_sub_sel").value; arr[i]=p; Store.pros=arr; renderAll(); toast("Prospecto actualizado","ok");
-  });
-  onClick("#dv_delete", function(){ var i=+this.dataset.idx, arr=Store.pros||[]; if(arr[i] && confirm("Eliminar este prospecto?")){ arr.splice(i,1); Store.pros=arr; closeDrawer(); renderAll(); toast("Eliminado","ok"); }});
-  onClick("#dv_adv_btn", function(){ var i=+this.dataset.idx, arr=Store.pros||[]; var p=arr[i]; if(!p) return; p.fase=nextPhase(p.fase||"CONTACTO"); p.sub=""; Store.pros=arr; openDrawer(p); renderAll(); toast("Avanzado a "+p.fase,"ok"); });
-  onClick("#dv_meeting_btn", function(){ var p=(Store.pros||[])[+this.dataset.idx]; if(!p) return; p.__idx=+this.dataset.idx; openMeeting(p); });
-  onClick("#dv_evals_btn", function(){ var pid=this.dataset.pid||""; if(!pid) return; location.href="evaluaciones.html?prospect="+encodeURIComponent(pid); });
-  ["m_budget","m_inchonor","m_fin","m_finp","m_objt","m_objv","m_mesini"].forEach(id=>{
-    document.addEventListener("input", e=>{ if(e.target && e.target.id===id) recalcMeeting(); });
-    document.addEventListener("change", e=>{ if(e.target && e.target.id===id) recalcMeeting(); });
-  });
-  onClick("#m_cancel", ()=>closeMeeting());
-  onClick("#m_save", function(){
-    var i=+this.dataset.idx, arr=Store.pros||[]; var p=arr[i]; if(!p) return;
-    p.dni=$("m_dni").value; p.dir=$("m_dir").value; p.loc_res=$("m_locres").value; p.email=$("m_email").value; p.tel=$("m_tel").value;
-    p.pref_tipo=$("m_tipo").value; p.locs_text=$("m_locsobj").value; p.n_activos=toNum($("m_nact").value);
-    p.ascensor=$("m_asc").value; p.altura_max=toNum($("m_altmax").value); p.bajo=$("m_bajo").value; p.reforma=$("m_ref").value;
-    p.mes_ini=$("m_mesini").value; p.mes_fin=$("m_mesfin").value;
-    p.budget=toNum($("m_budget").value); p.incluir_honor=$("m_inchonor").value; p.pmax_compra=toNum($("m_pmax").value);
-    p.financia=$("m_fin").value; p.broker=$("m_broker").value; p.fin_pct=toNum($("m_finp").value);
-    p.fin_importe=toNum($("m_fin_imp").value); p.aportacion=toNum($("m_aport").value);
-    p.obj_tipo=$("m_objt").value; p.obj_raw=toNum($("m_objv").value); p.alq_sugerido=toNum($("m_alq_sug").value);
-    arr[i]=p; Store.pros=arr; closeMeeting(); renderAll(); toast("Reunión guardada","ok");
-  });
-  // Toggle tabla flotante
-  document.body.insertAdjacentHTML("beforeend",
-    '<div style="position:fixed;right:16px;top:96px;z-index:9"><button class="btn" id="toggleTable">Mostrar tabla</button></div>');
-  onClick("#toggleTable", function(){ var el=$("tableWrap"); if(!el) return; var on=el.style.display!=="none"; el.style.display=on?"none":"block"; this.textContent=on?"Mostrar tabla":"Ocultar tabla"; });
-  // ESC cierra overlays
-  document.addEventListener("keydown", e=>{ if(e.key==="Escape"){ closeMeeting(); closeDrawer(); } });
+attachMoneyLive();
+onClick("#f_clear", function(){ $("f_q").value=""; $("f_fase").value=""; $("f_tipo").value=""; $("f_loc").value=""; $("f_fin").value=""; renderAll(); toast("Filtros limpiados","ok"); });
+onClick("#f_apply", function(){ renderAll(); toast("Filtros aplicados","ok"); });
+onClick("#btn_csv", function(){ downloadCSV(); });
+onClick("#btn_seed", function(){ seedIfEmpty(); renderAll(); toast("Datos de demo cargados","ok"); });
+
+onClick(".act-mail", function(){
+var p=(Store.pros||[])[+this.getAttribute("data-i")]; if(!p||!p.email) return;
+var resumen=[]; if(p.obj_tipo){resumen.push("Objetivo: "+String(p.obj_tipo||"").toUpperCase()+" "+(p.obj_tipo==="flujo"?fmtN0.format(p.obj_raw)+" €":fmtN1.format(p.obj_raw)+" %")); }
+if(p.locs_text) resumen.push("Zonas: "+p.locs_text); if(p.budget) resumen.push("Presupuesto: "+fmtN0.format(p.budget)+" €");
+var body="Hola "+(p.nombre||"")+",%0D%0A%0D%0AResumen:%0D%0A- "+resumen.join("%0D%0A- ")+"%0D%0A%0D%0AUn saludo.";
+location.href="mailto:"+encodeURIComponent(p.email)+"?subject="+encodeURIComponent("Unihouser — Seguimiento")+"&body="+body;
+});
+onClick(".act-wa", function(){ var p=(Store.pros||[])[+this.getAttribute("data-i")]; if(!p) return; var tel=normPhone(p.tel); if(!tel) return; window.open("https://wa.me/"+tel+"?text="+encodeURIComponent("Te envío el resumen por email. Seguimos."),"_blank"); });
+onClick(".act-open, .open-drawer", function(){ var p=(Store.pros||[])[+this.getAttribute("data-i")]; if(!p) return; p.__idx=+this.getAttribute("data-i"); openDrawer(p); });
+onClick(".act-next", function(){ var arr=Store.pros||[]; var p=arr[+this.getAttribute("data-i")]; if(!p) return; p.fase=nextPhase(p.fase||"CONTACTO"); p.sub=""; Store.pros=arr; renderAll(); toast("Movido a "+p.fase,"ok"); });
+onClick(".act-del", function(){ var arr=Store.pros||[]; var i=+this.getAttribute("data-i"); if(arr[i] && confirm("Eliminar este prospecto?")){arr.splice(i,1); Store.pros=arr; renderAll(); toast("Eliminado","ok"); }});
+
+onClick("#dv_close", function(){ closeDrawer(); });
+onClick("#dv_save", function(){ var i=+this.getAttribute("data-idx"), arr=Store.pros||[]; var p=arr[i]; if(!p) return;
+p.nombre=$("dv_nombre").value; p.email=$("dv_email").value; p.tel=$("dv_tel").value; p.locs_text=$("dv_locs").value;
+p.fase=$("dv_fase_sel").value; p.sub=$("dv_sub_sel").value; arr[i]=p; Store.pros=arr; renderAll(); toast("Prospecto actualizado","ok");
+});
+onClick("#dv_delete", function(){ var i=+this.getAttribute("data-idx"), arr=Store.pros||[]; if(arr[i] && confirm("Eliminar este prospecto?")){ arr.splice(i,1); Store.pros=arr; closeDrawer(); renderAll(); toast("Eliminado","ok"); }});
+onClick("#dv_adv_btn", function(){ var i=+this.getAttribute("data-idx"), arr=Store.pros||[]; var p=arr[i]; if(!p) return; p.fase=nextPhase(p.fase||"CONTACTO"); p.sub=""; Store.pros=arr; openDrawer(p); renderAll(); toast("Avanzado a "+p.fase,"ok"); });
+onClick("#dv_meeting_btn", function(){ var p=(Store.pros||[])[+this.getAttribute("data-idx")]; if(!p) return; p.__idx=+this.getAttribute("data-idx"); openMeeting(p); });
+onClick("#dv_evals_btn", function(){ var pid=this.getAttribute("data-pid")||""; if(!pid) return; location.href="evaluaciones.html?prospect="+encodeURIComponent(pid); });
+
+// Recalcular en modal
+var ids=["m_budget","m_inchonor","m_fin","m_finp","m_objt","m_objv","m_mesini"];
+for(var z=0;z<ids.length;z++){
+(function(id){
+document.addEventListener("input", function(e){ if(e.target && e.target.id===id) recalcMeeting(); });
+document.addEventListener("change", function(e){ if(e.target && e.target.id===id) recalcMeeting(); });
+})(ids[z]);
+}
+onClick("#m_cancel", function(){ closeMeeting(); });
+onClick("#m_save", function(){
+var i=+this.getAttribute("data-idx"), arr=Store.pros||[]; var p=arr[i]; if(!p) return;
+p.dni=$("m_dni").value; p.dir=$("m_dir").value; p.loc_res=$("m_locres").value; p.email=$("m_email").value; p.tel=$("m_tel").value;
+p.pref_tipo=$("m_tipo").value; p.locs_text=$("m_locsobj").value; p.n_activos=toNum($("m_nact").value);
+p.ascensor=$("m_asc").value; p.altura_max=toNum($("m_altmax").value); p.bajo=$("m_bajo").value; p.reforma=$("m_ref").value;
+p.mes_ini=$("m_mesini").value; p.mes_fin=$("m_mesfin").value;
+p.budget=toNum($("m_budget").value); p.incluir_honor=$("m_inchonor").value; p.pmax_compra=toNum($("m_pmax").value);
+p.financia=$("m_fin").value; p.broker=$("m_broker").value; p.fin_pct=toNum($("m_finp").value);
+p.fin_importe=toNum($("m_fin_imp").value); p.aportacion=toNum($("m_aport").value);
+p.obj_tipo=$("m_objt").value; p.obj_raw=toNum($("m_objv").value); p.alq_sugerido=toNum($("m_alq_sug").value);
+arr[i]=p; Store.pros=arr; closeMeeting(); renderAll(); toast("Reunión guardada","ok");
+});
+
+// Botón flotante mostrar/ocultar tabla
+document.body.insertAdjacentHTML("beforeend",
+'<div style="position:fixed;right:16px;top:96px;z-index:9"><button class="btn" id="toggleTable">Mostrar tabla</button></div>');
+onClick("#toggleTable", function(){ var el=$("tableWrap"); if(!el) return; var on=el.style.display!=="none"; el.style.display=on?"none":"block"; this.textContent=on?"Mostrar tabla":"Ocultar tabla"; });
+
+// ESC cierra
+document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ closeMeeting(); closeDrawer(); } });
 }
 /* ===== Init ===== */
-document.addEventListener("DOMContentLoaded", ()=>{ attach(); ensureIds(); renderAll(); });
+document.addEventListener("DOMContentLoaded", function(){
+try{
+attach(); ensureIds();
+// Carga demo si no hay datos (para que VEAS algo al instante)
+if((Store.pros||[]).length===0){ seedIfEmpty(); }
+renderAll();
+}catch(err){
+var msg=document.createElement("pre");
+msg.textContent="Error de carga Dashboard: "+(err&&err.message?err.message:String(err));
+msg.style.background="#fee2e2"; msg.style.border="1px solid #ef4444"; msg.style.padding="12px"; msg.style.whiteSpace="pre-wrap";
+document.body.prepend(msg);
+console.error(err);
+}
+});
 })();
 </script>
 </body>
