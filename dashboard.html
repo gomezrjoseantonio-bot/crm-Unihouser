@@ -9,57 +9,35 @@
 <style>
 /* ===== Tema claro SOLO para este dashboard ===== */
 .theme-light{
-  --bg:#ffffff;
-  --card:#ffffff;
-  --text:#111827;
-  --muted:#667085;
-  --border:#e5e7eb;
-  --accent:#ff6a3d;  /* naranja Unihouser */
-  --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+  --bg:#ffffff; --card:#ffffff; --text:#111827; --muted:#667085; --border:#e5e7eb;
+  --accent:#ff6a3d; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
   background:#fff; color:var(--text);
 }
 .theme-light .topbar{ background:#fff; border-bottom:1px solid var(--border); }
 .theme-light .container{ background:transparent; }
-
-/* Cards / contenedores */
-.theme-light .card,
-.theme-light .kpi-card,
-.theme-light .column,
-.theme-light .card-mini{
-  background:#fff;
-  border:1px solid var(--border);
-  box-shadow:0 1px 2px rgba(16,24,40,.04);
-}
-
-/* Tipografía */
 .theme-light h1,.theme-light h2,.theme-light h3,.theme-light h4{ color:#101828; }
 .theme-light label, .theme-light small.hint{ color:var(--muted); }
-
-/* Botones */
+.theme-light input, .theme-light select{ background:#fff; color:#101828; border:1px solid var(--border); }
 .theme-light .btn{ background:#f9fafb; border:1px solid var(--border); color:#101828; }
 .theme-light .btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
 .theme-light .btn.ghost{ background:#fff; border:1px solid var(--border); color:#101828; }
 .theme-light .btn:hover{ box-shadow:0 1px 2px rgba(16,24,40,.06); }
-
-/* Inputs y selects */
-.theme-light input, .theme-light select{
-  background:#fff; color:#101828; border:1px solid var(--border);
+.theme-light .card,.theme-light .kpi-card,.theme-light .column,.theme-light .card-mini{
+  background:#fff; border:1px solid var(--border); box-shadow:0 1px 2px rgba(16,24,40,.04);
 }
-
-/* Badges y tags */
 .theme-light .badge{ background:#f2f4f7; color:#344054; border:1px solid #e4e7ec; }
 .theme-light .tag{ background:#f9fafb; color:#344054; border:1px solid #e5e7eb; }
-
-/* Tabla */
 .theme-light .table{ background:#fff; border:1px solid var(--border); }
 .theme-light .table th{ background:#f9fafb; color:#344054; border-bottom:1px solid var(--border); }
 .theme-light .table td{ border-bottom:1px solid #f2f4f7; }
 .theme-light .table tr:last-child td{ border-bottom:none; }
-
-/* Nav activo */
 .theme-light .nav a.active{ background:rgba(255,106,61,.12); color:#8a3410; border-radius:10px; padding:8px 10px; }
 
-/* ===== Layout específico del dashboard ===== */
+/* Título uniforme */
+.page-header{ margin:18px 0 10px; }
+.page-title{ font-size:1.8rem; font-weight:600; color:#101828; margin:0; }
+
+/* Layout específico */
 .kpi-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
 @media(min-width:920px){.kpi-grid{grid-template-columns:repeat(6,1fr)}}
 .kpi-card .lab{font-size:12px;color:var(--muted)}
@@ -71,7 +49,7 @@
 
 .kanban{display:grid;gap:12px;grid-template-columns:1fr}
 @media(min-width:1100px){.kanban{grid-template-columns:repeat(5,1fr)}}
-.column{border-radius:14px;min-height:240px;padding:8px 8px 4px}
+.column{border-radius:14px;min-height:240px;padding:8px}
 .column h4{margin:2px 6px 8px;color:#344054}
 .card-mini{border-radius:12px;padding:10px;margin:6px 4px}
 .actions-row{display:flex;gap:8px;margin-top:8px}
@@ -81,13 +59,18 @@
 .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .tag{border-radius:999px;padding:2px 8px;font-size:12px}
 
-/* Drawer (panel lateral) */
-.drawer{position:fixed;right:0;top:0;bottom:0;width:420px;max-width:92vw;background:var(--card);border-left:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);transition:.25s;z-index:50}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:420px;max-width:92vw;background:var(--card);
+  border-left:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);
+  transition:.25s;z-index:50}
 .drawer.open{transform:translateX(0)}
 .drawer-header{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid var(--border)}
 .drawer-body{padding:14px}
 .pills{display:flex;gap:8px;flex-wrap:wrap}
 .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#f9fafb;color:#344054}
+
+/* bolitas estado objetivo */
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
+.dot.green{background:var(--ok)} .dot.amber{background:var(--warn)} .dot.red{background:var(--bad)} .dot.gray{background:#d0d5dd}
 </style>
 </head>
 
@@ -106,6 +89,8 @@
 </header>
 
 <main class="container">
+
+  <div class="page-header"><h1 class="page-title">Dashboard</h1></div>
 
   <!-- KPIs -->
   <section class="kpi-grid">
@@ -140,19 +125,19 @@
         <select id="f_fin"><option value="">Todas</option><option>Sí</option><option>No</option></select>
       </div>
       <div class="actions">
-        <button class="btn" id="f_clear">Limpiar</button>
-        <button class="btn primary" id="f_apply">Filtrar</button>
+        <button class="btn" id="f_clear" type="button">Limpiar</button>
+        <button class="btn primary" id="f_apply" type="button">Filtrar</button>
       </div>
     </div>
   </section>
 
-  <!-- Kanban -->
+  <!-- Kanban (rellena JS) -->
   <section class="kanban" id="kanban">
-    <div class="column"><h4>Contacto</h4></div>
-    <div class="column"><h4>Reunión</h4></div>
-    <div class="column"><h4>Búsqueda</h4></div>
-    <div class="column"><h4>Compraventa</h4></div>
-    <div class="column"><h4>Notaría</h4></div>
+    <div class="column" data-col="CONTACTO"><h4>Contacto</h4></div>
+    <div class="column" data-col="REUNION"><h4>Reunión</h4></div>
+    <div class="column" data-col="BUSQUEDA"><h4>Búsqueda</h4></div>
+    <div class="column" data-col="COMPRAVENTA"><h4>Compraventa</h4></div>
+    <div class="column" data-col="NOTARIA"><h4>Notaría</h4></div>
   </section>
 
   <!-- Tabla -->
@@ -187,9 +172,9 @@
     <div class="field"><label>Teléfono</label><input id="dv_tel" disabled></div>
     <div class="field"><label>Localidades</label><input id="dv_locs" disabled></div>
     <div class="actions" style="margin-top:12px">
-      <button class="btn">Email</button>
-      <button class="btn">WhatsApp</button>
-      <button class="btn primary">Avanzar fase</button>
+      <button class="btn" id="dv_email_btn">Email</button>
+      <button class="btn" id="dv_whatsapp_btn">WhatsApp</button>
+      <button class="btn primary" id="dv_adv_btn">Avanzar fase</button>
     </div>
   </div>
 </aside>
