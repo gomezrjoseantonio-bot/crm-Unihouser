@@ -14,7 +14,7 @@
 }
 .theme-light .topbar{ background:#fff; border-bottom:1px solid var(--border); }
 .theme-light h1,.theme-light h2,.theme-light h3,.theme-light h4{ color:#101828; }
-.theme-light label, .theme-light small.hint{ color:var(--muted); }
+.theme-light label, .theme-light small.hint{ color:#667085; }
 .theme-light input, .theme-light select{ background:#fff; color:#101828; border:1px solid var(--border); }
 .theme-light .btn{ background:#f9fafb; border:1px solid var(--border); color:#101828; cursor:pointer; }
 .theme-light .btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
@@ -45,10 +45,10 @@
 @media(min-width:1100px){.kanban{grid-template-columns:repeat(5,1fr)}}
 .column{border-radius:14px;min-height:260px;padding:8px}
 .column h4{margin:2px 6px 8px;color:#344054}
-.column.drop-target{outline:2px dashed #d0d5dd; outline-offset: -6px}
+.column.drop-target{outline:2px dashed #d0d5dd; outline-offset:-6px}
 .card-mini{border-radius:12px;padding:10px;margin:6px 4px}
 .card-mini[draggable="true"]{cursor:grab}
-.card-mini.dragging{opacity:.6; transform: scale(.98)}
+.card-mini.dragging{opacity:.6; transform:scale(.98)}
 .actions-row{display:flex;gap:8px;margin-top:8px}
 .icon-btn{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:8px;cursor:pointer}
 .icon-btn:hover{border-color:#d0d5dd}
@@ -68,11 +68,17 @@
 .pills{display:flex;gap:8px;flex-wrap:wrap}
 .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#f9fafb;color:#344054}
 
-/* Overlay reunión */
+/* Modal reunión ampliado */
 .modal{position:fixed;inset:0;background:rgba(16,24,40,.5);display:none;align-items:center;justify-content:center;z-index:60}
 .modal.open{display:flex}
-.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:720px;max-width:95vw;padding:16px}
+.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:880px;max-width:98vw;padding:16px}
 .modal-card h3{margin:0 0 8px}
+.section{margin:8px 0 12px}
+.section h4{margin:0 0 8px;color:#344054}
+.row{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:680px){ .row.two{grid-template-columns:1fr 1fr} .row.three{grid-template-columns:1fr 1fr 1fr} .row.four{grid-template-columns:1fr 1fr 1fr 1fr} }
+.field label{display:block;font-size:12px;color:#667085;margin-bottom:4px}
+small.hint{color:#667085}
 
 /* Toggle tabla */
 .toggle-row{display:flex;justify-content:flex-end;margin:12px 0}
@@ -99,7 +105,6 @@
 </header>
 
 <main class="container">
-
   <div class="page-header"><h2 class="page-title">Dashboard</h2></div>
 
   <!-- KPIs -->
@@ -142,7 +147,7 @@
     </div>
   </section>
 
-  <!-- Kanban (drag & drop) -->
+  <!-- Kanban -->
   <section class="kanban" id="kanban">
     <div class="column" data-col="CONTACTO" data-drop="1"><h4>Contacto</h4></div>
     <div class="column" data-col="REUNION" data-drop="1"><h4>Reunión</h4></div>
@@ -156,7 +161,7 @@
     <button class="btn" id="toggleTable">Mostrar tabla (avanzado)</button>
   </div>
 
-  <!-- Tabla (oculta por defecto) -->
+  <!-- Tabla -->
   <section class="table-wrap card" id="tableWrap" style="display:none">
     <h2 style="margin:0 0 10px">Listado</h2>
     <table class="table" id="tab">
@@ -166,7 +171,7 @@
         <th>Localidades</th><th>Objetivo</th><th>Presupuesto</th><th>Acciones</th>
       </tr></thead>
       <tbody id="tbody">
-        <tr><td colspan="10" style="text-align:center;color:var(--muted)">Sin datos (se rellenará desde Prospectos)</td></tr>
+        <tr><td colspan="10" style="text-align:center;color:var(--muted)">Sin datos</td></tr>
       </tbody>
     </table>
   </section>
@@ -221,40 +226,95 @@
   </div>
 </aside>
 
-<!-- Modal reunión -->
+<!-- Modal Reunión (versión completa, espejo de Prospectos) -->
 <div class="modal" id="meetModal" aria-hidden="true">
   <div class="modal-card">
     <h3>Completar datos de reunión</h3>
-    <div class="row two">
-      <div class="field"><label>DNI</label><input id="m_dni"></div>
-      <div class="field"><label>Dirección</label><input id="m_dir"></div>
-    </div>
-    <div class="row two">
-      <div class="field"><label>Localidad (residencia)</label><input id="m_locres"></div>
-      <div class="field">
-        <label>Tipo alquiler</label>
-        <select id="m_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
+
+    <div class="section">
+      <h4>1) Datos personales</h4>
+      <div class="row two">
+        <div class="field"><label>DNI</label><input id="m_dni"></div>
+        <div class="field"><label>Dirección</label><input id="m_dir"></div>
+      </div>
+      <div class="row two">
+        <div class="field"><label>Localidad (residencia)</label><input id="m_locres"></div>
+        <div class="field"><label>Teléfono</label><input id="m_tel"></div>
       </div>
     </div>
-    <div class="row two">
-      <div class="field"><label>Localidades objetivo</label><input id="m_locsobj" placeholder="Oviedo, Gijón…"></div>
-      <div class="field"><label>Nº de activos</label><input id="m_nact" inputmode="numeric" value="1"></div>
-    </div>
-    <div class="row two">
-      <div class="field">
-        <label>Objetivo principal</label>
-        <select id="m_objt"><option value="bruta">Bruta %</option><option value="neta">Neta %</option><option value="flujo">Flujo €</option></select>
+
+    <div class="section">
+      <h4>2) Características del activo deseado</h4>
+      <div class="row two">
+        <div class="field">
+          <label>Tipo alquiler</label>
+          <select id="m_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
+        </div>
+        <div class="field"><label>Localidades objetivo</label><input id="m_locsobj" placeholder="Oviedo, Gijón…"></div>
       </div>
-      <div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
-    </div>
-    <div class="row three">
-      <div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric" data-money></div>
-      <div class="field">
-        <label>Financiación</label>
-        <select id="m_fin"><option>Sí</option><option>No</option></select>
+      <div class="row four">
+        <div class="field"><label>Nº de activos</label><input id="m_nact" inputmode="numeric" value="1"></div>
+        <div class="field">
+          <label>¿Ascensor?</label>
+          <select id="m_asc"><option>Sí</option><option>No</option></select>
+        </div>
+        <div class="field"><label>Altura máxima</label><input id="m_altmax" inputmode="numeric" value="1"></div>
+        <div class="field">
+          <label>¿Bajo?</label>
+          <select id="m_bajo"><option>No</option><option>Sí</option></select>
+        </div>
       </div>
-      <div class="field"><label>% financiación</label><input id="m_finp" inputmode="numeric" value="80"></div>
+      <div class="row three">
+        <div class="field">
+          <label>Acepta reforma</label>
+          <select id="m_ref"><option>No</option><option>Lavado de cara</option><option>Integral</option></select>
+        </div>
+        <div class="field"><label>Mes inicio búsqueda</label><input id="m_mesini" type="month"></div>
+        <div class="field"><label>Mes fin (auto +5)</label><input id="m_mesfin" type="month" disabled></div>
+      </div>
     </div>
+
+    <div class="section">
+      <h4>3) Presupuesto y precio máximo de compra</h4>
+      <div class="row three">
+        <div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric" data-money></div>
+        <div class="field">
+          <label>Incluir honorarios (PSI)</label>
+          <select id="m_inchonor"><option value="si">Sí</option><option value="no">No</option></select>
+        </div>
+        <div class="field"><label>Precio máx. compra (auto)</label><input id="m_pmax" disabled></div>
+      </div>
+      <small class="hint">El precio máx. se calcula con tu Configuración (ITP, Notaría, Honorarios si procede).</small>
+    </div>
+
+    <div class="section">
+      <h4>4) Financiación</h4>
+      <div class="row three">
+        <div class="field">
+          <label>Financiación</label>
+          <select id="m_fin"><option>Sí</option><option>No</option></select>
+        </div>
+        <div class="field">
+          <label>¿Necesita broker?</label>
+          <select id="m_broker"><option>No</option><option>Sí</option></select>
+        </div>
+        <div class="field"><label>% financiación</label><input id="m_finp" inputmode="numeric" value="80"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h4>5) Objetivo del cliente</h4>
+      <div class="row three">
+        <div class="field">
+          <label>Objetivo principal</label>
+          <select id="m_objt"><option value="bruta">Rentabilidad bruta %</option><option value="neta">Rentabilidad neta %</option><option value="flujo">Flujo de caja €</option></select>
+        </div>
+        <div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
+        <div class="field"><label>Alquiler mensual sugerido (auto)</label><input id="m_alq_sug" disabled></div>
+      </div>
+      <small class="hint">Si el objetivo es “bruta %”, sugerimos un alquiler en base al coste total estimado.</small>
+    </div>
+
     <div class="actions" style="margin-top:10px">
       <button class="btn" id="m_cancel" type="button">Cancelar</button>
       <button class="btn primary" id="m_save" type="button">Guardar</button>
