@@ -151,6 +151,8 @@ const fmtN1=new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
 const e0=v=>fmtE0.format(Number(v||0));
 const pct=v=>fmtN1.format(Number(v||0))+' %';
 const parseEs=s=>Number(String(s??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'))||0;
+/* helper num para leer %/números desde prospectos */
+const num = v => Number(String(v ?? '').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.')) || 0;
 
 const Store={
   get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
@@ -160,7 +162,7 @@ const Store={
   get pros(){ try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]} },
   set pros(v){ localStorage.setItem('pros',JSON.stringify(v)); }
 };
-/* robustez para Config */
+/* robustez para Config (con mínimo para notaría) */
 const CFG=(k,def)=>{
   const c=Store.cfg||{}; let v=c[k];
   if(v==null){ const alt={itp_pct:'itp_pct',notaria:'notaria',hogar_pct:'hogar_pct',
@@ -170,8 +172,7 @@ const CFG=(k,def)=>{
   }
   v = Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));
   if(!Number.isFinite(v)) v=def;
-  /* hardening: notaría nunca 2 🙂 */
-  if(k==='notaria' && v<500) v=1500;
+  if(k==='notaria' && v<500) v=1500; // hardening
   return v;
 };
 
@@ -283,9 +284,15 @@ function calcular(){
   setDot(id('sf'),flujo>=0?100:0);
 
   // gráfica: Bruta vs Objetivo, Neta vs Objetivo
-  drawChart({bruta,neta,goalB,goalN:goalB}); // objetivo neta no definido -> uso mismo umbral visual
-  // sugerencias y selector de prospects
-  suggestProspects({tipo,loc:id('e_loc').value,inv,alq:alqM*12});
+  drawChart({bruta,neta,goalB,goalN:goalB});
+
+  // sugerencias (tipo + loc + objetivo individual del prospecto)
+  suggestProspects({ 
+    tipo, 
+    loc: id('e_loc').value, 
+    kpi_bruta: bruta, 
+    kpi_neta: neta 
+  });
 }
 
 /* ===== Gráfica Canvas básica ===== */
@@ -323,26 +330,64 @@ function drawChart({bruta,neta,goalB,goalN}){
   ctx.fillStyle='#f59e0b'; ctx.fillRect(W-112,22,16,10);
 }
 
-/* ===== Prospects: sugerir + asignar ===== */
-function suggestProspects({tipo,loc,inv,alq}){
-  const pros=Store.pros||[];
-  const box=id('assign_cli'); const info=id('matchList');
-  box.innerHTML=''; info.textContent='—';
-  if(!pros.length){ info.textContent='No hay prospects guardados.'; return; }
-  const matches = pros.filter(p=>{
-    const okTipo = !p.pref_tipo || String(p.pref_tipo).toLowerCase().includes(String(tipo||'').toLowerCase());
-    const okLoc = !p.locs_text || String(p.locs_text).toLowerCase().includes(String(loc||'').toLowerCase());
-    return okTipo && okLoc;
-  });
-  info.textContent = matches.length? Sugeridos: ${matches.length}/${pros.length} : 'Sin coincidencias claras';
-  matches.forEach(p=>{
-    const opt=document.createElement('option');
-    opt.value=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2));
-    opt.textContent=${p.nombre||'—'} · ${p.pref_tipo||'-'} · ${p.locs_text||''};
+/* ===== Prospects: sugerir (loc + tipo + objetivo Bruta/Neta) ===== */
+function suggestProspects({tipo, loc, kpi_bruta, kpi_neta}){
+  const pros = Store.pros || [];
+  const box  = id('assign_cli');
+  const info = id('matchList');
+  box.innerHTML = ''; 
+  info.textContent = '—';
+
+  if(!pros.length){
+    info.textContent = 'No hay prospects guardados.';
+    return;
+  }
+
+  const norm = s => (s||'').toString().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const atLeast = (real, goal) => (Number(real||0) - Number(goal||0)); // diferencia en puntos
+
+  const res = pros.map(p=>{
+    const pTipo  = (p.pref_tipo || '').trim();
+    const pLocs  = (p.locs_text || '').trim();
+    const pGoalM = (p.obj_principal || p.objetivo_principal || 'Bruta').toLowerCase();
+
+    // Metas del prospect con tolerancia y fallback a Config
+    const gBruta = num(p.obj_bruta_pct ?? p.goal_bruta ?? p.rentabilidad_bruta_obj ?? CFG('obj_bruta_trad',10));
+    const gNeta  = num(p.obj_neta_pct  ?? p.goal_neta  ?? p.rentabilidad_neta_obj  ?? Math.max(0, gBruta - 2));
+
+    const tipoOk = !pTipo || pTipo === tipo;
+    const locOk  = !pLocs || norm(pLocs).includes(norm(loc));
+
+    const diff = pGoalM.startsWith('net') ? atLeast(kpi_neta, gNeta)
+                                          : atLeast(kpi_bruta, gBruta);
+
+    // scoring simple: tipo (1) + loc (1) + KPI (0/1/2)
+    let score = 0, tag = '';
+    if(tipoOk) score += 1;
+    if(locOk)  score += 1;
+
+    if(diff >= 0){ score += 2; tag = 'OK'; }
+    else if(diff > -1){ score += 1; tag = 'Cerca'; }
+    else { tag = 'Lejos'; }
+
+    return { p, score, diff, tag, pGoalM, gBruta, gNeta };
+  })
+  .sort((a,b)=> (b.score - a.score) || (b.diff - a.diff));
+
+  res.forEach(({p, tag, diff})=>{
+    const opt = document.createElement('option');
+    opt.value = p.id || p.email || p.nombre || ('p_'+Math.random().toString(36).slice(2));
+    opt.textContent = ${p.nombre || '—'} · ${p.pref_tipo || '-'} · ${p.locs_text || ''} · ${tag} (${diff>=0?'+':''}${diff.toFixed(1)} pts);
     box.appendChild(opt);
   });
+
+  info.textContent = res.length 
+    ? Sugeridos: ${res.length}/${pros.length} 
+    : 'Sin coincidencias claras';
 }
 
+/* ===== Guardar / Asignar ===== */
 function collect(){
   const get = k=>document.getElementById(k);
   const o={
@@ -373,7 +418,6 @@ function collect(){
   };
   return o;
 }
-
 function guardarSolo(){
   const list=Store.evals||[];
   const data=collect();
@@ -382,7 +426,6 @@ function guardarSolo(){
   Store.evals=list;
   alert('Evaluación guardada');
 }
-
 function guardarYAsignar(){
   const list=Store.evals||[];
   const data=collect();
