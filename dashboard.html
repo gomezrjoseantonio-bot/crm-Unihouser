@@ -32,9 +32,9 @@
 .theme-light .table tr:last-child td{ border-bottom:none; }
 .theme-light .nav a.active{ background:rgba(255,106,61,.12); color:#8a3410; border-radius:10px; padding:8px 10px; }
 
-/* Título coherente con el resto (usa h2 como en tus secciones) */
+/* Título coherente */
 .page-header{ margin:18px 0 10px; }
-.page-title{ font-size:1.6rem; font-weight:700; margin:0; /* color heredado de h2 global */ }
+.page-title{ font-size:1.6rem; font-weight:700; margin:0; }
 
 /* KPIs / filtros / kanban */
 .kpi-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
@@ -78,6 +78,11 @@
 
 /* Toggle tabla */
 .toggle-row{display:flex;justify-content:flex-end;margin:12px 0}
+
+/* Toasts */
+.toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:80}
+.toast{background:#111827;color:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 10px 24px rgba(0,0,0,.25);opacity:.96}
+.toast.ok{background:#15803d} .toast.warn{background:#b45309} .toast.bad{background:#b91c1c}
 </style>
 </head>
 
@@ -242,7 +247,7 @@
       <div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
     </div>
     <div class="row three">
-      <div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric"></div>
+      <div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric" data-money></div>
       <div class="field">
         <label>Financiación</label>
         <select id="m_fin"><option>Sí</option><option>No</option></select>
@@ -255,6 +260,9 @@
     </div>
   </div>
 </div>
+
+<!-- Toasts -->
+<div class="toast-wrap" id="toasts"></div>
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
