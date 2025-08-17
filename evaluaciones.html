@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Evaluaciones</title>
-<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/style.css">
 <style>
-/* mínimos locales */
+/* Drawer/overlay/toasts locales (prefijo uh-) */
 .uh-overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
 .uh-overlay.open{display:block}
-.uh-drawer{position:fixed;top:0;right:-520px;height:100%;width:520px;max-width:100%;background:#fff;border-left:1px solid #e5e7eb;box-shadow:0 10px 24px rgba(0,0,0,.2);transition:right .2s ease;z-index:90}
+.uh-drawer{position:fixed;top:0;right:-480px;height:100%;width:480px;max-width:100%;background:#fff;border-left:1px solid #e5e7eb;box-shadow:0 10px 24px rgba(0,0,0,.25);transition:right .2s ease;z-index:90}
 .uh-drawer.open{right:0}
 .uh-d-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #eef2f7}
 .uh-d-body{padding:16px 16px 24px;overflow:auto;height:calc(100% - 60px)}
@@ -60,15 +60,15 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
       <h3 style="margin:0 0 6px">Filtros</h3>
       <div class="filters">
         <div class="row">
-          <div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad o calle" /></div>
+          <div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad o calle"></div>
           <div class="field"><label>Tipo</label>
             <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
           </div>
-          <div class="field"><label>Desde</label><input id="f_desde" type="date" /></div>
-          <div class="field"><label>Hasta</label><input id="f_hasta" type="date" /></div>
-          <div class="field" style="align-self:end"><button class="btn" id="b_limpiar">Limpiar</button></div>
+          <div class="field"><label>Desde</label><input id="f_desde" type="date"></div>
+          <div class="field"><label>Hasta</label><input id="f_hasta" type="date"></div>
+          <div class="field" style="align-self:end"><button class="btn"        id="b_limpiar">Limpiar</button></div>
           <div class="field" style="align-self:end"><button class="btn primary" id="b_filtrar">Filtrar</button></div>
-          <div class="field" style="align-self:end"><button class="btn" id="b_export">Exportar CSV</button></div>
+          <div class="field" style="align-self:end"><button class="btn"        id="b_export">Exportar CSV</button></div>
         </div>
       </div>
     </div>
@@ -82,12 +82,12 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
             <th data-k="calle">Calle</th>
             <th data-k="tipo">Tipo</th>
             <th data-k="precio" style="text-align:right">Precio</th>
-            <th data-k="alq" style="text-align:right">Alquiler</th>
+            <th data-k="alq"    style="text-align:right">Alquiler</th>
             <th data-k="kpi_bruta" style="text-align:right">Bruta %</th>
-            <th data-k="kpi_neta" style="text-align:right">Neta %</th>
+            <th data-k="kpi_neta"  style="text-align:right">Neta %</th>
             <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
-            <th data-k="pmax" style="text-align:right">P. máx</th>
-            <th data-k="asig" style="text-align:center">Asignados</th>
+            <th data-k="pmax"      style="text-align:right">P. máx</th>
+            <th data-k="asig"      style="text-align:center">Asignados</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -99,6 +99,7 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
+<!-- Drawer detalle -->
 <div id="uhOverlay" class="uh-overlay"></div>
 <aside id="uhDrawer" class="uh-drawer" aria-hidden="true">
   <div class="uh-d-head">
@@ -138,7 +139,7 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 (function(){
 "use strict";
 
-/* ===== Utils ===== */
+/* === Utils === */
 const id = x=>document.getElementById(x);
 const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
@@ -154,31 +155,31 @@ function toast(msg,kind){ const wrap=id('toasts'); if(!wrap) return;
 }
 function toPct(raw){ let v=Number(raw||0); if(v>0 && v<=1) v*=100; while(v>=100) v/=10; return v; }
 
-/* ===== Store ===== */
+/* === Store === */
 const Store={
-  get evals(){ try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]} },
-  set evals(v){ localStorage.setItem('evals', JSON.stringify(v)); },
-  get pros(){ try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]} },
-  set pros(v){ localStorage.setItem('pros', JSON.stringify(v)); }
+  get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},
+  set evals(v){localStorage.setItem('evals',JSON.stringify(v))},
+  get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}},
+  set pros(v){localStorage.setItem('pros',JSON.stringify(v))}
 };
 
-/* ===== Estado ===== */
+/* === Estado === */
 let data=[], view=[], sortKey='ts', sortAsc=true, openId=null;
 
-/* ===== Carga + KPIs ===== */
+/* === Carga + KPIs === */
 function load(){
   data=(Store.evals||[]).map(e=>({...e, asig:(e.prospect_ids||[]).length}));
   applyFilters(); kpis();
 }
 function kpis(){
   id('k_total').textContent = data.length;
-  id('k_asig').textContent = data.reduce((a,b)=>a+(b.asig||0),0);
+  id('k_asig').textContent  = data.reduce((a,b)=>a+(b.asig||0),0);
   id('k_bruta').textContent = pct(avg(data.map(x=>toPct(x.kpi_bruta))));
-  id('k_neta').textContent = pct(avg(data.map(x=>toPct(x.kpi_neta))));
+  id('k_neta').textContent  = pct(avg(data.map(x=>toPct(x.kpi_neta))));
 }
 const avg = arr => arr.length? arr.reduce((a,b)=>a+Number(b||0),0)/arr.length : 0;
 
-/* ===== Filtros / Orden ===== */
+/* === Filtros/orden === */
 function applyFilters(){
   const q=(id('f_text').value||'').toLowerCase().trim();
   const t=id('f_tipo').value||'';
@@ -198,19 +199,19 @@ function sort(){
   });
 }
 function get(o,k){
-  if(k==='ts') return new Date(o.ts||o.id?.slice(3)).getTime();
-  if(k==='asig') return (o.prospect_ids||[]).length;
+  if(k==='ts')        return new Date(o.ts||o.id?.slice(3)).getTime();
+  if(k==='asig')      return (o.prospect_ids||[]).length;
   if(k==='kpi_bruta') return toPct(o.kpi_bruta);
-  if(k==='kpi_neta') return toPct(o.kpi_neta);
+  if(k==='kpi_neta')  return toPct(o.kpi_neta);
   if(k==='kpi_flujo') return Number(parseNum(o.kpi_flujo));
-  if(k==='pmax') return Number(o.pmax||0);
-  if(k==='precio') return Number(o.precio||0);
-  if(k==='alq') return Number(o.alq||0);
-  if(k==='calle') return (o.calle||'').toLowerCase();
+  if(k==='pmax')      return Number(o.pmax||0);
+  if(k==='precio')    return Number(o.precio||0);
+  if(k==='alq')       return Number(o.alq||0);
+  if(k==='calle')     return (o.calle||'').toLowerCase();
   return (o[k]||'').toString().toLowerCase();
 }
 
-/* ===== Render tabla ===== */
+/* === Render tabla === */
 function render(){
   const tb=id('tbody'); tb.innerHTML='';
   view.forEach(e=>{
@@ -236,24 +237,25 @@ function render(){
   });
 }
 
-/* ===== Drawer detalle / asignación ===== */
+/* === Drawer detalle + asignación === */
 function openDrawer(idEv){
   openId=idEv;
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e) return;
 
   id('d_fecha').textContent=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
-  id('d_loc').textContent =e.loc||'—';
-  id('d_calle').textContent=e.calle||'—';
-  id('d_tipo').textContent =e.tipo||'—';
-  id('d_precio').textContent=e0(e.precio);
-  id('d_alq').textContent =e0(e.alq);
-  id('d_bruta').textContent =fmtN1.format(toPct(e.kpi_bruta))+' %';
-  id('d_neta').textContent =fmtN1.format(toPct(e.kpi_neta))+' %';
-  id('d_flujo').textContent =e0(e.kpi_flujo);
-  id('d_pmax').textContent =e0(e.pmax);
-  id('d_inv').textContent =e0(e.inv_total);
-  id('d_url').innerHTML =e.url? <a href="${e.url}" target="_blank" rel="noopener">Abrir</a>:'—';
+  id('d_loc').textContent   = e.loc||'—';
+  id('d_calle').textContent = e.calle||'—';
+  id('d_tipo').textContent  = e.tipo||'—';
+  id('d_precio').textContent= e0(e.precio);
+  id('d_alq').textContent   = e0(e.alq);
+  id('d_bruta').textContent = fmtN1.format(toPct(e.kpi_bruta))+' %';
+  id('d_neta').textContent  = fmtN1.format(toPct(e.kpi_neta))+' %';
+  id('d_flujo').textContent = e0(e.kpi_flujo);
+  id('d_pmax').textContent  = e0(e.pmax);
+  id('d_inv').textContent   = e0(e.inv_total);
+  id('d_url').innerHTML     = e.url? <a href="${e.url}" target="_blank" rel="noopener">Abrir</a>:'—';
 
+  // listado prospects
   const wrap=id('p_list'); wrap.innerHTML='';
   const pros=Store.pros||[]; const set=new Set(e.prospect_ids||[]);
   if(!pros.length){ wrap.textContent='No hay prospects guardados.'; }
@@ -273,56 +275,44 @@ function openDrawer(idEv){
   id('uhDrawer').classList.add('open');
 
   id('d_guardar').onclick = saveAssign;
-  id('d_pdf').onclick = ()=>quickPDF(e.id);
-  id('d_editar').onclick = ()=>goEvaluar(e.id);
+  id('d_pdf').onclick     = ()=>quickPDF(e.id);
+  id('d_editar').onclick  = ()=>goEvaluar(e.id);
 }
-function closeDrawer(){
-  id('uhOverlay').classList.remove('open');
-  id('uhDrawer').classList.remove('open');
-  openId=null;
-}
+function closeDrawer(){ id('uhOverlay').classList.remove('open'); id('uhDrawer').classList.remove('open'); openId=null; }
 function saveAssign(){
   if(!openId) return;
   const list=Store.evals||[];
   const idx=list.findIndex(x=>x.id===openId); if(idx<0) return;
   const choices=[...id('p_list').querySelectorAll('input[type=checkbox]')];
   list[idx].prospect_ids = choices.filter(c=>c.checked).map(c=>c.value);
-  Store.evals=list;
-  toast('Asignación guardada','ok');
-  closeDrawer(); load();
+  Store.evals=list; toast('Asignación guardada','ok'); closeDrawer(); load();
 }
 
-/* ===== Abrir en evaluar ===== */
+/* === Abrir en Evaluar (sin depender de evaluar.js) === */
 function goEvaluar(idEv){
-  if(!idEv) return;
-  location.href = 'evaluar.html?id=' + encodeURIComponent(idEv);
+  try{ localStorage.setItem('_load_eval', idEv); }catch(){}
+  location.href = 'evaluar.html#open='+encodeURIComponent(idEv);
 }
 
-/* ===== PDF rápido (sin <script>) ===== */
+/* === PDF rápido (sin <script> embebido) === */
 function quickPDF(idEv){
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e){toast('No encontrado','bad');return;}
   const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — ${esc(e.loc||'')}</title>
-  <style>
-    body{font-family:Inter,Arial;color:#101828;margin:24px}
-    h1{font-size:22px;margin:0 0 6px}
-    h2{font-size:16px;margin:16px 0 8px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .box{border:1px solid #e5e7eb;border-radius:10px;padding:10px}
-    .lab{font-size:12px;color:#667085}.val{font-weight:800}
-    .foot{margin-top:16px;font-size:12px;color:#667085;text-align:center}
-  </style></head><body>
-  <h1>Informe BuyBox — Unihouser</h1>
-  <div class="lab">${fecha}</div>
-  <h2>Resumen financiero</h2>
-  <div class="grid">
+  <style>body{font-family:Inter,Arial;color:#101828;margin:24px}
+  h1{font-size:22px;margin:0 0 6px} h2{font-size:16px;margin:16px 0 8px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .box{border:1px solid #e5e7eb;border-radius:10px;padding:10px}
+  .lab{font-size:12px;color:#667085}.val{font-weight:800}
+  .foot{margin-top:16px;font-size:12px;color:#667085;text-align:center}</style></head><body>
+  <h1>Informe BuyBox — Unihouser</h1><div class="lab">${fecha}</div>
+  <h2>Resumen financiero</h2><div class="grid">
     <div class="box"><div class="lab">Bruta</div><div class="val">${fmtN1.format(toPct(e.kpi_bruta))} %</div></div>
     <div class="box"><div class="lab">Neta</div><div class="val">${fmtN1.format(toPct(e.kpi_neta))} %</div></div>
     <div class="box"><div class="lab">Flujo anual</div><div class="val">${fmtE0.format(Number(parseNum(e.kpi_flujo)))}</div></div>
     <div class="box"><div class="lab">P. máx compra</div><div class="val">${fmtE0.format(e.pmax||0)}</div></div>
   </div>
-  <h2>Datos del inmueble</h2>
-  <div class="grid">
+  <h2>Datos del inmueble</h2><div class="grid">
     <div class="box"><div class="lab">Localidad</div><div class="val">${esc(e.loc||'-')}</div></div>
     <div class="box"><div class="lab">Calle</div><div class="val">${esc(e.calle||'-')}</div></div>
     <div class="box"><div class="lab">Tipo</div><div class="val">${esc(e.tipo||'-')}</div></div>
@@ -330,69 +320,69 @@ function quickPDF(idEv){
     <div class="box"><div class="lab">Precio</div><div class="val">${fmtE0.format(e.precio||0)}</div></div>
     <div class="box"><div class="lab">Inversión total</div><div class="val">${fmtE0.format(e.inv_total||0)}</div></div>
   </div>
-  <div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
-  </body></html>`;
-  const w=window.open('about:blank','_blank'); w.document.open(); w.document.write(html); w.document.close();
-  const tryPrint=()=>{ try{ w.focus(); w.print(); }catch(_){ } };
-  w.onload = tryPrint; setTimeout(tryPrint, 600);
+  <div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></body></html>`;
+  const w=window.open('','_blank'); w.document.open(); w.document.write(html); w.document.close();
+  const tryPrint=()=>{ try{ w.focus(); w.print(); }catch(_){ } }; w.onload=tryPrint; setTimeout(tryPrint,600);
 }
 
-/* ===== CSV (campos extendidos) ===== */
+/* === Export CSV (ampliado con detalles) === */
 function toCSV(rows){
-  const headers=["Fecha","Localidad","Calle","Tipo","Precio","Alquiler","Bruta%","Neta%","Flujo","Pmax","Inversion",
-                 "ITP","Notaria","Reforma","Comunidad","IBI","Hogar","Impago","Gestion",
-                 "m2","Anio","Ascensor","Bajo","Altura","Habs","Banos","URL","Asignados"];
+  const headers=["Fecha","Localidad","Calle","Tipo","Precio","Alquiler","Bruta%","Neta%","Flujo","Pmax","Asignados",
+    "Año","m2","Planta","Ascensor","Bajo","Habs","Baños",
+    "Inversión total","Comunidad/año","IBI/año","Hogar/año","Impago/año","Gestión/año","URL"];
   const lines=[headers.join(';')];
   rows.forEach(e=>{
     const f=new Date(e.ts||e.id?.slice(3)).toLocaleDateString('es-ES');
-    const vals=[
+    const safe=s=>(s??'').toString().replace(/;/g,',');
+    const num=v=>fmtN0.format(Number(parseNum(v)||v||0));
+    const pct=v=>fmtN1.format(Number(v||0));
+    lines.push([
       f, safe(e.loc), safe(e.calle), safe(e.tipo),
-      numfmt(e.precio), numfmt(e.alq),
-      pctfmt(toPct(e.kpi_bruta)), pctfmt(toPct(e.kpi_neta)),
-      numfmt(e.kpi_flujo), numfmt(e.pmax), numfmt(e.inv_total),
-      numfmt(e.itp_eur), numfmt(e.notaria), numfmt(e.reforma), numfmt(e.comunidad),
-      numfmt(e.ibi), numfmt(e.hogar), numfmt(e.impago), numfmt(e.gestion),
-      safe(e.m2), safe(e.anio), safe(e.asc? 'Sí':'No'), safe(e.bajo? 'Sí':'No'),
-      safe(e.alt), safe(e.habs), safe(e.banos), safe(e.url),
-      (e.prospect_ids||[]).length
-    ];
-    lines.push(vals.join(';'));
+      num(e.precio), num(e.alq),
+      pct(toPct(e.kpi_bruta)), pct(toPct(e.kpi_neta)),
+      num(e.kpi_flujo), num(e.pmax), (e.prospect_ids||[]).length,
+      e.anio||'', e.m2||'', e.alt||'', (e.asc||''), (e.bajo||''), e.habs||'', e.banos||'',
+      num(e.inv_total), num(e.comunidad), num(e.ibi), num(e.hogar), num(e.impago), num(e.gestion),
+      safe(e.url||'')
+    ].join(';'));
   });
   return lines.join('\n');
 }
-const numfmt=v=>fmtN0.format(Number(parseNum(v)||v||0));
-const pctfmt=v=>fmtN1.format(Number(v||0));
-const safe=s=>(s??'').toString().replace(/;/g,',');
-
 function download(name,content){
   const blob=new Blob([content],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},0);
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},0);
 }
 
-/* ===== Eventos ===== */
+/* === Eventos tabla/UI === */
 function onTableClick(ev){
-  const btn=ev.target.closest('button[data-act]'); const tr=ev.target.closest('tr');
-  if(!tr) return; const idEv=tr.dataset.id;
+  const btn=ev.target.closest('button[data-act]'); const tr=ev.target.closest('tr'); if(!tr) return;
+  const idEv=tr.dataset.id;
   if(btn){
     const act=btn.dataset.act;
     if(act==='ver') openDrawer(idEv);
     if(act==='del'){ if(confirm('¿Borrar esta evaluación?')){ Store.evals=(Store.evals||[]).filter(x=>x.id!==idEv); load(); } }
-  }else{
-    openDrawer(idEv);
-  }
+  }else{ openDrawer(idEv); }
 }
 function bindSort(){
   document.querySelectorAll('#tbl th[data-k]').forEach(th=>{
     th.addEventListener('click',()=>{
-      const k=th.dataset.k;
-      if(sortKey===k) sortAsc=!sortAsc; else{sortKey=k; sortAsc=true;}
+      const k=th.dataset.k; if(sortKey===k) sortAsc=!sortAsc; else{sortKey=k; sortAsc=true;}
       sort(); render();
     });
   });
 }
 function attach(){
   id('b_filtrar').addEventListener('click',applyFilters);
-  id('b_limpiar').addEventListener('click',()=>{ id('f_text').value=''; id('f_tipo').value=''; id('f_desde').value=''; id('f_hasta').value=''; applyFilters(); });
-  id('b_export').addEventListener('click',()=>{ if(!view.length){toast('Nada que exportar','warn');return
+  id('b_limpiar').addEventListener('click',()=>{id('f_text').value='';id('f_tipo').value='';id('f_desde').value='';id('f_hasta').value='';applyFilters();});
+  id('b_export').addEventListener('click',()=>{ if(!view.length){toast('Nada que exportar','warn');return;} download('evaluaciones.csv',toCSV(view)); });
+  id('tbody').addEventListener('click',onTableClick);
+  id('d_cerrar').addEventListener('click',closeDrawer);
+  id('uhOverlay').addEventListener('click',closeDrawer);
+  bindSort(); load();
+}
+document.addEventListener('DOMContentLoaded',attach);
+})();
+</script>
+</body>
+</html>
