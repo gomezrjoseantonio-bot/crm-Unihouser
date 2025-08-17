@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Dashboard</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff6a3d'/%3E%3Cpath d='M18 38l6-10 6 10 6-10 6 10' stroke='white' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
+/* Tema claro local al dashboard */
 .theme-light{
   --bg:#ffffff; --card:#ffffff; --text:#111827; --muted:#667085; --border:#e5e7eb;
   --accent:#ff6a3d; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
@@ -26,9 +28,11 @@
 .theme-light .table th{ background:#f9fafb; color:#344054; border-bottom:1px solid var(--border); }
 .theme-light .table td{ border-bottom:1px solid #f2f4f7; }
 
+/* Título coherente */
 .page-header{ margin:18px 0 10px; }
-.page-title{ font-size:1.6rem; font-weight:700; margin:0; }
+.page-title{ font-size:1.6rem; font-weight:700; margin:0; color:#101828; }
 
+/* KPIs / filtros / kanban */
 .kpi-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
 @media(min-width:920px){.kpi-grid{grid-template-columns:repeat(6,1fr)}}
 .kpi-card .lab{font-size:12px;color:var(--muted)}
@@ -55,6 +59,7 @@
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
 .dot.green{background:var(--ok)} .dot.amber{background:var(--warn)} .dot.red{background:var(--bad)} .dot.gray{background:#d0d5dd}
 
+/* Drawer */
 .drawer{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:92vw;background:var(--card);
   border-left:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);
   transition:.25s;z-index:50}
@@ -64,6 +69,7 @@
 .pills{display:flex;gap:8px;flex-wrap:wrap}
 .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#f9fafb;color:#344054}
 
+/* Modal reunión (espejo prospectos) */
 .modal{position:fixed;inset:0;background:rgba(16,24,40,.5);display:none;align-items:center;justify-content:center;z-index:60}
 .modal.open{display:flex}
 .modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:900px;max-width:98vw;padding:16px}
@@ -75,8 +81,10 @@
 .field label{display:block;font-size:12px;color:#667085;margin-bottom:4px}
 small.hint{color:#667085}
 
+/* Tabla toggle */
 .toggle-row{display:flex;justify-content:flex-end;margin:12px 0}
 
+/* Toasts */
 .toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:80}
 .toast{background:#111827;color:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 10px 24px rgba(0,0,0,.25);opacity:.96}
 .toast.ok{background:#15803d} .toast.warn{background:#b45309} .toast.bad{background:#b91c1c}
@@ -100,6 +108,7 @@ small.hint{color:#667085}
 <main class="container">
   <div class="page-header"><h2 class="page-title">Dashboard</h2></div>
 
+  <!-- KPIs -->
   <section class="kpi-grid">
     <div class="kpi-card"><div class="lab">Prospectos activos</div><div class="val" id="k_total">—</div></div>
     <div class="kpi-card"><div class="lab">Contacto</div><div class="val" id="k_contacto">—</div></div>
@@ -109,6 +118,7 @@ small.hint{color:#667085}
     <div class="kpi-card"><div class="lab">Notaría</div><div class="val" id="k_notaria">—</div></div>
   </section>
 
+  <!-- Filtros -->
   <section class="card" style="margin-top:12px">
     <h2 style="margin:0 0 10px">Filtros</h2>
     <div class="filter-bar">
@@ -138,6 +148,7 @@ small.hint{color:#667085}
     </div>
   </section>
 
+  <!-- Kanban -->
   <section class="kanban" id="kanban">
     <div class="column" data-col="CONTACTO" data-drop="1"><h4>Contacto</h4></div>
     <div class="column" data-col="REUNION" data-drop="1"><h4>Reunión</h4></div>
@@ -146,10 +157,12 @@ small.hint{color:#667085}
     <div class="column" data-col="NOTARIA" data-drop="1"><h4>Notaría</h4></div>
   </section>
 
+  <!-- Toggle tabla -->
   <div class="toggle-row">
     <button class="btn" id="toggleTable">Mostrar tabla (avanzado)</button>
   </div>
 
+  <!-- Tabla -->
   <section class="table-wrap card" id="tableWrap" style="display:none">
     <h2 style="margin:0 0 10px">Listado</h2>
     <table class="table" id="tab">
@@ -165,6 +178,7 @@ small.hint{color:#667085}
   </section>
 </main>
 
+<!-- Drawer lateral -->
 <aside class="drawer" id="drawer" aria-hidden="true">
   <div class="drawer-header">
     <strong id="dv_title">Prospecto</strong>
@@ -213,7 +227,7 @@ small.hint{color:#667085}
   </div>
 </aside>
 
-<!-- REUNIÓN: espejo + autocálculos -->
+<!-- Modal Reunión (espejo Prospectos con autocálculos) -->
 <div class="modal" id="meetModal" aria-hidden="true">
   <div class="modal-card">
     <h3>Completar datos de reunión</h3>
@@ -314,6 +328,7 @@ small.hint{color:#667085}
   </div>
 </div>
 
+<!-- Toasts -->
 <div class="toast-wrap" id="toasts"></div>
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
