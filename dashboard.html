@@ -5,73 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Dashboard</title>
 <link rel="stylesheet" href="css/style.css">
-<!-- Favicon inline para evitar 404 -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff6a3d'/%3E%3Cpath d='M18 38l6-10 6 10 6-10 6 10' stroke='white' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff6a3d'/%3E%3C/svg%3E">
 <style>
-/* ===== Ajustes mínimos para tema claro y modal compacto ===== */
-:root{
-  --accent:#ff6a3d; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
-  --text:#101828; --muted:#667085; --border:#e5e7eb; --bg:#ffffff; --chip:#f2f4f7;
-}
-body.theme-light{ background:#fff; color:var(--text); }
-.theme-light .topbar{ background:#fff; border-bottom:1px solid var(--border); }
-.theme-light .page-title{ color:#101828; font-size:1.6rem; font-weight:700; margin:16px 0 10px; }
-.theme-light .card, .theme-light .kpi, .theme-light .column, .theme-light .table{
-  background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 1px 2px rgba(16,24,40,.04);
-}
-.theme-light .btn{ background:#f9fafb; border:1px solid var(--border); color:#101828; padding:10px 14px; border-radius:10px; cursor:pointer }
-.theme-light .btn.primary{ background:var(--accent); color:#fff; border-color:transparent }
-.badge{ background:#f2f4f7; color:#344054; border:1px solid #e4e7ec; border-radius:999px; padding:2px 8px; font-weight:700; }
-.tag{ background:#f9fafb; color:#344054; border:1px solid var(--border); border-radius:999px; padding:2px 8px; font-size:12px }
-
-.kpis{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
-@media(min-width:900px){.kpis{grid-template-columns:repeat(6,1fr)}}
+:root{--accent:#ff6a3d;--ok:#16a34a;--warn:#f59e0b;--bad:#ef4444;--muted:#667085;--border:#e5e7eb}
+.page-title{color:#101828;font-size:1.6rem;font-weight:700;margin:16px 0 10px}
+.badge{background:#f2f4f7;color:#344054;border:1px solid #e4e7ec;border-radius:999px;padding:2px 8px;font-weight:700}
+.tag{background:#f9fafb;color:#344054;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}@media(min-width:900px){.kpis{grid-template-columns:repeat(6,1fr)}}
 .kpi{padding:12px}.kpi .lab{font-size:12px;color:var(--muted)}.kpi .val{font-size:22px;font-weight:800;margin-top:4px}
-
-.filters{display:grid;gap:10px;grid-template-columns:1fr}
-@media(min-width:1000px){.filters{grid-template-columns:1.2fr .8fr .8fr 1fr .8fr .6fr .6fr}}
-.filters .btn{height:44px}
-
-.kanban{display:grid;gap:12px;grid-template-columns:1fr}
-@media(min-width:1100px){.kanban{grid-template-columns:repeat(5,1fr)}}
+.filters{display:grid;gap:10px;grid-template-columns:1fr} @media(min-width:1000px){.filters{grid-template-columns:1.2fr .8fr .8fr 1fr .8fr .6fr .6fr}}
+.kanban{display:grid;gap:12px;grid-template-columns:1fr}@media(min-width:1100px){.kanban{grid-template-columns:repeat(5,1fr)}}
 .column{min-height:260px;padding:8px}
 .column h4{margin:2px 6px 8px;color:#344054}
-.drop-target{outline:2px dashed #d0d5dd; outline-offset:-6px}
-.card-mini{padding:10px;margin:6px 4px;border:1px solid var(--border);border-radius:12px}
-.card-mini[draggable="true"]{cursor:grab}
-.card-mini.dragging{opacity:.6; transform:scale(.98)}
+.card-mini{padding:10px;margin:6px 4px;border:1px solid var(--border);border-radius:12px;background:#fff}
+.card-mini[draggable="true"]{cursor:grab}.card-mini.dragging{opacity:.6;transform:scale(.98)}
 .actions-row{display:flex;gap:8px;margin-top:6px}
 .icon-btn{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:6px 8px;cursor:pointer}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
 .dot.green{background:var(--ok)} .dot.amber{background:var(--warn)} .dot.red{background:var(--bad)} .dot.gray{background:#d0d5dd}
-
 .table-wrap{margin-top:12px}
 .table{width:100%;border-collapse:separate;border-spacing:0;border-radius:12px;overflow:hidden}
 .table th,.table td{padding:10px 12px;border-bottom:1px solid #f2f4f7;text-align:left}
 .table th{background:#f9fafb;color:#344054}
-
-.drawer{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:92vw;background:#fff;border-left:1px solid var(--border);
-  box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);transition:.25s;z-index:50}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:92vw;background:#fff;border-left:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);transition:.25s;z-index:50}
 .drawer.open{transform:translateX(0)}
 .drawer-header{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid var(--border)}
 .drawer-body{padding:12px}
 .pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#f9fafb;color:#344054}
-
 .modal{position:fixed;inset:0;background:rgba(16,24,40,.5);display:none;align-items:center;justify-content:center;z-index:60}
 .modal.open{display:flex}
-.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);
-  width:920px;max-width:98vw;max-height:90vh;display:flex;flex-direction:column}
+.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:920px;max-width:98vw;max-height:90vh;display:flex;flex-direction:column}
 .modal-head{padding:12px 16px;border-bottom:1px solid var(--border)}
 .modal-body{padding:12px 16px;overflow:auto}
 .modal-actions{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 16px;background:#fff;border-top:1px solid var(--border)}
-.section{margin:6px 0 10px}
-.section h4{margin:0 0 6px;color:#344054}
+.section{margin:6px 0 10px}.section h4{margin:0 0 6px;color:#344054}
 .row{display:grid;gap:8px;grid-template-columns:1fr}
 @media (min-width:680px){ .row.two{grid-template-columns:1fr 1fr} .row.three{grid-template-columns:1fr 1fr 1fr} .row.four{grid-template-columns:1fr 1fr 1fr 1fr} }
-.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
-small.hint{color:#667085}
+.field label{display:block;font-size:12px;color:#667085;margin-bottom:3px}
 .toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:80}
 .toast{background:#111827;color:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 10px 24px rgba(0,0,0,.25);opacity:.96}
 .toast.ok{background:#15803d} .toast.warn{background:#b45309} .toast.bad{background:#b91c1c}
@@ -134,11 +105,11 @@ small.hint{color:#667085}
   </section>
 
   <section class="kanban" id="kanban">
-    <div class="column" data-col="CONTACTO" data-drop="1"><h4>Contacto</h4></div>
-    <div class="column" data-col="REUNION" data-drop="1"><h4>Reunión</h4></div>
-    <div class="column" data-col="BUSQUEDA" data-drop="1"><h4>Búsqueda</h4></div>
-    <div class="column" data-col="COMPRAVENTA" data-drop="1"><h4>Compraventa</h4></div>
-    <div class="column" data-col="NOTARIA" data-drop="1"><h4>Notaría</h4></div>
+    <div class="column card" data-col="CONTACTO" data-drop="1"><h4>Contacto</h4></div>
+    <div class="column card" data-col="REUNION" data-drop="1"><h4>Reunión</h4></div>
+    <div class="column card" data-col="BUSQUEDA" data-drop="1"><h4>Búsqueda</h4></div>
+    <div class="column card" data-col="COMPRAVENTA" data-drop="1"><h4>Compraventa</h4></div>
+    <div class="column card" data-col="NOTARIA" data-drop="1"><h4>Notaría</h4></div>
   </section>
 
   <div class="card table-wrap" id="tableWrap" style="display:none">
@@ -205,11 +176,10 @@ small.hint{color:#667085}
   </div>
 </aside>
 
-<!-- Modal Reunión -->
+<!-- Modal Reunión (compacto) -->
 <div class="modal" id="meetModal" aria-hidden="true">
   <div class="modal-card">
     <div class="modal-head"><h3 style="margin:0">Completar datos de reunión</h3></div>
-
     <div class="modal-body">
       <div class="section">
         <h4>1) Datos personales</h4>
@@ -257,7 +227,7 @@ small.hint{color:#667085}
           </div>
           <div class="field"><label>Precio máx. compra (auto)</label><input id="m_pmax" disabled></div>
         </div>
-        <small class="hint">El p. máx. usa tu Configuración (ITP, Notaría y, si marcas, Honorarios).</small>
+        <small class="hint">Se usan los valores de Configuración (ITP %, Notaría € y Honorarios € si marcas “Sí”).</small>
       </div>
 
       <div class="section">
@@ -286,7 +256,7 @@ small.hint{color:#667085}
           <div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
           <div class="field"><label>Alquiler mensual sugerido (auto)</label><input id="m_alq_sug" disabled></div>
         </div>
-        <small class="hint">Si el objetivo es “bruta %”, sugerimos alquiler en base al coste total <strong>sin honorarios</strong>.</small>
+        <small class="hint">El alquiler sugerido para “bruta %” usa el coste total <strong>sin honorarios</strong>.</small>
       </div>
     </div>
 
@@ -301,6 +271,6 @@ small.hint{color:#667085}
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
 <script defer src="js/app.js"></script>
-<script defer src="js/dashboard.js?v=20250817-1"></script>
+<script defer src="js/dashboard.js?v=fix-20250817"></script>
 </body>
 </html>
