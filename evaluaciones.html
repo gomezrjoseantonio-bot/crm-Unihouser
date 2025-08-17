@@ -78,7 +78,7 @@ input,select,button{padding:10px;border:1px solid var(--border);border-radius:10
 <section class="card">
 <h3 style="margin:0 0 8px">Filtros</h3>
 <div class="row four">
-<div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad, calle..."></div>
+<div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad o calle"></div>
 <div class="field"><label>Tipo</label>
 <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
 </div>
@@ -98,6 +98,7 @@ input,select,button{padding:10px;border:1px solid var(--border);border-radius:10
 <tr>
 <th data-k="ts">Fecha</th>
 <th data-k="loc">Localidad</th>
+<th data-k="calle">Calle</th>
 <th data-k="tipo">Tipo</th>
 <th data-k="precio" style="text-align:right">Precio</th>
 <th data-k="alq" style="text-align:right">Alquiler</th>
@@ -106,7 +107,7 @@ input,select,button{padding:10px;border:1px solid var(--border);border-radius:10
 <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
 <th data-k="pmax" style="text-align:right">P. máx</th>
 <th data-k="asig" style="text-align:center">Asignados</th>
-<th style="width:160px">Acciones</th>
+<th style="width:260px">Acciones</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -175,6 +176,21 @@ function toast(msg,kind){const w=id("toasts");const d=el("div","toast "+(kind||"
 function parseNum(t){return Number(String(t||'').replace(/[^\d.,-]/g,'').replace(/\./g,'').replace(',', '.'))||0}
 const Store={get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},set evals(v){localStorage.setItem('evals',JSON.stringify(v))},get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}},set pros(v){localStorage.setItem('pros',JSON.stringify(v))}};
 
+/* % robusto: acepta "11,3 %", 0.113, 113 y normaliza a 11.3 */
+function toPct(vRaw){
+const str = (vRaw==null?'':String(vRaw));
+let v = parseNum(str);
+if(v===0 && typeof vRaw==='number') v = vRaw;
+
+// Si viene en fracción (0-1), pásalo a %
+if(v>0 && v<=1) v = v*100;
+
+// Si viene desbocado (≥100), normaliza (113 -> 11.3, 1130 -> 11.3, etc.)
+while(v>=100) v = v/10;
+
+return v;
+}
+
 /* ===== Estado tabla & filtros ===== */
 let data=[], view=[], sortKey='ts', sortAsc=false, openId=null;
 
@@ -214,11 +230,12 @@ function get(o,k){
 if(k==='ts') return new Date(o.ts||o.id?.slice(3)).getTime();
 if(k==='precio') return Number(o.precio||0);
 if(k==='alq') return Number(o.alq||0);
-if(k==='kpi_bruta') return Number(parseNum(o.kpi_bruta));
-if(k==='kpi_neta') return Number(parseNum(o.kpi_neta));
+if(k==='kpi_bruta') return toPct(o.kpi_bruta);
+if(k==='kpi_neta') return toPct(o.kpi_neta);
 if(k==='kpi_flujo') return Number(parseNum(o.kpi_flujo));
 if(k==='pmax') return Number(o.pmax||0);
 if(k==='asig') return Number(o.asig||0);
+if(k==='calle') return (o.calle||'').toString().toLowerCase();
 return (o[k]||'').toString().toLowerCase();
 }
 
@@ -229,19 +246,26 @@ view.forEach(e=>{
 const tr=el('tr');
 const fecha=new Date(e.ts||e.id?.slice(3));
 const fstr=fecha.toLocaleDateString('es-ES',{year:'numeric',month:'2-digit',day:'2-digit'});
+
+const pBru = toPct(e.kpi_bruta);
+const pNet = toPct(e.kpi_neta);
+
 tr.innerHTML=`
 <td>${fstr}</td>
 <td>${esc(e.loc)}</td>
+<td>${esc(e.calle||'')}</td>
 <td><span class="badge">${esc(e.tipo||'-')}</span></td>
 <td style="text-align:right">${fmtE0.format(e.precio||0)}</td>
-<td style="text-align:right">${fmtE0.format((e.alq||0))}</td>
-<td style="text-align:right">${fmtN1.format(Number(parseNum(e.kpi_bruta)))} %</td>
-<td style="text-align:right">${fmtN1.format(Number(parseNum(e.kpi_neta)))} %</td>
+<td style="text-align:right">${fmtE0.format(e.alq||0)}</td>
+<td style="text-align:right">${fmtN1.format(pBru)} %</td>
+<td style="text-align:right">${fmtN1.format(pNet)} %</td>
 <td style="text-align:right">${fmtE0.format(Number(parseNum(e.kpi_flujo)))}</td>
 <td style="text-align:right">${fmtE0.format(e.pmax||0)}</td>
 <td style="text-align:center">${(e.prospect_ids||[]).length}</td>
 <td>
 <button class="btn" data-a="open" data-id="${e.id}">Abrir</button>
+<button class="btn" data-a="goeval" data-id="${e.id}">Editar</button>
+<button class="btn" data-a="pdf" data-id="${e.id}">PDF</button>
 <button class="btn" data-a="dup" data-id="${e.id}">Duplicar</button>
 <button class="btn" data-a="del" data-id="${e.id}">Eliminar</button>
 </td>`;
@@ -255,8 +279,8 @@ function kpis(){
 text('k_total', String(data.length));
 const asig = data.reduce((a,b)=>a+(b.asig||0),0);
 text('k_asig', String(asig));
-const bru = avg(data.map(x=>Number(parseNum(x.kpi_bruta))));
-const net = avg(data.map(x=>Number(parseNum(x.kpi_neta))));
+const bru = avg(data.map(x=>toPct(x.kpi_bruta)));
+const net = avg(data.map(x=>toPct(x.kpi_neta)));
 text('k_bru', fmtN1.format(bru)+' %');
 text('k_net', fmtN1.format(net)+' %');
 }
@@ -274,15 +298,14 @@ text('d_loc', e.loc||'-');
 text('d_calle', e.calle||'-');
 text('d_precio', fmtE0.format(e.precio||0));
 text('d_alq', fmtE0.format(e.alq||0));
-text('d_bruta', fmtN1.format(Number(parseNum(e.kpi_bruta)))+' %');
-text('d_neta', fmtN1.format(Number(parseNum(e.kpi_neta)))+' %');
+text('d_bruta', fmtN1.format(toPct(e.kpi_bruta))+' %');
+text('d_neta', fmtN1.format(toPct(e.kpi_neta))+' %');
 text('d_flujo', fmtE0.format(Number(parseNum(e.kpi_flujo))));
 text('d_pmax', fmtE0.format(e.pmax||0));
 text('d_inv', fmtE0.format(e.inv_total||0));
 const url = e.url?`<a href="${e.url}" target="_blank" rel="noopener">Abrir</a>`:'—';
 id('d_url').innerHTML = url;
 
-// prospects
 const wrap=id('p_list'); wrap.innerHTML='';
 const pros=Store.pros||[];
 const set=new Set(e.prospect_ids||[]);
@@ -322,6 +345,8 @@ const id=b.dataset.id, act=b.dataset.a;
 if(act==='open') openDrawer(id);
 if(act==='del') delEval(id);
 if(act==='dup') dupEval(id);
+if(act==='goeval') goEvaluar(id);
+if(act==='pdf') quickPDF(id);
 }
 function delEval(id){
 const list=Store.evals||[]; const idx=list.findIndex(x=>x.id===id); if(idx<0) return;
@@ -333,20 +358,76 @@ const cp=JSON.parse(JSON.stringify(it)); cp.id='ev_'+Date.now(); cp.ts=new Date(
 list.unshift(cp); Store.evals=list; toast('Duplicado','ok'); load();
 }
 
+/* ===== Editar en Evaluar ===== */
+function goEvaluar(id){
+const it=(Store.evals||[]).find(x=>x.id===id); if(!it){toast('No encontrado','bad');return;}
+try{
+sessionStorage.setItem('edit_eval', JSON.stringify(it));
+}catch(_){}
+location.href='evaluar.html?edit='+encodeURIComponent(id);
+}
+
+/* ===== PDF rápido (print window) ===== */
+function quickPDF(id){
+const e=(Store.evals||[]).find(x=>x.id===id); if(!e){toast('No encontrado','bad');return;}
+const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
+const html = `
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>Informe — ${esc(e.loc||'')}</title>
+<style>
+body{font-family:Inter,Arial; color:#101828; margin:24px}
+h1{font-size:22px;margin:0 0 6px}
+h2{font-size:16px;margin:16px 0 8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.box{border:1px solid #e5e7eb;border-radius:10px;padding:10px}
+.lab{font-size:12px;color:#667085}
+.val{font-weight:800}
+.foot{margin-top:16px;font-size:12px;color:#667085;text-align:center}
+</style></head><body>
+<h1>Informe BuyBox — Unihouser</h1>
+<div class="lab">${fecha}</div>
+
+<h2>Resumen financiero</h2>
+<div class="grid">
+<div class="box"><div class="lab">Bruta</div><div class="val">${fmtN1.format(toPct(e.kpi_bruta))} %</div></div>
+<div class="box"><div class="lab">Neta</div><div class="val">${fmtN1.format(toPct(e.kpi_neta))} %</div></div>
+<div class="box"><div class="lab">Flujo anual</div><div class="val">${fmtE0.format(Number(parseNum(e.kpi_flujo)))}</div></div>
+<div class="box"><div class="lab">P. máx compra</div><div class="val">${fmtE0.format(e.pmax||0)}</div></div>
+</div>
+
+<h2>Datos del inmueble</h2>
+<div class="grid">
+<div class="box"><div class="lab">Localidad</div><div class="val">${esc(e.loc||'-')}</div></div>
+<div class="box"><div class="lab">Calle</div><div class="val">${esc(e.calle||'-')}</div></div>
+<div class="box"><div class="lab">Tipo</div><div class="val">${esc(e.tipo||'-')}</div></div>
+<div class="box"><div class="lab">Alquiler</div><div class="val">${fmtE0.format(e.alq||0)}</div></div>
+<div class="box"><div class="lab">Precio</div><div class="val">${fmtE0.format(e.precio||0)}</div></div>
+<div class="box"><div class="lab">Inversión total</div><div class="val">${fmtE0.format(e.inv_total||0)}</div></div>
+</div>
+
+<div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
+<script>window.onload=()=>window.print()</script>
+</body></html>`;
+
+const w = window.open('', '_blank');
+w.document.open(); w.document.write(html); w.document.close();
+}
+
 /* ===== Export CSV ===== */
 function toCSV(rows){
-const headers=["Fecha","Localidad","Tipo","Precio","Alquiler","Bruta%","Neta%","Flujo","Pmax","Asignados"];
+const headers=["Fecha","Localidad","Calle","Tipo","Precio","Alquiler","Bruta%","Neta%","Flujo","Pmax","Asignados"];
 const lines=[headers.join(';')];
 rows.forEach(e=>{
 const f=new Date(e.ts||e.id?.slice(3)).toLocaleDateString('es-ES');
 lines.push([
 f,
 safe(e.loc),
+safe(e.calle),
 safe(e.tipo),
 numfmt(e.precio),
 numfmt(e.alq),
-pctfmt(e.kpi_bruta),
-pctfmt(e.kpi_neta),
+pctfmt(toPct(e.kpi_bruta)),
+pctfmt(toPct(e.kpi_neta)),
 numfmt(e.kpi_flujo),
 numfmt(e.pmax),
 (e.prospect_ids||[]).length
@@ -355,7 +436,7 @@ numfmt(e.pmax),
 return lines.join('\n');
 }
 function numfmt(v){return fmtN0.format(Number(parseNum(v)||v||0))}
-function pctfmt(v){return fmtN1.format(Number(parseNum(v)||0))}
+function pctfmt(v){return fmtN1.format(Number(v||0))}
 function safe(s){return (s??'').toString().replace(/;/g,',')}
 function download(name,content){
 const blob=new Blob([content],{type:'text/csv;charset=utf-8;'});
@@ -363,7 +444,7 @@ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.downloa
 document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
 }
 
-/* ===== Helpers ===== */
+/* ===== Sort binding ===== */
 function bindSort(){
 id('tbl').querySelectorAll('th[data-k]').forEach(th=>{
 th.addEventListener('click',()=>{
