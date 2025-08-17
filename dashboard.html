@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Dashboard</title>
 <link rel="stylesheet" href="css/style.css">
-
 <style>
 /* ===== Tema claro SOLO para este dashboard ===== */
 .theme-light{
@@ -33,11 +32,11 @@
 .theme-light .table tr:last-child td{ border-bottom:none; }
 .theme-light .nav a.active{ background:rgba(255,106,61,.12); color:#8a3410; border-radius:10px; padding:8px 10px; }
 
-/* Título uniforme */
+/* Título coherente (igual que el resto de páginas) */
 .page-header{ margin:18px 0 10px; }
-.page-title{ font-size:1.8rem; font-weight:600; color:#101828; margin:0; }
+.page-title{ font-size:1.6rem; font-weight:700; color:#101828; margin:0; }
 
-/* Layout específico */
+/* KPIs / filtros / kanban */
 .kpi-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
 @media(min-width:920px){.kpi-grid{grid-template-columns:repeat(6,1fr)}}
 .kpi-card .lab{font-size:12px;color:var(--muted)}
@@ -58,8 +57,11 @@
 .badge{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:700;font-size:12px}
 .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .tag{border-radius:999px;padding:2px 8px;font-size:12px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
+.dot.green{background:var(--ok)} .dot.amber{background:var(--warn)} .dot.red{background:var(--bad)} .dot.gray{background:#d0d5dd}
 
-.drawer{position:fixed;right:0;top:0;bottom:0;width:420px;max-width:92vw;background:var(--card);
+/* Drawer */
+.drawer{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:92vw;background:var(--card);
   border-left:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);
   transition:.25s;z-index:50}
 .drawer.open{transform:translateX(0)}
@@ -68,9 +70,14 @@
 .pills{display:flex;gap:8px;flex-wrap:wrap}
 .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#f9fafb;color:#344054}
 
-/* bolitas estado objetivo */
-.dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
-.dot.green{background:var(--ok)} .dot.amber{background:var(--warn)} .dot.red{background:var(--bad)} .dot.gray{background:#d0d5dd}
+/* Overlay reunión */
+.modal{position:fixed;inset:0;background:rgba(16,24,40,.5);display:none;align-items:center;justify-content:center;z-index:60}
+.modal.open{display:flex}
+.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:720px;max-width:95vw;padding:16px}
+.modal-card h3{margin:0 0 8px}
+
+/* Toggle tabla */
+.toggle-row{display:flex;justify-content:flex-end;margin:12px 0}
 </style>
 </head>
 
@@ -90,7 +97,7 @@
 
 <main class="container">
 
-  <div class="page-header"><h1 class="page-title">Dashboard</h1></div>
+  <div class="page-header"><h2 class="page-title">Dashboard</h2></div>
 
   <!-- KPIs -->
   <section class="kpi-grid">
@@ -131,7 +138,7 @@
     </div>
   </section>
 
-  <!-- Kanban (rellena JS) -->
+  <!-- Kanban -->
   <section class="kanban" id="kanban">
     <div class="column" data-col="CONTACTO"><h4>Contacto</h4></div>
     <div class="column" data-col="REUNION"><h4>Reunión</h4></div>
@@ -140,8 +147,13 @@
     <div class="column" data-col="NOTARIA"><h4>Notaría</h4></div>
   </section>
 
-  <!-- Tabla -->
-  <section class="table-wrap card">
+  <!-- Toggle tabla -->
+  <div class="toggle-row">
+    <button class="btn" id="toggleTable">Mostrar tabla (avanzado)</button>
+  </div>
+
+  <!-- Tabla (oculta por defecto) -->
+  <section class="table-wrap card" id="tableWrap" style="display:none">
     <h2 style="margin:0 0 10px">Listado</h2>
     <table class="table" id="tab">
       <thead><tr>
@@ -156,10 +168,10 @@
   </section>
 </main>
 
-<!-- Drawer lateral -->
+<!-- Drawer -->
 <aside class="drawer" id="drawer">
   <div class="drawer-header">
-    <strong id="dv_nombre">Prospecto</strong>
+    <strong id="dv_title">Prospecto</strong>
     <button class="btn" id="dv_close">Cerrar</button>
   </div>
   <div class="drawer-body">
@@ -168,16 +180,81 @@
       <div class="pill" id="dv_tipo">Tipo: —</div>
       <div class="pill" id="dv_obj">Objetivo: —</div>
     </div>
-    <div class="field"><label>Email</label><input id="dv_email" disabled></div>
-    <div class="field"><label>Teléfono</label><input id="dv_tel" disabled></div>
-    <div class="field"><label>Localidades</label><input id="dv_locs" disabled></div>
+
+    <div class="field"><label>Nombre</label><input id="dv_nombre"></div>
+    <div class="field"><label>Email</label><input id="dv_email"></div>
+    <div class="field"><label>Teléfono</label><input id="dv_tel"></div>
+    <div class="field"><label>Localidades</label><input id="dv_locs"></div>
+
+    <div class="row two" style="margin-top:8px">
+      <div class="field">
+        <label>Fase</label>
+        <select id="dv_fase_sel">
+          <option value="CONTACTO">Contacto</option>
+          <option value="REUNION">Reunión</option>
+          <option value="BUSQUEDA">Búsqueda</option>
+          <option value="COMPRAVENTA">Compraventa</option>
+          <option value="NOTARIA">Notaría</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Subestado</label>
+        <select id="dv_sub_sel"></select>
+      </div>
+    </div>
+
     <div class="actions" style="margin-top:12px">
-      <button class="btn" id="dv_email_btn">Email</button>
+      <button class="btn" id="dv_email_btn">Enviar resumen</button>
+      <button class="btn" id="dv_contract_btn">Enviar contrato</button>
       <button class="btn" id="dv_whatsapp_btn">WhatsApp</button>
+      <button class="btn" id="dv_meeting_btn">Completar datos de reunión</button>
+      <button class="btn" id="dv_delete">Eliminar</button>
+      <button class="btn primary" id="dv_save">Guardar</button>
       <button class="btn primary" id="dv_adv_btn">Avanzar fase</button>
     </div>
   </div>
 </aside>
+
+<!-- Modal reunión -->
+<div class="modal" id="meetModal">
+  <div class="modal-card">
+    <h3>Completar datos de reunión</h3>
+    <div class="row two">
+      <div class="field"><label>DNI</label><input id="m_dni"></div>
+      <div class="field"><label>Dirección</label><input id="m_dir"></div>
+    </div>
+    <div class="row two">
+      <div class="field"><label>Localidad (residencia)</label><input id="m_locres"></div>
+      <div class="field">
+        <label>Tipo alquiler</label>
+        <select id="m_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
+      </div>
+    </div>
+    <div class="row two">
+      <div class="field"><label>Localidades objetivo</label><input id="m_locsobj" placeholder="Oviedo, Gijón…"></div>
+      <div class="field"><label>Nº de activos</label><input id="m_nact" inputmode="numeric" value="1"></div>
+    </div>
+    <div class="row two">
+      <div class="field">
+        <label>Objetivo principal</label>
+        <select id="m_objt"><option value="bruta">Bruta %</option><option value="neta">Neta %</option><option value="flujo">Flujo €</option></select>
+      </div>
+      <div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
+    </div>
+    <div class="row three">
+      <div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric"></div>
+      <div class="field">
+        <label>Financiación</label>
+        <select id="m_fin"><option>Sí</option><option>No</option></select>
+      </div>
+      <div class="field"><label>% financiación</label><input id="m_finp" inputmode="numeric" value="80"></div>
+    </div>
+    <div class="actions" style="margin-top:10px">
+      <button class="btn" id="m_cancel">Cancelar</button>
+      <button class="btn primary" id="m_save">Guardar</button>
+    </div>
+  </div>
+</div>
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
