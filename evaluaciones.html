@@ -395,14 +395,4 @@ function bindSort(){
 function attach(){
   id('b_filtrar').addEventListener('click',applyFilters);
   id('b_limpiar').addEventListener('click',()=>{ id('f_text').value=''; id('f_tipo').value=''; id('f_desde').value=''; id('f_hasta').value=''; applyFilters(); });
-  id('b_export').addEventListener('click',()=>{ if(!view.length){toast('Nada que exportar','warn');return;} download('evaluaciones.csv',toCSV(view)); });
-  id('tbody').addEventListener('click',onTableClick);
-  id('d_cerrar').addEventListener('click',closeDrawer);
-  id('uhOverlay').addEventListener('click',closeDrawer);
-  bindSort(); load();
-}
-document.addEventListener('DOMContentLoaded',attach);
-})();
-</script>
-</body>
-</html>
+  id('b_export').addEventListener('click',()=>{ if(!view.length){toast('Nada que exportar','warn');return
