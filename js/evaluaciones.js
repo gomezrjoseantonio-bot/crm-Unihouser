@@ -1,200 +1,182 @@
-/* === Unihouser — evaluar.js (persistencia + cálculos + look&feel coherente) === */
+/* === Unihouser — evaluaciones.js === */
 (function(){
 "use strict";
 
-/* ---------- Utils ---------- */
+/* Utils */
 const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
 const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
-function id(x){return document.getElementById(x);}
-function parseEs(v){return Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;}
-function e0(n){return fmtE0.format(n||0);}
-function pct(n){return fmtN1.format(n||0)+' %';}
-function dot(el,cls){el.classList.remove('g','y','r');el.classList.add(cls);}
-function moneyifyInputs(){
-  document.querySelectorAll('input[data-money]').forEach(inp=>{
-    inp.addEventListener('input',()=>{
-      const digits=(inp.value||'').replace(/[^\d]/g,'');
-      if(!digits){inp.value='';return;}
-      inp.value=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(Number(digits));
+const id = x=>document.getElementById(x);
+const parseNum = v => Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
+const e0 = v => fmtE0.format(Number(v||0));
+const toPct = v => Number(v||0);
+const pct = v => fmtN1.format(Number(v||0))+' %';
+
+const Store={
+  get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},
+  set evals(v){localStorage.setItem('evals',JSON.stringify(v))}
+};
+
+let data=[], view=[], sortKey='ts', sortAsc=false;
+
+/* Carga + métricas */
+function load(){
+  data = (Store.evals||[]).map(x=>{
+    // normaliza valores numéricos y porcentaje con 1 decimal en UI
+    x.kpi_bruta = Number(x.kpi_bruta||0);
+    x.kpi_neta  = Number(x.kpi_neta||0);
+    x.kpi_flujo = Number(x.kpi_flujo||0);
+    x.pmax      = Number(x.pmax||0);
+    return x;
+  });
+  applyFilters();
+  updateKpis();
+}
+
+function updateKpis(){
+  id('k_total').textContent = data.length;
+  const asig = data.filter(e=>Array.isArray(e.prospect_ids)&&e.prospect_ids.length).length;
+  id('k_asig').textContent = asig;
+  const br = avg(data.map(e=>e.kpi_bruta));
+  const nt = avg(data.map(e=>e.kpi_neta));
+  id('k_bruta').textContent = pct(br);
+  id('k_neta').textContent  = pct(nt);
+}
+const avg = arr => arr.length? arr.reduce((a,b)=>a+Number(b||0),0)/arr.length : 0;
+
+/* Filtros */
+function applyFilters(){
+  const q = (id('f_text').value||'').toLowerCase().trim();
+  const tipo = id('f_tipo').value||'';
+  const d1 = id('f_desde').value? new Date(id('f_desde').value) : null;
+  const d2 = id('f_hasta').value? new Date(id('f_hasta').value) : null;
+
+  view = data.filter(e=>{
+    const txt = ((e.loc||'')+' '+(e.calle||'')).toLowerCase();
+    if(q && !txt.includes(q)) return false;
+    if(tipo && e.tipo!==tipo) return false;
+    const dt = new Date(e.ts||e.id?.slice(3));
+    if(d1 && dt<d1) return false;
+    if(d2 && dt>d2) return false;
+    return true;
+  });
+  sort();
+  render();
+}
+
+/* Ordenación */
+function sort(){
+  const k=sortKey, asc=sortAsc?1:-1;
+  view.sort((a,b)=>{
+    const va = k==='asig' ? (a.prospect_ids||[]).length
+      : k==='ts' ? new Date(a.ts||a.id?.slice(3)).getTime()
+      : a[k];
+    const vb = k==='asig' ? (b.prospect_ids||[]).length
+      : k==='ts' ? new Date(b.ts||b.id?.slice(3)).getTime()
+      : b[k];
+    return (va>vb?1:va<vb?-1:0)*asc;
+  });
+}
+
+/* Pintado */
+function render(){
+  const tb=id('tbody');
+  tb.innerHTML = view.map(e=>{
+    const fecha = new Date(e.ts||e.id?.slice(3)).toLocaleDateString('es-ES');
+    const asig  = (e.prospect_ids||[]).length;
+    return `<tr data-id="${e.id}">
+      <td>${fecha}</td>
+      <td>${esc(e.loc)}</td>
+      <td>${esc(e.calle||'')}</td>
+      <td><span class="pill">${esc(e.tipo)}</span></td>
+      <td>${e0(e.precio)}</td>
+      <td>${e0(Number(e.alq||0))}</td>
+      <td>${pct(toPct(e.kpi_bruta))}</td>
+      <td>${pct(toPct(e.kpi_neta))}</td>
+      <td>${e0(e.kpi_flujo)}</td>
+      <td>${e0(e.pmax)}</td>
+      <td style="text-align:center">${asig}</td>
+      <td>
+        <button class="btn sm" data-act="open">Abrir</button>
+        <button class="btn sm" data-act="del">Borrar</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function esc(s){return (s??'').toString().replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
+
+/* Acciones tabla */
+function onTableClick(ev){
+  const b = ev.target.closest('button[data-act]'); if(!b) return;
+  const tr = ev.target.closest('tr'); if(!tr) return;
+  const id = tr.dataset.id;
+  const act = b.dataset.act;
+  if(act==='del'){
+    if(confirm('¿Borrar esta evaluación?')){
+      Store.evals = (Store.evals||[]).filter(x=>x.id!==id);
+      load();
+    }
+  }else if(act==='open'){
+    // abrir Evaluar (sin pre-rellenado complejo por ahora)
+    window.location.href = 'evaluar.html';
+  }
+}
+
+/* Export CSV */
+function toCSV(rows){
+  const headers=["Fecha","Localidad","Calle","Tipo","Precio","Alquiler","Bruta%","Neta%","Flujo","Pmax","Asignados"];
+  const lines=[headers.join(';')];
+  rows.forEach(e=>{
+    const f=new Date(e.ts||e.id?.slice(3)).toLocaleDateString('es-ES');
+    lines.push([
+      f, safe(e.loc), safe(e.calle), safe(e.tipo),
+      numfmt(e.precio), numfmt(e.alq),
+      pctfmt(toPct(e.kpi_bruta)), pctfmt(toPct(e.kpi_neta)),
+      numfmt(e.kpi_flujo), numfmt(e.pmax),
+      (e.prospect_ids||[]).length
+    ].join(';'));
+  });
+  return lines.join('\n');
+}
+function numfmt(v){return fmtN0.format(Number(parseNum(v)||v||0))}
+function pctfmt(v){return fmtN1.format(Number(v||0))}
+function safe(s){return (s??'').toString().replace(/;/g,',')}
+function download(name,content){
+  const blob=new Blob([content],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},0);
+}
+
+/* Bindings */
+function bindSort(){
+  id('tbl').querySelectorAll('th[data-k]').forEach(th=>{
+    th.addEventListener('click',()=>{
+      const k=th.dataset.k;
+      if(sortKey===k) sortAsc=!sortAsc; else{sortKey=k; sortAsc=true;}
+      sort(); render();
     });
   });
 }
 
-/* ---------- Store ---------- */
-const Store={
-  get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
-  set cfg(v){localStorage.setItem('cfg',JSON.stringify(v));},
-  get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]} },
-  set evals(v){localStorage.setItem('evals',JSON.stringify(v));}
-};
-
-/* ---------- Localidades Asturias (select) ---------- */
-const AST = ["Allande","Aller","Amieva","Avilés","Belmonte de Miranda","Bimenes","Boal","Cabrales","Cabranes","Candamo","Cangas de Onís","Cangas del Narcea","Caravia","Carreño","Caso","Castrillón","Castropol","Coaña","Colunga","Corvera de Asturias","Cudillero","Degaña","Franco","Gijón","Gozón","Grado","Grandas de Salime","Ibias","Illano","Illas","Langreo","Laviana","Lena","Llanera","Llanes","Mieres","Morcín","Muros de Nalón","Nava","Navia","Noreña","Onís","Oviedo","Parres","Pesoz","Piloña","Ponga","Pravia","Proaza","Quirós","Ribadedeva","Ribadesella","Ribera de Arriba","Riosa","Salas","San Martín del Rey Aurelio","San Tirso de Abres","Santa Eulalia de Oscos","Santo Adriano","Sariego","Siero","Sobrescobio","Somiedo","SS de los Oscos","Tapia de Casariego","Taramundi","Teverga","Tineo","Valdés","Vegadeo","Villanueva de Oscos","Villaviciosa"];
-function fillLocs(){
-  const sel=id('e_loc'); if(!sel) return;
-  sel.innerHTML = AST.map(x=><option>${x}</option>).join('');
-}
-
-/* ---------- Cálculos ---------- */
-function getCfg(){
-  const c=Store.cfg||{};
-  return {
-    itp_pct: Number(c.itp_pct ?? 8)/100,         // % ITP
-    notaria: Number(c.notaria ?? 1500),          // €
-    psi_eur: Number(c.psi_eur ?? 4235),          // € (con IVA)
-    gest_trad_pct: Number(c.gest_trad_pct ?? 15)/100,
-    gest_habs_pct: Number(c.gest_habs_pct ?? 25)/100,
-    impago_pct: Number(c.impago_pct ?? 4)/100,
-    hogar_pct: Number(c.hogar_pct ?? 3.5)/100,
-    obj_bruta_trad: Number(c.obj_bruta_trad ?? 10)/100,
-    obj_bruta_habs: Number(c.obj_bruta_habs ?? 12)/100,
-  };
-}
-
-/* pmax que cumple objetivo bruto (alquiler anual / inversión = objetivo),
-   despejando precio: inv = p*(1+itp) + notaría + reforma + (honor si aplica)  */
-function calcPmax(alqAnual, objetivo, itp_pct, notaria, reforma, honorIncluido){
-  const otros = notaria + (reforma||0) + (honorIncluido ? 0 : 0); // honor se añade en inversión solo si se incluye; aquí buscamos P de compra
-  // Si el presupuesto final debe incluir honorarios, éstos van en inversión total.
-  // Para resolver Pmax con honor incluido en inversión, lo restamos del lado derecho:
-  const honor = honorIncluido ? (Store.cfg?.psi_eur ?? 4235) : 0;
-  // inv objetivo
-  const invTarget = alqAnual / (objetivo || 0.000001);
-  // Pmax = (inv - notaría - reforma - honor) / (1+itp)
-  return Math.max(0, (invTarget - notaria - (reforma||0) - honor) / (1+itp_pct));
-}
-
-/* ---------- Acciones ---------- */
-function autocalcITP_Notaria(){
-  const cfg=getCfg();
-  const precio = parseEs(id('e_precio').value);
-  id('e_itp_eur').value = new Intl.NumberFormat('es-ES').format(Math.round(precio * cfg.itp_pct));
-  id('e_notaria').value = new Intl.NumberFormat('es-ES').format(Math.round(cfg.notaria));
-}
-
-function autocalcOperativos(){
-  const cfg=getCfg();
-  const tipo = id('e_tipo').value;
-  const alqMes = parseEs(id('e_alq').value);
-  const alqAnual = alqMes*12;
-
-  const hogar = alqAnual * cfg.hogar_pct;
-  const impago = alqAnual * cfg.impago_pct;
-  const gest = alqAnual * (tipo==='Habitaciones'?cfg.gest_habs_pct:cfg.gest_trad_pct);
-
-  id('e_hogar').value   = new Intl.NumberFormat('es-ES').format(Math.round(hogar));
-  id('e_impago').value  = new Intl.NumberFormat('es-ES').format(Math.round(impago));
-  id('e_gestion').value = new Intl.NumberFormat('es-ES').format(Math.round(gest));
-}
-
-function calcular(){
-  const cfg = getCfg();
-  const precio   = parseEs(id('e_precio').value);
-  const itpEur   = Math.round(precio * cfg.itp_pct);
-  const notaria  = cfg.notaria;
-  const reforma  = parseEs(id('e_reforma').value);
-  const honorSi  = id('e_honor').value==='si';
-  const honorEUR = honorSi ? (Store.cfg?.psi_eur ?? 4235) : 0;
-
-  const alqMes   = parseEs(id('e_alq').value);
-  const alqAnual = alqMes*12;
-
-  const comunidad= parseEs(id('e_comunidad').value);
-  const ibi      = parseEs(id('e_ibi').value);
-  const hogar    = parseEs(id('e_hogar').value);
-  const impago   = parseEs(id('e_impago').value);
-  const gestion  = parseEs(id('e_gestion').value);
-
-  const gastosAnuales = comunidad + ibi + hogar + impago + gestion;
-  const inversionTotal = precio + itpEur + notaria + reforma + honorEUR;
-
-  const bruta = inversionTotal>0 ? (alqAnual / inversionTotal) * 100 : 0;
-  const neta  = inversionTotal>0 ? ((alqAnual - gastosAnuales) / inversionTotal) * 100 : 0;
-  const flujo = (alqAnual - gastosAnuales);
-
-  // objetivo bruto según tipo
-  const tipo = id('e_tipo').value;
-  const objBruta = (tipo==='Habitaciones'?cfg.obj_bruta_habs:cfg.obj_bruta_trad); // en fracción
-  const pmax = calcPmax(alqAnual, objBruta, cfg.itp_pct, notaria, reforma, honorSi);
-
-  // pintar
-  id('r_inv').textContent   = e0(inversionTotal);
-  id('r_bruta').textContent = pct(bruta);
-  id('r_neta').textContent  = pct(neta);
-  id('r_flujo').textContent = e0(flujo);
-  id('r_pmax').textContent  = e0(pmax);
-  id('e_pmax').value        = new Intl.NumberFormat('es-ES').format(Math.round(pmax));
-
-  // semáforos vs objetivo bruto (principal)
-  const diffB = bruta - (objBruta*100);
-  id('r_bruta_diff').textContent = (diffB>=0?'+':'') + fmtN1.format(diffB) + ' pts';
-  dot(id('sb'), diffB>=0 ? 'g' : (diffB>-1 ? 'y' : 'r'));
-
-  const diffN = 0; // si más adelante marcas objetivo neto, aquí el cálculo
-  id('r_neta_diff').textContent = '';
-  dot(id('sn'),'g');
-  dot(id('sf'),'g');
-
-  id('e_result').hidden = false;
-
-  // guarda “último cálculo” en memoria para poder persistir con el botón Guardar
-  window.__lastEval = {
-    id: 'ev_'+Date.now(),
-    ts: new Date().toISOString(),
-    tipo,
-    loc: id('e_loc').value,
-    calle: id('e_calle').value,
-    url: id('e_url').value,
-    anio: id('e_anio').value,
-    m2: id('e_m2').value,
-    reforma_tip: id('e_ref_nec').value,
-    alt: id('e_alt').value,
-    asc: id('e_asc').value,
-    bajo: id('e_bajo').value,
-    habs: id('e_habs').value,
-    banos: id('e_banos').value,
-    precio, itp: itpEur, notaria, reforma, honor: honorEUR,
-    comunidad, ibi, hogar, impago, gestion,
-    alq: alqMes,
-    inv_total: inversionTotal,
-    kpi_bruta: bruta,
-    kpi_neta:  neta,
-    kpi_flujo: flujo,
-    pmax
-  };
-}
-
-function guardar(){
-  if(!window.__lastEval){ alert('Calcula primero para poder guardar.'); return; }
-  const list = Store.evals || [];
-  list.unshift(window.__lastEval);
-  Store.evals = list;
-  // reseteo del flag
-  window.__lastEval = null;
-  alert('Evaluación guardada. La verás en "Evaluaciones".');
-}
-
-/* ---------- Eventos ---------- */
-function clean(){
-  document.querySelectorAll('input').forEach(i=>{ if(!i.readOnly) i.value=''; });
-  id('e_result').hidden = true;
-  window.__lastEval=null;
-  autocalcITP_Notaria();
-}
-
 function attach(){
-  fillLocs();
-  moneyifyInputs();
-  autocalcITP_Notaria();
-
-  id('e_precio').addEventListener('input', autocalcITP_Notaria);
-  id('e_alq').addEventListener('input', autocalcOperativos);
-  id('e_tipo').addEventListener('change', autocalcOperativos);
-
-  id('e_calc').addEventListener('click', calcular);
-  id('e_save').addEventListener('click', guardar);
-  id('e_clean').addEventListener('click', clean);
+  id('b_filtrar').addEventListener('click',applyFilters);
+  id('b_limpiar').addEventListener('click',()=>{
+    id('f_text').value='';
+    id('f_tipo').value='';
+    id('f_desde').value='';
+    id('f_hasta').value='';
+    applyFilters();
+  });
+  id('b_export').addEventListener('click',()=>{
+    if(!view.length){alert('Nada que exportar');return;}
+    download('evaluaciones.csv',toCSV(view));
+  });
+  id('tbody').addEventListener('click',onTableClick);
+  bindSort();
+  load();
 }
 
-document.addEventListener('DOMContentLoaded', attach);
+document.addEventListener('DOMContentLoaded',attach);
 })();
