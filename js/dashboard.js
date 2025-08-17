@@ -139,6 +139,7 @@
       col=wrap.querySelector('.column[data-col="'+fase+'"]');
       if(col) col.insertAdjacentHTML("beforeend", cardHTML(p,i));
     }
+    enableDnD();
   }
 
   /* ========= Tabla ========= */
@@ -199,15 +200,13 @@
     return { itp_pct: toNum(c.itp_pct)||8, not_eur: toNum(c.notaria)||1500, honor_eur: toNum(c.honorarios)||0 };
   }
   function calcPrecioMaxCompra(budget, includeHonor){
-    var c=cfgOrDefaults(); var honor = includeHonor? c.honor_eur : 0;
-    var denom = 1 + (c.itp_pct/100);
-    var num = Math.max(0, budget - c.not_eur - honor);
+    var c = cfgOrDefaults();
+    var itp = (c.itp_pct||0)/100;
+    var not = c.not_eur||0;
+    var hon = c.honor_eur||0;
+    var num = Math.max(0, budget - not - (includeHonor ? hon : 0));
+    var denom = 1 + itp;
     return Math.max(0, Math.floor(num/denom));
-  }
-  function calcAlquilerSugerido(objBrutaPct, inversionTotal){
-    if(!objBrutaPct||!inversionTotal) return 0;
-    var anual = (objBrutaPct/100)*inversionTotal;
-    return Math.max(0, Math.round(anual/12));
   }
   function monthPlus5(value){
     if(!value||!/\d{4}-\d{2}/.test(value)) return "";
@@ -218,22 +217,17 @@
   /* ========= Modal Reunión ========= */
   function openMeeting(p){
     if(!$("meetModal")) return;
-    // Personales
     $("m_dni").value=p.dni||""; $("m_dir").value=p.dir||""; $("m_locres").value=p.loc_res||"";
     $("m_email").value=p.email||""; $("m_tel").value=p.tel||"";
-    // Preferencias
     $("m_tipo").value=p.pref_tipo||"Tradicional"; $("m_locsobj").value=p.locs_text||"";
     $("m_nact").value=p.n_activos||1; $("m_asc").value=p.ascensor||"Sí";
     $("m_altmax").value=p.altura_max||1; $("m_bajo").value=p.bajo||"No";
     $("m_ref").value=p.reforma||"No"; $("m_mesini").value=p.mes_ini||"";
     $("m_mesfin").value=p.mes_fin||"";
-    // Presupuesto
     $("m_budget").value=p.budget?fmtN0.format(p.budget):""; $("m_inchonor").value=p.incluir_honor||"si";
     $("m_pmax").value=p.pmax_compra?fmtN0.format(p.pmax_compra):"";
-    // Financiación
     $("m_fin").value=p.financia||"Sí"; $("m_broker").value=p.broker||"No"; $("m_finp").value=p.fin_pct||"80";
     $("m_fin_imp").value=p.fin_importe?fmtN0.format(p.fin_importe):""; $("m_aport").value=p.aportacion?fmtN0.format(p.aportacion):"";
-    // Objetivos
     $("m_objt").value=p.obj_tipo||"bruta"; $("m_objv").value=p.obj_raw||"";
     $("m_alq_sug").value=p.alq_sugerido?fmtN0.format(p.alq_sugerido):"";
 
@@ -243,32 +237,43 @@
   function closeMeeting(){ $("meetModal")?.classList.remove("open"); $("meetModal")?.setAttribute("aria-hidden","true"); }
 
   function recalcMeeting(){
+    var c = cfgOrDefaults();
+    var itpPct = (c.itp_pct||0)/100;
+    var not    = c.not_eur||0;
+    var hon    = c.honor_eur||0;
+
     var budget = toNum($("m_budget")?.value||0);
     var includeHonor = (($("m_inchonor")?.value||"si")==="si");
+
     var pmax = calcPrecioMaxCompra(budget, includeHonor);
-    if($("m_pmax")) $("m_pmax").value = pmax?fmtN0.format(pmax):"";
+    if ($("m_pmax")) $("m_pmax").value = pmax ? fmtN0.format(pmax) : "";
 
-    // financiación (sobre precio)
-    var fin = ($("m_fin")?.value||"Sí")==="Sí";
-    var finp = toNum($("m_finp")?.value||80);
-    var finImporte = fin ? Math.round(pmax * (finp/100)) : 0;
-    var aport = Math.max(0, budget - finImporte);
-    $("m_fin_imp").value = finImporte?fmtN0.format(finImporte):"";
-    $("m_aport").value   = aport?fmtN0.format(aport):"";
+    var itpVal       = Math.round(pmax * itpPct);
+    var totalSinHonor= pmax + itpVal + not;
+    var totalConHonor= totalSinHonor + hon;
 
-    // alquiler sugerido si objetivo es bruta %
-    var objt= $("m_objt")?.value||"bruta";
-    var objv= toNum($("m_objv")?.value||0);
-    if(objt==="bruta"){
-      var alq = calcAlquilerSugerido(objv, budget);
-      $("m_alq_sug").value = alq?fmtN0.format(alq):"";
-    }else{
+    var fin        = ($("m_fin")?.value||"Sí")==="Sí";
+    var finp       = toNum($("m_finp")?.value||80);
+    var financiado = fin ? Math.round(pmax * (finp/100)) : 0;
+
+    var aport = includeHonor ? Math.max(0, totalConHonor - financiado)
+                             : Math.max(0, totalSinHonor - financiado + hon);
+
+    $("m_fin_imp").value = financiado ? fmtN0.format(financiado) : "";
+    $("m_aport").value   = aport      ? fmtN0.format(aport)      : "";
+
+    var objt = $("m_objt")?.value||"bruta";
+    var objv = toNum($("m_objv")?.value||0);
+    if (objt === "bruta" && objv > 0){
+      var anual = Math.round((objv/100) * totalSinHonor);
+      var alq   = Math.max(0, Math.round(anual/12));
+      $("m_alq_sug").value = alq ? fmtN0.format(alq) : "";
+    } else {
       $("m_alq_sug").value = "";
     }
 
-    // mes fin auto
-    var mi=$("m_mesini")?.value||"";
-    if(mi){ $("m_mesfin").value = monthPlus5(mi); }
+    var mi = $("m_mesini")?.value||"";
+    if (mi){ $("m_mesfin").value = monthPlus5(mi); }
   }
 
   /* ========= Render principal ========= */
@@ -313,143 +318,108 @@
       var tel=normPhone(p.tel); if(!tel) return;
       window.open("https://wa.me/"+tel+"?text="+encodeURIComponent("Te envío el resumen por email. Seguimos."), "_blank");
     });
-    onClick(".act-open", function(){ var p=(Store.pros||[])[parseInt(this.dataset.i,10)]; if(!p) return; p.__idx=parseInt(this.dataset.i,10); openDrawer(p); });
-    onClick(".act-next", function(){ var arr=Store.pros||[], idx=parseInt(this.dataset.i,10), p=arr[idx]; if(!p) return; p.fase=nextPhase(p.fase||"CONTACTO"); var subs=subestados[p.fase]||[]; p.sub=subs.length?subs[0]:""; Store.pros=arr; renderAll(); toast("Fase: "+p.fase,"ok"); });
-    onClick(".act-del", function(){ var arr=Store.pros||[], idx=parseInt(this.dataset.i,10), p=arr[idx]; if(!p) return; if(confirm("¿Eliminar a "+(p.nombre||"este prospecto")+"?")){ arr.splice(idx,1); Store.pros=arr; renderAll(); toast("Prospecto eliminado","ok"); } });
+    onClick(".act-open, .open-drawer", function(){
+      var i=parseInt(this.dataset.i,10); var p=(Store.pros||[])[i]; if(!p) return; p.__idx=i; openDrawer(p);
+    });
+    onClick(".act-next", function(){
+      var i=parseInt(this.dataset.i,10), arr=Store.pros||[]; var p=arr[i]; if(!p) return;
+      p.fase = nextPhase(p.fase||"CONTACTO"); p.sub=""; Store.pros=arr; renderAll(); toast("Prospecto movido a "+p.fase,"ok");
+    });
+    onClick(".act-del", function(){
+      var i=parseInt(this.dataset.i,10), arr=Store.pros||[]; if(arr[i] && confirm("Eliminar este prospecto?")){ arr.splice(i,1); Store.pros=arr; renderAll(); toast("Eliminado","ok"); }
+    });
 
-    // Drawer
+    // Drawer buttons
     onClick("#dv_close", function(){ closeDrawer(); });
-    onClick(".open-drawer", function(){ var p=(Store.pros||[])[parseInt(this.dataset.i,10)]; if(!p) return; p.__idx=parseInt(this.dataset.i,10); openDrawer(p); });
-    onClick("#dv_email_btn", function(){
-      var to=this.dataset.to||""; if(!to) return;
-      var arr=Store.pros||[]; var idx=$("dv_save")?.dataset.idx?parseInt($("dv_save").dataset.idx,10):-1; var p=arr[idx]||{};
-      var resumen=[]; if(p.obj_tipo){ resumen.push("Objetivo: "+p.obj_tipo.toUpperCase()+" "+(p.obj_tipo==="flujo"?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %"))); }
-      if(p.locs_text){ resumen.push("Zonas: "+p.locs_text); } if(p.budget){ resumen.push("Presupuesto total: "+fmtN0.format(p.budget)+" €"); }
-      var body="Hola "+(p.nombre||"")+",%0D%0A%0D%0AResumen reunión:%0D%0A- "+resumen.join("%0D%0A- ")+"%0D%0A%0D%0AQuedo atento.%0D%0ASaludos.";
-      window.location.href="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent("Unihouser — Resumen de reunión")+"&body="+body;
+    onClick("#dv_save", function(){
+      var i=parseInt(this.dataset.idx,10), arr=Store.pros||[]; var p=arr[i]; if(!p) return;
+      p.nombre=$("dv_nombre").value; p.email=$("dv_email").value; p.tel=$("dv_tel").value;
+      p.locs_text=$("dv_locs").value; p.fase=$("dv_fase_sel").value; p.sub=$("dv_sub_sel").value;
+      arr[i]=p; Store.pros=arr; renderAll(); toast("Prospecto actualizado","ok");
     });
-    onClick("#dv_contract_btn", function(){ var to=this.dataset.to||""; if(!to) return; var body="Hola,%0D%0AAdjunto contrato para firma. Cualquier duda, dime.%0D%0ASaludos."; window.location.href="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent("Unihouser — Contrato de servicios")+"&body="+body; });
-    onClick("#dv_whatsapp_btn", function(){ var tel=normPhone(this.dataset.tel||""); if(!tel) return; window.open("https://wa.me/"+tel+"?text="+encodeURIComponent("Te envío el resumen/contrato por email. Cualquier duda, dime."), "_blank"); });
-    onClick("#dv_adv_btn", function(){ var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return; p.fase=nextPhase(p.fase||"CONTACTO"); var subs=subestados[p.fase]||[]; p.sub=subs.length?subs[0]:""; Store.pros=arr; closeDrawer(); renderAll(); toast("Fase: "+p.fase,"ok"); });
-    onClick("#dv_delete", function(){ var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return; if(confirm("¿Eliminar a "+(p.nombre||"este prospecto")+"?")){ arr.splice(idx,1); Store.pros=arr; closeDrawer(); renderAll(); toast("Prospecto eliminado","ok"); } });
-    onClick("#dv_save", function(){ var idx=parseInt(this.dataset.idx,10), arr=Store.pros||[], p=arr[idx]; if(!p) return; p.nombre=$("dv_nombre")?.value||""; p.email=$("dv_email")?.value||""; p.tel=$("dv_tel")?.value||""; p.locs_text=$("dv_locs")?.value||""; p.fase=$("dv_fase_sel")?.value||"CONTACTO"; p.sub=$("dv_sub_sel")?.value||""; Store.pros=arr; closeDrawer(); renderAll(); toast("Guardado","ok"); });
-
-    // Abrir modal reunión (robusto con fallback)
+    onClick("#dv_delete", function(){
+      var i=parseInt(this.dataset.idx,10), arr=Store.pros||[]; if(arr[i] && confirm("Eliminar este prospecto?")){ arr.splice(i,1); Store.pros=arr; closeDrawer(); renderAll(); toast("Eliminado","ok"); }
+    });
+    onClick("#dv_adv_btn", function(){
+      var i=parseInt(this.dataset.idx,10), arr=Store.pros||[]; var p=arr[i]; if(!p) return;
+      p.fase=nextPhase(p.fase||"CONTACTO"); p.sub=""; Store.pros=arr; openDrawer(p); renderAll(); toast("Avanzado a "+p.fase,"ok");
+    });
     onClick("#dv_meeting_btn", function(){
-      try{
-        var idxStr = this.dataset.idx || "-1";
-        var idx = parseInt(idxStr, 10);
-        if (isNaN(idx) || idx < 0) {
-          var arr = Store.pros || [];
-          var name = $("dv_nombre")?.value||"", email=$("dv_email")?.value||"", tel=$("dv_tel")?.value||"";
-          var found=-1; for(var i=0;i<arr.length;i++){ var P=arr[i]||{}; if((name&&P.nombre===name)||(email&&P.email===email)||(tel&&P.tel===tel)){ found=i; break; } }
-          if(found<0){ toast("Abre el prospecto desde Kanban o Tabla y vuelve a pulsar “Completar datos de reunión”.","warn"); return; }
-          idx=found;
-        }
-        var list=Store.pros||[], sel=list[idx]; if(!sel){ toast("Prospecto no encontrado.","bad"); return; }
-        sel.__idx=idx; openMeeting(sel);
-      }catch(e){ console.error(e); toast("No se pudo abrir el formulario de reunión.","bad"); }
+      var i=parseInt(this.dataset.idx,10), p=(Store.pros||[])[i]; if(!p) return; p.__idx=i; openMeeting(p);
+    });
+    onClick("#dv_evals_btn", function(){
+      var pid=this.dataset.pid||""; if(!pid) return; window.location.href="evaluaciones.html?prospect="+encodeURIComponent(pid);
     });
 
-    // Ver evaluaciones
-    onClick("#dv_evals_btn", function(){ var pid=this.dataset.pid||""; if(!pid) return; window.location.href="evaluaciones.html?prospect="+encodeURIComponent(pid); });
-
-    // Modal reunión: listeners recalculo
-    ["m_budget","m_inchonor","m_objt","m_objv","m_fin","m_finp","m_mesini"].forEach(function(id){
-      var el=$(id); if(el){ ["input","change","blur"].forEach(function(ev){ el.addEventListener(ev, recalcMeeting); }); }
+    // Modal meeting change → recalc
+    ["m_budget","m_inchonor","m_fin","m_finp","m_objt","m_objv","m_mesini"].forEach(function(id){
+      document.addEventListener("input", function(e){ if(e.target && e.target.id===id){ recalcMeeting(); } });
+      document.addEventListener("change", function(e){ if(e.target && e.target.id===id){ recalcMeeting(); } });
     });
 
     onClick("#m_cancel", function(){ closeMeeting(); });
     onClick("#m_save", function(){
-      var idx=parseInt(this.dataset.idx,10), a=Store.pros||[], P=a[idx]; if(!P) return;
+      var i=parseInt(this.dataset.idx,10), arr=Store.pros||[]; var p=arr[i]; if(!p) return;
 
-      // Personales
-      P.dni=$("m_dni")?.value||""; P.dir=$("m_dir")?.value||""; P.loc_res=$("m_locres")?.value||"";
-      P.email=$("m_email")?.value||P.email||""; P.tel=$("m_tel")?.value||P.tel||"";
+      p.dni=$("m_dni").value; p.dir=$("m_dir").value; p.loc_res=$("m_locres").value;
+      p.email=$("m_email").value; p.tel=$("m_tel").value;
 
-      // Preferencias
-      P.pref_tipo=$("m_tipo")?.value||"Tradicional"; P.locs_text=$("m_locsobj")?.value||"";
-      P.n_activos=toNum($("m_nact")?.value); P.ascensor=$("m_asc")?.value||"Sí";
-      P.altura_max=toNum($("m_altmax")?.value); P.bajo=$("m_bajo")?.value||"No";
-      P.reforma=$("m_ref")?.value||"No"; P.mes_ini=$("m_mesini")?.value||""; P.mes_fin=$("m_mesfin")?.value||"";
+      p.pref_tipo=$("m_tipo").value; p.locs_text=$("m_locsobj").value;
+      p.n_activos=toNum($("m_nact").value); p.ascensor=$("m_asc").value;
+      p.altura_max=toNum($("m_altmax").value); p.bajo=$("m_bajo").value;
+      p.reforma=$("m_ref").value; p.mes_ini=$("m_mesini").value; p.mes_fin=$("m_mesfin").value;
 
-      // Presupuesto / pmax
-      P.budget=toNum($("m_budget")?.value); P.incluir_honor=$("m_inchonor")?.value||"si";
-      P.pmax_compra=toNum(($("m_pmax")?.value||"").replace(/\./g,""));
+      p.budget=toNum($("m_budget").value); p.incluir_honor=$("m_inchonor").value;
+      p.pmax_compra=toNum($("m_pmax").value);
 
-      // Financiación
-      P.financia=$("m_fin")?.value||"Sí"; P.broker=$("m_broker")?.value||"No"; P.fin_pct=toNum($("m_finp")?.value);
-      P.fin_importe=toNum(($("m_fin_imp")?.value||"").replace(/\./g,""));
-      P.aportacion=toNum(($("m_aport")?.value||"").replace(/\./g,""));
+      p.financia=$("m_fin").value; p.broker=$("m_broker").value; p.fin_pct=toNum($("m_finp").value);
+      p.fin_importe=toNum($("m_fin_imp").value); p.aportacion=toNum($("m_aport").value);
 
-      // Objetivo
-      P.obj_tipo=$("m_objt")?.value||"bruta"; P.obj_raw=toNum($("m_objv")?.value);
-      P.alq_sugerido=toNum(($("m_alq_sug")?.value||"").replace(/\./g,""));
+      p.obj_tipo=$("m_objt").value; p.obj_raw=toNum($("m_objv").value); p.alq_sugerido=toNum($("m_alq_sug").value);
 
-      Store.pros=a; closeMeeting(); renderAll(); toast("Datos de reunión guardados","ok");
+      arr[i]=p; Store.pros=arr; closeMeeting(); renderAll(); toast("Reunión guardada","ok");
     });
-
-    // Fase -> subestados
-    var faseSel=$("dv_fase_sel"); if(faseSel) faseSel.addEventListener("change", function(){ var v=this.value||"CONTACTO"; fillSubestadosSel(v,""); });
   }
 
   /* ========= Drag & Drop ========= */
-  function attachDragDrop(){
-    document.addEventListener("dragstart", function(e){
-      var card=e.target.closest(".card-mini"); if(!card) return;
-      card.classList.add("dragging");
-      e.dataTransfer.setData("text/plain", card.dataset.i||"");
+  function enableDnD(){
+    var cards=document.querySelectorAll(".card-mini");
+    cards.forEach(function(card){
+      card.addEventListener("dragstart", function(e){ card.classList.add("dragging"); e.dataTransfer.setData("text/plain", card.dataset.i||""); });
+      card.addEventListener("dragend", function(){ card.classList.remove("dragging"); document.querySelectorAll(".column").forEach(c=>c.classList.remove("drop-target")); });
     });
-    document.addEventListener("dragend", function(e){
-      var card=e.target.closest(".card-mini"); if(card) card.classList.remove("dragging");
-      document.querySelectorAll(".column").forEach(function(c){ c.classList.remove("drop-target"); });
-    });
-    document.addEventListener("dragover", function(e){
-      var col=e.target.closest('.column[data-drop="1"]'); if(!col) return;
-      e.preventDefault(); col.classList.add("drop-target");
-    });
-    document.addEventListener("dragleave", function(e){
-      var col=e.target.closest('.column[data-drop="1"]'); if(!col) return;
-      col.classList.remove("drop-target");
-    });
-    document.addEventListener("drop", function(e){
-      var col=e.target.closest('.column[data-drop="1"]'); if(!col) return;
-      e.preventDefault();
-      var idx=parseInt(e.dataTransfer.getData("text/plain"),10);
-      var arr=Store.pros||[], p=arr[idx]; if(!p) return;
-      var newPhase=col.getAttribute("data-col")||"CONTACTO";
-      if(p.fase!==newPhase){
-        p.fase=newPhase; var subs=subestados[p.fase]||[]; p.sub=subs.length?subs[0]:"";
+    document.querySelectorAll(".column[data-drop='1']").forEach(function(col){
+      col.addEventListener("dragover", function(e){ e.preventDefault(); col.classList.add("drop-target"); });
+      col.addEventListener("dragleave", function(){ col.classList.remove("drop-target"); });
+      col.addEventListener("drop", function(e){
+        e.preventDefault(); col.classList.remove("drop-target");
+        var idx=parseInt(e.dataTransfer.getData("text/plain"),10); var arr=Store.pros||[]; var p=arr[idx]; if(!p) return;
+        var newPhase=col.getAttribute("data-col")||"CONTACTO"; p.fase=newPhase; p.sub="";
         Store.pros=arr; renderAll(); toast("Movido a "+newPhase,"ok");
-      }
+      });
     });
   }
 
   /* ========= CSV ========= */
-  function toCSV(rows){
-    var esc=function(s){ if(s==null) return ""; s=String(s); if(s.includes('"')||s.includes(',')||s.includes('\n')) return '"'+s.replace(/"/g,'""')+'"'; return s; };
-    var head=["Nombre","Email","Teléfono","Fase","Subestado","Tipo","Localidades","Objetivo","Objetivo_valor","Presupuesto","ID"];
-    var lines=[head.join(",")];
-    for(var i=0;i<rows.length;i++){
-      var p=rows[i], objTxt=(p.obj_tipo||"").toUpperCase();
-      var objVal=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)):(fmtN1.format(p.obj_raw));
-      lines.push([esc(p.nombre||""),esc(p.email||""),esc(p.tel||""),esc(p.fase||"CONTACTO"),esc(p.sub||""),esc(p.pref_tipo||""),esc(p.locs_text||""),esc(objTxt),esc(objVal),esc(p.budget?fmtN0.format(p.budget):""),esc(p.id||"")].join(","));
-    }
-    return lines.join("\n");
-  }
   function downloadCSV(){
-    var all=Store.pros||[], rows=applyFilters(all, readFilters());
-    var csv=toCSV(rows), blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
-    var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="unihouser_prospectos.csv";
-    document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);document.body.removeChild(a);},500);
-    toast("CSV exportado","ok");
+    var rows=applyFilters(Store.pros||[], readFilters());
+    if(!rows.length){ toast("Nada que exportar","warn"); return; }
+    var h=["Nombre","Email","Teléfono","Fase","Subestado","Tipo","Localidades","Objetivo","Valor","Presupuesto"];
+    var lines=[h.join(";")];
+    for(var i=0;i<rows.length;i++){
+      var p=rows[i]; lines.push([
+        p.nombre||"", p.email||"", p.tel||"", p.fase||"", p.sub||"", p.pref_tipo||"",
+        (p.locs_text||"").replace(/;/g,","), (p.obj_tipo||"").toUpperCase(), p.obj_raw||"", p.budget||""
+      ].join(";"));
+    }
+    var blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
+    var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="prospectos.csv"; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
   }
 
   /* ========= Init ========= */
   document.addEventListener("DOMContentLoaded", function(){
-    ensureIds();
-    attach();
-    attachDragDrop();
-    renderAll();
-  });
+    attach(); renderAll();
+  });
+
 })();
