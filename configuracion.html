@@ -6,7 +6,7 @@
 <title>Unihouser — Configuración</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-/* Afinado visual local */
+/* Afinado visual local (coherente con Evaluar/Dashboard) */
 .grid-2{display:grid;gap:12px;grid-template-columns:1fr 1fr}
 .grid-3{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr}
 .grid-4{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr 1fr}
@@ -19,10 +19,9 @@
 .switch input:checked::after{left:22px}
 .slider{appearance:none;width:100%;height:8px;border-radius:999px;background:#eef2f7;outline:none}
 .slider::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:#ff5a1f;border:2px solid #ff5a1f}
-.inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.inline{display:flex;gap:10px;align-items:center}
 .help{color:#667085;font-size:12px;margin-top:4px}
 .badge{display:inline-block;background:#eef2f7;border-radius:999px;padding:2px 8px;font-size:12px}
-textarea{width:100%;min-height:120px;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font:inherit}
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
 .toast.ok{background:#16a34a}
@@ -67,7 +66,7 @@ textarea{width:100%;min-height:120px;border:1px solid #e5e7eb;border-radius:10px
         </div>
         <div class="field">
           <label>Incluir PSI por defecto en P. máx</label>
-          <div class="switch"><input type="checkbox" id="c_incluir_psi"><span class="badge">Se aplica al cálculo de “Precio máx. de compra”</span></div>
+          <div class="switch"><input type="checkbox" id="c_incluir_psi"><span class="badge">Aplicado en “Precio máx. de compra”</span></div>
         </div>
       </div>
     </div>
@@ -76,13 +75,28 @@ textarea{width:100%;min-height:120px;border:1px solid #e5e7eb;border-radius:10px
     <div class="section">
       <h3>Seguros y gestión (como % del alquiler anual)</h3>
       <div class="grid-4">
-        <div class="field"><label>Seguro hogar (%)</label><input id="c_hogar" data-pct placeholder="3,5"></div>
-        <div class="field"><label>Seguro impago — Tradicional (%)</label><input id="c_impago_trad" data-pct placeholder="4,0"></div>
-        <div class="field"><label>Seguro impago — Habitaciones (%)</label><input id="c_impago_hab" data-pct placeholder="4,0"></div>
-        <div class="field"><label>Gestión — Tradicional (%)</label><input id="c_gestion_trad" data-pct placeholder="15,0"></div>
+        <div class="field">
+          <label>Seguro hogar (%)</label>
+          <input id="c_hogar" data-pct placeholder="3,5">
+        </div>
+        <div class="field">
+          <label>Seguro impago — Tradicional (%)</label>
+          <input id="c_impago_trad" data-pct placeholder="4,0">
+        </div>
+        <div class="field">
+          <label>Seguro impago — Habitaciones (%)</label>
+          <input id="c_impago_hab" data-pct placeholder="4,0">
+        </div>
+        <div class="field">
+          <label>Gestión — Tradicional (%)</label>
+          <input id="c_gestion_trad" data-pct placeholder="15,0">
+        </div>
       </div>
       <div class="grid-4" style="margin-top:8px">
-        <div class="field"><label>Gestión — Habitaciones (%)</label><input id="c_gestion_hab" data-pct placeholder="25,0"></div>
+        <div class="field">
+          <label>Gestión — Habitaciones (%)</label>
+          <input id="c_gestion_hab" data-pct placeholder="25,0">
+        </div>
       </div>
     </div>
 
@@ -90,7 +104,7 @@ textarea{width:100%;min-height:120px;border:1px solid #e5e7eb;border-radius:10px
     <div class="section">
       <h3>Objetivos por tipo de alquiler</h3>
       <div class="card" style="margin-bottom:10px">
-        <div class="inline"><strong>Tradicional</strong><span class="help">Valores usados en Evaluar y matching.</span></div>
+        <div class="inline"><strong>Tradicional</strong><span class="help">Valores por defecto usados en Evaluar y matching.</span></div>
         <div class="grid-4" style="margin-top:10px">
           <div class="field"><label>Rentabilidad bruta (%)</label><input id="c_obj_t_bruta" data-pct placeholder="10,0"></div>
           <div class="field"><label>Rentabilidad neta (%)</label><input id="c_obj_t_neta" data-pct placeholder="6,0"></div>
@@ -98,7 +112,7 @@ textarea{width:100%;min-height:120px;border:1px solid #e5e7eb;border-radius:10px
         </div>
       </div>
       <div class="card">
-        <div class="inline"><strong>Habitaciones</strong><span class="help">Valores usados en Evaluar y matching.</span></div>
+        <div class="inline"><strong>Habitaciones</strong><span class="help">Valores por defecto usados en Evaluar y matching.</span></div>
         <div class="grid-4" style="margin-top:10px">
           <div class="field"><label>Rentabilidad bruta (%)</label><input id="c_obj_h_bruta" data-pct placeholder="12,0"></div>
           <div class="field"><label>Rentabilidad neta (%)</label><input id="c_obj_h_neta" data-pct placeholder="7,0"></div>
@@ -107,9 +121,9 @@ textarea{width:100%;min-height:120px;border:1px solid #e5e7eb;border-radius:10px
       </div>
     </div>
 
-    <!-- PREFERENCIAS DE MATCHING -->
+    <!-- PESOS DE MATCHING -->
     <div class="section">
-      <h3>Matching: preferencias y umbrales</h3>
+      <h3>Pesos de matching (sugerencia de inversor para un activo)</h3>
       <div class="grid-3">
         <div class="field">
           <label>Localidad (peso)</label>
@@ -127,64 +141,13 @@ textarea{width:100%;min-height:120px;border:1px solid #e5e7eb;border-radius:10px
           <div class="inline"><span class="help">Peso actual:</span><strong id="c_w_kpi_v">20</strong></div>
         </div>
       </div>
-
-      <div class="grid-3" style="margin-top:10px">
-        <div class="field">
-          <label>KPI principal para sugerir inversor</label>
-          <select id="c_kpi_principal">
-            <option value="bruta">Rentabilidad bruta</option>
-            <option value="neta">Rentabilidad neta</option>
-            <option value="flujo">Flujo de caja</option>
-          </select>
-          <small class="help">Este KPI se usa para calcular el “gap” frente al objetivo del inversor.</small>
-        </div>
-        <div class="field">
-          <label>Umbral VERDE (score ≥)</label>
-          <input id="c_thr_green" data-pct placeholder="70,0">
-          <small class="help">0–100. Ej.: 70 = verde.</small>
-        </div>
-        <div class="field">
-          <label>Umbral ÁMBAR (score ≥)</label>
-          <input id="c_thr_amber" data-pct placeholder="40,0">
-          <small class="help">Si es menor que ámbar → rojo.</small>
-        </div>
-      </div>
-      <small class="help">La suma de pesos no necesita ser 100; normalizamos internamente.</small>
-    </div>
-
-    <!-- PLANTILLAS -->
-    <div class="section">
-      <h3>Plantillas de comunicación</h3>
-      <div class="card" style="margin-bottom:10px">
-        <strong>Email — Resumen de evaluación</strong>
-        <small class="help">Tokens disponibles: {NOMBRE} {CALLE} {LOCALIDAD} {TIPO} {PRECIO} {ALQUILER} {BRUTA} {NETA} {FLUJO} {PMAX} {LINK}</small>
-        <div class="grid-2" style="margin-top:8px">
-          <div class="field"><label>Asunto</label><input id="c_tpl_email_resumen_subject" placeholder="Resumen evaluación {CALLE}, {LOCALIDAD}"></div>
-          <div class="field"><label>Destinatario por defecto (opcional)</label><input id="c_tpl_email_to" placeholder="ej: cliente@correo.com"></div>
-        </div>
-        <div class="field" style="margin-top:8px"><label>Cuerpo</label><textarea id="c_tpl_email_resumen_body"></textarea></div>
-      </div>
-
-      <div class="card" style="margin-bottom:10px">
-        <strong>Email — Contrato / Siguiente paso</strong>
-        <small class="help">Mismos tokens que arriba.</small>
-        <div class="grid-2" style="margin-top:8px">
-          <div class="field"><label>Asunto</label><input id="c_tpl_email_contrato_subject" placeholder="Propuesta de contrato — {CALLE}, {LOCALIDAD}"></div>
-        </div>
-        <div class="field" style="margin-top:8px"><label>Cuerpo</label><textarea id="c_tpl_email_contrato_body"></textarea></div>
-      </div>
-
-      <div class="card">
-        <strong>WhatsApp — Mensaje</strong>
-        <small class="help">Mismos tokens. Se usa con wa.me (se codifica automáticamente).</small>
-        <div class="field" style="margin-top:8px"><label>Texto</label><textarea id="c_tpl_whatsapp_body"></textarea></div>
-      </div>
+      <small class="help">La suma no necesita ser 100; normalizamos internamente.</small>
     </div>
 
     <!-- ACCIONES -->
     <div class="actions" style="margin-top:12px">
-      <button class="btn" id="c_reset">Restablecer valores por defecto</button>
-      <button class="btn primary" id="c_save">Guardar configuración</button>
+      <button type="button" class="btn" id="c_reset" onclick="window._resetCfg()">Restablecer valores por defecto</button>
+      <button type="button" class="btn primary" id="c_save" onclick="window._saveCfg()">Guardar configuración</button>
     </div>
   </section>
 </main>
@@ -197,7 +160,7 @@ textarea{width:100%;min-height:120px;border:1px solid #e5e7eb;border-radius:10px
 (function(){
 "use strict";
 
-/* ===== Formato ES ===== */
+/* ======= Formato ES ======= */
 const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
 const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
@@ -211,6 +174,7 @@ function parseEs(str){
 function e0(v){ return fmtE0.format(v||0); }
 function p1(v){ return fmtN1.format(v||0); }
 
+/* ======= Helpers de formato en vivo ======= */
 function setupMoneyLive(){
   document.querySelectorAll('input[data-money]').forEach(inp=>{
     inp.addEventListener('input', ()=>{
@@ -238,13 +202,13 @@ function setupPctLive(){
   });
 }
 
-/* ===== Store ===== */
+/* ======= Store ======= */
 const Store={
   get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
   set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); }
 };
 
-/* ===== Defaults (incluye NUEVOS campos) ===== */
+/* ======= Defaults ======= */
 const DEF={
   itp_pct: 8.0,
   notaria_eur: 1500,
@@ -259,33 +223,10 @@ const DEF={
     tradicional:{ bruta_pct:10.0, neta_pct:6.0, flujo_mes_eur:0 },
     habitaciones:{ bruta_pct:12.0, neta_pct:7.0, flujo_mes_eur:0 }
   },
-  matching:{
-    peso_localidad:50,
-    peso_tipo:30,
-    peso_kpi:20,
-    kpi_principal:'bruta',       // 'bruta' | 'neta' | 'flujo'
-    umbral_verde:70.0,
-    umbral_ambar:40.0
-  },
-  templates:{
-    email_to:'',
-    email_resumen:{
-      subject:'Resumen evaluación {CALLE}, {LOCALIDAD}',
-      body:
-'Hola {NOMBRE},\n\nTe comparto el resumen del activo en {CALLE}, {LOCALIDAD} ({TIPO}).\nPrecio: {PRECIO} · Alquiler: {ALQUILER}\nBruta: {BRUTA} · Neta: {NETA} · Flujo anual: {FLUJO}\nPrecio máx. objetivo: {PMAX}\n\nMás info: {LINK}\n\nUn saludo,\nUnihouser'
-    },
-    email_contrato:{
-      subject:'Propuesta de contrato — {CALLE}, {LOCALIDAD}',
-      body:
-'Hola {NOMBRE},\n\nAdjunto propuesta para avanzar con el activo de {CALLE}, {LOCALIDAD}.\nBruta: {BRUTA} · Neta: {NETA} · Flujo: {FLUJO}\nPrecio máx. objetivo: {PMAX}\n\nQuedo atento.\n\nUnihouser'
-    },
-    whatsapp:{
-      body:'Hola {NOMBRE}! Sobre {CALLE} ({LOCALIDAD}): bruta {BRUTA}, neta {NETA}, flujo {FLUJO}. Pmáx {PMAX}. {LINK}'
-    }
-  }
+  matching:{ peso_localidad:50, peso_tipo:30, peso_kpi:20 }
 };
 
-/* ===== UI helpers ===== */
+/* ======= UI helpers ======= */
 const id = s=>document.getElementById(s);
 function toast(msg){
   const wrap=id('toasts'); const el=document.createElement('div');
@@ -295,10 +236,9 @@ function toast(msg){
   setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 
-/* ===== Cargar en el formulario ===== */
+/* ======= Cargar en el formulario ======= */
 function loadForm(){
-  const cfg = mergeDeep(DEF, Store.cfg||{});
-
+  const cfg = Object.assign({}, DEF, Store.cfg||{});
   id('c_itp').value          = p1(cfg.itp_pct);
   id('c_notaria').value      = fmtN0.format(cfg.notaria_eur||0);
   id('c_psi').value          = fmtN0.format(cfg.psi_fee_eur||0);
@@ -324,20 +264,9 @@ function loadForm(){
   id('c_w_loc_v').textContent = id('c_w_loc').value;
   id('c_w_tipo_v').textContent= id('c_w_tipo').value;
   id('c_w_kpi_v').textContent = id('c_w_kpi').value;
-
-  id('c_kpi_principal').value = String(cfg.matching.kpi_principal||'bruta');
-  id('c_thr_green').value     = p1(cfg.matching.umbral_verde);
-  id('c_thr_amber').value     = p1(cfg.matching.umbral_ambar);
-
-  id('c_tpl_email_to').value                 = cfg.templates.email_to||'';
-  id('c_tpl_email_resumen_subject').value    = cfg.templates.email_resumen.subject||'';
-  id('c_tpl_email_resumen_body').value       = cfg.templates.email_resumen.body||'';
-  id('c_tpl_email_contrato_subject').value   = cfg.templates.email_contrato.subject||'';
-  id('c_tpl_email_contrato_body').value      = cfg.templates.email_contrato.body||'';
-  id('c_tpl_whatsapp_body').value            = cfg.templates.whatsapp.body||'';
 }
 
-/* ===== Guardar desde el formulario ===== */
+/* ======= Guardar desde el formulario ======= */
 function saveForm(){
   const cfg={
     itp_pct:           parseEs(id('c_itp').value)||0,
@@ -366,30 +295,42 @@ function saveForm(){
     matching:{
       peso_localidad: parseInt(id('c_w_loc').value,10)||0,
       peso_tipo:      parseInt(id('c_w_tipo').value,10)||0,
-      peso_kpi:       parseInt(id('c_w_kpi').value,10)||0,
-      kpi_principal:  id('c_kpi_principal').value||'bruta',
-      umbral_verde:   parseEs(id('c_thr_green').value)||0,
-      umbral_ambar:   parseEs(id('c_thr_amber').value)||0
-    },
-    templates:{
-      email_to: (id('c_tpl_email_to').value||'').trim(),
-      email_resumen:{
-        subject: id('c_tpl_email_resumen_subject').value||'',
-        body:    id('c_tpl_email_resumen_body').value||''
-      },
-      email_contrato:{
-        subject: id('c_tpl_email_contrato_subject').value||'',
-        body:    id('c_tpl_email_contrato_body').value||''
-      },
-      whatsapp:{
-        body: id('c_tpl_whatsapp_body').value||''
-      }
+      peso_kpi:       parseInt(id('c_w_kpi').value,10)||0
     }
   };
-  Store.cfg = mergeDeep(DEF, cfg); // aseguramos defaults
+  Store.cfg = cfg;
   toast('Nueva configuración guardada con éxito');
 }
 
-/* ===== Restablecer ===== */
+/* ======= Restablecer ======= */
 function resetDefaults(){
-  Store.cfg = DEF
+  Store.cfg = DEF;
+  loadForm();
+  toast('Valores por defecto restablecidos');
+}
+
+/* ======= Eventos ======= */
+function attach(){
+  setupMoneyLive();
+  setupPctLive();
+
+  id('c_w_loc').addEventListener('input',()=>id('c_w_loc_v').textContent=id('c_w_loc').value);
+  id('c_w_tipo').addEventListener('input',()=>id('c_w_tipo_v').textContent=id('c_w_tipo').value);
+  id('c_w_kpi').addEventListener('input',()=>id('c_w_kpi_v').textContent=id('c_w_kpi').value);
+
+  // Listeners normales (además del onclick de respaldo)
+  id('c_save').addEventListener('click', saveForm);
+  id('c_reset').addEventListener('click', resetDefaults);
+
+  loadForm();
+}
+document.addEventListener('DOMContentLoaded', attach);
+
+/* Respaldo global por si algún bind falla */
+window._saveCfg  = function(){ saveForm(); };
+window._resetCfg = function(){ resetDefaults(); };
+
+})();
+</script>
+</body>
+</html>
