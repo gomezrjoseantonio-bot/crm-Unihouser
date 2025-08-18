@@ -62,3 +62,59 @@ background:#f8fafc;color:#0f172a;font-weight:700
 .step.done{background:#0f2318;color:#86efac;border-color:#14532d}
 .step.done .dot{background:#22c55e}
 .step small{opacity:.8;font-weight:700}
+/* === Unihouser – Parche de consistencia UI === */
+:root{
+  --uh-bg:#ffffff;
+  --uh-ink:#111827;
+  --uh-muted:#667085;
+  --uh-line:#e5e7eb;
+  --uh-soft:#f3f4f6;
+  --uh-soft2:#f8fafc;
+  --uh-accent:#ff5a1f; /* mismo acento que veníamos usando */
+}
+
+/* Contenedor tarjeta y títulos */
+.card{background:var(--uh-bg);border:1px solid var(--uh-line);border-radius:12px;padding:16px}
+.card h2,.card h3{color:var(--uh-ink);margin:0 0 10px;border:none}
+
+/* Texto auxiliar y KPIs */
+.lab, label, small.hint{color:var(--uh-muted)}
+.kpi{background:#fff;border:1px solid var(--uh-line);border-radius:12px;padding:12px}
+.kpi .lab{font-size:12px;color:var(--uh-muted)}
+.kpi .val{font-weight:800;font-size:20px}
+
+/* Inputs */
+input,select{background:#fff;border:1px solid var(--uh-line);color:var(--uh-ink)}
+input:focus,select:focus{outline:2px solid var(--uh-accent);border-color:transparent}
+
+/* Botones */
+.btn{appearance:none;border:1px solid var(--uh-line);background:#fff;color:var(--uh-ink);
+     padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer}
+.btn:hover{background:var(--uh-soft)}
+.btn.primary{background:var(--uh-accent);border-color:var(--uh-accent);color:#fff}
+.btn.primary:hover{filter:brightness(0.95)}
+.btn.ghost{background:#fff;border:1px solid var(--uh-line);color:var(--uh-ink)}
+.btn.sm{padding:8px 12px;font-size:13px;border-radius:10px}
+
+/* Pills */
+.pill{background:#eef2f7;color:var(--uh-ink)}
+
+/* Tabla */
+.table{background:#fff;border:1px solid var(--uh-line);border-radius:12px;overflow:hidden}
+.table th{background:var(--uh-soft2);color:var(--uh-ink);cursor:pointer;border-bottom:1px solid var(--uh-line)}
+.table td{border-bottom:1px solid var(--uh-line)}
+.table tr:hover td{background:#fafafa}
+
+/* Drawer */
+.uh-drawer{background:#fff;border-left:1px solid var(--uh-line);box-shadow:0 10px 24px rgba(0,0,0,.08)}
+.uh-d-head{border-bottom:1px solid var(--uh-line)}
+.uh-kv{border-bottom:1px dashed var(--uh-line)}
+.uh-d-head .btn{background:#fff;border:1px solid var(--uh-line);color:var(--uh-ink)}
+.uh-d-head .btn:hover{background:var(--uh-soft)}
+
+/* Filtros en una fila y botones alineados */
+.filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
+.filters .row .field .btn{height:42px;display:inline-flex;align-items:center}
+
+/* Footer */
+.foot .foot-inner{text-align:center;opacity:.85}
