@@ -6,22 +6,26 @@
 <title>Unihouser — Configuración</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-.grid-2{display:grid;gap:12px;grid-template-columns:1fr}
-.grid-3{display:grid;gap:12px;grid-template-columns:1fr}
-.grid-4{display:grid;gap:12px;grid-template-columns:1fr}
-@media(min-width:760px){.grid-2{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}}
-small.hint{color:var(--muted)}
-.range-row{display:grid;grid-template-columns:160px 1fr 70px;gap:8px;align-items:center;margin-bottom:8px}
-.range-row output{display:inline-block;min-width:54px;text-align:right}
-.kpi-pills{display:flex;gap:8px;flex-wrap:wrap}
-.pill{display:inline-block;padding:.25rem .6rem;border-radius:999px;background:#f1f5f9;color:#0f1112;font-size:12px}
+/* Afinado visual local */
+.grid-2{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.grid-3{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr}
+.grid-4{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr 1fr}
+@media(max-width:960px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+.section h3{margin:0 0 8px}
+.switch{display:flex;align-items:center;gap:10px}
+.switch input{width:42px;height:22px;appearance:none;background:#e5e7eb;border-radius:999px;position:relative;outline:none;border:1px solid #e5e7eb}
+.switch input:checked{background:#ff5a1f;border-color:#ff5a1f}
+.switch input::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .18s}
+.switch input:checked::after{left:22px}
+.slider{appearance:none;width:100%;height:8px;border-radius:999px;background:#eef2f7;outline:none}
+.slider::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:#ff5a1f;border:2px solid #ff5a1f}
+.inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.help{color:#667085;font-size:12px;margin-top:4px}
+.badge{display:inline-block;background:#eef2f7;border-radius:999px;padding:2px 8px;font-size:12px}
+textarea{width:100%;min-height:120px;border:1px solid #e5e7eb;border-radius:10px;padding:10px;font:inherit}
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
-.toast.ok{background:var(--ok)} .toast.warn{background:var(--warn)} .toast.bad{background:var(--bad)}
-textarea{min-height:120px;resize:vertical}
-.switch{display:flex;align-items:center;gap:10px}
-.switch input{width:auto}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:12px;background:#0f1214;border:1px solid #2b343a;border-radius:8px;padding:8px;color:var(--text)}
+.toast.ok{background:#16a34a}
 </style>
 </head>
 <body>
@@ -42,362 +46,350 @@ textarea{min-height:120px;resize:vertical}
   <section class="card">
     <h2>Configuración</h2>
 
-    <!-- Costes & impuestos -->
+    <!-- IMPUESTOS Y COSTES -->
     <div class="section">
-      <h3>Costes de adquisición e impuestos</h3>
+      <h3>Impuestos y costes de adquisición</h3>
       <div class="grid-4">
         <div class="field">
           <label>ITP (%)</label>
-          <input id="itp_pct" inputmode="decimal" data-percent>
-          <small class="hint">Asturias por defecto 8,0</small>
+          <input id="c_itp" data-pct placeholder="8,0">
+          <small class="help">Asturias: 8 % por defecto.</small>
         </div>
         <div class="field">
           <label>Notaría y Registro (€)</label>
-          <input id="notaria_eur" inputmode="numeric" data-money>
-          <small class="hint">Importe fijo recomendado: 1.500</small>
+          <input id="c_notaria" data-money placeholder="1.500">
+          <small class="help">Se muestra con separador de miles.</small>
         </div>
         <div class="field">
-          <label>Honorarios PSI (€ con IVA)</label>
-          <input id="psi_eur" inputmode="numeric" data-money>
-          <small class="hint">Recomendado: 4.235 (3.500 + IVA)</small>
+          <label>Honorarios PSI (€)</label>
+          <input id="c_psi" data-money placeholder="4.235">
+          <small class="help">3.500 € + IVA = 4.235 €.</small>
         </div>
-        <div class="field switch">
-          <input type="checkbox" id="psi_incluir">
-          <label for="psi_incluir">Incluir PSI por defecto en los cálculos</label>
+        <div class="field">
+          <label>Incluir PSI por defecto en P. máx</label>
+          <div class="switch"><input type="checkbox" id="c_incluir_psi"><span class="badge">Se aplica al cálculo de “Precio máx. de compra”</span></div>
         </div>
       </div>
     </div>
 
-    <!-- Seguros & gestión -->
+    <!-- SEGUROS Y GESTIÓN -->
     <div class="section">
-      <h3>Seguros y gestión (sobre alquiler anual)</h3>
+      <h3>Seguros y gestión (como % del alquiler anual)</h3>
       <div class="grid-4">
-        <div class="field">
-          <label>Seguro hogar (%)</label>
-          <input id="hogar_pct" inputmode="decimal" data-percent>
-        </div>
-        <div class="field">
-          <label>Seguro impago — Tradicional (%)</label>
-          <input id="impago_trad_pct" inputmode="decimal" data-percent>
-        </div>
-        <div class="field">
-          <label>Seguro impago — Habitaciones (%)</label>
-          <input id="impago_hab_pct" inputmode="decimal" data-percent>
-        </div>
-        <div class="field">
-          <label>Gestión — Tradicional (%)</label>
-          <input id="gestion_trad_pct" inputmode="decimal" data-percent>
-        </div>
+        <div class="field"><label>Seguro hogar (%)</label><input id="c_hogar" data-pct placeholder="3,5"></div>
+        <div class="field"><label>Seguro impago — Tradicional (%)</label><input id="c_impago_trad" data-pct placeholder="4,0"></div>
+        <div class="field"><label>Seguro impago — Habitaciones (%)</label><input id="c_impago_hab" data-pct placeholder="4,0"></div>
+        <div class="field"><label>Gestión — Tradicional (%)</label><input id="c_gestion_trad" data-pct placeholder="15,0"></div>
       </div>
-      <div class="grid-4">
-        <div class="field">
-          <label>Gestión — Habitaciones (%)</label>
-          <input id="gestion_hab_pct" inputmode="decimal" data-percent>
-        </div>
+      <div class="grid-4" style="margin-top:8px">
+        <div class="field"><label>Gestión — Habitaciones (%)</label><input id="c_gestion_hab" data-pct placeholder="25,0"></div>
       </div>
-      <small class="hint">Se aplican automáticamente al cambiar alquiler/tipo en <strong>Evaluar</strong>.</small>
     </div>
 
-    <!-- Objetivos por tipo -->
+    <!-- OBJETIVOS POR TIPO -->
     <div class="section">
       <h3>Objetivos por tipo de alquiler</h3>
-      <div class="grid-4">
-        <div class="field">
-          <label>Objetivo Bruta — Tradicional (%)</label>
-          <input id="obj_bruta_trad" inputmode="decimal" data-percent>
-        </div>
-        <div class="field">
-          <label>Objetivo Bruta — Habitaciones (%)</label>
-          <input id="obj_bruta_hab" inputmode="decimal" data-percent>
-        </div>
-        <div class="field">
-          <label>Objetivo Neta — Tradicional (%)</label>
-          <input id="obj_neta_trad" inputmode="decimal" data-percent>
-        </div>
-        <div class="field">
-          <label>Objetivo Neta — Habitaciones (%)</label>
-          <input id="obj_neta_hab" inputmode="decimal" data-percent>
+      <div class="card" style="margin-bottom:10px">
+        <div class="inline"><strong>Tradicional</strong><span class="help">Valores usados en Evaluar y matching.</span></div>
+        <div class="grid-4" style="margin-top:10px">
+          <div class="field"><label>Rentabilidad bruta (%)</label><input id="c_obj_t_bruta" data-pct placeholder="10,0"></div>
+          <div class="field"><label>Rentabilidad neta (%)</label><input id="c_obj_t_neta" data-pct placeholder="6,0"></div>
+          <div class="field"><label>Flujo objetivo (€/mes)</label><input id="c_obj_t_flujo" data-money placeholder="0"></div>
         </div>
       </div>
-      <div class="field" style="max-width:320px;margin-top:8px">
-        <label>KPI por defecto</label>
-        <select id="kpi_default">
-          <option>Bruta</option>
-          <option>Neta</option>
-          <option>Flujo</option>
-        </select>
+      <div class="card">
+        <div class="inline"><strong>Habitaciones</strong><span class="help">Valores usados en Evaluar y matching.</span></div>
+        <div class="grid-4" style="margin-top:10px">
+          <div class="field"><label>Rentabilidad bruta (%)</label><input id="c_obj_h_bruta" data-pct placeholder="12,0"></div>
+          <div class="field"><label>Rentabilidad neta (%)</label><input id="c_obj_h_neta" data-pct placeholder="7,0"></div>
+          <div class="field"><label>Flujo objetivo (€/mes)</label><input id="c_obj_h_flujo" data-money placeholder="0"></div>
+        </div>
       </div>
     </div>
 
-    <!-- Matching sugerencias -->
+    <!-- PREFERENCIAS DE MATCHING -->
     <div class="section">
-      <h3>Ponderaciones de matching (sugerir clientes)</h3>
-      <div class="mono" style="margin-bottom:8px">0 = no importa · 5 = muy importante</div>
-      <div>
-        <div class="range-row">
-          <label>Zonas/localidades</label>
-          <input id="w_zona" type="range" min="0" max="5" step="1"><output id="w_zona_o">0</output>
+      <h3>Matching: preferencias y umbrales</h3>
+      <div class="grid-3">
+        <div class="field">
+          <label>Localidad (peso)</label>
+          <input id="c_w_loc" class="slider" type="range" min="0" max="100" step="5">
+          <div class="inline"><span class="help">Peso actual:</span><strong id="c_w_loc_v">50</strong></div>
         </div>
-        <div class="range-row">
-          <label>Tipo de alquiler</label>
-          <input id="w_tipo" type="range" min="0" max="5" step="1"><output id="w_tipo_o">0</output>
+        <div class="field">
+          <label>Tipo de alquiler (peso)</label>
+          <input id="c_w_tipo" class="slider" type="range" min="0" max="100" step="5">
+          <div class="inline"><span class="help">Peso actual:</span><strong id="c_w_tipo_v">30</strong></div>
         </div>
-        <div class="range-row">
-          <label>Objetivo principal (KPI)</label>
-          <input id="w_obj" type="range" min="0" max="5" step="1"><output id="w_obj_o">0</output>
-        </div>
-        <div class="range-row">
-          <label>Rango de alquiler</label>
-          <input id="w_rango" type="range" min="0" max="5" step="1"><output id="w_rango_o">0</output>
-        </div>
-        <div class="range-row">
-          <label>Ascensor/altura/bajo</label>
-          <input id="w_altura" type="range" min="0" max="5" step="1"><output id="w_altura_o">0</output>
-        </div>
-        <div class="range-row">
-          <label>Reforma necesaria</label>
-          <input id="w_reforma" type="range" min="0" max="5" step="1"><output id="w_reforma_o">0</output>
+        <div class="field">
+          <label>Gap objetivo KPI (peso)</label>
+          <input id="c_w_kpi" class="slider" type="range" min="0" max="100" step="5">
+          <div class="inline"><span class="help">Peso actual:</span><strong id="c_w_kpi_v">20</strong></div>
         </div>
       </div>
-      <div class="grid-3" style="margin-top:8px">
+
+      <div class="grid-3" style="margin-top:10px">
         <div class="field">
-          <label>Umbral Score — Verde (≥ %)</label>
-          <input id="t_green" inputmode="decimal" data-percent>
+          <label>KPI principal para sugerir inversor</label>
+          <select id="c_kpi_principal">
+            <option value="bruta">Rentabilidad bruta</option>
+            <option value="neta">Rentabilidad neta</option>
+            <option value="flujo">Flujo de caja</option>
+          </select>
+          <small class="help">Este KPI se usa para calcular el “gap” frente al objetivo del inversor.</small>
         </div>
         <div class="field">
-          <label>Umbral Score — Ámbar (≥ %)</label>
-          <input id="t_amber" inputmode="decimal" data-percent>
+          <label>Umbral VERDE (score ≥)</label>
+          <input id="c_thr_green" data-pct placeholder="70,0">
+          <small class="help">0–100. Ej.: 70 = verde.</small>
         </div>
         <div class="field">
-          <label>Rojo (&lt; Ámbar)</label>
-          <input value="auto" disabled>
+          <label>Umbral ÁMBAR (score ≥)</label>
+          <input id="c_thr_amber" data-pct placeholder="40,0">
+          <small class="help">Si es menor que ámbar → rojo.</small>
         </div>
       </div>
-      <small class="hint">Estos pesos y umbrales se usan para “Clientes potenciales” en <strong>Evaluar</strong>.</small>
+      <small class="help">La suma de pesos no necesita ser 100; normalizamos internamente.</small>
     </div>
 
-    <!-- Plantillas -->
+    <!-- PLANTILLAS -->
     <div class="section">
       <h3>Plantillas de comunicación</h3>
-      <div class="kpi-pills">
-        <span class="pill">{{nombre}}</span><span class="pill">{{calle}}</span><span class="pill">{{localidad}}</span>
-        <span class="pill">{{bruta}}</span><span class="pill">{{neta}}</span><span class="pill">{{flujo}}</span><span class="pill">{{url}}</span>
-      </div>
-      <div class="grid-2" style="margin-top:10px">
-        <div class="field">
-          <label>Asunto Email</label>
-          <input id="email_subject" placeholder="Informe Unihouser — {{calle}}, {{localidad}}">
+      <div class="card" style="margin-bottom:10px">
+        <strong>Email — Resumen de evaluación</strong>
+        <small class="help">Tokens disponibles: {NOMBRE} {CALLE} {LOCALIDAD} {TIPO} {PRECIO} {ALQUILER} {BRUTA} {NETA} {FLUJO} {PMAX} {LINK}</small>
+        <div class="grid-2" style="margin-top:8px">
+          <div class="field"><label>Asunto</label><input id="c_tpl_email_resumen_subject" placeholder="Resumen evaluación {CALLE}, {LOCALIDAD}"></div>
+          <div class="field"><label>Destinatario por defecto (opcional)</label><input id="c_tpl_email_to" placeholder="ej: cliente@correo.com"></div>
         </div>
-        <div class="field">
-          <label>WhatsApp (plantilla)</label>
-          <textarea id="wa_tpl" class="mono" placeholder="Hola {{nombre}}, te envío el informe del activo {{calle}}, {{localidad}}. Bruta: {{bruta}}%. {{url}}"></textarea>
-        </div>
+        <div class="field" style="margin-top:8px"><label>Cuerpo</label><textarea id="c_tpl_email_resumen_body"></textarea></div>
       </div>
-      <div class="field">
-        <label>Cuerpo Email (HTML permitido)</label>
-        <textarea id="email_body" class="mono" placeholder="<p>Hola {{nombre}},</p><p>Adjuntamos el informe del activo {{calle}} ({{localidad}}).</p><p>Rentabilidad bruta: {{bruta}}% · neta: {{neta}}%.</p><p>Un saludo,<br>Unihouser</p>"></textarea>
+
+      <div class="card" style="margin-bottom:10px">
+        <strong>Email — Contrato / Siguiente paso</strong>
+        <small class="help">Mismos tokens que arriba.</small>
+        <div class="grid-2" style="margin-top:8px">
+          <div class="field"><label>Asunto</label><input id="c_tpl_email_contrato_subject" placeholder="Propuesta de contrato — {CALLE}, {LOCALIDAD}"></div>
+        </div>
+        <div class="field" style="margin-top:8px"><label>Cuerpo</label><textarea id="c_tpl_email_contrato_body"></textarea></div>
+      </div>
+
+      <div class="card">
+        <strong>WhatsApp — Mensaje</strong>
+        <small class="help">Mismos tokens. Se usa con wa.me (se codifica automáticamente).</small>
+        <div class="field" style="margin-top:8px"><label>Texto</label><textarea id="c_tpl_whatsapp_body"></textarea></div>
       </div>
     </div>
 
-    <!-- Acciones -->
-    <div class="actions">
-      <button class="btn" id="b_reset">Restablecer recomendado</button>
-      <button class="btn primary" id="b_save">Guardar configuración</button>
+    <!-- ACCIONES -->
+    <div class="actions" style="margin-top:12px">
+      <button class="btn" id="c_reset">Restablecer valores por defecto</button>
+      <button class="btn primary" id="c_save">Guardar configuración</button>
     </div>
-    <div id="save_note" class="muted" style="margin-top:6px"></div>
   </section>
 </main>
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
-<div class="toast-wrap"></div>
+<div id="toasts" class="toast-wrap"></div>
 
 <script>
 (function(){
 "use strict";
 
-/* ===== Utils ===== */
-var id=function(x){return document.getElementById(x)};
-var fmtE0=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
-var fmtN0=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
-var fmtN1=new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
+/* ===== Formato ES ===== */
+const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
 function parseEs(str){
   if(str==null) return NaN;
-  var s=String(str).trim().replace(/\./g,'').replace(',', '.');
+  const s=String(str).trim().replace(/\./g,'').replace(',', '.');
   if(!s) return NaN;
-  var n=Number(s);
-  return isFinite(n)?n:NaN;
+  const n=Number(s);
+  return Number.isFinite(n)?n:NaN;
 }
-function toast(msg,kind){
-  var wrap=document.querySelector('.toast-wrap'); if(!wrap) return;
-  var el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
-  wrap.appendChild(el); setTimeout(function(){el.style.opacity='0'},1600);
-  setTimeout(function(){try{wrap.removeChild(el)}catch(_){}} ,2200);
+function e0(v){ return fmtE0.format(v||0); }
+function p1(v){ return fmtN1.format(v||0); }
+
+function setupMoneyLive(){
+  document.querySelectorAll('input[data-money]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const digits=(inp.value||'').replace(/[^\d]/g,'');
+      if(!digits){inp.value='';return;}
+      const n=Number(digits);
+      inp.value=fmtN0.format(n);
+    });
+    inp.addEventListener('blur', ()=>{
+      const n=parseEs(inp.value);
+      if(Number.isFinite(n)) inp.value=fmtN0.format(Math.round(n));
+    });
+  });
+}
+function setupPctLive(){
+  document.querySelectorAll('input[data-pct]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const v=(inp.value||'').replace(/[^\d,]/g,'');
+      inp.value=v;
+    });
+    inp.addEventListener('blur', ()=>{
+      const n=parseEs(inp.value);
+      if(Number.isFinite(n)) inp.value=p1(n);
+    });
+  });
 }
 
 /* ===== Store ===== */
-var Store={
+const Store={
   get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
   set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); }
 };
 
-/* ===== Defaults ===== */
-var DEFAULTS={
-  itp_pct:8.0, notaria_eur:1500, psi_eur:4235, psi_incluir:true,
-  hogar_pct:3.5, impago_trad_pct:4.0, impago_hab_pct:4.0, gestion_trad_pct:15.0, gestion_hab_pct:25.0,
-  obj_bruta_trad:10.0, obj_bruta_hab:12.0, obj_neta_trad:6.0, obj_neta_hab:7.0, kpi_default:"Bruta",
-  match_weights:{zona:4,tipo:4,objetivo:5,rango:3,altura:2,reforma:2},
-  match_thresholds:{green:75,amber:50},
-  email_subject:"Informe Unihouser — {{calle}}, {{localidad}}",
-  email_body:"<p>Hola {{nombre}},</p><p>Adjuntamos el informe del activo {{calle}} ({{localidad}}).</p><p>Rentabilidad bruta: {{bruta}}% · neta: {{neta}}%.</p><p>Un saludo,<br>Unihouser</p>",
-  wa_tpl:"Hola {{nombre}}, te envío el informe del activo {{calle}}, {{localidad}}. Bruta: {{bruta}}%. {{url}}"
+/* ===== Defaults (incluye NUEVOS campos) ===== */
+const DEF={
+  itp_pct: 8.0,
+  notaria_eur: 1500,
+  psi_fee_eur: 4235,
+  incluir_psi_por_defecto: true,
+  hogar_pct: 3.5,
+  impago_trad_pct: 4.0,
+  impago_hab_pct: 4.0,
+  gestion_trad_pct: 15.0,
+  gestion_hab_pct: 25.0,
+  objetivos:{
+    tradicional:{ bruta_pct:10.0, neta_pct:6.0, flujo_mes_eur:0 },
+    habitaciones:{ bruta_pct:12.0, neta_pct:7.0, flujo_mes_eur:0 }
+  },
+  matching:{
+    peso_localidad:50,
+    peso_tipo:30,
+    peso_kpi:20,
+    kpi_principal:'bruta',       // 'bruta' | 'neta' | 'flujo'
+    umbral_verde:70.0,
+    umbral_ambar:40.0
+  },
+  templates:{
+    email_to:'',
+    email_resumen:{
+      subject:'Resumen evaluación {CALLE}, {LOCALIDAD}',
+      body:
+'Hola {NOMBRE},\n\nTe comparto el resumen del activo en {CALLE}, {LOCALIDAD} ({TIPO}).\nPrecio: {PRECIO} · Alquiler: {ALQUILER}\nBruta: {BRUTA} · Neta: {NETA} · Flujo anual: {FLUJO}\nPrecio máx. objetivo: {PMAX}\n\nMás info: {LINK}\n\nUn saludo,\nUnihouser'
+    },
+    email_contrato:{
+      subject:'Propuesta de contrato — {CALLE}, {LOCALIDAD}',
+      body:
+'Hola {NOMBRE},\n\nAdjunto propuesta para avanzar con el activo de {CALLE}, {LOCALIDAD}.\nBruta: {BRUTA} · Neta: {NETA} · Flujo: {FLUJO}\nPrecio máx. objetivo: {PMAX}\n\nQuedo atento.\n\nUnihouser'
+    },
+    whatsapp:{
+      body:'Hola {NOMBRE}! Sobre {CALLE} ({LOCALIDAD}): bruta {BRUTA}, neta {NETA}, flujo {FLUJO}. Pmáx {PMAX}. {LINK}'
+    }
+  }
 };
 
-/* ===== Formateadores de inputs ===== */
-function moneyify(inp){
-  inp.addEventListener('input', function(){
-    var digits=(inp.value||'').replace(/[^\d]/g,'');
-    if(!digits){inp.value='';return;}
-    var n=Number(digits);
-    inp.value=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(n);
-  });
-  inp.addEventListener('blur', function(){
-    var n=parseEs(inp.value);
-    if(isFinite(n)) inp.value=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(Math.round(n));
-  });
-}
-function percentify(inp){
-  inp.addEventListener('input', function(){
-    var s=(inp.value||'').replace(/[^\d,.-]/g,'').replace(/,/g,'.');
-    var n=Number(s); if(!isFinite(n)) return;
-    inp.value=fmtN1.format(n).replace('.',',');
-  });
-  inp.addEventListener('blur', function(){
-    var n=parseEs(inp.value);
-    if(isFinite(n)) inp.value=fmtN1.format(n).replace('.',',');
-  });
-}
-function bindRanges(){
-  [['w_zona','w_zona_o'],['w_tipo','w_tipo_o'],['w_obj','w_obj_o'],['w_rango','w_rango_o'],['w_altura','w_altura_o'],['w_reforma','w_reforma_o']]
-  .forEach(function(pair){
-    var rr=id(pair[0]), oo=id(pair[1]);
-    var sync=function(){ oo.textContent=rr.value; };
-    rr.addEventListener('input', sync); sync();
-  });
+/* ===== UI helpers ===== */
+const id = s=>document.getElementById(s);
+function toast(msg){
+  const wrap=id('toasts'); const el=document.createElement('div');
+  el.className='toast ok'; el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>el.style.opacity='0',1600);
+  setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 
-/* ===== Cargar CFG -> Form ===== */
-function loadCfgToForm(){
-  var cfg=Object.assign({},DEFAULTS,Store.cfg||{});
+/* ===== Cargar en el formulario ===== */
+function loadForm(){
+  const cfg = mergeDeep(DEF, Store.cfg||{});
 
-  id('itp_pct').value=fmtN1.format(cfg.itp_pct).replace('.',',');
-  id('notaria_eur').value=fmtN0.format(cfg.notaria_eur);
-  id('psi_eur').value=fmtN0.format(cfg.psi_eur);
-  id('psi_incluir').checked=!!cfg.psi_incluir;
+  id('c_itp').value          = p1(cfg.itp_pct);
+  id('c_notaria').value      = fmtN0.format(cfg.notaria_eur||0);
+  id('c_psi').value          = fmtN0.format(cfg.psi_fee_eur||0);
+  id('c_incluir_psi').checked= !!cfg.incluir_psi_por_defecto;
 
-  id('hogar_pct').value=fmtN1.format(cfg.hogar_pct).replace('.',',');
-  id('impago_trad_pct').value=fmtN1.format(cfg.impago_trad_pct).replace('.',',');
-  id('impago_hab_pct').value=fmtN1.format(cfg.impago_hab_pct).replace('.',',');
-  id('gestion_trad_pct').value=fmtN1.format(cfg.gestion_trad_pct).replace('.',',');
-  id('gestion_hab_pct').value=fmtN1.format(cfg.gestion_hab_pct).replace('.',',');
+  id('c_hogar').value        = p1(cfg.hogar_pct);
+  id('c_impago_trad').value  = p1(cfg.impago_trad_pct);
+  id('c_impago_hab').value   = p1(cfg.impago_hab_pct);
+  id('c_gestion_trad').value = p1(cfg.gestion_trad_pct);
+  id('c_gestion_hab').value  = p1(cfg.gestion_hab_pct);
 
-  id('obj_bruta_trad').value=fmtN1.format(cfg.obj_bruta_trad).replace('.',',');
-  id('obj_bruta_hab').value=fmtN1.format(cfg.obj_bruta_hab).replace('.',',');
-  id('obj_neta_trad').value=fmtN1.format(cfg.obj_neta_trad).replace('.',',');
-  id('obj_neta_hab').value=fmtN1.format(cfg.obj_neta_hab).replace('.',',');
-  id('kpi_default').value=cfg.kpi_default||'Bruta';
+  id('c_obj_t_bruta').value  = p1(cfg.objetivos.tradicional.bruta_pct);
+  id('c_obj_t_neta').value   = p1(cfg.objetivos.tradicional.neta_pct);
+  id('c_obj_t_flujo').value  = fmtN0.format(cfg.objetivos.tradicional.flujo_mes_eur||0);
 
-  var mw=(cfg.match_weights||{});
-  id('w_zona').value=Number(mw.zona!=null?mw.zona:DEFAULTS.match_weights.zona);
-  id('w_tipo').value=Number(mw.tipo!=null?mw.tipo:DEFAULTS.match_weights.tipo);
-  id('w_obj').value=Number(mw.objetivo!=null?mw.objetivo:DEFAULTS.match_weights.objetivo);
-  id('w_rango').value=Number(mw.rango!=null?mw.rango:DEFAULTS.match_weights.rango);
-  id('w_altura').value=Number(mw.altura!=null?mw.altura:DEFAULTS.match_weights.altura);
-  id('w_reforma').value=Number(mw.reforma!=null?mw.reforma:DEFAULTS.match_weights.reforma);
+  id('c_obj_h_bruta').value  = p1(cfg.objetivos.habitaciones.bruta_pct);
+  id('c_obj_h_neta').value   = p1(cfg.objetivos.habitaciones.neta_pct);
+  id('c_obj_h_flujo').value  = fmtN0.format(cfg.objetivos.habitaciones.flujo_mes_eur||0);
 
-  var th=(cfg.match_thresholds||{});
-  id('t_green').value=fmtN1.format((th.green!=null?th.green:DEFAULTS.match_thresholds.green)).replace('.',',');
-  id('t_amber').value=fmtN1.format((th.amber!=null?th.amber:DEFAULTS.match_thresholds.amber)).replace('.',',');
+  id('c_w_loc').value        = Number(cfg.matching.peso_localidad||0);
+  id('c_w_tipo').value       = Number(cfg.matching.peso_tipo||0);
+  id('c_w_kpi').value        = Number(cfg.matching.peso_kpi||0);
+  id('c_w_loc_v').textContent = id('c_w_loc').value;
+  id('c_w_tipo_v').textContent= id('c_w_tipo').value;
+  id('c_w_kpi_v').textContent = id('c_w_kpi').value;
 
-  id('email_subject').value=cfg.email_subject||DEFAULTS.email_subject;
-  id('email_body').value=cfg.email_body||DEFAULTS.email_body;
-  id('wa_tpl').value=cfg.wa_tpl||DEFAULTS.wa_tpl;
+  id('c_kpi_principal').value = String(cfg.matching.kpi_principal||'bruta');
+  id('c_thr_green').value     = p1(cfg.matching.umbral_verde);
+  id('c_thr_amber').value     = p1(cfg.matching.umbral_ambar);
 
-  bindRanges();
+  id('c_tpl_email_to').value                 = cfg.templates.email_to||'';
+  id('c_tpl_email_resumen_subject').value    = cfg.templates.email_resumen.subject||'';
+  id('c_tpl_email_resumen_body').value       = cfg.templates.email_resumen.body||'';
+  id('c_tpl_email_contrato_subject').value   = cfg.templates.email_contrato.subject||'';
+  id('c_tpl_email_contrato_body').value      = cfg.templates.email_contrato.body||'';
+  id('c_tpl_whatsapp_body').value            = cfg.templates.whatsapp.body||'';
 }
 
-/* ===== Form -> CFG ===== */
-function getCfgFromForm(){
-  function pct(el){var v=parseEs(id(el).value); return isFinite(v)?v:0}
-  function eur(el){var v=parseEs(id(el).value); return isFinite(v)?v:0}
-  function rng(el){return Number(id(el).value||0)}
+/* ===== Guardar desde el formulario ===== */
+function saveForm(){
+  const cfg={
+    itp_pct:           parseEs(id('c_itp').value)||0,
+    notaria_eur:       parseEs(id('c_notaria').value)||0,
+    psi_fee_eur:       parseEs(id('c_psi').value)||0,
+    incluir_psi_por_defecto: !!id('c_incluir_psi').checked,
 
-  var cfg=Object.assign({},DEFAULTS,Store.cfg||{});
+    hogar_pct:         parseEs(id('c_hogar').value)||0,
+    impago_trad_pct:   parseEs(id('c_impago_trad').value)||0,
+    impago_hab_pct:    parseEs(id('c_impago_hab').value)||0,
+    gestion_trad_pct:  parseEs(id('c_gestion_trad').value)||0,
+    gestion_hab_pct:   parseEs(id('c_gestion_hab').value)||0,
 
-  cfg.itp_pct=pct('itp_pct');
-  cfg.notaria_eur=eur('notaria_eur');
-  cfg.psi_eur=eur('psi_eur');
-  cfg.psi_incluir=!!id('psi_incluir').checked;
-
-  cfg.hogar_pct=pct('hogar_pct');
-  cfg.impago_trad_pct=pct('impago_trad_pct');
-  cfg.impago_hab_pct=pct('impago_hab_pct');
-  cfg.gestion_trad_pct=pct('gestion_trad_pct');
-  cfg.gestion_hab_pct=pct('gestion_hab_pct');
-
-  cfg.obj_bruta_trad=pct('obj_bruta_trad');
-  cfg.obj_bruta_hab=pct('obj_bruta_hab');
-  cfg.obj_neta_trad=pct('obj_neta_trad');
-  cfg.obj_neta_hab=pct('obj_neta_hab');
-  cfg.kpi_default=id('kpi_default').value;
-
-  cfg.match_weights={
-    zona:rng('w_zona'),
-    tipo:rng('w_tipo'),
-    objetivo:rng('w_obj'),
-    rango:rng('w_rango'),
-    altura:rng('w_altura'),
-    reforma:rng('w_reforma')
+    objetivos:{
+      tradicional:{
+        bruta_pct:       parseEs(id('c_obj_t_bruta').value)||0,
+        neta_pct:        parseEs(id('c_obj_t_neta').value)||0,
+        flujo_mes_eur:   parseEs(id('c_obj_t_flujo').value)||0
+      },
+      habitaciones:{
+        bruta_pct:       parseEs(id('c_obj_h_bruta').value)||0,
+        neta_pct:        parseEs(id('c_obj_h_neta').value)||0,
+        flujo_mes_eur:   parseEs(id('c_obj_h_flujo').value)||0
+      }
+    },
+    matching:{
+      peso_localidad: parseInt(id('c_w_loc').value,10)||0,
+      peso_tipo:      parseInt(id('c_w_tipo').value,10)||0,
+      peso_kpi:       parseInt(id('c_w_kpi').value,10)||0,
+      kpi_principal:  id('c_kpi_principal').value||'bruta',
+      umbral_verde:   parseEs(id('c_thr_green').value)||0,
+      umbral_ambar:   parseEs(id('c_thr_amber').value)||0
+    },
+    templates:{
+      email_to: (id('c_tpl_email_to').value||'').trim(),
+      email_resumen:{
+        subject: id('c_tpl_email_resumen_subject').value||'',
+        body:    id('c_tpl_email_resumen_body').value||''
+      },
+      email_contrato:{
+        subject: id('c_tpl_email_contrato_subject').value||'',
+        body:    id('c_tpl_email_contrato_body').value||''
+      },
+      whatsapp:{
+        body: id('c_tpl_whatsapp_body').value||''
+      }
+    }
   };
-  cfg.match_thresholds={
-    green:parseEs(id('t_green').value)||DEFAULTS.match_thresholds.green,
-    amber:parseEs(id('t_amber').value)||DEFAULTS.match_thresholds.amber
-  };
-
-  cfg.email_subject=(id('email_subject').value||'').trim();
-  cfg.email_body=(id('email_body').value||'').trim();
-  cfg.wa_tpl=(id('wa_tpl').value||'').trim();
-
-  return cfg;
+  Store.cfg = mergeDeep(DEF, cfg); // aseguramos defaults
+  toast('Nueva configuración guardada con éxito');
 }
 
-/* ===== Bind ===== */
-function bindFormatting(){
-  Array.prototype.forEach.call(document.querySelectorAll('input[data-money]'),moneyify);
-  Array.prototype.forEach.call(document.querySelectorAll('input[data-percent]'),percentify);
-}
-function attach(){
-  bindFormatting();
-  loadCfgToForm();
-
-  id('b_save').addEventListener('click', function(){
-    var cfg=getCfgFromForm();
-    Store.cfg=cfg;
-    toast('Configuración guardada','ok');
-    var t=new Date();
-    id('save_note').textContent='Nueva configuración guardada con éxito · '+t.toLocaleTimeString('es-ES');
-  });
-
-  id('b_reset').addEventListener('click', function(){
-    if(!confirm('¿Restablecer valores recomendados?')) return;
-    Store.cfg=DEFAULTS;
-    loadCfgToForm();
-    toast('Valores recomendados aplicados','warn');
-  });
-}
-
-document.addEventListener('DOMContentLoaded', attach);
-})();
-</script>
-</body>
-</html>
+/* ===== Restablecer ===== */
+function resetDefaults(){
+  Store.cfg = DEF
