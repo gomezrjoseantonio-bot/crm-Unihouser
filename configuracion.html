@@ -1,17 +1,33 @@
-<!DOCTYPE html><html lang="es"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Configuración</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-  /* Refuerzo visual del toast: compatible con hidden + clase show */
-  .toast{
-    margin-top:12px;padding:12px;border-radius:12px;border:1px solid #d1fae5;
-    background:#ecfdf5;color:#065f46;font-weight:700;transition:opacity .25s ease;
-  }
-  .toast[hidden]{ display:none !important; }
-  .toast.show{ display:block !important; opacity:1; }
+/* Afinado visual local para esta vista (coherente con Evaluar/Dashboard) */
+.grid-2{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.grid-3{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr}
+.grid-4{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr 1fr}
+@media(max-width:960px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+.section h3{margin:0 0 8px}
+.switch{display:flex;align-items:center;gap:10px}
+.switch input{width:42px;height:22px;appearance:none;background:#e5e7eb;border-radius:999px;position:relative;outline:none;border:1px solid #e5e7eb}
+.switch input:checked{background:#ff5a1f;border-color:#ff5a1f}
+.switch input::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .18s}
+.switch input:checked::after{left:22px}
+.slider{appearance:none;width:100%;height:8px;border-radius:999px;background:#eef2f7;outline:none}
+.slider::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:#ff5a1f;border:2px solid #ff5a1f}
+.inline{display:flex;gap:10px;align-items:center}
+.help{color:#667085;font-size:12px;margin-top:4px}
+.badge{display:inline-block;background:#eef2f7;border-radius:999px;padding:2px 8px;font-size:12px}
+.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
+.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
+.toast.ok{background:#16a34a}
 </style>
-</head><body>
+</head>
+<body>
 <header class="topbar">
   <div class="container flex between center">
     <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
@@ -26,65 +42,289 @@
 </header>
 
 <main class="container">
-<section class="card">
-  <h2>Configuración</h2>
+  <section class="card">
+    <h2>Configuración</h2>
 
-  <div class="row three">
-    <div class="field">
-      <label>ITP (%)</label>
-      <input id="c_itp" value="8,0">
-    </div>
-    <div class="field">
-      <label>Notaría y Registro (€)</label>
-      <input id="c_notaria" value="1.500" data-money>
-      <small class="hint">Se muestra y guarda con punto de miles.</small>
-    </div>
-    <div class="field">
-      <label>% Seguro hogar</label>
-      <input id="c_pct_hogar" value="3,5">
-    </div>
-  </div>
-
-  <div class="row three">
-    <div class="field">
-      <label>% Seguro impago (Tradicional)</label>
-      <input id="c_pct_impago_trad" value="4,0">
-    </div>
-    <div class="field">
-      <label>% Seguro impago (Habitaciones)</label>
-      <input id="c_pct_impago_hab" value="4,0">
-    </div>
-    <div class="field">
-      <label>% Gestión (Tradicional)</label>
-      <input id="c_pct_g_trad" value="15,0">
-    </div>
-  </div>
-
-  <div class="row three">
-    <div class="field">
-      <label>% Gestión (Habitaciones)</label>
-      <input id="c_pct_g_hab" value="25,0">
-    </div>
-    <div class="field">
-      <label>Objetivo de Flujo por defecto (€/mes)</label>
-      <input id="c_obj_flujo" value="150" data-money>
-    </div>
-    <div class="field">
-      <label>&nbsp;</label>
-      <div class="actions">
-        <button class="btn primary" id="c_save" type="button">Guardar configuración</button>
-        <button class="btn ghost" id="c_reset" type="button">Restaurar valores por defecto</button>
+    <!-- IMPUESTOS Y COSTES -->
+    <div class="section">
+      <h3>Impuestos y costes de adquisición</h3>
+      <div class="grid-4">
+        <div class="field">
+          <label>ITP (%)</label>
+          <input id="c_itp" data-pct placeholder="8,0">
+          <small class="help">Asturias: 8 % por defecto.</small>
+        </div>
+        <div class="field">
+          <label>Notaría y Registro (€)</label>
+          <input id="c_notaria" data-money placeholder="1.500">
+          <small class="help">Se muestra con separador de miles.</small>
+        </div>
+        <div class="field">
+          <label>Honorarios PSI (€)</label>
+          <input id="c_psi" data-money placeholder="4.235">
+          <small class="help">3.500 € + IVA = 4.235 €.</small>
+        </div>
+        <div class="field">
+          <label>Incluir PSI por defecto en P. máx</label>
+          <div class="switch"><input type="checkbox" id="c_incluir_psi"><span class="badge">Aplicado en “Precio máx. de compra”</span></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div id="c_toast" class="toast" hidden>✅ Nueva configuración guardada con éxito</div>
-</section>
+    <!-- SEGUROS Y GESTIÓN -->
+    <div class="section">
+      <h3>Seguros y gestión (como % del alquiler anual)</h3>
+      <div class="grid-4">
+        <div class="field">
+          <label>Seguro hogar (%)</label>
+          <input id="c_hogar" data-pct placeholder="3,5">
+        </div>
+        <div class="field">
+          <label>Seguro impago — Tradicional (%)</label>
+          <input id="c_impago_trad" data-pct placeholder="4,0">
+        </div>
+        <div class="field">
+          <label>Seguro impago — Habitaciones (%)</label>
+          <input id="c_impago_hab" data-pct placeholder="4,0">
+        </div>
+        <div class="field">
+          <label>Gestión — Tradicional (%)</label>
+          <input id="c_gestion_trad" data-pct placeholder="15,0">
+        </div>
+      </div>
+      <div class="grid-4" style="margin-top:8px">
+        <div class="field">
+          <label>Gestión — Habitaciones (%)</label>
+          <input id="c_gestion_hab" data-pct placeholder="25,0">
+        </div>
+      </div>
+    </div>
+
+    <!-- OBJETIVOS POR TIPO -->
+    <div class="section">
+      <h3>Objetivos por tipo de alquiler</h3>
+      <div class="card" style="margin-bottom:10px">
+        <div class="inline"><strong>Tradicional</strong><span class="help">Valores por defecto usados en Evaluar y matching.</span></div>
+        <div class="grid-4" style="margin-top:10px">
+          <div class="field"><label>Rentabilidad bruta (%)</label><input id="c_obj_t_bruta" data-pct placeholder="10,0"></div>
+          <div class="field"><label>Rentabilidad neta (%)</label><input id="c_obj_t_neta" data-pct placeholder="6,0"></div>
+          <div class="field"><label>Flujo objetivo (€/mes)</label><input id="c_obj_t_flujo" data-money placeholder="0"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="inline"><strong>Habitaciones</strong><span class="help">Valores por defecto usados en Evaluar y matching.</span></div>
+        <div class="grid-4" style="margin-top:10px">
+          <div class="field"><label>Rentabilidad bruta (%)</label><input id="c_obj_h_bruta" data-pct placeholder="12,0"></div>
+          <div class="field"><label>Rentabilidad neta (%)</label><input id="c_obj_h_neta" data-pct placeholder="7,0"></div>
+          <div class="field"><label>Flujo objetivo (€/mes)</label><input id="c_obj_h_flujo" data-money placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESOS DE MATCHING -->
+    <div class="section">
+      <h3>Pesos de matching (sugerencia de inversor para un activo)</h3>
+      <div class="grid-3">
+        <div class="field">
+          <label>Localidad (peso)</label>
+          <input id="c_w_loc" class="slider" type="range" min="0" max="100" step="5">
+          <div class="inline"><span class="help">Peso actual:</span><strong id="c_w_loc_v">50</strong></div>
+        </div>
+        <div class="field">
+          <label>Tipo de alquiler (peso)</label>
+          <input id="c_w_tipo" class="slider" type="range" min="0" max="100" step="5">
+          <div class="inline"><span class="help">Peso actual:</span><strong id="c_w_tipo_v">30</strong></div>
+        </div>
+        <div class="field">
+          <label>Gap objetivo KPI (peso)</label>
+          <input id="c_w_kpi" class="slider" type="range" min="0" max="100" step="5">
+          <div class="inline"><span class="help">Peso actual:</span><strong id="c_w_kpi_v">20</strong></div>
+        </div>
+      </div>
+      <small class="help">La suma no necesita ser 100; normalizamos internamente.</small>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="actions" style="margin-top:12px">
+      <button class="btn" id="c_reset">Restablecer valores por defecto</button>
+      <button class="btn primary" id="c_save">Guardar configuración</button>
+    </div>
+  </section>
 </main>
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
-<!-- Orden correcto de scripts -->
-<script defer src="js/app.js"></script>
-<script defer src="js/config.js"></script>
-</body></html>
+<div id="toasts" class="toast-wrap"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ======= Formato ES (miles con punto, decimales con coma) ======= */
+const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
+function parseEs(str){
+  if(str==null) return NaN;
+  const s=String(str).trim().replace(/\./g,'').replace(',', '.');
+  if(!s) return NaN;
+  const n=Number(s);
+  return Number.isFinite(n)?n:NaN;
+}
+function e0(v){ return fmtE0.format(v||0); }
+function p1(v){ return fmtN1.format(v||0); }
+
+function setupMoneyLive(){
+  document.querySelectorAll('input[data-money]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const digits=(inp.value||'').replace(/[^\d]/g,'');
+      if(!digits){inp.value='';return;}
+      const n=Number(digits);
+      inp.value=fmtN0.format(n);
+    });
+    inp.addEventListener('blur', ()=>{
+      const n=parseEs(inp.value);
+      if(Number.isFinite(n)) inp.value=fmtN0.format(Math.round(n));
+    });
+  });
+}
+function setupPctLive(){
+  document.querySelectorAll('input[data-pct]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      // permitir números y coma
+      const v=(inp.value||'').replace(/[^\d,]/g,'');
+      inp.value=v;
+    });
+    inp.addEventListener('blur', ()=>{
+      const n=parseEs(inp.value);
+      if(Number.isFinite(n)) inp.value=p1(n);
+    });
+  });
+}
+
+/* ======= Store ======= */
+const Store={
+  get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
+  set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); }
+};
+
+/* ======= Defaults ======= */
+const DEF={
+  itp_pct: 8.0,
+  notaria_eur: 1500,
+  psi_fee_eur: 4235,
+  incluir_psi_por_defecto: true,
+  hogar_pct: 3.5,
+  impago_trad_pct: 4.0,
+  impago_hab_pct: 4.0,
+  gestion_trad_pct: 15.0,
+  gestion_hab_pct: 25.0,
+  objetivos:{
+    tradicional:{ bruta_pct:10.0, neta_pct:6.0, flujo_mes_eur:0 },
+    habitaciones:{ bruta_pct:12.0, neta_pct:7.0, flujo_mes_eur:0 }
+  },
+  matching:{ peso_localidad:50, peso_tipo:30, peso_kpi:20 }
+};
+
+/* ======= UI helpers ======= */
+const id = s=>document.getElementById(s);
+function toast(msg){
+  const wrap=id('toasts'); const el=document.createElement('div');
+  el.className='toast ok'; el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>el.style.opacity='0',1600);
+  setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
+}
+
+/* ======= Cargar en el formulario ======= */
+function loadForm(){
+  const cfg = Object.assign({}, DEF, Store.cfg||{});
+  id('c_itp').value          = p1(cfg.itp_pct);
+  id('c_notaria').value      = fmtN0.format(cfg.notaria_eur||0);
+  id('c_psi').value          = fmtN0.format(cfg.psi_fee_eur||0);
+  id('c_incluir_psi').checked= !!cfg.incluir_psi_por_defecto;
+
+  id('c_hogar').value        = p1(cfg.hogar_pct);
+  id('c_impago_trad').value  = p1(cfg.impago_trad_pct);
+  id('c_impago_hab').value   = p1(cfg.impago_hab_pct);
+  id('c_gestion_trad').value = p1(cfg.gestion_trad_pct);
+  id('c_gestion_hab').value  = p1(cfg.gestion_hab_pct);
+
+  id('c_obj_t_bruta').value  = p1(cfg.objetivos.tradicional.bruta_pct);
+  id('c_obj_t_neta').value   = p1(cfg.objetivos.tradicional.neta_pct);
+  id('c_obj_t_flujo').value  = fmtN0.format(cfg.objetivos.tradicional.flujo_mes_eur||0);
+
+  id('c_obj_h_bruta').value  = p1(cfg.objetivos.habitaciones.bruta_pct);
+  id('c_obj_h_neta').value   = p1(cfg.objetivos.habitaciones.neta_pct);
+  id('c_obj_h_flujo').value  = fmtN0.format(cfg.objetivos.habitaciones.flujo_mes_eur||0);
+
+  id('c_w_loc').value        = Number(cfg.matching.peso_localidad||0);
+  id('c_w_tipo').value       = Number(cfg.matching.peso_tipo||0);
+  id('c_w_kpi').value        = Number(cfg.matching.peso_kpi||0);
+  id('c_w_loc_v').textContent = id('c_w_loc').value;
+  id('c_w_tipo_v').textContent= id('c_w_tipo').value;
+  id('c_w_kpi_v').textContent = id('c_w_kpi').value;
+}
+
+/* ======= Guardar desde el formulario ======= */
+function saveForm(){
+  const cfg={
+    itp_pct:           parseEs(id('c_itp').value)||0,
+    notaria_eur:       parseEs(id('c_notaria').value)||0,
+    psi_fee_eur:       parseEs(id('c_psi').value)||0,
+    incluir_psi_por_defecto: !!id('c_incluir_psi').checked,
+
+    hogar_pct:         parseEs(id('c_hogar').value)||0,
+    impago_trad_pct:   parseEs(id('c_impago_trad').value)||0,
+    impago_hab_pct:    parseEs(id('c_impago_hab').value)||0,
+    gestion_trad_pct:  parseEs(id('c_gestion_trad').value)||0,
+    gestion_hab_pct:   parseEs(id('c_gestion_hab').value)||0,
+
+    objetivos:{
+      tradicional:{
+        bruta_pct:       parseEs(id('c_obj_t_bruta').value)||0,
+        neta_pct:        parseEs(id('c_obj_t_neta').value)||0,
+        flujo_mes_eur:   parseEs(id('c_obj_t_flujo').value)||0
+      },
+      habitaciones:{
+        bruta_pct:       parseEs(id('c_obj_h_bruta').value)||0,
+        neta_pct:        parseEs(id('c_obj_h_neta').value)||0,
+        flujo_mes_eur:   parseEs(id('c_obj_h_flujo').value)||0
+      }
+    },
+    matching:{
+      peso_localidad: parseInt(id('c_w_loc').value,10)||0,
+      peso_tipo:      parseInt(id('c_w_tipo').value,10)||0,
+      peso_kpi:       parseInt(id('c_w_kpi').value,10)||0
+    }
+  };
+  Store.cfg = cfg;
+  toast('Nueva configuración guardada con éxito');
+}
+
+/* ======= Restablecer ======= */
+function resetDefaults(){
+  Store.cfg = DEF;
+  loadForm();
+  toast('Valores por defecto restablecidos');
+}
+
+/* ======= Eventos ======= */
+function attach(){
+  setupMoneyLive();
+  setupPctLive();
+
+  id('c_w_loc').addEventListener('input',()=>id('c_w_loc_v').textContent=id('c_w_loc').value);
+  id('c_w_tipo').addEventListener('input',()=>id('c_w_tipo_v').textContent=id('c_w_tipo').value);
+  id('c_w_kpi').addEventListener('input',()=>id('c_w_kpi_v').textContent=id('c_w_kpi').value);
+
+  id('c_save').addEventListener('click', saveForm);
+  id('c_reset').addEventListener('click', resetDefaults);
+
+  loadForm();
+}
+document.addEventListener('DOMContentLoaded', attach);
+})();
+</script>
+</body>
+</html>
