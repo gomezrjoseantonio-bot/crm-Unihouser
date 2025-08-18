@@ -6,11 +6,10 @@
 <title>Unihouser — Configuración</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-/* Estilos locales mínimos para nuevos controles */
 .grid-2{display:grid;gap:12px;grid-template-columns:1fr}
 .grid-3{display:grid;gap:12px;grid-template-columns:1fr}
 .grid-4{display:grid;gap:12px;grid-template-columns:1fr}
-@media(min-width:760px){.grid-2{grid-template-columns:1fr 1fr} .grid-3{grid-template-columns:repeat(3,1fr)} .grid-4{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:760px){.grid-2{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(4,1fr)}}
 small.hint{color:var(--muted)}
 .range-row{display:grid;grid-template-columns:160px 1fr 70px;gap:8px;align-items:center;margin-bottom:8px}
 .range-row output{display:inline-block;min-width:54px;text-align:right}
@@ -22,7 +21,7 @@ small.hint{color:var(--muted)}
 textarea{min-height:120px;resize:vertical}
 .switch{display:flex;align-items:center;gap:10px}
 .switch input{width:auto}
-.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-size:12px;background:#0f1214;border:1px solid #2b343a;border-radius:8px;padding:8px;color:var(--text)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:12px;background:#0f1214;border:1px solid #2b343a;border-radius:8px;padding:8px;color:var(--text)}
 </style>
 </head>
 <body>
@@ -137,33 +136,27 @@ textarea{min-height:120px;resize:vertical}
       <div>
         <div class="range-row">
           <label>Zonas/localidades</label>
-          <input id="w_zona" type="range" min="0" max="5" step="1">
-          <output id="w_zona_o">0</output>
+          <input id="w_zona" type="range" min="0" max="5" step="1"><output id="w_zona_o">0</output>
         </div>
         <div class="range-row">
           <label>Tipo de alquiler</label>
-          <input id="w_tipo" type="range" min="0" max="5" step="1">
-          <output id="w_tipo_o">0</output>
+          <input id="w_tipo" type="range" min="0" max="5" step="1"><output id="w_tipo_o">0</output>
         </div>
         <div class="range-row">
           <label>Objetivo principal (KPI)</label>
-          <input id="w_obj" type="range" min="0" max="5" step="1">
-          <output id="w_obj_o">0</output>
+          <input id="w_obj" type="range" min="0" max="5" step="1"><output id="w_obj_o">0</output>
         </div>
         <div class="range-row">
           <label>Rango de alquiler</label>
-          <input id="w_rango" type="range" min="0" max="5" step="1">
-          <output id="w_rango_o">0</output>
+          <input id="w_rango" type="range" min="0" max="5" step="1"><output id="w_rango_o">0</output>
         </div>
         <div class="range-row">
           <label>Ascensor/altura/bajo</label>
-          <input id="w_altura" type="range" min="0" max="5" step="1">
-          <output id="w_altura_o">0</output>
+          <input id="w_altura" type="range" min="0" max="5" step="1"><output id="w_altura_o">0</output>
         </div>
         <div class="range-row">
           <label>Reforma necesaria</label>
-          <input id="w_reforma" type="range" min="0" max="5" step="1">
-          <output id="w_reforma_o">0</output>
+          <input id="w_reforma" type="range" min="0" max="5" step="1"><output id="w_reforma_o">0</output>
         </div>
       </div>
       <div class="grid-3" style="margin-top:8px">
@@ -187,13 +180,8 @@ textarea{min-height:120px;resize:vertical}
     <div class="section">
       <h3>Plantillas de comunicación</h3>
       <div class="kpi-pills">
-        <span class="pill">{{nombre}}</span>
-        <span class="pill">{{calle}}</span>
-        <span class="pill">{{localidad}}</span>
-        <span class="pill">{{bruta}}</span>
-        <span class="pill">{{neta}}</span>
-        <span class="pill">{{flujo}}</span>
-        <span class="pill">{{url}}</span>
+        <span class="pill">{{nombre}}</span><span class="pill">{{calle}}</span><span class="pill">{{localidad}}</span>
+        <span class="pill">{{bruta}}</span><span class="pill">{{neta}}</span><span class="pill">{{flujo}}</span><span class="pill">{{url}}</span>
       </div>
       <div class="grid-2" style="margin-top:10px">
         <div class="field">
@@ -222,205 +210,187 @@ textarea{min-height:120px;resize:vertical}
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
-<div id="toasts" class="toast-wrap"></div>
+<div class="toast-wrap"></div>
 
 <script>
 (function(){
 "use strict";
 
-/* ======= Utils de formato ======= */
-const id = x=>document.getElementById(x);
-const fmtE0 = new Intl.NumberFormat('es-ES',{ style:'currency', currency:'EUR', maximumFractionDigits:0 });
-const fmtN0 = new Intl.NumberFormat('es-ES',{ maximumFractionDigits:0 });
-const fmtN1 = new Intl.NumberFormat('es-ES',{ maximumFractionDigits:1 });
-
+/* ===== Utils ===== */
+var id=function(x){return document.getElementById(x)};
+var fmtE0=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+var fmtN0=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+var fmtN1=new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
 function parseEs(str){
   if(str==null) return NaN;
-  const s=String(str).trim().replace(/\./g,'').replace(',', '.');
+  var s=String(str).trim().replace(/\./g,'').replace(',', '.');
   if(!s) return NaN;
-  const n=Number(s);
-  return Number.isFinite(n)?n:NaN;
+  var n=Number(s);
+  return isFinite(n)?n:NaN;
 }
-function fmtPct(val){ return fmtN1.format(Number(val||0)) }
 function toast(msg,kind){
-  const wrap=document.querySelector('.toast-wrap'); if(!wrap) return;
-  const el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
-  wrap.appendChild(el); setTimeout(()=>el.style.opacity='0',1600);
-  setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
+  var wrap=document.querySelector('.toast-wrap'); if(!wrap) return;
+  var el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
+  wrap.appendChild(el); setTimeout(function(){el.style.opacity='0'},1600);
+  setTimeout(function(){try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 
-/* ======= Tienda (localStorage) ======= */
-const Store={
+/* ===== Store ===== */
+var Store={
   get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
   set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); }
 };
 
-/* ======= Defaults ======= */
-const DEFAULTS = {
-  itp_pct: 8.0,
-  notaria_eur: 1500,
-  psi_eur: 4235,
-  psi_incluir: true,
-  hogar_pct: 3.5,
-  impago_trad_pct: 4.0,
-  impago_hab_pct: 4.0,
-  gestion_trad_pct: 15.0,
-  gestion_hab_pct: 25.0,
-  obj_bruta_trad: 10.0,
-  obj_bruta_hab: 12.0,
-  obj_neta_trad: 6.0,
-  obj_neta_hab: 7.0,
-  kpi_default: "Bruta",
-  match_weights: { zona:4, tipo:4, objetivo:5, rango:3, altura:2, reforma:2 },
-  match_thresholds: { green:75, amber:50 },
-  email_subject: "Informe Unihouser — {{calle}}, {{localidad}}",
-  email_body:
-    "<p>Hola {{nombre}},</p>" +
-    "<p>Adjuntamos el informe del activo {{calle}} ({{localidad}}).</p>" +
-    "<p>Rentabilidad bruta: {{bruta}}% · neta: {{neta}}%.</p>" +
-    "<p>Un saludo,<br>Unihouser</p>",
-  wa_tpl: "Hola {{nombre}}, te envío el informe del activo {{calle}}, {{localidad}}. Bruta: {{bruta}}%. {{url}}"
+/* ===== Defaults ===== */
+var DEFAULTS={
+  itp_pct:8.0, notaria_eur:1500, psi_eur:4235, psi_incluir:true,
+  hogar_pct:3.5, impago_trad_pct:4.0, impago_hab_pct:4.0, gestion_trad_pct:15.0, gestion_hab_pct:25.0,
+  obj_bruta_trad:10.0, obj_bruta_hab:12.0, obj_neta_trad:6.0, obj_neta_hab:7.0, kpi_default:"Bruta",
+  match_weights:{zona:4,tipo:4,objetivo:5,rango:3,altura:2,reforma:2},
+  match_thresholds:{green:75,amber:50},
+  email_subject:"Informe Unihouser — {{calle}}, {{localidad}}",
+  email_body:"<p>Hola {{nombre}},</p><p>Adjuntamos el informe del activo {{calle}} ({{localidad}}).</p><p>Rentabilidad bruta: {{bruta}}% · neta: {{neta}}%.</p><p>Un saludo,<br>Unihouser</p>",
+  wa_tpl:"Hola {{nombre}}, te envío el informe del activo {{calle}}, {{localidad}}. Bruta: {{bruta}}%. {{url}}"
 };
 
-/* ======= Bind inputs <-> cfg ======= */
+/* ===== Formateadores de inputs ===== */
 function moneyify(inp){
-  inp.addEventListener('input', ()=>{
-    const digits=(inp.value||'').replace(/[^\d]/g,'');
+  inp.addEventListener('input', function(){
+    var digits=(inp.value||'').replace(/[^\d]/g,'');
     if(!digits){inp.value='';return;}
-    const n=Number(digits);
-    inp.value = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(n);
+    var n=Number(digits);
+    inp.value=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(n);
   });
-  inp.addEventListener('blur', ()=>{
-    const n=parseEs(inp.value);
-    if(Number.isFinite(n)) inp.value = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(Math.round(n));
+  inp.addEventListener('blur', function(){
+    var n=parseEs(inp.value);
+    if(isFinite(n)) inp.value=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0}).format(Math.round(n));
   });
 }
 function percentify(inp){
-  inp.addEventListener('input', ()=>{
-    // permitir coma y punto, no miles
-    const s=(inp.value||'').replace(/[^\d,.-]/g,'').replace(/,/g,'.');
-    const n=Number(s); if(!isFinite(n)){return;}
-    inp.value = fmtN1.format(n).replace('.',',');
+  inp.addEventListener('input', function(){
+    var s=(inp.value||'').replace(/[^\d,.-]/g,'').replace(/,/g,'.');
+    var n=Number(s); if(!isFinite(n)) return;
+    inp.value=fmtN1.format(n).replace('.',',');
   });
-  inp.addEventListener('blur', ()=>{
-    const n=parseEs(inp.value);
-    if(Number.isFinite(n)) inp.value = fmtN1.format(n).replace('.',',');
+  inp.addEventListener('blur', function(){
+    var n=parseEs(inp.value);
+    if(isFinite(n)) inp.value=fmtN1.format(n).replace('.',',');
   });
 }
 function bindRanges(){
-  const pairs=[
-    ['w_zona','w_zona_o'],['w_tipo','w_tipo_o'],['w_obj','w_obj_o'],
-    ['w_rango','w_rango_o'],['w_altura','w_altura_o'],['w_reforma','w_reforma_o']
-  ];
-  pairs.forEach(([r,o])=>{
-    const rr=id(r), oo=id(o);
-    const sync=()=>{ oo.textContent = rr.value; };
+  [['w_zona','w_zona_o'],['w_tipo','w_tipo_o'],['w_obj','w_obj_o'],['w_rango','w_rango_o'],['w_altura','w_altura_o'],['w_reforma','w_reforma_o']]
+  .forEach(function(pair){
+    var rr=id(pair[0]), oo=id(pair[1]);
+    var sync=function(){ oo.textContent=rr.value; };
     rr.addEventListener('input', sync); sync();
   });
 }
 
-/* ======= Cargar CFG en UI ======= */
+/* ===== Cargar CFG -> Form ===== */
 function loadCfgToForm(){
-  const cfg = {...DEFAULTS, ...(Store.cfg||{})};
+  var cfg=Object.assign({},DEFAULTS,Store.cfg||{});
 
-  id('itp_pct').value           = fmtN1.format(cfg.itp_pct).replace('.',',');
-  id('notaria_eur').value       = fmtN0.format(cfg.notaria_eur);
-  id('psi_eur').value           = fmtN0.format(cfg.psi_eur);
-  id('psi_incluir').checked     = !!cfg.psi_incluir;
+  id('itp_pct').value=fmtN1.format(cfg.itp_pct).replace('.',',');
+  id('notaria_eur').value=fmtN0.format(cfg.notaria_eur);
+  id('psi_eur').value=fmtN0.format(cfg.psi_eur);
+  id('psi_incluir').checked=!!cfg.psi_incluir;
 
-  id('hogar_pct').value         = fmtN1.format(cfg.hogar_pct).replace('.',',');
-  id('impago_trad_pct').value   = fmtN1.format(cfg.impago_trad_pct).replace('.',',');
-  id('impago_hab_pct').value    = fmtN1.format(cfg.impago_hab_pct).replace('.',',');
-  id('gestion_trad_pct').value  = fmtN1.format(cfg.gestion_trad_pct).replace('.',',');
-  id('gestion_hab_pct').value   = fmtN1.format(cfg.gestion_hab_pct).replace('.',',');
+  id('hogar_pct').value=fmtN1.format(cfg.hogar_pct).replace('.',',');
+  id('impago_trad_pct').value=fmtN1.format(cfg.impago_trad_pct).replace('.',',');
+  id('impago_hab_pct').value=fmtN1.format(cfg.impago_hab_pct).replace('.',',');
+  id('gestion_trad_pct').value=fmtN1.format(cfg.gestion_trad_pct).replace('.',',');
+  id('gestion_hab_pct').value=fmtN1.format(cfg.gestion_hab_pct).replace('.',',');
 
-  id('obj_bruta_trad').value    = fmtN1.format(cfg.obj_bruta_trad).replace('.',',');
-  id('obj_bruta_hab').value     = fmtN1.format(cfg.obj_bruta_hab).replace('.',',');
-  id('obj_neta_trad').value     = fmtN1.format(cfg.obj_neta_trad).replace('.',',');
-  id('obj_neta_hab').value      = fmtN1.format(cfg.obj_neta_hab).replace('.',',');
-  id('kpi_default').value       = cfg.kpi_default || 'Bruta';
+  id('obj_bruta_trad').value=fmtN1.format(cfg.obj_bruta_trad).replace('.',',');
+  id('obj_bruta_hab').value=fmtN1.format(cfg.obj_bruta_hab).replace('.',',');
+  id('obj_neta_trad').value=fmtN1.format(cfg.obj_neta_trad).replace('.',',');
+  id('obj_neta_hab').value=fmtN1.format(cfg.obj_neta_hab).replace('.',',');
+  id('kpi_default').value=cfg.kpi_default||'Bruta';
 
-  id('w_zona').value            = Number(cfg.match_weights?.zona ?? DEFAULTS.match_weights.zona);
-  id('w_tipo').value            = Number(cfg.match_weights?.tipo ?? DEFAULTS.match_weights.tipo);
-  id('w_obj').value             = Number(cfg.match_weights?.objetivo ?? DEFAULTS.match_weights.objetivo);
-  id('w_rango').value           = Number(cfg.match_weights?.rango ?? DEFAULTS.match_weights.rango);
-  id('w_altura').value          = Number(cfg.match_weights?.altura ?? DEFAULTS.match_weights.altura);
-  id('w_reforma').value         = Number(cfg.match_weights?.reforma ?? DEFAULTS.match_weights.reforma);
+  var mw=(cfg.match_weights||{});
+  id('w_zona').value=Number(mw.zona!=null?mw.zona:DEFAULTS.match_weights.zona);
+  id('w_tipo').value=Number(mw.tipo!=null?mw.tipo:DEFAULTS.match_weights.tipo);
+  id('w_obj').value=Number(mw.objetivo!=null?mw.objetivo:DEFAULTS.match_weights.objetivo);
+  id('w_rango').value=Number(mw.rango!=null?mw.rango:DEFAULTS.match_weights.rango);
+  id('w_altura').value=Number(mw.altura!=null?mw.altura:DEFAULTS.match_weights.altura);
+  id('w_reforma').value=Number(mw.reforma!=null?mw.reforma:DEFAULTS.match_weights.reforma);
 
-  id('t_green').value           = fmtN1.format(cfg.match_thresholds?.green ?? DEFAULTS.match_thresholds.green).replace('.',',');
-  id('t_amber').value           = fmtN1.format(cfg.match_thresholds?.amber ?? DEFAULTS.match_thresholds.amber).replace('.',',');
+  var th=(cfg.match_thresholds||{});
+  id('t_green').value=fmtN1.format((th.green!=null?th.green:DEFAULTS.match_thresholds.green)).replace('.',',');
+  id('t_amber').value=fmtN1.format((th.amber!=null?th.amber:DEFAULTS.match_thresholds.amber)).replace('.',',');
 
-  id('email_subject').value     = cfg.email_subject || DEFAULTS.email_subject;
-  id('email_body').value        = cfg.email_body || DEFAULTS.email_body;
-  id('wa_tpl').value            = cfg.wa_tpl || DEFAULTS.wa_tpl;
+  id('email_subject').value=cfg.email_subject||DEFAULTS.email_subject;
+  id('email_body').value=cfg.email_body||DEFAULTS.email_body;
+  id('wa_tpl').value=cfg.wa_tpl||DEFAULTS.wa_tpl;
 
   bindRanges();
 }
 
-/* ======= Leer UI -> CFG ======= */
+/* ===== Form -> CFG ===== */
 function getCfgFromForm(){
-  const pct = (el)=>parseEs(id(el).value);           // devuelve número (p.e. 8.0)
-  const eur = (el)=>parseEs(id(el).value);           // idem
-  const rng = (el)=>Number(id(el).value||0);
+  function pct(el){var v=parseEs(id(el).value); return isFinite(v)?v:0}
+  function eur(el){var v=parseEs(id(el).value); return isFinite(v)?v:0}
+  function rng(el){return Number(id(el).value||0)}
 
-  const cfg = {...DEFAULTS, ...(Store.cfg||{})};
+  var cfg=Object.assign({},DEFAULTS,Store.cfg||{});
 
-  cfg.itp_pct          = pct('itp_pct')||0;
-  cfg.notaria_eur      = eur('notaria_eur')||0;
-  cfg.psi_eur          = eur('psi_eur')||0;
-  cfg.psi_incluir      = !!id('psi_incluir').checked;
+  cfg.itp_pct=pct('itp_pct');
+  cfg.notaria_eur=eur('notaria_eur');
+  cfg.psi_eur=eur('psi_eur');
+  cfg.psi_incluir=!!id('psi_incluir').checked;
 
-  cfg.hogar_pct        = pct('hogar_pct')||0;
-  cfg.impago_trad_pct  = pct('impago_trad_pct')||0;
-  cfg.impago_hab_pct   = pct('impago_hab_pct')||0;
-  cfg.gestion_trad_pct = pct('gestion_trad_pct')||0;
-  cfg.gestion_hab_pct  = pct('gestion_hab_pct')||0;
+  cfg.hogar_pct=pct('hogar_pct');
+  cfg.impago_trad_pct=pct('impago_trad_pct');
+  cfg.impago_hab_pct=pct('impago_hab_pct');
+  cfg.gestion_trad_pct=pct('gestion_trad_pct');
+  cfg.gestion_hab_pct=pct('gestion_hab_pct');
 
-  cfg.obj_bruta_trad   = pct('obj_bruta_trad')||0;
-  cfg.obj_bruta_hab    = pct('obj_bruta_hab')||0;
-  cfg.obj_neta_trad    = pct('obj_neta_trad')||0;
-  cfg.obj_neta_hab     = pct('obj_neta_hab')||0;
-  cfg.kpi_default      = id('kpi_default').value;
+  cfg.obj_bruta_trad=pct('obj_bruta_trad');
+  cfg.obj_bruta_hab=pct('obj_bruta_hab');
+  cfg.obj_neta_trad=pct('obj_neta_trad');
+  cfg.obj_neta_hab=pct('obj_neta_hab');
+  cfg.kpi_default=id('kpi_default').value;
 
-  cfg.match_weights = {
-    zona:    rng('w_zona'),
-    tipo:    rng('w_tipo'),
+  cfg.match_weights={
+    zona:rng('w_zona'),
+    tipo:rng('w_tipo'),
     objetivo:rng('w_obj'),
-    rango:   rng('w_rango'),
-    altura:  rng('w_altura'),
-    reforma: rng('w_reforma')
+    rango:rng('w_rango'),
+    altura:rng('w_altura'),
+    reforma:rng('w_reforma')
   };
-  cfg.match_thresholds = {
-    green: parseEs(id('t_green').value)||DEFAULTS.match_thresholds.green,
-    amber: parseEs(id('t_amber').value)||DEFAULTS.match_thresholds.amber
+  cfg.match_thresholds={
+    green:parseEs(id('t_green').value)||DEFAULTS.match_thresholds.green,
+    amber:parseEs(id('t_amber').value)||DEFAULTS.match_thresholds.amber
   };
 
-  cfg.email_subject    = id('email_subject').value.trim();
-  cfg.email_body       = id('email_body').value.trim();
-  cfg.wa_tpl           = id('wa_tpl').value.trim();
+  cfg.email_subject=(id('email_subject').value||'').trim();
+  cfg.email_body=(id('email_body').value||'').trim();
+  cfg.wa_tpl=(id('wa_tpl').value||'').trim();
 
   return cfg;
 }
 
-/* ======= Eventos ======= */
+/* ===== Bind ===== */
 function bindFormatting(){
-  document.querySelectorAll('input[data-money]').forEach(moneyify);
-  document.querySelectorAll('input[data-percent]').forEach(percentify);
+  Array.prototype.forEach.call(document.querySelectorAll('input[data-money]'),moneyify);
+  Array.prototype.forEach.call(document.querySelectorAll('input[data-percent]'),percentify);
 }
 function attach(){
   bindFormatting();
   loadCfgToForm();
 
-  id('b_save').addEventListener('click', ()=>{
-    const cfg = getCfgFromForm();
-    Store.cfg = cfg;
+  id('b_save').addEventListener('click', function(){
+    var cfg=getCfgFromForm();
+    Store.cfg=cfg;
     toast('Configuración guardada','ok');
-    const t=new Date(); id('save_note').textContent = Nueva configuración guardada con éxito · ${t.toLocaleTimeString('es-ES')};
+    var t=new Date();
+    id('save_note').textContent='Nueva configuración guardada con éxito · '+t.toLocaleTimeString('es-ES');
   });
 
-  id('b_reset').addEventListener('click', ()=>{
+  id('b_reset').addEventListener('click', function(){
     if(!confirm('¿Restablecer valores recomendados?')) return;
-    Store.cfg = DEFAULTS;
+    Store.cfg=DEFAULTS;
     loadCfgToForm();
     toast('Valores recomendados aplicados','warn');
   });
