@@ -6,7 +6,7 @@
 <title>Unihouser — Evaluaciones</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-/* ===== Ajustes visuales coherentes con Evaluar/Dashboard ===== */
+/* ===== Estilos coherentes con Evaluar/Dashboard ===== */
 .uh-overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
 .uh-overlay.open{display:block}
 .uh-drawer{position:fixed;top:0;right:-520px;height:100%;width:520px;max-width:100%;background:#fff;border-left:1px solid #e5e7eb;box-shadow:0 10px 24px rgba(0,0,0,.22);transition:right .2s ease;z-index:90}
@@ -18,6 +18,7 @@
 .uh-kv .k{color:#667085}
 .uh-kv .v{font-weight:600}
 .uh-list-pros label{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid #f3f4f6}
+
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
 .toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
@@ -26,7 +27,7 @@
 .kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
 .kpi .lab{font-size:12px;color:#667085}.kpi .val{font-weight:800;font-size:20px}
 
-/* Tabla */
+/* Tabla contenida */
 .table-wrap{overflow:auto}
 table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
 .table th,.table td{padding:10px 12px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px;white-space:nowrap;vertical-align:middle}
@@ -36,13 +37,13 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 th.num, td.num{text-align:right}
 th.center, td.center{text-align:center}
 
-/* Acciones con icono */
-.actions-cell{display:flex;gap:8px;justify-content:center}
-.icon-btn{border:1px solid #e5e7eb;background:#fff;border-radius:10px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center}
+/* Acciones */
+.actions-cell{display:flex;gap:6px;justify-content:center}
+.icon-btn{border:1px solid #e5e7eb;background:#fff;border-radius:10px;min-width:34px;height:34px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;font-size:16px;line-height:1}
 .icon-btn:hover{background:#f8fafc}
-.icon{width:18px;height:18px;display:block}
 
 .btn.sm{padding:8px 10px;font-size:13px;border-radius:10px}
+.pill{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#f1f5f9;font-size:12px}
 </style>
 </head>
 <body>
@@ -218,9 +219,6 @@ function get(o,k){
 }
 
 /* ===== Render tabla ===== */
-const ICON_EYE = '<svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" stroke="#111" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="#111" stroke-width="1.6"/></svg>';
-const ICON_TRASH = '<svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" stroke="#111" stroke-width="1.6" stroke-linecap="round"/></svg>';
-
 function render(){
   const tb=id('tbody'); tb.innerHTML='';
   view.forEach(e=>{
@@ -240,8 +238,8 @@ function render(){
       <td class="center">${(e.prospect_ids||[]).length}</td>
       <td class="center">
         <div class="actions-cell">
-          <button class="icon-btn" data-act="ver" title="Ver">${ICON_EYE}</button>
-          <button class="icon-btn" data-act="del" title="Borrar">${ICON_TRASH}</button>
+          <button class="icon-btn" data-act="ver" title="Ver">👁</button>
+          <button class="icon-btn" data-act="del" title="Borrar">🗑</button>
         </div>
       </td>`;
     tb.appendChild(tr);
