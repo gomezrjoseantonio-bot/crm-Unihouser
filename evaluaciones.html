@@ -262,7 +262,6 @@ function openDrawer(idEv){
   id('d_flujo').textContent =e0(e.kpi_flujo);
   id('d_pmax').textContent =e0(e.pmax);
   id('d_inv').textContent =e0(e.inv_total);
-  id('d_url').innerHTML =e.url? <a href="${e.url}" target="_blank" rel="noopener">Abrir</a>:'—';
 
   const wrap=id('p_list'); wrap.innerHTML='';
   const pros=Store.pros||[]; const set=new Set(e.prospect_ids||[]);
