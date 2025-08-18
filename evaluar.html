@@ -6,12 +6,18 @@
 <title>Unihouser — Evaluar</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
+/* ===== Afinado local Evaluar (coherente con resto) ===== */
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
 .dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
 .small{font-size:12px;color:#667085}
 .kpi .muted{color:#667085;font-weight:600;margin-left:6px}
-#matchList .tag{display:inline-block;background:#eef2f7;color:#0f1112;border-radius:999px;padding:4px 8px;margin:2px 4px;font-size:12px}
 .canvasWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
+.match-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}
+.match-card{border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fff}
+.match-card h4{margin:0 0 8px;font-size:14px;color:#101828}
+.match-list{display:flex;flex-direction:column;gap:6px}
+.match-name{display:inline-block;background:#eef2f7;color:#0f1112;border-radius:999px;padding:4px 10px;font-size:13px}
+@media(max-width:900px){.match-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -129,7 +135,22 @@
 
     <div class="card" style="margin-top:12px">
       <h3 style="margin:0 0 8px">Clientes potenciales</h3>
-      <div id="matchList" class="muted">—</div>
+
+      <div id="matchList" class="match-grid">
+        <div class="match-card">
+          <h4>Bruta</h4>
+          <div id="ml_bruta" class="match-list">—</div>
+        </div>
+        <div class="match-card">
+          <h4>Neta</h4>
+          <div id="ml_neta" class="match-list">—</div>
+        </div>
+        <div class="match-card">
+          <h4>Flujo</h4>
+          <div id="ml_flujo" class="match-list">—</div>
+        </div>
+      </div>
+
       <div class="actions" style="margin-top:8px">
         <select id="assign_cli" size="6" style="min-width:320px"></select>
         <button class="btn" id="save_only">Guardar evaluación</button>
@@ -143,6 +164,9 @@
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
 <script>
+/* ===========================================================
+   Evaluar — Revisado con foco en matching + preload keys
+   =========================================================== */
 (function(){
 "use strict";
 
@@ -180,6 +204,8 @@ function toast(msg,kind){
   wrap.appendChild(el); setTimeout(()=>el.style.opacity='0',1600);
   setTimeout(()=>{ try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
+const norm = s => (s??'').toString().toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 
 /* ===== Store (localStorage) ===== */
 const Store={
@@ -217,21 +243,16 @@ function getCfg(){
   return {
     itp_pct: Number(c.itp_pct ?? 8),
     notaria_eur: Number(c.notaria_eur ?? 1500),
-    psi_eur: Number(c.psi_fee_eur ?? 4235),
+    psi_eur: Number(c.psi_fee_eur ?? c.psi_eur ?? 4235),
     hogar_pct: Number(c.hogar_pct ?? 3.5),
-    impago_pct_trad: Number(c.impago_trad_pct ?? 4.0),
-    impago_pct_hab: Number(c.impago_hab_pct ?? 4.0),
-    gestion_pct_trad: Number(c.gestion_trad_pct ?? 15.0),
-    gestion_pct_hab: Number(c.gestion_hab_pct ?? 25.0),
-    obj_bruta_trad: Number((c.objetivos?.tradicional?.bruta_pct) ?? 10.0),
-    obj_bruta_hab: Number((c.objetivos?.habitaciones?.bruta_pct) ?? 12.0),
-    obj_neta_trad: Number((c.objetivos?.tradicional?.neta_pct) ?? 6.0),
-    obj_neta_hab: Number((c.objetivos?.habitaciones?.neta_pct) ?? 7.0),
-    match_weights: (c.matching? {
-      tipo: Number(c.matching.peso_tipo||30)/100,
-      localidad: Number(c.matching.peso_localidad||50)/100,
-      gap: Number(c.matching.peso_kpi||20)/100
-    } : {tipo:0.3, localidad:0.5, gap:0.2})
+    impago_pct_trad: Number(c.impago_trad_pct ?? c.impago_pct_trad ?? 4.0),
+    impago_pct_hab: Number(c.impago_hab_pct ?? c.impago_pct_hab ?? 4.0),
+    gestion_pct_trad: Number(c.gestion_trad_pct ?? c.gestion_pct_trad ?? 15.0),
+    gestion_pct_hab: Number(c.gestion_hab_pct ?? c.gestion_pct_hab ?? 25.0),
+    obj_bruta_trad: Number(c.objetivos?.tradicional?.bruta_pct ?? c.obj_bruta_trad ?? 10.0),
+    obj_bruta_hab: Number(c.objetivos?.habitaciones?.bruta_pct ?? c.obj_bruta_hab ?? 12.0),
+    obj_neta_trad:  Number(c.objetivos?.tradicional?.neta_pct  ?? c.obj_neta_trad  ?? 6.0),
+    obj_neta_hab:   Number(c.objetivos?.habitaciones?.neta_pct ?? c.obj_neta_hab   ?? 7.0)
   };
 }
 
@@ -321,17 +342,17 @@ function calc(){
   id('r_pmax').textContent  = e0(pmax);
   id('e_pmax').value        = n0(pmax);
 
-  // Dots + diff
+  // Semáforos + diff
   paintDot('sb', gapB);
   paintDot('sn', gapN);
   paintDot('sf', flujo>=0? 1 : -1);
   id('r_bruta_diff').textContent = gapText(gapB);
   id('r_neta_diff').textContent  = gapText(gapN);
 
-  // Gráfico (blanco + línea discontinua gris)
+  // Gráfico
   drawChart(bruta, obj_bruta);
 
-  // Sugerencias de prospects
+  // Sugerencias
   suggestProspects({ tipo, loc: id('e_loc').value||'', bruta, neta, flujo });
 
   id('e_result').hidden=false;
@@ -371,123 +392,113 @@ function paintDot(idDot, gap){
 /* ===== Mini chart: barra naranja + línea discontinua gris ===== */
 function drawChart(real, objetivo){
   const c=id('chartKPI'); const ctx=c.getContext('2d');
-  ctx.clearRect(0,0,c.width,c.height);
   const pad=36; const W=c.width, H=c.height;
-
-  // Fondo blanco
-  ctx.fillStyle='#ffffff';
-  ctx.fillRect(0,0,W,H);
-
+  // fondo blanco
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
+  // rejilla suave
+  ctx.strokeStyle='#eef2f7'; ctx.lineWidth=1; ctx.setLineDash([]);
   const max = Math.max( Math.ceil((Math.max(real, objetivo)+2)/2)*2 , 2);
-
-  // Ejes guía leves
-  ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=1;
   for(let y=0;y<=max;y+=2){
     const yy = H - pad - (H-2*pad)* (y/max);
     ctx.beginPath(); ctx.moveTo(pad,yy); ctx.lineTo(W-pad,yy); ctx.stroke();
   }
-
-  // Barra real (naranja)
+  // barra real (naranja)
   const barW=80;
-  const realH=(H-2*pad)*(real/max);
+  const realH=(H-2*pad)*(Math.max(0,real)/max);
   ctx.fillStyle='#ff5a1f';
   ctx.fillRect(W/2 - barW/2, H - pad - realH, barW, realH);
-
-  // Línea objetivo discontinua (gris)
-  const yObj = H - pad - (H-2*pad)*(objetivo/max);
-  ctx.strokeStyle='#9ca3af'; ctx.lineWidth=2;
-  ctx.setLineDash([6,6]);
+  // objetivo (línea discontinua gris)
+  const yObj = H - pad - (H-2*pad)*(Math.max(0,objetivo)/max);
+  ctx.strokeStyle='#94a3b8'; ctx.lineWidth=2; ctx.setLineDash([6,4]);
   ctx.beginPath(); ctx.moveTo(pad, yObj); ctx.lineTo(W-pad, yObj); ctx.stroke();
+  // etiquetas
   ctx.setLineDash([]);
-
-  // Etiquetas
-  ctx.fillStyle='#111827'; ctx.font='12px Inter, Arial';
-  ctx.fillText('Bruta real', W/2 - 30, H - 8);
+  ctx.fillStyle='#0f1112'; ctx.font='12px Inter, Arial';
+  ctx.fillText('Bruta', W/2 - 18, H - 10);
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects ===== */
+/* ===== Matching: Tipo + Localidad exactos (normalizados) en 3 columnas ===== */
 function suggestProspects(ctx){
-  const list = Store.pros || [];
-  const asignSel = id('assign_cli');
-  const panel = id('matchList');
+  const pros=Store.pros||[];
+  const loc = norm(ctx.loc);
+  const tipo = norm(ctx.tipo);
 
-  const norm = s => (s||'').toString()
-    .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .trim();
-
-  const tipoAsset = norm(ctx.tipo);
-  const locAsset  = norm(ctx.loc);
-
-  const bruta = Number(ctx.bruta||0);
-  const neta  = Number(ctx.neta||0);
-  const flujoMes = Number((ctx.flujo||0)/12);
-
-  const encajaBruta = [];
-  const encajaNeta  = [];
-  const encajaFlujo = [];
-
-  list.forEach(p=>{
-    const tipoPros = norm(p.pref_tipo||'');
-    if(!tipoPros || tipoPros !== tipoAsset) return;
-
-    const locsPros = String(p.locs_text||'')
-      .split(',')
-      .map(norm)
-      .filter(Boolean);
-    if(!locsPros.length || !locsPros.includes(locAsset)) return;
-
-    const objB = Number(p.obj_bruta || p.obj_bruta_pct || 0);
-    const objN = Number(p.obj_neta  || p.obj_neta_pct  || 0);
-    const objF = Number(p.obj_flujo || p.obj_flujo_mes || p.obj_flujo_mes_eur || 0);
-
-    const nombre = p.nombre || '(sin nombre)';
-    const pid = p.id || p.email || nombre || ('p_'+Math.random().toString(36).slice(2,7));
-
-    if(objB>0 && bruta >= objB) encajaBruta.push({id:pid, nombre});
-    if(objN>0 && neta  >= objN) encajaNeta.push({id:pid, nombre});
-    if(objF>0 && flujoMes >= objF) encajaFlujo.push({id:pid, nombre});
-  });
-
-  const col = (titulo, arr) => {
-    if(!arr.length) return '<div class="card"><h4 style="margin:0 0 6px">'+titulo+'</h4><div class="muted">—</div></div>';
-    const chips = arr.map(x=>'<span class="tag">'+x.nombre+'</span>').join('');
-    return '<div class="card"><h4 style="margin:0 0 6px">'+titulo+'</h4>'+chips+'</div>';
+  // Construye set de localidades del prospect (locs array o locs_text)
+  const prospectLocs = p=>{
+    if(Array.isArray(p.locs)) return new Set(p.locs.map(norm));
+    const raw = String(p.locs_text||'');
+    const parts = raw.split(/[,;|/·\n]+/).map(s=>s.trim()).filter(Boolean);
+    return new Set(parts.map(norm));
   };
 
-  panel.innerHTML =
-    '<div class="row three" style="align-items:start">'+
-      col('Encaja por bruta', encajaBruta)+
-      col('Encaja por neta',  encajaNeta)+
-      col('Encaja por flujo', encajaFlujo)+
-    '</div>';
-
-  const uniq = new Map();
-  [...encajaBruta, ...encajaNeta, ...encajaFlujo].forEach(x=>uniq.set(x.id, x.nombre));
-  asignSel.innerHTML = '';
-  [...uniq.entries()].forEach(([idVal, nombre])=>{
-    const opt=document.createElement('option');
-    opt.value=idVal; opt.textContent=nombre;
-    asignSel.appendChild(opt);
+  // filtros duros: tipo + localidad
+  const filtered = pros.filter(p=>{
+    const ptipo = norm(p.pref_tipo||'');
+    const locsSet = prospectLocs(p);
+    return ptipo===tipo && locsSet.has(loc);
   });
 
-  if(!list.length){
-    panel.textContent='No hay prospects guardados.';
-    asignSel.innerHTML='';
-  }
+  const byBruta = [];
+  const byNeta  = [];
+  const byFlujo = [];
+
+  filtered.forEach(p=>{
+    const objB = Number(p.obj_bruta||0);
+    const objN = Number(p.obj_neta||0);
+    // flujo objetivo MES -> comparamos con flujo ANUAL
+    const objF = Number(p.obj_flujo||0) * 12;
+
+    if(ctx.bruta >= objB) byBruta.push(p);
+    if(ctx.neta  >= objN) byNeta.push(p);
+    if(ctx.flujo >= objF) byFlujo.push(p);
+  });
+
+  const paintNames = (arr, elId)=>{
+    const box = id(elId); box.innerHTML='';
+    if(!arr.length){ box.textContent='—'; return; }
+    arr.forEach(p=>{
+      const span=document.createElement('span');
+      span.className='match-name';
+      span.textContent=p.nombre||'(sin nombre)';
+      box.appendChild(span);
+    });
+  };
+  paintNames(byBruta,'ml_bruta');
+  paintNames(byNeta,'ml_neta');
+  paintNames(byFlujo,'ml_flujo');
+
+  // selector para "Guardar y asignar" (union única)
+  const unionMap = new Map();
+  [...byBruta, ...byNeta, ...byFlujo].forEach(p=>{
+    const key = p.id || p.email || p.nombre || ('p_'+Math.random().toString(36).slice(2,7));
+    if(!unionMap.has(key)) unionMap.set(key, {key, label: (p.nombre||'-')+' ('+(p.pref_tipo||'-')+')'});
+  });
+  const sel=id('assign_cli'); sel.innerHTML='';
+  [...unionMap.values()].forEach(x=>{
+    const opt=document.createElement('option');
+    opt.value=x.key; opt.textContent=x.label; sel.appendChild(opt);
+  });
 }
 
 /* ===== Guardar / Asignar ===== */
+let LOAD_KEY_USED=null;
 function gather(){ return calc(); }
 function save(alsoAssign){
   const e=gather();
-  const params = new URLSearchParams(location.search);
-  const loaded = params.get('id'); // si venimos a re-editar
+  const loaded = (function(){
+    for(const k of ['_load_eval','_load_eval']){
+      const v=localStorage.getItem(k);
+      if(v) { LOAD_KEY_USED=k; return v; }
+    }
+    return null;
+  })();
   let list=Store.evals||[];
   if(loaded){
     const idx=list.findIndex(x=>x.id===loaded);
     if(idx>=0){ e.id=list[idx].id; e.ts=list[idx].ts; }
+    if(LOAD_KEY_USED){ localStorage.removeItem(LOAD_KEY_USED); LOAD_KEY_USED=null; } // dejar siguiente carga en blanco
   }
   if(alsoAssign){
     const sel=[...document.getElementById('assign_cli').options].filter(o=>o.selected).map(o=>o.value);
@@ -510,14 +521,17 @@ function limpiar(){
   document.getElementById('e_result').hidden=true;
 }
 
-/* ===== Preload solo si ?id=... ===== */
+/* ===== Preload desde Evaluaciones (acepta 2 claves) ===== */
 function preloadIfAny(){
-  const params = new URLSearchParams(location.search);
-  const evId = params.get('id');
-  if(!evId) { limpiar(); return; }
+  let evKey=null, evId=null;
+  for(const k of ['_load_eval','_load_eval']){
+    const v=localStorage.getItem(k);
+    if(v){ evKey=k; evId=v; break; }
+  }
+  if(!evId) return; // si no vienes desde Evaluaciones, entra en blanco
+  LOAD_KEY_USED=evKey;
 
-  const e=(Store.evals||[]).find(x=>x.id===evId);
-  if(!e) { limpiar(); return; }
+  const e=(Store.evals||[]).find(x=>x.id===evId); if(!e) return;
 
   id('e_loc').value = e.loc || '';
   id('e_calle').value = e.calle||'';
@@ -547,46 +561,8 @@ function preloadIfAny(){
   id('e_alq').value = n0(e.alq||0);
 
   calc();
+  // Nota: no borramos aquí la clave; la borro en save() para que puedas revisar/editar.
 }
-
-/* ===== PDF (sin template string) ===== */
-function quickPDFfrom(e){
-  const fecha=new Date(e.ts||Date.now()).toLocaleString('es-ES');
-  const htmlParts = [
-    '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — ',
-    escapeHtml(e.loc||''), '</title>',
-    '<style>body{font-family:Inter,Arial;color:#101828;margin:24px}',
-    'h1{font-size:22px;margin:0 0 6px}h2{font-size:16px;margin:16px 0 8px}',
-    '.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}',
-    '.box{border:1px solid #e5e7eb;border-radius:10px;padding:10px}',
-    '.lab{font-size:12px;color:#667085}.val{font-weight:800}',
-    '.foot{margin-top:16px;font-size:12px;color:#667085;text-align:center}',
-    '</style></head><body>',
-    '<h1>Informe BuyBox — Unihouser</h1>',
-    '<div class="lab">', fecha, '</div>',
-    '<h2>Resumen financiero</h2><div class="grid">',
-      '<div class="box"><div class="lab">Bruta</div><div class="val">', fmtN1.format(e.kpi_bruta||0),' %</div></div>',
-      '<div class="box"><div class="lab">Neta</div><div class="val">', fmtN1.format(e.kpi_neta||0),' %</div></div>',
-      '<div class="box"><div class="lab">Flujo anual</div><div class="val">', e0(e.kpi_flujo||0),'</div></div>',
-      '<div class="box"><div class="lab">P. máx compra</div><div class="val">', e0(e.pmax||0),'</div></div>',
-    '</div>',
-    '<h2>Datos del inmueble</h2><div class="grid">',
-      '<div class="box"><div class="lab">Localidad</div><div class="val">', escapeHtml(e.loc||'-'),'</div></div>',
-      '<div class="box"><div class="lab">Calle</div><div class="val">', escapeHtml(e.calle||'-'),'</div></div>',
-      '<div class="box"><div class="lab">Tipo</div><div class="val">', escapeHtml(e.tipo||'-'),'</div></div>',
-      '<div class="box"><div class="lab">Alquiler</div><div class="val">', e0(e.alq*12||0),'</div></div>',
-      '<div class="box"><div class="lab">Precio</div><div class="val">', e0(e.precio||0),'</div></div>',
-      '<div class="box"><div class="lab">Inversión total</div><div class="val">', e0(e.inv_total||0),'</div></div>',
-    '</div>',
-    '<div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>',
-    '</body></html>'
-  ];
-  const html = htmlParts.join('');
-  const w=window.open('','_blank'); if(!w) return;
-  w.document.open(); w.document.write(html); w.document.close();
-  const tryPrint=()=>{ try{w.focus(); w.print();}catch(_){}}; w.onload=tryPrint; setTimeout(tryPrint,600);
-}
-function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
 /* ===== Eventos ===== */
 function attach(){
