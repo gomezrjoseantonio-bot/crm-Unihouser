@@ -165,7 +165,7 @@
 
 <script>
 /* ===========================================================
-   Evaluar — Revisado con foco en matching + preload keys
+   Evaluar — Matching robusto + preload compatible
    =========================================================== */
 (function(){
 "use strict";
@@ -229,12 +229,22 @@ const ASTURIAS = [
 "Vegadeo","Villanueva de Oscos","Villaviciosa","Villayón"
 ];
 
-/* ===== Cargar localidades ===== */
+/* ===== Select localidades ===== */
 function loadLocalidades(){
   const s=id('e_loc'); s.innerHTML='';
   ASTURIAS.forEach(loc=>{
     const o=document.createElement('option'); o.textContent=loc; s.appendChild(o);
   });
+}
+function ensureSelectHasValue(sel, value){
+  if(!value) return;
+  const wanted = value.toString();
+  const exists = [...sel.options].some(o=>o.textContent===wanted || o.value===wanted);
+  if(!exists){
+    const o=document.createElement('option'); o.textContent=wanted; o.value=wanted;
+    sel.appendChild(o);
+  }
+  sel.value = wanted;
 }
 
 /* ===== Leer cfg con defaults ===== */
@@ -419,24 +429,35 @@ function drawChart(real, objetivo){
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching: Tipo + Localidad exactos (normalizados) en 3 columnas ===== */
+/* ===== Matching: Tipo + Localidad exactos (normalizados) ===== */
+function prospectLocsSet(p){
+  // 1) array locs
+  if(Array.isArray(p.locs)){
+    return new Set(p.locs.map(norm));
+  }
+  // 2) string locs_text con separadores varios
+  if(p.locs_text){
+    const parts = String(p.locs_text).split(/[,;|/·\n]+/).map(s=>s.trim()).filter(Boolean);
+    return new Set(parts.map(norm));
+  }
+  // 3) posibles loc1..loc5 o pref_locs
+  const cands=[];
+  if(p.pref_locs && Array.isArray(p.pref_locs)) cands.push(...p.pref_locs);
+  for(let i=1;i<=5;i++){
+    const k='loc'+i;
+    if(p[k]) cands.push(p[k]);
+  }
+  return new Set(cands.map(norm));
+}
 function suggestProspects(ctx){
   const pros=Store.pros||[];
   const loc = norm(ctx.loc);
   const tipo = norm(ctx.tipo);
 
-  // Construye set de localidades del prospect (locs array o locs_text)
-  const prospectLocs = p=>{
-    if(Array.isArray(p.locs)) return new Set(p.locs.map(norm));
-    const raw = String(p.locs_text||'');
-    const parts = raw.split(/[,;|/·\n]+/).map(s=>s.trim()).filter(Boolean);
-    return new Set(parts.map(norm));
-  };
-
-  // filtros duros: tipo + localidad
+  // filtro duro: tipo + localidad
   const filtered = pros.filter(p=>{
     const ptipo = norm(p.pref_tipo||'');
-    const locsSet = prospectLocs(p);
+    const locsSet = prospectLocsSet(p);
     return ptipo===tipo && locsSet.has(loc);
   });
 
@@ -447,9 +468,7 @@ function suggestProspects(ctx){
   filtered.forEach(p=>{
     const objB = Number(p.obj_bruta||0);
     const objN = Number(p.obj_neta||0);
-    // flujo objetivo MES -> comparamos con flujo ANUAL
-    const objF = Number(p.obj_flujo||0) * 12;
-
+    const objF = Number(p.obj_flujo||0) * 12; // objetivo mensual → comparamos con flujo ANUAL
     if(ctx.bruta >= objB) byBruta.push(p);
     if(ctx.neta  >= objN) byNeta.push(p);
     if(ctx.flujo >= objF) byFlujo.push(p);
@@ -469,7 +488,7 @@ function suggestProspects(ctx){
   paintNames(byNeta,'ml_neta');
   paintNames(byFlujo,'ml_flujo');
 
-  // selector para "Guardar y asignar" (union única)
+  // selector para "Guardar y asignar" (unión única)
   const unionMap = new Map();
   [...byBruta, ...byNeta, ...byFlujo].forEach(p=>{
     const key = p.id || p.email || p.nombre || ('p_'+Math.random().toString(36).slice(2,7));
@@ -521,7 +540,7 @@ function limpiar(){
   document.getElementById('e_result').hidden=true;
 }
 
-/* ===== Preload desde Evaluaciones (acepta 2 claves) ===== */
+/* ===== Preload desde Evaluaciones (acepta 2 llaves y asegura localidad) ===== */
 function preloadIfAny(){
   let evKey=null, evId=null;
   for(const k of ['_load_eval','_load_eval']){
@@ -533,7 +552,9 @@ function preloadIfAny(){
 
   const e=(Store.evals||[]).find(x=>x.id===evId); if(!e) return;
 
-  id('e_loc').value = e.loc || '';
+  // Asegurar que la localidad guardada exista en el select
+  ensureSelectHasValue(id('e_loc'), e.loc||'');
+
   id('e_calle').value = e.calle||'';
   id('e_m2').value = e.m2||'';
   id('e_anio').value = e.anio||'';
@@ -560,8 +581,8 @@ function preloadIfAny(){
 
   id('e_alq').value = n0(e.alq||0);
 
-  calc();
-  // Nota: no borramos aquí la clave; la borro en save() para que puedas revisar/editar.
+  calc(); // muestra resultados con datos precargados
+  // La llave se borra al guardar para que la siguiente vez abra en blanco.
 }
 
 /* ===== Eventos ===== */
