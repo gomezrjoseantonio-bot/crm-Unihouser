@@ -25,6 +25,8 @@
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
 .toast.ok{background:#16a34a}
+textarea{min-height:120px;resize:vertical}
+code.placeholder{background:#f3f4f6;border-radius:6px;padding:0 6px}
 </style>
 </head>
 <body>
@@ -144,10 +146,43 @@
       <small class="help">La suma no necesita ser 100; normalizamos internamente.</small>
     </div>
 
+    <!-- COMUNICACIONES -->
+    <div class="section">
+      <h3>Comunicaciones (plantillas)</h3>
+      <div class="grid-2">
+        <div class="card">
+          <div class="field">
+            <label>Asunto email</label>
+            <input id="c_mail_subj" placeholder="Oportunidad en {LOCALIDAD}: {CALLE}">
+          </div>
+          <div class="field">
+            <label>Cuerpo email</label>
+            <textarea id="c_mail_body" placeholder="Hola {NOMBRE},&#10;Te encaja este piso en {LOCALIDAD}, {CALLE}? Precio {PRECIO}, alquiler {ALQUILER}. P. máx compra {P_MAX}.&#10;{LINK}"></textarea>
+          </div>
+        </div>
+        <div class="card">
+          <div class="field">
+            <label>Mensaje WhatsApp</label>
+            <textarea id="c_wa_body" placeholder="Hola {NOMBRE}! Mira este activo: {CALLE}, {LOCALIDAD}. {LINK}"></textarea>
+          </div>
+        </div>
+      </div>
+      <small class="help">
+        Placeholders disponibles:
+        <code class="placeholder">{NOMBRE}</code>
+        <code class="placeholder">{CALLE}</code>
+        <code class="placeholder">{LOCALIDAD}</code>
+        <code class="placeholder">{PRECIO}</code>
+        <code class="placeholder">{P_MAX}</code>
+        <code class="placeholder">{ALQUILER}</code>
+        <code class="placeholder">{LINK}</code>
+      </small>
+    </div>
+
     <!-- ACCIONES -->
     <div class="actions" style="margin-top:12px">
-      <button type="button" class="btn" id="c_reset" onclick="window._resetCfg()">Restablecer valores por defecto</button>
-      <button type="button" class="btn primary" id="c_save" onclick="window._saveCfg()">Guardar configuración</button>
+      <button type="button" class="btn" id="c_reset">Restablecer valores por defecto</button>
+      <button type="button" class="btn primary" id="c_save">Guardar configuración</button>
     </div>
   </section>
 </main>
@@ -171,7 +206,6 @@ function parseEs(str){
   const n=Number(s);
   return Number.isFinite(n)?n:NaN;
 }
-function e0(v){ return fmtE0.format(v||0); }
 function p1(v){ return fmtN1.format(v||0); }
 
 /* ======= Helpers de formato en vivo ======= */
@@ -223,13 +257,21 @@ const DEF={
     tradicional:{ bruta_pct:10.0, neta_pct:6.0, flujo_mes_eur:0 },
     habitaciones:{ bruta_pct:12.0, neta_pct:7.0, flujo_mes_eur:0 }
   },
-  matching:{ peso_localidad:50, peso_tipo:30, peso_kpi:20 }
+  matching:{ peso_localidad:50, peso_tipo:30, peso_kpi:20 },
+  comms:{
+    mail_subj: 'Oportunidad en {LOCALIDAD}: {CALLE}',
+    mail_body: 'Hola {NOMBRE},\nTe encaja este piso en {LOCALIDAD}, {CALLE}? Precio {PRECIO}, alquiler {ALQUILER}. P. máx compra {P_MAX}.\n{LINK}',
+    wa_body: 'Hola {NOMBRE}! Mira este activo: {CALLE}, {LOCALIDAD}. {LINK}'
+  }
 };
 
 /* ======= UI helpers ======= */
 const id = s=>document.getElementById(s);
 function toast(msg){
-  const wrap=id('toasts'); const el=document.createElement('div');
+  const wrap=id('toasts');
+  // Evitar duplicados: limpiamos el anterior
+  while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
+  const el=document.createElement('div');
   el.className='toast ok'; el.textContent=msg;
   wrap.appendChild(el);
   setTimeout(()=>el.style.opacity='0',1600);
@@ -264,6 +306,11 @@ function loadForm(){
   id('c_w_loc_v').textContent = id('c_w_loc').value;
   id('c_w_tipo_v').textContent= id('c_w_tipo').value;
   id('c_w_kpi_v').textContent = id('c_w_kpi').value;
+
+  const comms = cfg.comms||DEF.comms;
+  id('c_mail_subj').value = comms.mail_subj||'';
+  id('c_mail_body').value = comms.mail_body||'';
+  id('c_wa_body').value   = comms.wa_body||'';
 }
 
 /* ======= Guardar desde el formulario ======= */
@@ -296,6 +343,11 @@ function saveForm(){
       peso_localidad: parseInt(id('c_w_loc').value,10)||0,
       peso_tipo:      parseInt(id('c_w_tipo').value,10)||0,
       peso_kpi:       parseInt(id('c_w_kpi').value,10)||0
+    },
+    comms:{
+      mail_subj: (id('c_mail_subj').value||'').trim(),
+      mail_body: (id('c_mail_body').value||'').trim(),
+      wa_body:   (id('c_wa_body').value||'').trim()
     }
   };
   Store.cfg = cfg;
@@ -318,18 +370,12 @@ function attach(){
   id('c_w_tipo').addEventListener('input',()=>id('c_w_tipo_v').textContent=id('c_w_tipo').value);
   id('c_w_kpi').addEventListener('input',()=>id('c_w_kpi_v').textContent=id('c_w_kpi').value);
 
-  // Listeners normales (además del onclick de respaldo)
   id('c_save').addEventListener('click', saveForm);
   id('c_reset').addEventListener('click', resetDefaults);
 
   loadForm();
 }
 document.addEventListener('DOMContentLoaded', attach);
-
-/* Respaldo global por si algún bind falla */
-window._saveCfg  = function(){ saveForm(); };
-window._resetCfg = function(){ resetDefaults(); };
-
 })();
 </script>
 </body>
