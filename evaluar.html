@@ -339,7 +339,7 @@ function calc(){
   // Gráfico
   drawChart(bruta, obj_bruta);
 
-  // Sugerencias
+  // Sugerencias (match)
   suggestProspects({
     tipo,
     loc: id('e_loc').value||'',
@@ -415,7 +415,7 @@ function drawChart(real, objetivo){
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects (filtra por fase, tipo, localidad; ≥ objetivos; avisos) ===== */
+/* ===== Matching prospects (fase, tipo, localidad; solo KPI principal; ≥ objetivos; avisos) ===== */
 function isSearching(p){
   const f=(p.fase||'').toString().toLowerCase();
   return f.includes('busc'); // “búsqueda”, “buscando”, etc.
@@ -440,21 +440,14 @@ function wantsElevator(p){
 function prospectBudget(p){
   return parseMoney(p.presupuesto_max??p.presupuesto??p.budget_max??p.budget);
 }
-
 function warnBadges(p, ctx){
   const warns=[];
   const necesitaReforma = (ctx.ref_tip && ctx.ref_tip !== 'no');
   const sinAscensor = String(ctx.asc||'Sí').toLowerCase()==='no';
   const budget = prospectBudget(p);
-  if(necesitaReforma && wantsNoReform(p)){
-    warns.push({icon:'🚧', title:'No quiere inmuebles con reforma'});
-  }
-  if(sinAscensor && wantsElevator(p)){
-    warns.push({icon:'🛗', title:'Requiere ascensor'});
-  }
-  if(budget>0 && Number(ctx.inv_total||0) > budget){
-    warns.push({icon:'💰', title:'Excede su presupuesto'});
-  }
+  if(necesitaReforma && wantsNoReform(p)){ warns.push({icon:'🚧', title:'No quiere inmuebles con reforma'}); }
+  if(sinAscensor && wantsElevator(p)){ warns.push({icon:'🛗', title:'Requiere ascensor'}); }
+  if(budget>0 && Number(ctx.inv_total||0) > budget){ warns.push({icon:'💰', title:'Excede su presupuesto'}); }
   return warns;
 }
 
@@ -468,9 +461,9 @@ function suggestProspects(ctx){
 
   const wantTipo = fold(ctx.tipo);
   const wantLoc  = fold(ctx.loc);
+  const seen=new Set();
 
   const brutaOK=[], netaOK=[], flujoOK=[];
-  const addOptionSet=new Set();
 
   list.forEach(p=>{
     if(!isSearching(p)) return;
@@ -478,15 +471,16 @@ function suggestProspects(ctx){
     const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
     if(!locs.includes(wantLoc)) return;
 
-    const objB=Number(p.obj_bruta||0);
-    const objN=Number(p.obj_neta||0);
-    const objFmes=Number(p.obj_flujo||0);
-    const objF_ano=objFmes>0? objFmes*12 : 0;
+    const main=(p.obj_main||'bruta').toLowerCase();
+    const objB = parseEs(p.obj_bruta||0);
+    const objN = parseEs(p.obj_neta||0);
+    const objFmes = parseMoney(p.obj_flujo||0);
+    const objFano = objFmes>0 ? objFmes*12 : 0;
 
-    // Si no tiene objetivo para un KPI (0), no lo mostramos en esa columna.
-    if(objB>0 && Number(ctx.bruta)>=objB) brutaOK.push(p);
-    if(objN>0 && Number(ctx.neta) >=objN) netaOK.push(p);
-    if(objF_ano>0 && Number(ctx.flujo)>=objF_ano) flujoOK.push(p);
+    // Solo en la columna de su KPI principal y si tiene objetivo (>0) y el activo lo cumple (>=)
+    if(main==='bruta' && objB>0 && Number(ctx.bruta)>=objB){ brutaOK.push(p); }
+    if(main==='neta'  && objN>0 && Number(ctx.neta)>=objN){  netaOK.push(p);  }
+    if(main==='flujo' && objFano>0 && Number(ctx.flujo)>=objFano){ flujoOK.push(p); }
   });
 
   const chip = (p, warns)=>{
@@ -509,7 +503,7 @@ function suggestProspects(ctx){
       const warns = warnBadges(p, ctx);
       el.appendChild(chip(p, warns));
       const key=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
-      if(!addOptionSet.has(key)){ addOptionSet.add(key);
+      if(!seen.has(key)){ seen.add(key);
         const opt=document.createElement('option'); opt.value=key; opt.textContent=p.nombre||'-';
         asignSel.appendChild(opt);
       }
@@ -589,7 +583,7 @@ function preloadIfAny(){
   calc();
 }
 
-/* ===== PDF rápido (opcional, sin template strings) ===== */
+/* ===== PDF rápido (opcional) ===== */
 function quickPDFfrom(e){
   const fecha=new Date(e.ts||Date.now()).toLocaleString('es-ES');
   const htmlParts = [
