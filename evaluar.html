@@ -17,6 +17,7 @@
 .match-col{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
 .match-col h4{margin:0 0 8px}
 .tag{display:inline-block;background:#eef2f7;border-radius:999px;padding:4px 8px;margin:2px 4px;font-size:12px}
+.warn{margin-left:6px;opacity:.85}
 </style>
 </head>
 <body>
@@ -190,6 +191,12 @@ function toast(msg,kind){
   setTimeout(()=>{ try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 
+/* ===== Acentos: normalización para comparar localidades ===== */
+function normalizeEs(s){
+  const t=(s||'').toString().trim().toLowerCase();
+  return t.normalize? t.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : t;
+}
+
 /* ===== Store (localStorage) ===== */
 const Store={
   get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
@@ -333,8 +340,17 @@ function calc(){
   // Gráfico
   drawChart(bruta, obj_bruta);
 
-  // Sugerencias
-  suggestProspects({ tipo, loc: id('e_loc').value||'', bruta, neta, flujo, obj_bruta, obj_neta });
+  // Sugerencias (paso info extra del activo para avisos)
+  suggestProspects({
+    tipo,
+    loc: id('e_loc').value||'',
+    bruta, neta, flujo,
+    obj_bruta, obj_neta,
+    inv_total,
+    ref_tip: id('e_ref_nec').value||'no',
+    asc: (id('e_asc').value||'Sí'),
+    m2: parseEs(id('e_m2').value)||0
+  });
 
   id('e_result').hidden=false;
 
@@ -402,12 +418,39 @@ function drawChart(real, objetivo){
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects ===== */
+/* ===== Matching prospects + avisos ===== */
 function isSearching(p){
   const f=(p.fase||'').toString().toLowerCase();
   return f.includes('busc'); // “búsqueda”, “buscando”, etc.
 }
-function norm(s){ return (s||'').toString().trim().toLowerCase(); }
+function norm(s){ return normalizeEs(s); }
+
+/* Avisos opcionales por restricciones del prospecto */
+function buildWarnings(p, asset){
+  const warns=[];
+  // Reforma: si el activo requiere reforma y el prospecto no quiere reformas
+  const prefRef = (p.pref_reforma||'').toString().toLowerCase(); // valores esperados: 'no', 'lavado', 'integral', 'indiferente'
+  if(asset.ref_tip!=='no' && prefRef==='no'){
+    warns.push(['🛠','No acepta reforma']);
+  }
+  // Ascensor: si el prospecto exige ascensor y el activo no tiene
+  const reqAsc = (p.req_ascensor||p.pref_ascensor||'').toString().toLowerCase(); // 'sí'/'si' o 'no'
+  if((reqAsc==='sí'||reqAsc==='si') && (asset.asc||'').toString().toLowerCase()==='no'){
+    warns.push(['🛗','Exige ascensor']);
+  }
+  // Presupuesto máximo
+  const presupMax = Number(p.presupuesto_max||p.budget_max||0);
+  if(presupMax>0 && Number(asset.inv_total||0)>presupMax){
+    warns.push(['💶','Sobrepasa presupuesto']);
+  }
+  // m² mínimos
+  const m2min = Number(p.m2_min||0);
+  if(m2min>0 && Number(asset.m2||0)>0 && Number(asset.m2)<m2min){
+    warns.push(['📏','Menos m² de lo pedido']);
+  }
+  return warns;
+}
+
 function suggestProspects(ctx){
   const list=Store.pros||[];
   const mB=id('m_bruta'), mN=id('m_neta'), mF=id('m_flujo');
@@ -419,22 +462,28 @@ function suggestProspects(ctx){
   const wantTipo = norm(ctx.tipo);
   const wantLoc  = norm(ctx.loc);
 
-  const brutaOK=[], netaOK=[], flujoOK=[], assignOptions=[];
+  const brutaOK=[], netaOK=[], flujoOK=[];
 
   list.forEach(p=>{
     if(!isSearching(p)) return;
     if(norm(p.pref_tipo)!==wantTipo) return;
-    const locs=(p.locs_text||'').split(',').map(s=>norm(s));
+
+    // Localidades del prospecto: admite coma, punto y coma o barra
+    const locs=(p.locs_text||'')
+      .split(/[,;\/]/).map(s=>norm(s)).filter(Boolean);
     if(!locs.includes(wantLoc)) return;
 
+    // Objetivos del prospecto
     const main=(p.obj_main||'bruta').toLowerCase();
     const objB=Number(p.obj_bruta||0);
     const objN=Number(p.obj_neta||0);
-    const objF_ano=(Number(p.obj_flujo||0)*12)||0; // prospect en €/mes → anual
+    const objF_mes=Number(p.obj_flujo||0);
+    const objF_ano=objF_mes>0? objF_mes*12 : 0;
 
-    if(main==='bruta' && ctx.bruta>=objB){ brutaOK.push(p); assignOptions.push(p); }
-    if(main==='neta'  && ctx.neta>=objN){  netaOK.push(p);  assignOptions.push(p); }
-    if(main==='flujo' && ctx.flujo>=objF_ano){ flujoOK.push(p); assignOptions.push(p); }
+    // Clasificamos SOLO en su objetivo principal (como acordamos)
+    if(main==='bruta' && ctx.bruta>=objB){ brutaOK.push(p); }
+    if(main==='neta'  && ctx.neta>=objN){  netaOK.push(p);  }
+    if(main==='flujo' && ctx.flujo>=objF_ano){ flujoOK.push(p); }
   });
 
   const renderChips=(arr,el)=>{
@@ -444,6 +493,18 @@ function suggestProspects(ctx){
       const span=document.createElement('span');
       span.className='tag';
       span.textContent=p.nombre||'-';
+
+      // avisos
+      const warns=buildWarnings(p, ctx);
+      if(warns.length){
+        warns.forEach(([icon,title])=>{
+          const w=document.createElement('span');
+          w.className='warn';
+          w.title=title;
+          w.textContent=icon;
+          span.appendChild(w);
+        });
+      }
       el.appendChild(span);
     });
   };
@@ -465,12 +526,12 @@ function suggestProspects(ctx){
 function gather(){ return calc(); }
 function save(alsoAssign){
   const e=gather();
-  const loaded = localStorage.getItem('_load_eval_');
+  const loaded = localStorage.getItem('load_eval');
   let list=Store.evals||[];
   if(loaded){
     const idx=list.findIndex(x=>x.id===loaded);
     if(idx>=0){ e.id=list[idx].id; e.ts=list[idx].ts; }
-    localStorage.removeItem('_load_eval_');
+    localStorage.removeItem('load_eval');
   }
   if(alsoAssign){
     const sel=[...document.getElementById('assign_cli').options].filter(o=>o.selected).map(o=>o.value);
@@ -495,7 +556,7 @@ function limpiar(){
 
 /* ===== Preload desde Evaluaciones (solo si existe) ===== */
 function preloadIfAny(){
-  const evId = localStorage.getItem('_load_eval_');
+  const evId = localStorage.getItem('load_eval');
   if(!evId) return; // abrir en blanco si no viene de Evaluaciones
   const e=(Store.evals||[]).find(x=>x.id===evId); if(!e) return;
 
