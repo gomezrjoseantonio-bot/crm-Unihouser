@@ -84,7 +84,7 @@
     </div>
     <div class="row three">
       <div class="field"><label>Reforma (€)</label><input id="e_reforma" value="0" data-money></div>
-      <div class="field"><label>Incluir honorarios PSI (€)</label>
+      <div class="field"><label>Incluir honorarios PSI (4.235 €)</label>
         <select id="e_honor"><option value="si">Sí</option><option value="no" selected>No</option></select>
       </div>
       <div class="field"><label>Precio máx. de compra (objetivo bruta)</label><input id="e_pmax" data-money disabled></div>
@@ -217,7 +217,7 @@ const ASTURIAS = ["Allande","Aller","Amieva","Avilés","Belmonte de Miranda","Bi
 "Onís","Oviedo","Parres","Peñamellera Alta","Peñamellera Baja","Pesoz","Piloña","Pravia","Proaza","Quirós",
 "Ribadedeva","Ribadesella","Ribera de Arriba","Riosa","Salas","San Martín de Oscos","San Martín del Rey Aurelio","San Tirso de Abres","Santa Eulalia de Oscos","Santo Adriano",
 "Sariego","Siero","Sobrescobio","Somiedo","Soto del Barco","Tapia de Casariego","Taramundi","Teverga","Tineo","Valdés",
-"Vegadeo","Villanueva de Oscos","Villaviciosa","Villayón","Todas"];
+"Vegadeo","Villanueva de Oscos","Villaviciosa","Villayón"];
 function loadLocalidades(){
   const s=id('e_loc'); s.innerHTML='';
   ASTURIAS.forEach(loc=>{
