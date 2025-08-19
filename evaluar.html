@@ -10,9 +10,13 @@
 .dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
 .small{font-size:12px;color:#667085}
 .kpi .muted{color:#667085;font-weight:600;margin-left:6px}
-#matchList .tag{display:inline-block;background:#eef2f7;color:#0f1112;border-radius:999px;padding:4px 8px;margin:2px 4px;font-size:12px}
-.badge{display:inline-block;background:#eef2f7;border-radius:999px;padding:2px 8px;font-size:12px;color:#0f1112}
 .canvasWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
+.group3{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}
+@media(max-width:1000px){.group3{grid-template-columns:1fr}}
+#matchWrap{display:grid;gap:8px}
+.match-col{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
+.match-col h4{margin:0 0 8px}
+.tag{display:inline-block;background:#eef2f7;border-radius:999px;padding:4px 8px;margin:2px 4px;font-size:12px}
 </style>
 </head>
 <body>
@@ -130,7 +134,11 @@
 
     <div class="card" style="margin-top:12px">
       <h3 style="margin:0 0 8px">Clientes potenciales</h3>
-      <div id="matchList" class="muted">—</div>
+      <div id="matchWrap" class="group3">
+        <div class="match-col"><h4>Bruta ≥ objetivo</h4><div id="m_bruta">—</div></div>
+        <div class="match-col"><h4>Neta ≥ objetivo</h4><div id="m_neta">—</div></div>
+        <div class="match-col"><h4>Flujo ≥ objetivo</h4><div id="m_flujo">—</div></div>
+      </div>
       <div class="actions" style="margin-top:8px">
         <select id="assign_cli" size="6" style="min-width:320px"></select>
         <button class="btn" id="save_only">Guardar evaluación</button>
@@ -193,16 +201,14 @@ const Store={
 };
 
 /* ===== Localidades Asturias ===== */
-const ASTURIAS = [
-"Allande","Aller","Amieva","Avilés","Belmonte de Miranda","Bimenes","Boal","Cabrales","Cabranes","Candamo",
+const ASTURIAS = ["Allande","Aller","Amieva","Avilés","Belmonte de Miranda","Bimenes","Boal","Cabrales","Cabranes","Candamo",
 "Cangas de Onís","Cangas del Narcea","Caravia","Carreño","Caso","Castrillón","Castropol","Coaña","Colunga","Corvera de Asturias",
 "Cudillero","Degaña","Gijón","Gozón","Grado","Grandas de Salime","Ibias","Illano","Illas","Langreo",
 "Laviana","Lena","Llanera","Llanes","Mieres","Morcín","Muros de Nalón","Nava","Navia","Noreña",
 "Onís","Oviedo","Parres","Peñamellera Alta","Peñamellera Baja","Pesoz","Piloña","Pravia","Proaza","Quirós",
 "Ribadedeva","Ribadesella","Ribera de Arriba","Riosa","Salas","San Martín de Oscos","San Martín del Rey Aurelio","San Tirso de Abres","Santa Eulalia de Oscos","Santo Adriano",
 "Sariego","Siero","Sobrescobio","Somiedo","Soto del Barco","Tapia de Casariego","Taramundi","Teverga","Tineo","Valdés",
-"Vegadeo","Villanueva de Oscos","Villaviciosa","Villayón"
-];
+"Vegadeo","Villanueva de Oscos","Villaviciosa","Villayón"];
 
 /* ===== Cargar localidades ===== */
 function loadLocalidades(){
@@ -212,22 +218,22 @@ function loadLocalidades(){
   });
 }
 
-/* ===== Leer cfg con defaults (compatibilidad con claves nuevas/viejas) ===== */
+/* ===== Leer cfg con defaults ===== */
 function getCfg(){
   const c=Store.cfg||{};
   return {
     itp_pct: Number(c.itp_pct ?? 8),
     notaria_eur: Number(c.notaria_eur ?? 1500),
-    psi_eur: Number(c.psi_eur ?? c.psi_fee_eur ?? 4235),
+    psi_eur: Number(c.psi_fee_eur ?? 4235),
     hogar_pct: Number(c.hogar_pct ?? 3.5),
-    impago_pct_trad: Number(c.impago_pct_trad ?? c.impago_trad_pct ?? 4.0),
-    impago_pct_hab:  Number(c.impago_pct_hab  ?? c.impago_hab_pct  ?? 4.0),
-    gestion_pct_trad:Number(c.gestion_pct_trad?? c.gestion_trad_pct??15.0),
-    gestion_pct_hab: Number(c.gestion_pct_hab ?? c.gestion_hab_pct ??25.0),
-    obj_bruta_trad:  Number(c.obj_bruta_trad ?? (c.objetivos?.tradicional?.bruta_pct ?? 10.0)),
-    obj_bruta_hab:   Number(c.obj_bruta_hab  ?? (c.objetivos?.habitaciones?.bruta_pct ?? 12.0)),
-    obj_neta_trad:   Number(c.obj_neta_trad  ?? (c.objetivos?.tradicional?.neta_pct ?? 6.0)),
-    obj_neta_hab:    Number(c.obj_neta_hab   ?? (c.objetivos?.habitaciones?.neta_pct ?? 7.0))
+    impago_pct_trad: Number(c.impago_trad_pct ?? 4.0),
+    impago_pct_hab: Number(c.impago_hab_pct ?? 4.0),
+    gestion_pct_trad: Number(c.gestion_trad_pct ?? 15.0),
+    gestion_pct_hab: Number(c.gestion_hab_pct ?? 25.0),
+    obj_bruta_trad: Number((c.objetivos?.tradicional?.bruta_pct) ?? 10.0),
+    obj_bruta_hab:  Number((c.objetivos?.habitaciones?.bruta_pct) ?? 12.0),
+    obj_neta_trad:  Number((c.objetivos?.tradicional?.neta_pct) ?? 6.0),
+    obj_neta_hab:   Number((c.objetivos?.habitaciones?.neta_pct) ?? 7.0)
   };
 }
 
@@ -277,7 +283,7 @@ function calc(){
   const itp    = parseEs(id('e_itp_eur').value) || Math.round(precio*(cfg.itp_pct/100));
   const notari = parseEs(id('e_notaria').value) || cfg.notaria_eur;
   const ref    = parseEs(id('e_reforma').value);
-  const honor  = (id('e_honor').value==='si') ? (cfg.psi_eur||0) : 0;
+  const honor  = (id('e_honor').value==='si') ? cfg.psi_eur : 0;
 
   const comu   = parseEs(id('e_comunidad').value);
   const ibi    = parseEs(id('e_ibi').value);
@@ -297,10 +303,10 @@ function calc(){
 
   const obj_bruta = (tipo==='Habitaciones')? cfg.obj_bruta_hab : cfg.obj_bruta_trad;
   const gapB = bruta - obj_bruta;
-  const obj_neta  = (tipo==='Habitaciones')? cfg.obj_neta_hab  : cfg.obj_neta_trad;
+  const obj_neta = (tipo==='Habitaciones')? cfg.obj_neta_hab : cfg.obj_neta_trad;
   const gapN = neta - obj_neta;
 
-  // Precio máximo para alcanzar objetivo bruta (resolviendo precio con ITP)
+  // Precio máximo para alcanzar objetivo bruta (con ITP)
   const rate = cfg.itp_pct/100;
   const targetInv = (obj_bruta>0)? (alq_a / (obj_bruta/100)) : 0;
   let pmax = 0;
@@ -328,7 +334,7 @@ function calc(){
   drawChart(bruta, obj_bruta);
 
   // Sugerencias
-  suggestProspects({ tipo, loc: id('e_loc').value||'', bruta, neta, flujo });
+  suggestProspects({ tipo, loc: id('e_loc').value||'', bruta, neta, flujo, obj_bruta, obj_neta });
 
   id('e_result').hidden=false;
 
@@ -364,147 +370,107 @@ function paintDot(idDot, gap){
   const el=id(idDot); el.className='dot '+(gap>=0?'g':(gap>-1?'y':'r'));
 }
 
-/* ===== Mini chart: barra (real) + línea discontinua gris (objetivo) ===== */
+/* ===== Mini chart: barra naranja + línea discontinua gris ===== */
 function drawChart(real, objetivo){
   const c=id('chartKPI'); const ctx=c.getContext('2d');
-  const W=c.width, H=c.height, pad=40;
-  ctx.clearRect(0,0,W,H);
-
-  // Fondo blanco
-  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
-
-  // Grid tenue
+  ctx.clearRect(0,0,c.width,c.height);
+  const pad=36; const W=c.width, H=c.height;
   const max = Math.max( Math.ceil((Math.max(real, objetivo)+2)/2)*2 , 2);
-  ctx.strokeStyle='rgba(0,0,0,.08)'; ctx.lineWidth=1;
+
+  // grid claro
+  ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=1;
   for(let y=0;y<=max;y+=2){
     const yy = H - pad - (H-2*pad)* (y/max);
     ctx.beginPath(); ctx.moveTo(pad,yy); ctx.lineTo(W-pad,yy); ctx.stroke();
   }
 
-  // Barra naranja
+  // barra real (naranja)
   const barW=80;
   const realH=(H-2*pad)*(real/max);
   ctx.fillStyle='#ff5a1f';
   ctx.fillRect(W/2 - barW/2, H - pad - realH, barW, realH);
 
-  // Línea discontinua gris (objetivo)
+  // línea objetivo (gris discontinua)
   const yObj = H - pad - (H-2*pad)*(objetivo/max);
-  ctx.setLineDash([5,4]); ctx.strokeStyle='#9aa3ab'; ctx.lineWidth=2;
+  ctx.setLineDash([6,4]); ctx.strokeStyle='#9ca3af'; ctx.lineWidth=2;
   ctx.beginPath(); ctx.moveTo(pad, yObj); ctx.lineTo(W-pad, yObj); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Etiquetas
-  ctx.fillStyle='#111'; ctx.font='12px Inter, Arial';
+  // etiquetas
+  ctx.fillStyle='#111827'; ctx.font='12px Inter, Arial';
   ctx.fillText('Bruta real', W/2 - 30, H - 8);
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Normalización simple para textos ===== */
-function norm(s){
-  return (s||'').toString().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sin acentos
-    .trim();
+/* ===== Matching prospects ===== */
+function isSearching(p){
+  const f=(p.fase||'').toString().toLowerCase();
+  return f.includes('busc'); // “búsqueda”, “buscando”, etc.
 }
-
-/* ===== Matching prospects (solo fase de búsqueda) ===== */
+function norm(s){ return (s||'').toString().trim().toLowerCase(); }
 function suggestProspects(ctx){
-  const list = (Store.pros||[]);
-  const panel   = document.getElementById('matchList');
-  const asignSel= document.getElementById('assign_cli');
+  const list=Store.pros||[];
+  const mB=id('m_bruta'), mN=id('m_neta'), mF=id('m_flujo');
+  const asignSel=id('assign_cli');
+  mB.innerHTML=mN.innerHTML=mF.innerHTML='—'; asignSel.innerHTML='';
 
-  panel.innerHTML = '';
-  asignSel.innerHTML = '';
+  if(!list.length){ return; }
 
-  const locLower  = norm(ctx.loc);
-  const tipoLower = norm(ctx.tipo);
+  const wantTipo = norm(ctx.tipo);
+  const wantLoc  = norm(ctx.loc);
 
-  const buckets = { bruta:[], neta:[], flujo:[] };
+  const brutaOK=[], netaOK=[], flujoOK=[], assignOptions=[];
 
   list.forEach(p=>{
-    // Solo fase búsqueda
-    const fase = norm(p.fase || p.estado || p.status);
-    if(!fase || !['busqueda','buscando'].includes(fase)) return;
+    if(!isSearching(p)) return;
+    if(norm(p.pref_tipo)!==wantTipo) return;
+    const locs=(p.locs_text||'').split(',').map(s=>norm(s));
+    if(!locs.includes(wantLoc)) return;
 
-    // Debe coincidir tipo y localidad
-    if(norm(p.pref_tipo) !== tipoLower) return;
-    const locs = (p.locs_text||'').split(',').map(norm).filter(Boolean);
-    if(locs.length && !locs.includes(locLower)) return;
+    const main=(p.obj_main||'bruta').toLowerCase();
+    const objB=Number(p.obj_bruta||0);
+    const objN=Number(p.obj_neta||0);
+    const objF_ano=(Number(p.obj_flujo||0)*12)||0; // prospect en €/mes → anual
 
-    // Objetivo principal
-    const main = (p.obj_main||'bruta').toString().toLowerCase();
-    if(main==='bruta'){
-      if( Number(ctx.bruta||0) >= Number(p.obj_bruta||0) ) buckets.bruta.push(p);
-    }else if(main==='neta'){
-      if( Number(ctx.neta||0)  >= Number(p.obj_neta||0)  ) buckets.neta.push(p);
-    }else{
-      // ctx.flujo anual; asumimos p.obj_flujo anual también
-      if( Number(ctx.flujo||0) >= Number(p.obj_flujo||0) ) buckets.flujo.push(p);
-    }
+    if(main==='bruta' && ctx.bruta>=objB){ brutaOK.push(p); assignOptions.push(p); }
+    if(main==='neta'  && ctx.neta>=objN){  netaOK.push(p);  assignOptions.push(p); }
+    if(main==='flujo' && ctx.flujo>=objF_ano){ flujoOK.push(p); assignOptions.push(p); }
   });
 
-  renderProspectBuckets(panel, buckets);
+  const renderChips=(arr,el)=>{
+    if(!arr.length){ el.textContent='—'; return; }
+    el.innerHTML='';
+    arr.forEach(p=>{
+      const span=document.createElement('span');
+      span.className='tag';
+      span.textContent=p.nombre||'-';
+      el.appendChild(span);
+    });
+  };
+  renderChips(brutaOK,mB);
+  renderChips(netaOK,mN);
+  renderChips(flujoOK,mF);
 
-  // Selector para asignar = unión de los 3 buckets
-  const all = [].concat(buckets.bruta, buckets.neta, buckets.flujo);
-  all.forEach(p=>{
-    const opt=document.createElement('option');
-    opt.value = p.id || p.email || p.nombre || ('p_'+Math.random().toString(36).slice(2,7));
-    opt.textContent = p.nombre || '-';
+  // select múltiple para asignar (unión de los tres, sin duplicados)
+  const seen=new Set();
+  [...brutaOK,...netaOK,...flujoOK].forEach(p=>{
+    const val=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
+    if(seen.has(val)) return; seen.add(val);
+    const opt=document.createElement('option'); opt.value=val; opt.textContent=p.nombre||'-';
     asignSel.appendChild(opt);
   });
-}
-
-// UI de las 3 tarjetas (nombres como chips)
-function renderProspectBuckets(container, b){
-  container.innerHTML='';
-  const grid=document.createElement('div');
-  grid.style.display='grid'; grid.style.gap='10px'; grid.style.gridTemplateColumns='1fr 1fr 1fr';
-
-  const makeCard=(title, arr)=>{
-    const card=document.createElement('div');
-    card.className='card'; card.style.padding='10px';
-
-    const head=document.createElement('div');
-    head.style.display='flex'; head.style.justifyContent='space-between'; head.style.alignItems='center';
-
-    const t=document.createElement('strong'); t.textContent=title;
-    const badge=document.createElement('span'); badge.className='badge'; badge.textContent=String(arr.length);
-
-    head.appendChild(t); head.appendChild(badge); card.appendChild(head);
-
-    const body=document.createElement('div'); body.style.marginTop='8px';
-    if(arr.length===0){
-      const m=document.createElement('div'); m.className='muted'; m.textContent='—';
-      body.appendChild(m);
-    }else{
-      arr.forEach(p=>{
-        const tag=document.createElement('span'); tag.className='tag'; tag.textContent=(p.nombre||'-');
-        body.appendChild(tag);
-      });
-    }
-    card.appendChild(body);
-    return card;
-  };
-
-  grid.appendChild(makeCard('Bruta ≥ objetivo', b.bruta));
-  grid.appendChild(makeCard('Neta ≥ objetivo',  b.neta));
-  grid.appendChild(makeCard('Flujo ≥ objetivo', b.flujo));
-  container.appendChild(grid);
 }
 
 /* ===== Guardar / Asignar ===== */
 function gather(){ return calc(); }
 function save(alsoAssign){
   const e=gather();
-
-  // si venimos de Evaluaciones, conservar id/ts
-  const loaded = localStorage.getItem('_load_eval') || localStorage.getItem('_load_eval');
+  const loaded = localStorage.getItem('_load_eval_');
   let list=Store.evals||[];
   if(loaded){
     const idx=list.findIndex(x=>x.id===loaded);
     if(idx>=0){ e.id=list[idx].id; e.ts=list[idx].ts; }
     localStorage.removeItem('_load_eval_');
-    localStorage.removeItem('load_eval');
   }
   if(alsoAssign){
     const sel=[...document.getElementById('assign_cli').options].filter(o=>o.selected).map(o=>o.value);
@@ -527,10 +493,10 @@ function limpiar(){
   document.getElementById('e_result').hidden=true;
 }
 
-/* ===== Preload desde Evaluaciones (solo si venimos con id) ===== */
+/* ===== Preload desde Evaluaciones (solo si existe) ===== */
 function preloadIfAny(){
-  const evId = localStorage.getItem('_load_eval') || localStorage.getItem('_load_eval');
-  if(!evId) return; // abrir en blanco por defecto
+  const evId = localStorage.getItem('_load_eval_');
+  if(!evId) return; // abrir en blanco si no viene de Evaluaciones
   const e=(Store.evals||[]).find(x=>x.id===evId); if(!e) return;
 
   id('e_loc').value = e.loc || '';
@@ -563,7 +529,7 @@ function preloadIfAny(){
   calc();
 }
 
-/* ===== PDF (sin template string) ===== */
+/* ===== PDF rápido (opcional, sin template strings) ===== */
 function quickPDFfrom(e){
   const fecha=new Date(e.ts||Date.now()).toLocaleString('es-ES');
   const htmlParts = [
@@ -615,7 +581,7 @@ function attach(){
   id('save_assign') && id('save_assign').addEventListener('click', ()=>save(true));
   id('e_clean').addEventListener('click', limpiar);
 
-  preloadIfAny(); // en blanco por defecto; solo carga si venimos de Evaluaciones
+  preloadIfAny(); // solo precarga si venimos de Evaluaciones
 }
 
 document.addEventListener('DOMContentLoaded', attach);
