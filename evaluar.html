@@ -6,16 +6,16 @@
 <title>Unihouser — Evaluar</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
+/* Dots KPIs */
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
 .dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
 .small{font-size:12px;color:#667085}
 .kpi .muted{color:#667085;font-weight:600;margin-left:6px}
+/* Canvas caja blanca */
 .canvasWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
-
 /* Grid 3 columnas responsive */
 .group3{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}
 @media(max-width:1000px){.group3{grid-template-columns:1fr}}
-
 /* Matching UI */
 #matchWrap{display:grid;gap:8px}
 .match-col{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
@@ -84,7 +84,7 @@
     </div>
     <div class="row three">
       <div class="field"><label>Reforma (€)</label><input id="e_reforma" value="0" data-money></div>
-      <div class="field"><label>Incluir honorarios PSI (4.235 €)</label>
+      <div class="field"><label>Incluir honorarios PSI (€)</label>
         <select id="e_honor"><option value="si">Sí</option><option value="no" selected>No</option></select>
       </div>
       <div class="field"><label>Precio máx. de compra (objetivo bruta)</label><input id="e_pmax" data-money disabled></div>
@@ -161,19 +161,24 @@
 (function(){
 "use strict";
 
-/* ===== Utils / formato ES ===== */
+/* ========= Utilidades ========= */
 const id = x=>document.getElementById(x);
 const fmtE0 = new Intl.NumberFormat('es-ES', { style:'currency', currency:'EUR', maximumFractionDigits:0 });
 const fmtN0 = new Intl.NumberFormat('es-ES', { maximumFractionDigits:0 });
 const fmtN1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits:1 });
-function e0(v){ return fmtE0.format(Number(v||0)); }
-function n0(v){ return fmtN0.format(Number(v||0)); }
-function pct1(v){ return fmtN1.format(Number(v||0))+' %'; }
+const e0 = v => fmtE0.format(Number(v||0));
+const n0 = v => fmtN0.format(Number(v||0));
+const pct1 = v => fmtN1.format(Number(v||0))+' %';
 function parseEs(str){
   if(str==null) return 0;
   const s=String(str).trim().replace(/\./g,'').replace(',', '.').replace(/[^\d.-]/g,'');
   const n=Number(s); return Number.isFinite(n)? n : 0;
 }
+function fold(s){
+  return (s??'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+}
+function num(x){ const n=Number(x); return Number.isFinite(n)?n:0; }
+
 function moneyLive(){
   document.querySelectorAll('input[data-money]').forEach(inp=>{
     inp.addEventListener('input',()=>{
@@ -188,15 +193,13 @@ function moneyLive(){
   });
 }
 function toast(msg,kind){
-  const wrap = document.getElementById('toasts') || (function(){
-    const d=document.createElement('div'); d.id='toasts'; d.className='toast-wrap'; document.body.appendChild(d); return d;
-  })();
+  const wrap = document.getElementById('toasts') || (()=>{const d=document.createElement('div');d.id='toasts';d.className='toast-wrap';document.body.appendChild(d);return d;})();
   const el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
   wrap.appendChild(el); setTimeout(()=>el.style.opacity='0',1600);
   setTimeout(()=>{ try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 
-/* ===== Store (localStorage) ===== */
+/* ========= Store ========= */
 const Store={
   get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
   set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); },
@@ -206,7 +209,7 @@ const Store={
   set evals(v){ localStorage.setItem('evals', JSON.stringify(v)); }
 };
 
-/* ===== Localidades Asturias ===== */
+/* ========= Localidades ========= */
 const ASTURIAS = ["Allande","Aller","Amieva","Avilés","Belmonte de Miranda","Bimenes","Boal","Cabrales","Cabranes","Candamo",
 "Cangas de Onís","Cangas del Narcea","Caravia","Carreño","Caso","Castrillón","Castropol","Coaña","Colunga","Corvera de Asturias",
 "Cudillero","Degaña","Gijón","Gozón","Grado","Grandas de Salime","Ibias","Illano","Illas","Langreo",
@@ -214,9 +217,7 @@ const ASTURIAS = ["Allande","Aller","Amieva","Avilés","Belmonte de Miranda","Bi
 "Onís","Oviedo","Parres","Peñamellera Alta","Peñamellera Baja","Pesoz","Piloña","Pravia","Proaza","Quirós",
 "Ribadedeva","Ribadesella","Ribera de Arriba","Riosa","Salas","San Martín de Oscos","San Martín del Rey Aurelio","San Tirso de Abres","Santa Eulalia de Oscos","Santo Adriano",
 "Sariego","Siero","Sobrescobio","Somiedo","Soto del Barco","Tapia de Casariego","Taramundi","Teverga","Tineo","Valdés",
-"Vegadeo","Villanueva de Oscos","Villaviciosa","Villayón"];
-
-/* ===== Cargar localidades ===== */
+"Vegadeo","Villanueva de Oscos","Villaviciosa","Villayón","Todas"];
 function loadLocalidades(){
   const s=id('e_loc'); s.innerHTML='';
   ASTURIAS.forEach(loc=>{
@@ -224,7 +225,7 @@ function loadLocalidades(){
   });
 }
 
-/* ===== Leer cfg con defaults ===== */
+/* ========= Config (con defaults) ========= */
 function getCfg(){
   const c=Store.cfg||{};
   return {
@@ -243,7 +244,7 @@ function getCfg(){
   };
 }
 
-/* ===== Autocálculos dependientes ===== */
+/* ========= Autocálculos ========= */
 function bindAuto(){
   const cfg=getCfg();
   const tipoEl=id('e_tipo');
@@ -281,7 +282,7 @@ function bindAuto(){
   tipoEl.addEventListener('change',updAlq);
 }
 
-/* ===== Cálculos financieros ===== */
+/* ========= Cálculos financieros ========= */
 function calc(){
   const cfg=getCfg();
   const tipo=(id('e_tipo').value||'Tradicional');
@@ -339,7 +340,7 @@ function calc(){
   // Gráfico
   drawChart(bruta, obj_bruta);
 
-  // Sugerencias (con más contexto para avisos)
+  // Sugerencias (con contexto para avisos)
   suggestProspects({
     tipo,
     loc: id('e_loc').value||'',
@@ -383,73 +384,56 @@ function paintDot(idDot, gap){
   const el=id(idDot); el.className='dot '+(gap>=0?'g':(gap>-1?'y':'r'));
 }
 
-/* ===== Mini chart: barra naranja + línea discontinua gris ===== */
+/* ========= Mini chart ========= */
 function drawChart(real, objetivo){
   const c=id('chartKPI'); const ctx=c.getContext('2d');
   ctx.clearRect(0,0,c.width,c.height);
   const pad=36; const W=c.width, H=c.height;
   const max = Math.max( Math.ceil((Math.max(real, objetivo)+2)/2)*2 , 2);
 
-  // grid claro
   ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=1;
   for(let y=0;y<=max;y+=2){
     const yy = H - pad - (H-2*pad)* (y/max);
     ctx.beginPath(); ctx.moveTo(pad,yy); ctx.lineTo(W-pad,yy); ctx.stroke();
   }
 
-  // barra real (naranja)
   const barW=80;
   const realH=(H-2*pad)*(real/max);
   ctx.fillStyle='#ff5a1f';
   ctx.fillRect(W/2 - barW/2, H - pad - realH, barW, realH);
 
-  // línea objetivo (gris discontinua)
   const yObj = H - pad - (H-2*pad)*(objetivo/max);
   ctx.setLineDash([6,4]); ctx.strokeStyle='#9ca3af'; ctx.lineWidth=2;
   ctx.beginPath(); ctx.moveTo(pad, yObj); ctx.lineTo(W-pad, yObj); ctx.stroke();
   ctx.setLineDash([]);
 
-  // etiquetas
   ctx.fillStyle='#111827'; ctx.font='12px Inter, Arial';
   ctx.fillText('Bruta real', W/2 - 30, H - 8);
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects (usa tu esquema real) ===== */
-function fold(s){
-  return (s||'').toString()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .toLowerCase().trim();
+/* ========= Matching prospects (tu esquema real) ========= */
+function splitLocs(text){
+  return (text||'').split(/[,;|·]/).map(fold).filter(Boolean);
 }
-function isSearching(p){
-  return fold(p.fase).includes('busc'); // BUSQUEDA / BUSCANDO...
-}
-function parseMoney(v){
-  if(v==null) return 0;
-  return Number(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
-}
-function needsReformText(s){
-  const t=fold(s);
-  if(!t) return false;
-  // cualquier valor distinto de "no" implica que acepta/indica reforma
-  return t!=='no';
+function wantsNoReform(str){ return fold(str)==='no'; }
+function prospectBudget(p){
+  const a=num(String(p.max_compra||'').toString().replace(/[^\d]/g,'')); // tu campo real
+  const b=num(String(p.budget||'').toString().replace(/[^\d]/g,''));     // alternativo
+  return Math.max(a,b);
 }
 function warnBadges(p, ctx){
   const warns=[];
-  const assetNeedsReform = (ctx.ref_tip && ctx.ref_tip !== 'no');
-  if(assetNeedsReform && !needsReformText(p.reforma)){ // p.reforma === "No"
-    warns.push({title:'No quiere inmuebles con reforma', icon:'🚧'});
-  }
+  const assetNeedsReform = (ctx.ref_tip && fold(ctx.ref_tip)!=='no');
+  if(assetNeedsReform && wantsNoReform(p.reforma)){ warns.push({title:'No quiere inmuebles con reforma', icon:'🚧'}); }
   const assetNoElevator = fold(ctx.asc)==='no';
-  if(assetNoElevator && fold(p.asc)==='si'){
-    warns.push({title:'Requiere ascensor', icon:'🛗'});
-  }
-  const budgetMax = parseMoney(p.max_compra);
-  if(budgetMax>0 && Number(ctx.inv_total||0) > budgetMax){
-    warns.push({title:'Excede su presupuesto máximo', icon:'💰'});
-  }
+  if(assetNoElevator && fold(p.asc)==='si'){ warns.push({title:'Requiere ascensor', icon:'🛗'}); }
+  const budget = prospectBudget(p);
+  if(budget>0 && Number(ctx.inv_total||0) > budget){ warns.push({title:'Excede su presupuesto máximo', icon:'💰'}); }
   return warns;
 }
+function isSearching(p){ return fold(p.fase).includes('busc'); }
+
 function suggestProspects(ctx){
   const list=Store.pros||[];
   const mB=id('m_bruta'), mN=id('m_neta'), mF=id('m_flujo');
@@ -468,16 +452,16 @@ function suggestProspects(ctx){
     if(!isSearching(p)) return;
     if(fold(p.pref_tipo)!==wantTipo) return;
 
-    const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
+    const locs=splitLocs(p.locs_text);
     if(!locs.includes(wantLoc)) return;
 
-    const principal = fold(p.obj_tipo); // "bruta" | "neta" | "flujo"
-    const raw = Number(p.obj_raw||0);
+    const principal = fold(p.obj_tipo||p.obj_main||'');
+    const raw = num(p.obj_raw);
 
     if(principal==='bruta' && raw>0 && Number(ctx.bruta) >= raw) brutaOK.push(p);
     if(principal==='neta'  && raw>0 && Number(ctx.neta)  >= raw) netaOK.push(p);
     if(principal==='flujo' && raw>0){
-      const objetivoAnual = raw*12; // raw en €/mes → anual
+      const objetivoAnual = raw*12; // raw viene €/mes
       if(Number(ctx.flujo) >= objetivoAnual) flujoOK.push(p);
     }
   });
@@ -489,7 +473,7 @@ function suggestProspects(ctx){
     span.appendChild(name);
     warns.forEach(w=>{
       const b=document.createElement('span'); b.className='badge-warn'; b.title=w.title;
-      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.2"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.6" stroke-linecap="round"/></svg>'+w.icon;
+      b.innerHTML='<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.2"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.6" stroke-linecap="round"/></svg>'+w.icon;
       span.appendChild(b);
     });
     return span;
@@ -514,11 +498,11 @@ function suggestProspects(ctx){
   render(flujoOK, mF);
 }
 
-/* ===== Guardar / Asignar ===== */
+/* ========= Guardar / Asignar ========= */
 function gather(){ return calc(); }
 function save(alsoAssign){
   const e=gather();
-  const loaded = localStorage.getItem('load_eval');
+  const loaded = localStorage.getItem('load_eval'); // mantener tu clave estable
   let list=Store.evals||[];
   if(loaded){
     const idx=list.findIndex(x=>x.id===loaded);
@@ -535,7 +519,7 @@ function save(alsoAssign){
   toast('Evaluación guardada','ok');
 }
 
-/* ===== Limpiar ===== */
+/* ========= Limpiar ========= */
 function limpiar(){
   document.querySelectorAll('input').forEach(i=>i.value='');
   document.querySelectorAll('select').forEach(s=>{
@@ -546,7 +530,7 @@ function limpiar(){
   document.getElementById('e_result').hidden=true;
 }
 
-/* ===== Preload desde Evaluaciones (solo si existe) ===== */
+/* ========= Preload desde Evaluaciones ========= */
 function preloadIfAny(){
   const evId = localStorage.getItem('load_eval');
   if(!evId) return; // abrir en blanco si no viene de Evaluaciones
@@ -582,7 +566,7 @@ function preloadIfAny(){
   calc();
 }
 
-/* ===== PDF rápido (opcional) ===== */
+/* ========= PDF rápido ========= */
 function quickPDFfrom(e){
   const fecha=new Date(e.ts||Date.now()).toLocaleString('es-ES');
   const htmlParts = [
@@ -619,13 +603,9 @@ function quickPDFfrom(e){
   w.document.open(); w.document.write(html); w.document.close();
   const tryPrint=()=>{ try{w.focus(); w.print();}catch(_){}}; w.onload=tryPrint; setTimeout(tryPrint,600);
 }
-function escapeHtml(s){
-  return (s||'').toString().replace(/[&<>"']/g, m=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[m]));
-}
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
-/* ===== Eventos ===== */
+/* ========= Arranque ========= */
 function attach(){
   loadLocalidades();
   moneyLive();
@@ -640,7 +620,6 @@ function attach(){
 
   preloadIfAny(); // solo precarga si venimos de Evaluaciones
 }
-
 document.addEventListener('DOMContentLoaded', attach);
 })();
 </script>
