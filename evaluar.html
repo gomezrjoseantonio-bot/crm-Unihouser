@@ -6,14 +6,13 @@
 <title>Unihouser — Evaluar</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
-  .dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
-  .small{font-size:12px;color:#667085}
-  .kpi .muted{color:#667085;font-weight:600;margin-left:6px}
-  .tag{display:inline-block;background:#eef2f7;color:#0f1112;border-radius:999px;padding:4px 8px;margin:2px 4px;font-size:12px}
-  .canvasWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
-  .three-cols{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}
-  @media(max-width:980px){.three-cols{grid-template-columns:1fr}}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
+.dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
+.small{font-size:12px;color:#667085}
+.kpi .muted{color:#667085;font-weight:600;margin-left:6px}
+#matchList .tag{display:inline-block;background:#eef2f7;color:#0f1112;border-radius:999px;padding:4px 8px;margin:2px 4px;font-size:12px}
+.badge{display:inline-block;background:#eef2f7;border-radius:999px;padding:2px 8px;font-size:12px;color:#0f1112}
+.canvasWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
 </style>
 </head>
 <body>
@@ -131,20 +130,7 @@
 
     <div class="card" style="margin-top:12px">
       <h3 style="margin:0 0 8px">Clientes potenciales</h3>
-      <div class="three-cols">
-        <div>
-          <div class="small" style="margin-bottom:6px">Bruta ≥ objetivo</div>
-          <div id="matchBruta" class="muted">—</div>
-        </div>
-        <div>
-          <div class="small" style="margin-bottom:6px">Neta ≥ objetivo</div>
-          <div id="matchNeta" class="muted">—</div>
-        </div>
-        <div>
-          <div class="small" style="margin-bottom:6px">Flujo ≥ objetivo</div>
-          <div id="matchFlujo" class="muted">—</div>
-        </div>
-      </div>
+      <div id="matchList" class="muted">—</div>
       <div class="actions" style="margin-top:8px">
         <select id="assign_cli" size="6" style="min-width:320px"></select>
         <button class="btn" id="save_only">Guardar evaluación</button>
@@ -161,14 +147,14 @@
 (function(){
 "use strict";
 
-/* ========= Formato / Utils ========= */
+/* ===== Utils / formato ES ===== */
 const id = x=>document.getElementById(x);
-const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
-const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
-const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
-const e0 = v=>fmtE0.format(Number(v||0));
-const n0 = v=>fmtN0.format(Number(v||0));
-const pct1 = v=>fmtN1.format(Number(v||0))+' %';
+const fmtE0 = new Intl.NumberFormat('es-ES', { style:'currency', currency:'EUR', maximumFractionDigits:0 });
+const fmtN0 = new Intl.NumberFormat('es-ES', { maximumFractionDigits:0 });
+const fmtN1 = new Intl.NumberFormat('es-ES', { maximumFractionDigits:1 });
+function e0(v){ return fmtE0.format(Number(v||0)); }
+function n0(v){ return fmtN0.format(Number(v||0)); }
+function pct1(v){ return fmtN1.format(Number(v||0))+' %'; }
 function parseEs(str){
   if(str==null) return 0;
   const s=String(str).trim().replace(/\./g,'').replace(',', '.').replace(/[^\d.-]/g,'');
@@ -188,13 +174,15 @@ function moneyLive(){
   });
 }
 function toast(msg,kind){
-  let wrap=document.getElementById('toasts');
-  if(!wrap){wrap=document.createElement('div');wrap.id='toasts';wrap.className='toast-wrap';document.body.appendChild(wrap);}
+  const wrap = document.getElementById('toasts') || (function(){
+    const d=document.createElement('div'); d.id='toasts'; d.className='toast-wrap'; document.body.appendChild(d); return d;
+  })();
   const el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
-  wrap.appendChild(el); setTimeout(()=>el.style.opacity='0',1600); setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
+  wrap.appendChild(el); setTimeout(()=>el.style.opacity='0',1600);
+  setTimeout(()=>{ try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 
-/* ========= Store ========= */
+/* ===== Store (localStorage) ===== */
 const Store={
   get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
   set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); },
@@ -204,33 +192,46 @@ const Store={
   set evals(v){ localStorage.setItem('evals', JSON.stringify(v)); }
 };
 
-/* ========= Localidades Asturias ========= */
-const ASTURIAS=["Allande","Aller","Amieva","Avilés","Belmonte de Miranda","Bimenes","Boal","Cabrales","Cabranes","Candamo","Cangas de Onís","Cangas del Narcea","Caravia","Carreño","Caso","Castrillón","Castropol","Coaña","Colunga","Corvera de Asturias","Cudillero","Degaña","Gijón","Gozón","Grado","Grandas de Salime","Ibias","Illano","Illas","Langreo","Laviana","Lena","Llanera","Llanes","Mieres","Morcín","Muros de Nalón","Nava","Navia","Noreña","Onís","Oviedo","Parres","Peñamellera Alta","Peñamellera Baja","Pesoz","Piloña","Pravia","Proaza","Quirós","Ribadedeva","Ribadesella","Ribera de Arriba","Riosa","Salas","San Martín de Oscos","San Martín del Rey Aurelio","San Tirso de Abres","Santa Eulalia de Oscos","Santo Adriano","Sariego","Siero","Sobrescobio","Somiedo","Soto del Barco","Tapia de Casariego","Taramundi","Teverga","Tineo","Valdés","Vegadeo","Villanueva de Oscos","Villaviciosa","Villayón"];
+/* ===== Localidades Asturias ===== */
+const ASTURIAS = [
+"Allande","Aller","Amieva","Avilés","Belmonte de Miranda","Bimenes","Boal","Cabrales","Cabranes","Candamo",
+"Cangas de Onís","Cangas del Narcea","Caravia","Carreño","Caso","Castrillón","Castropol","Coaña","Colunga","Corvera de Asturias",
+"Cudillero","Degaña","Gijón","Gozón","Grado","Grandas de Salime","Ibias","Illano","Illas","Langreo",
+"Laviana","Lena","Llanera","Llanes","Mieres","Morcín","Muros de Nalón","Nava","Navia","Noreña",
+"Onís","Oviedo","Parres","Peñamellera Alta","Peñamellera Baja","Pesoz","Piloña","Pravia","Proaza","Quirós",
+"Ribadedeva","Ribadesella","Ribera de Arriba","Riosa","Salas","San Martín de Oscos","San Martín del Rey Aurelio","San Tirso de Abres","Santa Eulalia de Oscos","Santo Adriano",
+"Sariego","Siero","Sobrescobio","Somiedo","Soto del Barco","Tapia de Casariego","Taramundi","Teverga","Tineo","Valdés",
+"Vegadeo","Villanueva de Oscos","Villaviciosa","Villayón"
+];
+
+/* ===== Cargar localidades ===== */
 function loadLocalidades(){
   const s=id('e_loc'); s.innerHTML='';
-  ASTURIAS.forEach(loc=>{const o=document.createElement('option'); o.textContent=loc; s.appendChild(o);});
+  ASTURIAS.forEach(loc=>{
+    const o=document.createElement('option'); o.textContent=loc; s.appendChild(o);
+  });
 }
 
-/* ========= Config desde Configuración ========= */
+/* ===== Leer cfg con defaults (compatibilidad con claves nuevas/viejas) ===== */
 function getCfg(){
   const c=Store.cfg||{};
   return {
     itp_pct: Number(c.itp_pct ?? 8),
     notaria_eur: Number(c.notaria_eur ?? 1500),
-    psi_fee_eur: Number(c.psi_fee_eur ?? 4235),
+    psi_eur: Number(c.psi_eur ?? c.psi_fee_eur ?? 4235),
     hogar_pct: Number(c.hogar_pct ?? 3.5),
-    impago_trad_pct: Number(c.impago_trad_pct ?? 4.0),
-    impago_hab_pct: Number(c.impago_hab_pct ?? 4.0),
-    gestion_trad_pct: Number(c.gestion_trad_pct ?? 15.0),
-    gestion_hab_pct: Number(c.gestion_hab_pct ?? 25.0),
-    objetivos: c.objetivos || {
-      tradicional:{ bruta_pct:10.0, neta_pct:6.0, flujo_mes_eur:0 },
-      habitaciones:{ bruta_pct:12.0, neta_pct:7.0, flujo_mes_eur:0 }
-    }
+    impago_pct_trad: Number(c.impago_pct_trad ?? c.impago_trad_pct ?? 4.0),
+    impago_pct_hab:  Number(c.impago_pct_hab  ?? c.impago_hab_pct  ?? 4.0),
+    gestion_pct_trad:Number(c.gestion_pct_trad?? c.gestion_trad_pct??15.0),
+    gestion_pct_hab: Number(c.gestion_pct_hab ?? c.gestion_hab_pct ??25.0),
+    obj_bruta_trad:  Number(c.obj_bruta_trad ?? (c.objetivos?.tradicional?.bruta_pct ?? 10.0)),
+    obj_bruta_hab:   Number(c.obj_bruta_hab  ?? (c.objetivos?.habitaciones?.bruta_pct ?? 12.0)),
+    obj_neta_trad:   Number(c.obj_neta_trad  ?? (c.objetivos?.tradicional?.neta_pct ?? 6.0)),
+    obj_neta_hab:    Number(c.obj_neta_hab   ?? (c.objetivos?.habitaciones?.neta_pct ?? 7.0))
   };
 }
 
-/* ========= Autocálculos dependientes ========= */
+/* ===== Autocálculos dependientes ===== */
 function bindAuto(){
   const cfg=getCfg();
   const tipoEl=id('e_tipo');
@@ -252,8 +253,8 @@ function bindAuto(){
     const alq_m=parseEs(alqEl.value);
     const alq_a = alq_m*12;
     const tipo=(tipoEl.value||'Tradicional').toLowerCase();
-    const impago_pct = (tipo==='habitaciones')? cfg.impago_hab_pct : cfg.impago_trad_pct;
-    const gest_pct   = (tipo==='habitaciones')? cfg.gestion_hab_pct : cfg.gestion_trad_pct;
+    const impago_pct = (tipo==='habitaciones')? cfg.impago_pct_hab : cfg.impago_pct_trad;
+    const gest_pct   = (tipo==='habitaciones')? cfg.gestion_pct_hab : cfg.gestion_pct_trad;
 
     const hogar   = Math.round(alq_a*(cfg.hogar_pct/100));
     const impago  = Math.round(alq_a*(impago_pct/100));
@@ -268,17 +269,15 @@ function bindAuto(){
   tipoEl.addEventListener('change',updAlq);
 }
 
-/* ========= Cálculos financieros ========= */
+/* ===== Cálculos financieros ===== */
 function calc(){
   const cfg=getCfg();
-  const tipoSel=(id('e_tipo').value||'Tradicional');
-  const tipoKey=(tipoSel==='Habitaciones')?'habitaciones':'tradicional';
-
+  const tipo=(id('e_tipo').value||'Tradicional');
   const precio = parseEs(id('e_precio').value);
   const itp    = parseEs(id('e_itp_eur').value) || Math.round(precio*(cfg.itp_pct/100));
   const notari = parseEs(id('e_notaria').value) || cfg.notaria_eur;
   const ref    = parseEs(id('e_reforma').value);
-  const honor  = (id('e_honor').value==='si') ? cfg.psi_fee_eur : 0;
+  const honor  = (id('e_honor').value==='si') ? (cfg.psi_eur||0) : 0;
 
   const comu   = parseEs(id('e_comunidad').value);
   const ibi    = parseEs(id('e_ibi').value);
@@ -296,14 +295,12 @@ function calc(){
   const neta  = inv_total>0 ? ((alq_a - gastos_a) / inv_total * 100) : 0;
   const flujo = alq_a - gastos_a;
 
-  const obj = cfg.objetivos[tipoKey] || {bruta_pct:10,neta_pct:6,flujo_mes_eur:0};
-  const obj_bruta = Number(obj.bruta_pct||0);
-  const obj_neta  = Number(obj.neta_pct||0);
-
+  const obj_bruta = (tipo==='Habitaciones')? cfg.obj_bruta_hab : cfg.obj_bruta_trad;
   const gapB = bruta - obj_bruta;
-  const gapN = neta  - obj_neta;
+  const obj_neta  = (tipo==='Habitaciones')? cfg.obj_neta_hab  : cfg.obj_neta_trad;
+  const gapN = neta - obj_neta;
 
-  // Precio máximo para alcanzar objetivo bruta
+  // Precio máximo para alcanzar objetivo bruta (resolviendo precio con ITP)
   const rate = cfg.itp_pct/100;
   const targetInv = (obj_bruta>0)? (alq_a / (obj_bruta/100)) : 0;
   let pmax = 0;
@@ -312,6 +309,7 @@ function calc(){
     pmax = Math.max(0, Math.floor((targetInv - extras) / (1+rate)));
   }
 
+  // KPIs
   id('r_inv').textContent   = e0(inv_total);
   id('r_bruta').textContent = pct1(bruta);
   id('r_neta').textContent  = pct1(neta);
@@ -319,17 +317,22 @@ function calc(){
   id('r_pmax').textContent  = e0(pmax);
   id('e_pmax').value        = n0(pmax);
 
+  // Dots + diff
   paintDot('sb', gapB);
   paintDot('sn', gapN);
   paintDot('sf', flujo>=0? 1 : -1);
   id('r_bruta_diff').textContent = gapText(gapB);
   id('r_neta_diff').textContent  = gapText(gapN);
 
+  // Gráfico
   drawChart(bruta, obj_bruta);
-  suggestProspects({ tipo:tipoSel, loc:id('e_loc').value||'', bruta, neta, flujo });
+
+  // Sugerencias
+  suggestProspects({ tipo, loc: id('e_loc').value||'', bruta, neta, flujo });
 
   id('e_result').hidden=false;
 
+  // objeto evaluación
   return {
     id: 'ev_'+Date.now(),
     ts: Date.now(),
@@ -344,7 +347,7 @@ function calc(){
     banos: id('e_banos').value || '',
     ref_tip: id('e_ref_nec').value || 'no',
     url: id('e_url').value || '',
-    tipo: tipoSel,
+    tipo,
     precio, itp, notaria:notari, psi: honor, reforma: ref,
     comu:comu, ibi:ibi, hogar:hogar, impago:impago, gestion:gest,
     alq: alq_m,
@@ -361,120 +364,159 @@ function paintDot(idDot, gap){
   const el=id(idDot); el.className='dot '+(gap>=0?'g':(gap>-1?'y':'r'));
 }
 
-/* ========= Mini chart: barra naranja + línea discontinua gris ========= */
+/* ===== Mini chart: barra (real) + línea discontinua gris (objetivo) ===== */
 function drawChart(real, objetivo){
   const c=id('chartKPI'); const ctx=c.getContext('2d');
-  ctx.clearRect(0,0,c.width,c.height);
-  const pad=36; const W=c.width, H=c.height;
-  // fondo blanco (ya lo es por CSS) y rejilla suave
-  ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=1;
+  const W=c.width, H=c.height, pad=40;
+  ctx.clearRect(0,0,W,H);
+
+  // Fondo blanco
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+
+  // Grid tenue
   const max = Math.max( Math.ceil((Math.max(real, objetivo)+2)/2)*2 , 2);
+  ctx.strokeStyle='rgba(0,0,0,.08)'; ctx.lineWidth=1;
   for(let y=0;y<=max;y+=2){
     const yy = H - pad - (H-2*pad)* (y/max);
     ctx.beginPath(); ctx.moveTo(pad,yy); ctx.lineTo(W-pad,yy); ctx.stroke();
   }
-  // barra real
+
+  // Barra naranja
   const barW=80;
-  const realH=(H-2*pad)*(Math.max(real,0)/max);
+  const realH=(H-2*pad)*(real/max);
   ctx.fillStyle='#ff5a1f';
   ctx.fillRect(W/2 - barW/2, H - pad - realH, barW, realH);
-  // línea objetivo gris discontinua
-  const yObj = H - pad - (H-2*pad)*(Math.max(objetivo,0)/max);
-  ctx.setLineDash([6,6]); ctx.strokeStyle='#9ca3af'; ctx.lineWidth=2;
+
+  // Línea discontinua gris (objetivo)
+  const yObj = H - pad - (H-2*pad)*(objetivo/max);
+  ctx.setLineDash([5,4]); ctx.strokeStyle='#9aa3ab'; ctx.lineWidth=2;
   ctx.beginPath(); ctx.moveTo(pad, yObj); ctx.lineTo(W-pad, yObj); ctx.stroke();
   ctx.setLineDash([]);
-  // etiquetas
-  ctx.fillStyle='#0f1112'; ctx.font='12px Inter, Arial';
-  ctx.fillText('Bruta real', W/2 - 30, H - 10);
-  ctx.fillStyle='#6b7280';
+
+  // Etiquetas
+  ctx.fillStyle='#111'; ctx.font='12px Inter, Arial';
+  ctx.fillText('Bruta real', W/2 - 30, H - 8);
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ========= Matching de prospects (nombre, ≥ objetivo, coincide tipo+localidad) ========= */
-function suggestProspects(ctx){
-  const pros=Store.pros||[];
-  const loc = (ctx.loc||'').toLowerCase();
-  const tipo = (ctx.tipo||'').toLowerCase();
-  const br = Number(ctx.bruta||0);
-  const ne = Number(ctx.neta||0);
-  const flujoMes = Math.round(Number(ctx.flujo||0)/12); // KPI anual -> mes
-
-  const matchBr=[], matchNe=[], matchFl=[];
-  const picked = new Set();
-
-  pros.forEach(p=>{
-    const pTipo=(p.pref_tipo||'').toLowerCase();
-    const locs=(p.locs_text||'').toLowerCase().split(',').map(s=>s.trim()).filter(Boolean);
-    if(pTipo!==tipo) return;
-    if(!locs.includes(loc)) return;
-
-    const id = p.id || p.email || p.nombre || ('p_'+Math.random().toString(36).slice(2,7));
-    const nombre = p.nombre || '—';
-    const oB = Number(p.obj_bruta||0);
-    const oN = Number(p.obj_neta||0);
-    const oF = Number(p.obj_flujo||0); // €/mes
-
-    if(br >= oB){ matchBr.push({id,nombre}); picked.add(id); }
-    if(ne >= oN){ matchNe.push({id,nombre}); picked.add(id); }
-    if(flujoMes >= oF){ matchFl.push({id,nombre}); picked.add(id); }
-  });
-
-  const put=(elId,arr)=>{
-    const el=document.getElementById(elId);
-    if(!el) return;
-    if(!arr.length){ el.textContent='—'; return; }
-    el.innerHTML='';
-    arr.slice(0,12).forEach(x=>{
-      const s=document.createElement('span');
-      s.className='tag';
-      s.textContent=x.nombre;
-      el.appendChild(s);
-    });
-  };
-
-  put('matchBruta', matchBr);
-  put('matchNeta', matchNe);
-  put('matchFlujo', matchFl);
-
-  // Select múltiple para asignar (unión de todos)
-  const sel=document.getElementById('assign_cli');
-  if(sel){
-    sel.innerHTML='';
-    [...picked].forEach(id=>{
-      const p=pros.find(pp=>(pp.id||pp.email||pp.nombre)===id);
-      const opt=document.createElement('option');
-      opt.value=id; opt.textContent=p?.nombre || id;
-      sel.appendChild(opt);
-    });
-  }
+/* ===== Normalización simple para textos ===== */
+function norm(s){
+  return (s||'').toString().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sin acentos
+    .trim();
 }
 
-/* ========= Guardar / Asignar ========= */
+/* ===== Matching prospects (solo fase de búsqueda) ===== */
+function suggestProspects(ctx){
+  const list = (Store.pros||[]);
+  const panel   = document.getElementById('matchList');
+  const asignSel= document.getElementById('assign_cli');
+
+  panel.innerHTML = '';
+  asignSel.innerHTML = '';
+
+  const locLower  = norm(ctx.loc);
+  const tipoLower = norm(ctx.tipo);
+
+  const buckets = { bruta:[], neta:[], flujo:[] };
+
+  list.forEach(p=>{
+    // Solo fase búsqueda
+    const fase = norm(p.fase || p.estado || p.status);
+    if(!fase || !['busqueda','buscando'].includes(fase)) return;
+
+    // Debe coincidir tipo y localidad
+    if(norm(p.pref_tipo) !== tipoLower) return;
+    const locs = (p.locs_text||'').split(',').map(norm).filter(Boolean);
+    if(locs.length && !locs.includes(locLower)) return;
+
+    // Objetivo principal
+    const main = (p.obj_main||'bruta').toString().toLowerCase();
+    if(main==='bruta'){
+      if( Number(ctx.bruta||0) >= Number(p.obj_bruta||0) ) buckets.bruta.push(p);
+    }else if(main==='neta'){
+      if( Number(ctx.neta||0)  >= Number(p.obj_neta||0)  ) buckets.neta.push(p);
+    }else{
+      // ctx.flujo anual; asumimos p.obj_flujo anual también
+      if( Number(ctx.flujo||0) >= Number(p.obj_flujo||0) ) buckets.flujo.push(p);
+    }
+  });
+
+  renderProspectBuckets(panel, buckets);
+
+  // Selector para asignar = unión de los 3 buckets
+  const all = [].concat(buckets.bruta, buckets.neta, buckets.flujo);
+  all.forEach(p=>{
+    const opt=document.createElement('option');
+    opt.value = p.id || p.email || p.nombre || ('p_'+Math.random().toString(36).slice(2,7));
+    opt.textContent = p.nombre || '-';
+    asignSel.appendChild(opt);
+  });
+}
+
+// UI de las 3 tarjetas (nombres como chips)
+function renderProspectBuckets(container, b){
+  container.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.display='grid'; grid.style.gap='10px'; grid.style.gridTemplateColumns='1fr 1fr 1fr';
+
+  const makeCard=(title, arr)=>{
+    const card=document.createElement('div');
+    card.className='card'; card.style.padding='10px';
+
+    const head=document.createElement('div');
+    head.style.display='flex'; head.style.justifyContent='space-between'; head.style.alignItems='center';
+
+    const t=document.createElement('strong'); t.textContent=title;
+    const badge=document.createElement('span'); badge.className='badge'; badge.textContent=String(arr.length);
+
+    head.appendChild(t); head.appendChild(badge); card.appendChild(head);
+
+    const body=document.createElement('div'); body.style.marginTop='8px';
+    if(arr.length===0){
+      const m=document.createElement('div'); m.className='muted'; m.textContent='—';
+      body.appendChild(m);
+    }else{
+      arr.forEach(p=>{
+        const tag=document.createElement('span'); tag.className='tag'; tag.textContent=(p.nombre||'-');
+        body.appendChild(tag);
+      });
+    }
+    card.appendChild(body);
+    return card;
+  };
+
+  grid.appendChild(makeCard('Bruta ≥ objetivo', b.bruta));
+  grid.appendChild(makeCard('Neta ≥ objetivo',  b.neta));
+  grid.appendChild(makeCard('Flujo ≥ objetivo', b.flujo));
+  container.appendChild(grid);
+}
+
+/* ===== Guardar / Asignar ===== */
 function gather(){ return calc(); }
 function save(alsoAssign){
   const e=gather();
-  const KEY='_load_eval_';
-  const editingId = localStorage.getItem(KEY);
 
+  // si venimos de Evaluaciones, conservar id/ts
+  const loaded = localStorage.getItem('_load_eval') || localStorage.getItem('_load_eval');
   let list=Store.evals||[];
-  if(editingId){
-    const idx=list.findIndex(x=>x.id===editingId);
+  if(loaded){
+    const idx=list.findIndex(x=>x.id===loaded);
     if(idx>=0){ e.id=list[idx].id; e.ts=list[idx].ts; }
-    localStorage.removeItem(KEY);
+    localStorage.removeItem('_load_eval_');
+    localStorage.removeItem('load_eval');
   }
-
   if(alsoAssign){
     const sel=[...document.getElementById('assign_cli').options].filter(o=>o.selected).map(o=>o.value);
     e.prospect_ids = sel;
   }
-
   const idx2=list.findIndex(x=>x.id===e.id);
   if(idx2>=0) list[idx2]=e; else list.push(e);
   Store.evals = list;
   toast('Evaluación guardada','ok');
 }
 
-/* ========= Limpiar ========= */
+/* ===== Limpiar ===== */
 function limpiar(){
   document.querySelectorAll('input').forEach(i=>i.value='');
   document.querySelectorAll('select').forEach(s=>{
@@ -485,16 +527,11 @@ function limpiar(){
   document.getElementById('e_result').hidden=true;
 }
 
-/* ========= Preload desde Evaluaciones (y luego SIEMPRE en blanco) ========= */
+/* ===== Preload desde Evaluaciones (solo si venimos con id) ===== */
 function preloadIfAny(){
-  const KEY='_load_eval_';
-  const evId = localStorage.getItem(KEY);
-  if(!evId) return;                // si no viene desde Evaluaciones, se queda en blanco
-
-  const list = Store.evals || [];
-  const e = list.find(x=>x.id===evId);
-  localStorage.removeItem(KEY);    // limpiamos para que la próxima vez abra en blanco
-  if(!e) return;
+  const evId = localStorage.getItem('_load_eval') || localStorage.getItem('_load_eval');
+  if(!evId) return; // abrir en blanco por defecto
+  const e=(Store.evals||[]).find(x=>x.id===evId); if(!e) return;
 
   id('e_loc').value = e.loc || '';
   id('e_calle').value = e.calle||'';
@@ -523,10 +560,49 @@ function preloadIfAny(){
 
   id('e_alq').value = n0(e.alq||0);
 
-  calc(); // pinta todo
+  calc();
 }
 
-/* ========= Eventos ========= */
+/* ===== PDF (sin template string) ===== */
+function quickPDFfrom(e){
+  const fecha=new Date(e.ts||Date.now()).toLocaleString('es-ES');
+  const htmlParts = [
+    '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — ',
+    escapeHtml(e.loc||''), '</title>',
+    '<style>body{font-family:Inter,Arial;color:#101828;margin:24px}',
+    'h1{font-size:22px;margin:0 0 6px}h2{font-size:16px;margin:16px 0 8px}',
+    '.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}',
+    '.box{border:1px solid #e5e7eb;border-radius:10px;padding:10px}',
+    '.lab{font-size:12px;color:#667085}.val{font-weight:800}',
+    '.foot{margin-top:16px;font-size:12px;color:#667085;text-align:center}',
+    '</style></head><body>',
+    '<h1>Informe BuyBox — Unihouser</h1>',
+    '<div class="lab">', fecha, '</div>',
+    '<h2>Resumen financiero</h2><div class="grid">',
+      '<div class="box"><div class="lab">Bruta</div><div class="val">', fmtN1.format(e.kpi_bruta||0),' %</div></div>',
+      '<div class="box"><div class="lab">Neta</div><div class="val">', fmtN1.format(e.kpi_neta||0),' %</div></div>',
+      '<div class="box"><div class="lab">Flujo anual</div><div class="val">', e0(e.kpi_flujo||0),'</div></div>',
+      '<div class="box"><div class="lab">P. máx compra</div><div class="val">', e0(e.pmax||0),'</div></div>',
+    '</div>',
+    '<h2>Datos del inmueble</h2><div class="grid">',
+      '<div class="box"><div class="lab">Localidad</div><div class="val">', escapeHtml(e.loc||'-'),'</div></div>',
+      '<div class="box"><div class="lab">Calle</div><div class="val">', escapeHtml(e.calle||'-'),'</div></div>',
+      '<div class="box"><div class="lab">Tipo</div><div class="val">', escapeHtml(e.tipo||'-'),'</div></div>',
+      '<div class="box"><div class="lab">Alquiler</div><div class="val">', e0(e.alq*12||0),'</div></div>',
+      '<div class="box"><div class="lab">Precio</div><div class="val">', e0(e.precio||0),'</div></div>',
+      '<div class="box"><div class="lab">Inversión total</div><div class="val">', e0(e.inv_total||0),'</div></div>',
+    '</div>',
+    '<div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>',
+    '</body></html>'
+  ];
+  const html = htmlParts.join('');
+  const w=window.open('','_blank'); if(!w) return;
+  w.document.open(); w.document.write(html); w.document.close();
+  const tryPrint=()=>{ try{w.focus(); w.print();}catch(_){}}; w.onload=tryPrint; setTimeout(tryPrint,600);
+}
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+/* ===== Eventos ===== */
 function attach(){
   loadLocalidades();
   moneyLive();
@@ -539,8 +615,9 @@ function attach(){
   id('save_assign') && id('save_assign').addEventListener('click', ()=>save(true));
   id('e_clean').addEventListener('click', limpiar);
 
-  preloadIfAny();
+  preloadIfAny(); // en blanco por defecto; solo carga si venimos de Evaluaciones
 }
+
 document.addEventListener('DOMContentLoaded', attach);
 })();
 </script>
