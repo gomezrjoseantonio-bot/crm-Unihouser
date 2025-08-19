@@ -11,13 +11,18 @@
 .small{font-size:12px;color:#667085}
 .kpi .muted{color:#667085;font-weight:600;margin-left:6px}
 .canvasWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
+
+/* Grid 3 columnas responsive */
 .group3{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}
 @media(max-width:1000px){.group3{grid-template-columns:1fr}}
+
+/* Matching UI */
 #matchWrap{display:grid;gap:8px}
 .match-col{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
 .match-col h4{margin:0 0 8px}
-.tag{display:inline-block;background:#eef2f7;border-radius:999px;padding:4px 8px;margin:2px 4px;font-size:12px}
-.warn{margin-left:6px;opacity:.85}
+.tag{display:inline-flex;align-items:center;gap:6px;background:#eef2f7;border-radius:999px;padding:4px 10px;margin:3px 4px;font-size:12px}
+.badge-warn{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#b45309;background:#fff7ed;border:1px solid #fde68a;border-radius:999px;padding:2px 6px}
+.badge-warn svg{width:12px;height:12px}
 </style>
 </head>
 <body>
@@ -191,12 +196,6 @@ function toast(msg,kind){
   setTimeout(()=>{ try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 
-/* ===== Acentos: normalización para comparar localidades ===== */
-function normalizeEs(s){
-  const t=(s||'').toString().trim().toLowerCase();
-  return t.normalize? t.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : t;
-}
-
 /* ===== Store (localStorage) ===== */
 const Store={
   get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
@@ -340,16 +339,14 @@ function calc(){
   // Gráfico
   drawChart(bruta, obj_bruta);
 
-  // Sugerencias (paso info extra del activo para avisos)
+  // Sugerencias
   suggestProspects({
     tipo,
     loc: id('e_loc').value||'',
     bruta, neta, flujo,
-    obj_bruta, obj_neta,
     inv_total,
     ref_tip: id('e_ref_nec').value||'no',
-    asc: (id('e_asc').value||'Sí'),
-    m2: parseEs(id('e_m2').value)||0
+    asc: id('e_asc').value||'Sí'
   });
 
   id('e_result').hidden=false;
@@ -418,35 +415,45 @@ function drawChart(real, objetivo){
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects + avisos ===== */
+/* ===== Matching prospects (filtra por fase, tipo, localidad; ≥ objetivos; avisos) ===== */
 function isSearching(p){
   const f=(p.fase||'').toString().toLowerCase();
   return f.includes('busc'); // “búsqueda”, “buscando”, etc.
 }
-function norm(s){ return normalizeEs(s); }
+function fold(s){ return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
+function parseMoney(v){
+  if(v==null) return 0;
+  return Number(String(v).toString().replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
+}
+function boolLike(x){
+  if(x===true) return true; if(x===false) return false;
+  const s=String(x||'').toLowerCase();
+  return s==='si'||s==='sí'||s==='true'||s==='1';
+}
+function wantsNoReform(p){
+  return boolLike(p.no_reformas)||boolLike(p.no_reforma)||String(p.reforma||p.ref||'').toLowerCase()==='no'||
+         String(p.pref_reforma||'').toLowerCase()==='no'||boolLike(p.prefiere_sin_reforma);
+}
+function wantsElevator(p){
+  return boolLike(p.requiere_ascensor)||boolLike(p.quiere_ascensor)||String(p.ascensor||'').toLowerCase()==='si';
+}
+function prospectBudget(p){
+  return parseMoney(p.presupuesto_max??p.presupuesto??p.budget_max??p.budget);
+}
 
-/* Avisos opcionales por restricciones del prospecto */
-function buildWarnings(p, asset){
+function warnBadges(p, ctx){
   const warns=[];
-  // Reforma: si el activo requiere reforma y el prospecto no quiere reformas
-  const prefRef = (p.pref_reforma||'').toString().toLowerCase(); // valores esperados: 'no', 'lavado', 'integral', 'indiferente'
-  if(asset.ref_tip!=='no' && prefRef==='no'){
-    warns.push(['🛠','No acepta reforma']);
+  const necesitaReforma = (ctx.ref_tip && ctx.ref_tip !== 'no');
+  const sinAscensor = String(ctx.asc||'Sí').toLowerCase()==='no';
+  const budget = prospectBudget(p);
+  if(necesitaReforma && wantsNoReform(p)){
+    warns.push({icon:'🚧', title:'No quiere inmuebles con reforma'});
   }
-  // Ascensor: si el prospecto exige ascensor y el activo no tiene
-  const reqAsc = (p.req_ascensor||p.pref_ascensor||'').toString().toLowerCase(); // 'sí'/'si' o 'no'
-  if((reqAsc==='sí'||reqAsc==='si') && (asset.asc||'').toString().toLowerCase()==='no'){
-    warns.push(['🛗','Exige ascensor']);
+  if(sinAscensor && wantsElevator(p)){
+    warns.push({icon:'🛗', title:'Requiere ascensor'});
   }
-  // Presupuesto máximo
-  const presupMax = Number(p.presupuesto_max||p.budget_max||0);
-  if(presupMax>0 && Number(asset.inv_total||0)>presupMax){
-    warns.push(['💶','Sobrepasa presupuesto']);
-  }
-  // m² mínimos
-  const m2min = Number(p.m2_min||0);
-  if(m2min>0 && Number(asset.m2||0)>0 && Number(asset.m2)<m2min){
-    warns.push(['📏','Menos m² de lo pedido']);
+  if(budget>0 && Number(ctx.inv_total||0) > budget){
+    warns.push({icon:'💰', title:'Excede su presupuesto'});
   }
   return warns;
 }
@@ -459,67 +466,59 @@ function suggestProspects(ctx){
 
   if(!list.length){ return; }
 
-  const wantTipo = norm(ctx.tipo);
-  const wantLoc  = norm(ctx.loc);
+  const wantTipo = fold(ctx.tipo);
+  const wantLoc  = fold(ctx.loc);
 
   const brutaOK=[], netaOK=[], flujoOK=[];
+  const addOptionSet=new Set();
 
   list.forEach(p=>{
     if(!isSearching(p)) return;
-    if(norm(p.pref_tipo)!==wantTipo) return;
-
-    // Localidades del prospecto: admite coma, punto y coma o barra
-    const locs=(p.locs_text||'')
-      .split(/[,;\/]/).map(s=>norm(s)).filter(Boolean);
+    if(fold(p.pref_tipo)!==wantTipo) return;
+    const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
     if(!locs.includes(wantLoc)) return;
 
-    // Objetivos del prospecto
-    const main=(p.obj_main||'bruta').toLowerCase();
     const objB=Number(p.obj_bruta||0);
     const objN=Number(p.obj_neta||0);
-    const objF_mes=Number(p.obj_flujo||0);
-    const objF_ano=objF_mes>0? objF_mes*12 : 0;
+    const objFmes=Number(p.obj_flujo||0);
+    const objF_ano=objFmes>0? objFmes*12 : 0;
 
-    // Clasificamos SOLO en su objetivo principal (como acordamos)
-    if(main==='bruta' && ctx.bruta>=objB){ brutaOK.push(p); }
-    if(main==='neta'  && ctx.neta>=objN){  netaOK.push(p);  }
-    if(main==='flujo' && ctx.flujo>=objF_ano){ flujoOK.push(p); }
+    // Si no tiene objetivo para un KPI (0), no lo mostramos en esa columna.
+    if(objB>0 && Number(ctx.bruta)>=objB) brutaOK.push(p);
+    if(objN>0 && Number(ctx.neta) >=objN) netaOK.push(p);
+    if(objF_ano>0 && Number(ctx.flujo)>=objF_ano) flujoOK.push(p);
   });
 
-  const renderChips=(arr,el)=>{
+  const chip = (p, warns)=>{
+    const span=document.createElement('span');
+    span.className='tag';
+    const name=document.createElement('span'); name.textContent=p.nombre||'-';
+    span.appendChild(name);
+    warns.forEach(w=>{
+      const b=document.createElement('span'); b.className='badge-warn'; b.title=w.title;
+      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.2"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.6" stroke-linecap="round"/></svg>' + w.icon;
+      span.appendChild(b);
+    });
+    return span;
+  };
+
+  const render = (arr, el)=>{
     if(!arr.length){ el.textContent='—'; return; }
     el.innerHTML='';
     arr.forEach(p=>{
-      const span=document.createElement('span');
-      span.className='tag';
-      span.textContent=p.nombre||'-';
-
-      // avisos
-      const warns=buildWarnings(p, ctx);
-      if(warns.length){
-        warns.forEach(([icon,title])=>{
-          const w=document.createElement('span');
-          w.className='warn';
-          w.title=title;
-          w.textContent=icon;
-          span.appendChild(w);
-        });
+      const warns = warnBadges(p, ctx);
+      el.appendChild(chip(p, warns));
+      const key=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
+      if(!addOptionSet.has(key)){ addOptionSet.add(key);
+        const opt=document.createElement('option'); opt.value=key; opt.textContent=p.nombre||'-';
+        asignSel.appendChild(opt);
       }
-      el.appendChild(span);
     });
   };
-  renderChips(brutaOK,mB);
-  renderChips(netaOK,mN);
-  renderChips(flujoOK,mF);
 
-  // select múltiple para asignar (unión de los tres, sin duplicados)
-  const seen=new Set();
-  [...brutaOK,...netaOK,...flujoOK].forEach(p=>{
-    const val=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
-    if(seen.has(val)) return; seen.add(val);
-    const opt=document.createElement('option'); opt.value=val; opt.textContent=p.nombre||'-';
-    asignSel.appendChild(opt);
-  });
+  render(brutaOK, mB);
+  render(netaOK,  mN);
+  render(flujoOK, mF);
 }
 
 /* ===== Guardar / Asignar ===== */
