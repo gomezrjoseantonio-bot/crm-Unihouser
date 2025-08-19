@@ -174,6 +174,11 @@ function parseEs(str){
   const s=String(str).trim().replace(/\./g,'').replace(',', '.').replace(/[^\d.-]/g,'');
   const n=Number(s); return Number.isFinite(n)? n : 0;
 }
+/* NUEVO: número robusto ES (para bruta/neta/flujo en prospects) */
+function numES(v){
+  return Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.')) || 0;
+}
+
 function moneyLive(){
   document.querySelectorAll('input[data-money]').forEach(inp=>{
     inp.addEventListener('input',()=>{
@@ -339,7 +344,7 @@ function calc(){
   // Gráfico
   drawChart(bruta, obj_bruta);
 
-  // Sugerencias (match)
+  // Sugerencias (añadimos datos para avisos)
   suggestProspects({
     tipo,
     loc: id('e_loc').value||'',
@@ -415,15 +420,19 @@ function drawChart(real, objetivo){
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects (fase, tipo, localidad; solo KPI principal; ≥ objetivos; avisos) ===== */
+/* ===== Matching prospects (fase + tipo + localidad + KPIs; con avisos) ===== */
 function isSearching(p){
-  const f=(p.fase||'').toString().toLowerCase();
-  return f.includes('busc'); // “búsqueda”, “buscando”, etc.
+  const s=(p.fase||p.estado||p.status||'').toString().toLowerCase();
+  return /busc|search/.test(s) || boolLike(p.en_busqueda) || boolLike(p.activo_busqueda);
 }
-function fold(s){ return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
+function fold(s){
+  return (s||'').toString()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().trim();
+}
 function parseMoney(v){
   if(v==null) return 0;
-  return Number(String(v).toString().replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
+  return Number(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
 }
 function boolLike(x){
   if(x===true) return true; if(x===false) return false;
@@ -431,11 +440,13 @@ function boolLike(x){
   return s==='si'||s==='sí'||s==='true'||s==='1';
 }
 function wantsNoReform(p){
-  return boolLike(p.no_reformas)||boolLike(p.no_reforma)||String(p.reforma||p.ref||'').toLowerCase()==='no'||
-         String(p.pref_reforma||'').toLowerCase()==='no'||boolLike(p.prefiere_sin_reforma);
+  return boolLike(p.no_reformas)||boolLike(p.no_reforma)||
+         String(p.reforma||p.ref||p.pref_reforma||'').toLowerCase()==='no'||
+         boolLike(p.prefiere_sin_reforma);
 }
 function wantsElevator(p){
-  return boolLike(p.requiere_ascensor)||boolLike(p.quiere_ascensor)||String(p.ascensor||'').toLowerCase()==='si';
+  return boolLike(p.requiere_ascensor)||boolLike(p.quiere_ascensor)||
+         String(p.ascensor||p.pref_ascensor||'').toLowerCase()==='si';
 }
 function prospectBudget(p){
   return parseMoney(p.presupuesto_max??p.presupuesto??p.budget_max??p.budget);
@@ -445,9 +456,15 @@ function warnBadges(p, ctx){
   const necesitaReforma = (ctx.ref_tip && ctx.ref_tip !== 'no');
   const sinAscensor = String(ctx.asc||'Sí').toLowerCase()==='no';
   const budget = prospectBudget(p);
-  if(necesitaReforma && wantsNoReform(p)){ warns.push({icon:'🚧', title:'No quiere inmuebles con reforma'}); }
-  if(sinAscensor && wantsElevator(p)){ warns.push({icon:'🛗', title:'Requiere ascensor'}); }
-  if(budget>0 && Number(ctx.inv_total||0) > budget){ warns.push({icon:'💰', title:'Excede su presupuesto'}); }
+  if(necesitaReforma && wantsNoReform(p)){
+    warns.push({icon:'🚧', title:'No quiere inmuebles con reforma'});
+  }
+  if(sinAscensor && wantsElevator(p)){
+    warns.push({icon:'🛗', title:'Requiere ascensor'});
+  }
+  if(budget>0 && Number(ctx.inv_total||0) > budget){
+    warns.push({icon:'💰', title:'Excede su presupuesto'});
+  }
   return warns;
 }
 
@@ -459,28 +476,31 @@ function suggestProspects(ctx){
 
   if(!list.length){ return; }
 
-  const wantTipo = fold(ctx.tipo);
-  const wantLoc  = fold(ctx.loc);
-  const seen=new Set();
+  const wantTipo = fold(ctx.tipo || '');
+  const wantLoc  = fold(ctx.loc || '');
 
   const brutaOK=[], netaOK=[], flujoOK=[];
+  const added=new Set();
 
   list.forEach(p=>{
     if(!isSearching(p)) return;
-    if(fold(p.pref_tipo)!==wantTipo) return;
-    const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
+
+    const pTipo = fold(p.pref_tipo ?? p.tipo_pref ?? p.tipo ?? '');
+    if(!pTipo || pTipo!==wantTipo) return;
+
+    let locs=[];
+    if(Array.isArray(p.locs)) locs = p.locs.map(fold);
+    else locs = String(p.locs_text ?? p.localidades ?? '').split(',').map(fold).filter(Boolean);
     if(!locs.includes(wantLoc)) return;
 
-    const main=(p.obj_main||'bruta').toLowerCase();
-    const objB = parseEs(p.obj_bruta||0);
-    const objN = parseEs(p.obj_neta||0);
-    const objFmes = parseMoney(p.obj_flujo||0);
-    const objFano = objFmes>0 ? objFmes*12 : 0;
+    const objB = numES(p.obj_bruta);
+    const objN = numES(p.obj_neta);
+    const objFmes = numES(p.obj_flujo);
+    const objFano = objFmes>0? objFmes*12 : 0;
 
-    // Solo en la columna de su KPI principal y si tiene objetivo (>0) y el activo lo cumple (>=)
-    if(main==='bruta' && objB>0 && Number(ctx.bruta)>=objB){ brutaOK.push(p); }
-    if(main==='neta'  && objN>0 && Number(ctx.neta)>=objN){  netaOK.push(p);  }
-    if(main==='flujo' && objFano>0 && Number(ctx.flujo)>=objFano){ flujoOK.push(p); }
+    if(objB>0 && Number(ctx.bruta)>=objB) brutaOK.push(p);
+    if(objN>0 && Number(ctx.neta) >=objN) netaOK.push(p);
+    if(objFano>0 && Number(ctx.flujo)>=objFano) flujoOK.push(p);
   });
 
   const chip = (p, warns)=>{
@@ -490,25 +510,25 @@ function suggestProspects(ctx){
     span.appendChild(name);
     warns.forEach(w=>{
       const b=document.createElement('span'); b.className='badge-warn'; b.title=w.title;
-      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.2"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.6" stroke-linecap="round"/></svg>' + w.icon;
+      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.2"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.6" stroke-linecap="round"/></svg>'+w.icon;
       span.appendChild(b);
     });
     return span;
   };
 
-  const render = (arr, el)=>{
-    if(!arr.length){ el.textContent='—'; return; }
+  function render(listArr, el){
+    if(!listArr.length){ el.textContent='—'; return; }
     el.innerHTML='';
-    arr.forEach(p=>{
+    listArr.forEach(p=>{
       const warns = warnBadges(p, ctx);
       el.appendChild(chip(p, warns));
-      const key=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
-      if(!seen.has(key)){ seen.add(key);
+      const key = p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
+      if(!added.has(key)){ added.add(key);
         const opt=document.createElement('option'); opt.value=key; opt.textContent=p.nombre||'-';
         asignSel.appendChild(opt);
       }
     });
-  };
+  }
 
   render(brutaOK, mB);
   render(netaOK,  mN);
@@ -583,7 +603,7 @@ function preloadIfAny(){
   calc();
 }
 
-/* ===== PDF rápido (opcional) ===== */
+/* ===== PDF rápido (opcional, sin template strings) ===== */
 function quickPDFfrom(e){
   const fecha=new Date(e.ts||Date.now()).toLocaleString('es-ES');
   const htmlParts = [
