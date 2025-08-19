@@ -6,49 +6,49 @@
 <title>Unihouser — Evaluaciones</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-/* ===== Ajustes locales coherentes con Evaluar/Dashboard ===== */
-.kpis{display:grid;gap:10px;grid-template-columns:repeat(4,1fr)}
+/* Overlay + Drawer (coherente con Evaluar/Dashboard) */
+.uh-overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
+.uh-overlay.open{display:block}
+.uh-drawer{position:fixed;top:0;right:-520px;height:100%;width:520px;max-width:100%;background:#fff;
+border-left:1px solid #e5e7eb;box-shadow:0 10px 24px rgba(0,0,0,.25);transition:right .2s ease;z-index:90}
+.uh-drawer.open{right:0}
+.uh-d-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #eef2f7}
+.uh-d-body{padding:16px 16px 24px;overflow:auto;height:calc(100% - 60px)}
+.uh-meta{font-size:12px;color:#667085;margin-bottom:12px}
+
 .kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
 .kpi .lab{font-size:12px;color:#667085}.kpi .val{font-weight:800;font-size:20px}
+.kpis{display:grid;gap:10px;grid-template-columns:repeat(4,1fr)}
 
-.filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
-@media(max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
+.pill{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#f1f5f9;font-size:12px}
 
 table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
 .table th,.table td{padding:10px 12px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px;white-space:nowrap}
 .table th{background:#f8fafc;color:#111827;cursor:pointer}
 .table tr:last-child td{border-bottom:none}
 .table tr{cursor:pointer}
-.table .col-actions{width:92px;text-align:center}
-.table td.col-actions{padding:8px}
 
-.pill{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#f1f5f9;font-size:12px}
-
-.actions-icons{display:flex;gap:8px;justify-content:center}
-.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
+.actions-cell{display:flex;gap:6px;align-items:center}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;cursor:pointer}
 .iconbtn:hover{background:#f8fafc}
-.iconbtn svg{width:18px;height:18px;color:#111}
+.icon{width:18px;height:18px;display:block}
+
+.btn.sm{padding:8px 10px;font-size:13px;border-radius:10px}
 
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
 .toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
 
-/* ===== Drawer ===== */
-.uh-overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
-.uh-overlay.open{display:block}
-.uh-drawer{position:fixed;top:0;right:-520px;height:100%;width:520px;max-width:100%;background:#fff;border-left:1px solid #e5e7eb;box-shadow:0 10px 24px rgba(0,0,0,.25);transition:right .2s ease;z-index:90}
-.uh-drawer.open{right:0}
-.uh-d-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #eef2f7}
-.uh-d-body{padding:16px 16px 24px;overflow:auto;height:calc(100% - 60px)}
-.uh-meta{font-size:12px;color:#667085;margin-bottom:8px}
-.detail-grid{display:grid;grid-template-columns:1fr auto;gap:8px}
-.krow{display:contents}
-.krow .k{color:#667085}
-.krow .v{font-weight:700;justify-self:end}
-.sep{height:1px;background:#eef2f7;margin:10px 0}
-.subttl{margin:14px 0 8px;font-weight:700}
+/* Drawer detail list */
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin-bottom:8px}
+.kv .k{color:#667085;font-size:12px}
+.kv .v{font-weight:700}
+.uh-list-pros{display:grid;gap:6px}
+.uh-list-pros label{display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid #eef2f7;border-radius:10px;background:#fff}
+.uh-list-pros input{width:16px;height:16px}
 
-.uh-list-pros label{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #f3f4f6}
+.filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
+@media(max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -66,55 +66,55 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 </header>
 
 <main class="container">
-<section class="card">
-  <h2>Evaluaciones</h2>
+  <section class="card">
+    <h2>Evaluaciones</h2>
 
-  <div class="kpis" style="margin-top:6px">
-    <div class="kpi"><div class="lab">Total evaluaciones</div><div class="val" id="k_total">0</div></div>
-    <div class="kpi"><div class="lab">Asignadas</div><div class="val" id="k_asig">0</div></div>
-    <div class="kpi"><div class="lab">Bruta media</div><div class="val" id="k_bruta">0,0 %</div></div>
-    <div class="kpi"><div class="lab">Neta media</div><div class="val" id="k_neta">0,0 %</div></div>
-  </div>
+    <div class="kpis" style="margin-top:6px">
+      <div class="kpi"><div class="lab">Total evaluaciones</div><div class="val" id="k_total">0</div></div>
+      <div class="kpi"><div class="lab">Asignadas</div><div class="val" id="k_asig">0</div></div>
+      <div class="kpi"><div class="lab">Bruta media</div><div class="val" id="k_bruta">0,0 %</div></div>
+      <div class="kpi"><div class="lab">Neta media</div><div class="val" id="k_neta">0,0 %</div></div>
+    </div>
 
-  <div class="card" style="margin-top:12px">
-    <h3 style="margin:0 0 6px">Filtros</h3>
-    <div class="filters">
-      <div class="row">
-        <div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad o calle"></div>
-        <div class="field"><label>Tipo</label>
-          <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
+    <div class="card" style="margin-top:12px">
+      <h3 style="margin:0 0 6px">Filtros</h3>
+      <div class="filters">
+        <div class="row">
+          <div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad o calle"></div>
+          <div class="field"><label>Tipo</label>
+            <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
+          </div>
+          <div class="field"><label>Desde</label><input id="f_desde" type="date"></div>
+          <div class="field"><label>Hasta</label><input id="f_hasta" type="date"></div>
+          <div class="field" style="align-self:end"><button class="btn" id="b_limpiar">Limpiar</button></div>
+          <div class="field" style="align-self:end"><button class="btn primary" id="b_filtrar">Filtrar</button></div>
+          <div class="field" style="align-self:end"><button class="btn" id="b_export">Exportar CSV</button></div>
         </div>
-        <div class="field"><label>Desde</label><input id="f_desde" type="date"></div>
-        <div class="field"><label>Hasta</label><input id="f_hasta" type="date"></div>
-        <div class="field" style="align-self:end"><button class="btn" id="b_limpiar">Limpiar</button></div>
-        <div class="field" style="align-self:end"><button class="btn primary" id="b_filtrar">Filtrar</button></div>
-        <div class="field" style="align-self:end"><button class="btn" id="b_export">Exportar CSV</button></div>
       </div>
     </div>
-  </div>
 
-  <div class="card" style="margin-top:12px">
-    <table class="table" id="tbl">
-      <thead>
-        <tr>
-          <th data-k="ts">Fecha</th>
-          <th data-k="loc">Localidad</th>
-          <th data-k="calle">Calle</th>
-          <th data-k="tipo">Tipo</th>
-          <th data-k="precio" style="text-align:right">Precio</th>
-          <th data-k="alq" style="text-align:right">Alquiler</th>
-          <th data-k="kpi_bruta" style="text-align:right">Bruta %</th>
-          <th data-k="kpi_neta" style="text-align:right">Neta %</th>
-          <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
-          <th data-k="pmax" style="text-align:right">P. máx</th>
-          <th data-k="asig" style="text-align:center">Asignados</th>
-          <th class="col-actions">Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-</section>
+    <div class="card" style="margin-top:12px">
+      <table class="table" id="tbl">
+        <thead>
+          <tr>
+            <th data-k="ts">Fecha</th>
+            <th data-k="loc">Localidad</th>
+            <th data-k="calle">Calle</th>
+            <th data-k="tipo">Tipo</th>
+            <th data-k="precio" style="text-align:right">Precio</th>
+            <th data-k="alq" style="text-align:right">Alquiler</th>
+            <th data-k="kpi_bruta" style="text-align:right">Bruta %</th>
+            <th data-k="kpi_neta" style="text-align:right">Neta %</th>
+            <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
+            <th data-k="pmax" style="text-align:right">P. máx</th>
+            <th data-k="asig" style="text-align:center">Asignados</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
 </main>
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
@@ -128,23 +128,20 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
   <div class="uh-d-body">
     <div class="uh-meta" id="d_fecha">—</div>
 
-    <div class="detail-grid" id="detGrid">
-      <div class="krow"><div class="k">Localidad</div><div class="v" id="d_loc">—</div></div>
-      <div class="krow"><div class="k">Calle</div><div class="v" id="d_calle">—</div></div>
-      <div class="krow"><div class="k">Tipo</div><div class="v" id="d_tipo">—</div></div>
-      <div class="krow"><div class="k">Precio</div><div class="v" id="d_precio">—</div></div>
-      <div class="krow"><div class="k">Alquiler</div><div class="v" id="d_alq">—</div></div>
-      <div class="krow"><div class="k">Bruta</div><div class="v" id="d_bruta">—</div></div>
-      <div class="krow"><div class="k">Neta</div><div class="v" id="d_neta">—</div></div>
-      <div class="krow"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
-      <div class="krow"><div class="k">Precio máx.</div><div class="v" id="d_pmax">—</div></div>
-      <div class="krow"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
-      <div class="krow"><div class="k">URL</div><div class="v" id="d_url">—</div></div>
-    </div>
+    <div class="kv"><div class="k">Localidad</div><div class="v" id="d_loc">—</div></div>
+    <div class="kv"><div class="k">Calle</div><div class="v" id="d_calle">—</div></div>
+    <div class="kv"><div class="k">Tipo</div><div class="v" id="d_tipo">—</div></div>
 
-    <div class="sep"></div>
+    <div class="kv"><div class="k">Precio</div><div class="v" id="d_precio">—</div></div>
+    <div class="kv"><div class="k">Alquiler</div><div class="v" id="d_alq">—</div></div>
+    <div class="kv"><div class="k">Bruta</div><div class="v" id="d_bruta">—</div></div>
+    <div class="kv"><div class="k">Neta</div><div class="v" id="d_neta">—</div></div>
+    <div class="kv"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
+    <div class="kv"><div class="k">Precio máx.</div><div class="v" id="d_pmax">—</div></div>
+    <div class="kv"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
+    <div class="kv"><div class="k">URL</div><div class="v" id="d_url">—</div></div>
 
-    <div class="subttl">Asignar a prospects</div>
+    <h3 style="margin:14px 0 8px">Asignar a prospects</h3>
     <div id="p_list" class="uh-list-pros">—</div>
 
     <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
@@ -169,13 +166,21 @@ const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
 const e0 = v=>fmtE0.format(Number(v||0));
 const parseNum = v=>Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
 const esc = s=>(s??'').toString().replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-function toast(msg,kind){ const w=id('toasts'); const el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg; w.appendChild(el); setTimeout(()=>el.style.opacity='0',1600); setTimeout(()=>{try{w.removeChild(el)}catch(_){}} ,2200); }
+function toast(msg,kind){
+  const wrap=id('toasts'); if(!wrap) return;
+  const el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
+  wrap.appendChild(el); setTimeout(()=>el.style.opacity='0',1600);
+  setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
+}
 function toPct(raw){ let v=Number(raw||0); if(v>0 && v<=1) v*=100; while(v>=100) v/=10; return v; }
 
-const Store={ get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},
-               set evals(v){localStorage.setItem('evals',JSON.stringify(v))},
-               get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}},
-               set pros(v){localStorage.setItem('pros',JSON.stringify(v))} };
+/* ===== Store ===== */
+const Store={
+  get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},
+  set evals(v){localStorage.setItem('evals',JSON.stringify(v))},
+  get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}},
+  set pros(v){localStorage.setItem('pros',JSON.stringify(v))}
+};
 
 /* ===== Estado ===== */
 let data=[], view=[], sortKey='ts', sortAsc=true, openId=null;
@@ -183,7 +188,8 @@ let data=[], view=[], sortKey='ts', sortAsc=true, openId=null;
 /* ===== Carga y KPIs ===== */
 function load(){
   data=(Store.evals||[]).map(e=>({...e, asig:(e.prospect_ids||[]).length}));
-  applyFilters(); kpis();
+  applyFilters();
+  kpis();
 }
 function kpis(){
   id('k_total').textContent = data.length;
@@ -207,7 +213,10 @@ function applyFilters(){
   sort(); render();
 }
 function sort(){
-  view.sort((a,b)=>{ const va=get(a,sortKey), vb=get(b,sortKey); return (va<vb? -1: va>vb? 1: 0) * (sortAsc?1:-1); });
+  view.sort((a,b)=>{
+    const va=get(a,sortKey), vb=get(b,sortKey);
+    return (va<vb? -1: va>vb? 1: 0) * (sortAsc?1:-1);
+  });
 }
 function get(o,k){
   if(k==='ts') return new Date(o.ts||o.id?.slice(3)).getTime();
@@ -228,7 +237,7 @@ function render(){
   view.forEach(e=>{
     const tr=document.createElement('tr'); tr.dataset.id=e.id;
     const f=new Date(e.ts||e.id?.slice(3)).toLocaleDateString('es-ES');
-    const rowHtml = `
+    tr.innerHTML=`
       <td>${f}</td>
       <td>${esc(e.loc||'')}</td>
       <td>${esc(e.calle||'')}</td>
@@ -240,17 +249,16 @@ function render(){
       <td style="text-align:right">${e0(e.kpi_flujo)}</td>
       <td style="text-align:right">${e0(e.pmax)}</td>
       <td style="text-align:center">${(e.prospect_ids||[]).length}</td>
-      <td class="col-actions">
-        <div class="actions-icons">
-          <button class="iconbtn" data-act="ver" title="Ver">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M12 5c5 0 9 7 9 7s-4 7-9 7-9-7-9-7 4-7 9-7Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+      <td>
+        <div class="actions-cell">
+          <button class="iconbtn" title="Ver" data-act="ver" aria-label="Ver">
+            <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 5c5 0 9 4 10 7-1 3-5 7-10 7S3 15 2 12c1-3 5-7 10-7Z" stroke="#111827" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#111827" stroke-width="1.5"/></svg>
           </button>
-          <button class="iconbtn" data-act="del" title="Borrar">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5h6v2m-8 0 1 12h8l1-12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <button class="iconbtn" title="Borrar" data-act="del" aria-label="Borrar">
+            <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12" stroke="#111827" stroke-width="1.5" stroke-linecap="round"/></svg>
           </button>
         </div>
       </td>`;
-    tr.innerHTML = rowHtml;
     tb.appendChild(tr);
   });
 }
@@ -271,7 +279,7 @@ function openDrawer(idEv){
   id('d_flujo').textContent =e0(e.kpi_flujo);
   id('d_pmax').textContent =e0(e.pmax);
   id('d_inv').textContent =e0(e.inv_total);
-  id('d_url').innerHTML =e.url? '<a href="'+e.url+'" target="_blank" rel="noopener">Abrir</a>':'—';
+  id('d_url').innerHTML =e.url? <a href="${e.url}" target="_blank" rel="noopener">Abrir anuncio</a>:'—';
 
   const wrap=id('p_list'); wrap.innerHTML='';
   const pros=Store.pros||[]; const set=new Set(e.prospect_ids||[]);
@@ -282,7 +290,7 @@ function openDrawer(idEv){
       const cb=document.createElement('input'); cb.type='checkbox';
       cb.value=p.id||p.email||p.nombre; cb.checked=set.has(cb.value);
       const sp=document.createElement('span');
-      sp.textContent=(p.nombre||'—')+' · '+(p.pref_tipo||'-')+' · '+(p.locs_text||'');
+      sp.textContent=${p.nombre||'—'} · ${p.pref_tipo||'-'} · ${(p.locs_text||'')};
       row.appendChild(cb); row.appendChild(sp);
       wrap.appendChild(row);
     });
@@ -295,40 +303,53 @@ function openDrawer(idEv){
   id('d_pdf').onclick = ()=>quickPDF(e.id);
   id('d_editar').onclick = ()=>goEvaluar(e.id);
 }
-function closeDrawer(){ id('uhOverlay').classList.remove('open'); id('uhDrawer').classList.remove('open'); openId=null; }
+function closeDrawer(){
+  id('uhOverlay').classList.remove('open');
+  id('uhDrawer').classList.remove('open');
+  openId=null;
+}
 function saveAssign(){
   if(!openId) return;
   const list=Store.evals||[];
   const idx=list.findIndex(x=>x.id===openId); if(idx<0) return;
   const choices=[...id('p_list').querySelectorAll('input[type=checkbox]')];
   list[idx].prospect_ids = choices.filter(c=>c.checked).map(c=>c.value);
-  Store.evals=list; toast('Asignación guardada','ok'); closeDrawer(); load();
+  Store.evals=list;
+  toast('Asignación guardada','ok');
+  closeDrawer();
+  load();
 }
 
 /* ===== PDF simple (sin scripts) ===== */
 function quickPDF(idEv){
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e){toast('No encontrado','bad');return;}
   const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — ${esc(e.loc||'')}</title>
-  <style>body{font-family:Inter,Arial;color:#101828;margin:24px}h1{font-size:22px;margin:0 0 6px}h2{font-size:16px;margin:16px 0 8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.box{border:1px solid #e5e7eb;border-radius:10px;padding:10px}.lab{font-size:12px;color:#667085}.val{font-weight:800}.foot{margin-top:16px;font-size:12px;color:#667085;text-align:center}</style></head><body>
-  <h1>Informe BuyBox — Unihouser</h1><div class="lab">${fecha}</div>
-  <h2>Resumen financiero</h2><div class="grid">
-    <div class="box"><div class="lab">Bruta</div><div class="val">${fmtN1.format(toPct(e.kpi_bruta))} %</div></div>
-    <div class="box"><div class="lab">Neta</div><div class="val">${fmtN1.format(toPct(e.kpi_neta))} %</div></div>
-    <div class="box"><div class="lab">Flujo anual</div><div class="val">${fmtE0.format(Number(parseNum(e.kpi_flujo)))}</div></div>
-    <div class="box"><div class="lab">P. máx compra</div><div class="val">${fmtE0.format(e.pmax||0)}</div></div>
-  </div>
-  <h2>Datos del inmueble</h2><div class="grid">
-    <div class="box"><div class="lab">Localidad</div><div class="val">${esc(e.loc||'-')}</div></div>
-    <div class="box"><div class="lab">Calle</div><div class="val">${esc(e.calle||'-')}</div></div>
-    <div class="box"><div class="lab">Tipo</div><div class="val">${esc(e.tipo||'-')}</div></div>
-    <div class="box"><div class="lab">Alquiler</div><div class="val">${fmtE0.format(e.alq||0)}</div></div>
-    <div class="box"><div class="lab">Precio</div><div class="val">${fmtE0.format(e.precio||0)}</div></div>
-    <div class="box"><div class="lab">Inversión total</div><div class="val">${fmtE0.format(e.inv_total||0)}</div></div>
-  </div>
-  <div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></body></html>`;
+  const html = [
+'<!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — ',
+e.loc||'', '</title><style>body{font-family:Inter,Arial;color:#101828;margin:24px}',
+'h1{font-size:22px;margin:0 0 6px}h2{font-size:16px;margin:16px 0 8px}',
+'.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}',
+'.box{border:1px solid #e5e7eb;border-radius:10px;padding:10px}',
+'.lab{font-size:12px;color:#667085}.val{font-weight:800}',
+'.foot{margin-top:16px;font-size:12px;color:#667085;text-align:center}</style></head><body>',
+'<h1>Informe BuyBox — Unihouser</h1><div class="lab">',fecha,'</div>',
+'<h2>Resumen financiero</h2><div class="grid">',
+'<div class="box"><div class="lab">Bruta</div><div class="val">',fmtN1.format(toPct(e.kpi_bruta)),' %</div></div>',
+'<div class="box"><div class="lab">Neta</div><div class="val">',fmtN1.format(toPct(e.kpi_neta)),' %</div></div>',
+'<div class="box"><div class="lab">Flujo anual</div><div class="val">',fmtE0.format(parseNum(e.kpi_flujo)),'</div></div>',
+'<div class="box"><div class="lab">P. máx compra</div><div class="val">',fmtE0.format(e.pmax||0),'</div></div></div>',
+'<h2>Datos del inmueble</h2><div class="grid">',
+'<div class="box"><div class="lab">Localidad</div><div class="val">',e.loc||'-','</div></div>',
+'<div class="box"><div class="lab">Calle</div><div class="val">',e.calle||'-','</div></div>',
+'<div class="box"><div class="lab">Tipo</div><div class="val">',e.tipo||'-','</div></div>',
+'<div class="box"><div class="lab">Alquiler</div><div class="val">',fmtE0.format(e.alq||0),'</div></div>',
+'<div class="box"><div class="lab">Precio</div><div class="val">',fmtE0.format(e.precio||0),'</div></div>',
+'<div class="box"><div class="lab">Inversión total</div><div class="val">',fmtE0.format(e.inv_total||0),'</div></div></div>',
+'<div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></body></html>'
+].join('');
   const w=window.open('','_blank'); w.document.open(); w.document.write(html); w.document.close();
-  const tryPrint=()=>{ try{w.focus(); w.print();}catch(_){}}; w.onload=tryPrint; setTimeout(tryPrint,600);
+  const tryPrint=()=>{ try{ w.focus(); w.print(); }catch(_){ } };
+  w.onload = tryPrint; setTimeout(tryPrint, 600);
 }
 
 /* ===== Export CSV ===== */
@@ -337,16 +358,18 @@ function toCSV(rows){
   const lines=[headers.join(';')];
   rows.forEach(e=>{
     const f=new Date(e.ts||e.id?.slice(3)).toLocaleDateString('es-ES');
-    lines.push([e.id,f,safe(e.loc),safe(e.calle),safe(e.tipo),
-      num(e.precio),num(e.itp),num(e.notaria),num(e.psi),num(e.reforma),
-      num(e.comu),num(e.ibi),num(e.hogar),num(e.impago),num(e.gestion),
-      num(e.alq),pct(toPct(e.kpi_bruta)),pct(toPct(e.kpi_neta)),num(e.kpi_flujo),
-      num(e.pmax),num(e.inv_total),(e.prospect_ids||[]).length,safe(e.url)].join(';'));
+    lines.push([
+      e.id, f, safe(e.loc), safe(e.calle), safe(e.tipo),
+      n(e.precio), n(e.itp), n(e.notaria), n(e.psi), n(e.reforma),
+      n(e.comu), n(e.ibi), n(e.hogar), n(e.impago), n(e.gestion),
+      n(e.alq), p(toPct(e.kpi_bruta)), p(toPct(e.kpi_neta)), n(e.kpi_flujo),
+      n(e.pmax), n(e.inv_total), (e.prospect_ids||[]).length, safe(e.url)
+    ].join(';'));
   });
   return lines.join('\n');
 }
-const num=v=>fmtN0.format(Number(parseNum(v)||v||0));
-const pct=v=>fmtN1.format(Number(v||0));
+const n=v=>fmtN0.format(Number(parseNum(v)||v||0));
+const p=v=>fmtN1.format(Number(v||0));
 const safe=s=>(s??'').toString().replace(/;/g,',');
 
 function download(name,content){
@@ -377,9 +400,9 @@ function bindSort(){
   });
 }
 
-/* ===== Abrir en Evaluar (persisto id) ===== */
+/* ===== Abrir en Evaluar (persisto id usando load_eval) ===== */
 function goEvaluar(idEv){
-  localStorage.setItem('_load_eval_', idEv);
+  localStorage.setItem('load_eval', idEv);
   location.href = 'evaluar.html';
 }
 
