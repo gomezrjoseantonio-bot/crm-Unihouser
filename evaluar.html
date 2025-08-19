@@ -411,7 +411,7 @@ function drawChart(real, objetivo){
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects ===== */
+/* ===== Matching prospects (soporta obj_tipo/obj_raw y obj_main/obj_*) ===== */
 function fold(s){
   return (s||'').toString()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -423,8 +423,7 @@ function splitLocs(text){
 function toPct(x){
   let v = Number(x||0);
   if(!Number.isFinite(v)) v=0;
-  // si vino en 0.1 → 10%
-  if(v>0 && v<=1) v = v*100;
+  if(v>0 && v<=1) v = v*100; // admite 0.1 → 10%
   return v;
 }
 function isSearching(p){
@@ -432,8 +431,10 @@ function isSearching(p){
   return /(busq|busc|^bus)/.test(f); // BUSQUEDA, BUSCANDO, EN BUSQUEDA…
 }
 function prospectBudget(p){
-  const raw = String(p.presupuesto_max ?? p.presupuesto ?? p.budget_max ?? p.budget ?? '')
-    .replace(/[^\d]/g,'');
+  // admite varios nombres de campo
+  const raw = String(
+    p.max_compra ?? p.presupuesto_max ?? p.presupuesto ?? p.budget_max ?? p.budget ?? ''
+  ).replace(/[^\d]/g,'');
   return Number(raw||0);
 }
 function warnBadges(p, ctx){
@@ -472,10 +473,13 @@ function suggestProspects(ctx){
     if(fold(p.pref_tipo)!==wantTipo) return;
     if(!matchLoc(wantLoc, p)) return;
 
-    const main = fold(p.obj_main || ''); // 'bruta' | 'neta' | 'flujo'
-    const objB = toPct(Number(p.obj_bruta||0));
-    const objN = toPct(Number(p.obj_neta||0));
-    const objF_m = Number(p.obj_flujo||0); // €/mes
+    const main = fold(p.obj_main ?? p.obj_tipo ?? ''); // bruta|neta|flujo
+
+    // Objetivos soportando ambos esquemas
+    const rawPct = Number(p.obj_raw ?? 0);
+    const objB = toPct( p.obj_bruta ?? (main==='bruta' ? rawPct : 0) );
+    const objN = toPct( p.obj_neta  ?? (main==='neta'  ? rawPct : 0) );
+    const objF_m = Number( p.obj_flujo ?? (main==='flujo' ? rawPct : 0) ); // €/mes
     const objF_a = objF_m>0 ? objF_m*12 : 0;
 
     if(main==='bruta' && objB>0 && Number(ctx.bruta)>=objB) brutaOK.push(p);
