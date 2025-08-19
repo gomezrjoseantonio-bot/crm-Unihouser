@@ -6,7 +6,34 @@
 <title>Unihouser — Evaluaciones</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-/* Ajustes locales coherentes con Evaluar/Dashboard */
+/* ===== Ajustes locales coherentes con Evaluar/Dashboard ===== */
+.kpis{display:grid;gap:10px;grid-template-columns:repeat(4,1fr)}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
+.kpi .lab{font-size:12px;color:#667085}.kpi .val{font-weight:800;font-size:20px}
+
+.filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
+@media(max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
+
+table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
+.table th,.table td{padding:10px 12px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px;white-space:nowrap}
+.table th{background:#f8fafc;color:#111827;cursor:pointer}
+.table tr:last-child td{border-bottom:none}
+.table tr{cursor:pointer}
+.table .col-actions{width:92px;text-align:center}
+.table td.col-actions{padding:8px}
+
+.pill{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#f1f5f9;font-size:12px}
+
+.actions-icons{display:flex;gap:8px;justify-content:center}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
+.iconbtn:hover{background:#f8fafc}
+.iconbtn svg{width:18px;height:18px;color:#111}
+
+.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
+.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
+.toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
+
+/* ===== Drawer ===== */
 .uh-overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
 .uh-overlay.open{display:block}
 .uh-drawer{position:fixed;top:0;right:-520px;height:100%;width:520px;max-width:100%;background:#fff;border-left:1px solid #e5e7eb;box-shadow:0 10px 24px rgba(0,0,0,.25);transition:right .2s ease;z-index:90}
@@ -14,27 +41,14 @@
 .uh-d-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #eef2f7}
 .uh-d-body{padding:16px 16px 24px;overflow:auto;height:calc(100% - 60px)}
 .uh-meta{font-size:12px;color:#667085;margin-bottom:8px}
-.uh-kv{display:grid;grid-template-columns:1fr auto;gap:8px;border-bottom:1px dashed #eef2f7;padding:8px 0}
-.uh-kv .k{color:#667085}.uh-kv .v{font-weight:700}
+.detail-grid{display:grid;grid-template-columns:1fr auto;gap:8px}
+.krow{display:contents}
+.krow .k{color:#667085}
+.krow .v{font-weight:700;justify-self:end}
+.sep{height:1px;background:#eef2f7;margin:10px 0}
+.subttl{margin:14px 0 8px;font-weight:700}
+
 .uh-list-pros label{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #f3f4f6}
-.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
-.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
-.toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
-.kpis{display:grid;gap:10px;grid-template-columns:repeat(4,1fr)}
-.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
-.kpi .lab{font-size:12px;color:#667085}.kpi .val{font-weight:800;font-size:20px}
-table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
-.table th,.table td{padding:10px 12px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px;white-space:nowrap}
-.table th{background:#f8fafc;color:#111827;cursor:pointer}
-.table tr:last-child td{border-bottom:none}
-.table tr{cursor:pointer}
-.btn.sm{padding:8px 10px;font-size:13px;border-radius:10px}
-.pill{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#f1f5f9;font-size:12px}
-.actions-icons{display:flex;gap:6px}
-.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
-.iconbtn svg{width:18px;height:18px;opacity:.85}
-.filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
-@media(max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -94,7 +108,7 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
           <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
           <th data-k="pmax" style="text-align:right">P. máx</th>
           <th data-k="asig" style="text-align:center">Asignados</th>
-          <th>Acciones</th>
+          <th class="col-actions">Acciones</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -114,20 +128,23 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
   <div class="uh-d-body">
     <div class="uh-meta" id="d_fecha">—</div>
 
-    <div class="uh-kv"><div class="k">Localidad</div><div class="v" id="d_loc">—</div></div>
-    <div class="uh-kv"><div class="k">Calle</div><div class="v" id="d_calle">—</div></div>
-    <div class="uh-kv"><div class="k">Tipo</div><div class="v" id="d_tipo">—</div></div>
+    <div class="detail-grid" id="detGrid">
+      <div class="krow"><div class="k">Localidad</div><div class="v" id="d_loc">—</div></div>
+      <div class="krow"><div class="k">Calle</div><div class="v" id="d_calle">—</div></div>
+      <div class="krow"><div class="k">Tipo</div><div class="v" id="d_tipo">—</div></div>
+      <div class="krow"><div class="k">Precio</div><div class="v" id="d_precio">—</div></div>
+      <div class="krow"><div class="k">Alquiler</div><div class="v" id="d_alq">—</div></div>
+      <div class="krow"><div class="k">Bruta</div><div class="v" id="d_bruta">—</div></div>
+      <div class="krow"><div class="k">Neta</div><div class="v" id="d_neta">—</div></div>
+      <div class="krow"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
+      <div class="krow"><div class="k">Precio máx.</div><div class="v" id="d_pmax">—</div></div>
+      <div class="krow"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
+      <div class="krow"><div class="k">URL</div><div class="v" id="d_url">—</div></div>
+    </div>
 
-    <div class="uh-kv"><div class="k">Precio</div><div class="v" id="d_precio">—</div></div>
-    <div class="uh-kv"><div class="k">Alquiler</div><div class="v" id="d_alq">—</div></div>
-    <div class="uh-kv"><div class="k">Bruta</div><div class="v" id="d_bruta">—</div></div>
-    <div class="uh-kv"><div class="k">Neta</div><div class="v" id="d_neta">—</div></div>
-    <div class="uh-kv"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
-    <div class="uh-kv"><div class="k">Precio máx.</div><div class="v" id="d_pmax">—</div></div>
-    <div class="uh-kv"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
-    <div class="uh-kv"><div class="k">URL</div><div class="v" id="d_url">—</div></div>
+    <div class="sep"></div>
 
-    <h3 style="margin:14px 0 8px">Asignar a prospects</h3>
+    <div class="subttl">Asignar a prospects</div>
     <div id="p_list" class="uh-list-pros">—</div>
 
     <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
@@ -223,13 +240,13 @@ function render(){
       <td style="text-align:right">${e0(e.kpi_flujo)}</td>
       <td style="text-align:right">${e0(e.pmax)}</td>
       <td style="text-align:center">${(e.prospect_ids||[]).length}</td>
-      <td>
+      <td class="col-actions">
         <div class="actions-icons">
           <button class="iconbtn" data-act="ver" title="Ver">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M12 5c5 0 9 7 9 7s-4 7-9 7-9-7-9-7 4-7 9-7Z" stroke="#111" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#111" stroke-width="1.5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 5c5 0 9 7 9 7s-4 7-9 7-9-7-9-7 4-7 9-7Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
           </button>
           <button class="iconbtn" data-act="del" title="Borrar">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5h6v2m-8 0 1 12h8l1-12" stroke="#111" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5h6v2m-8 0 1 12h8l1-12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           </button>
         </div>
       </td>`;
@@ -288,7 +305,7 @@ function saveAssign(){
   Store.evals=list; toast('Asignación guardada','ok'); closeDrawer(); load();
 }
 
-/* ===== PDF simple ===== */
+/* ===== PDF simple (sin scripts) ===== */
 function quickPDF(idEv){
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e){toast('No encontrado','bad');return;}
   const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
