@@ -411,31 +411,48 @@ function drawChart(real, objetivo){
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects (corrige "BUSQUEDA") ===== */
-function fold(s){ return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
-function splitLocs(text){ return (text||'').split(/[,;|·]/).map(fold).filter(Boolean); }
-function num(x){ const n=Number(x); return Number.isFinite(n)? n : 0; }
+/* ===== Matching prospects ===== */
+function fold(s){
+  return (s||'').toString()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().trim();
+}
+function splitLocs(text){
+  return (text||'').split(/[,;|·]/).map(fold).filter(Boolean);
+}
+function toPct(x){
+  let v = Number(x||0);
+  if(!Number.isFinite(v)) v=0;
+  // si vino en 0.1 → 10%
+  if(v>0 && v<=1) v = v*100;
+  return v;
+}
+function isSearching(p){
+  const f=fold(p.fase);
+  return /(busq|busc|^bus)/.test(f); // BUSQUEDA, BUSCANDO, EN BUSQUEDA…
+}
 function prospectBudget(p){
-  const a=num(String(p.max_compra||'').toString().replace(/[^\d]/g,''));
-  const b=num(String(p.budget||'').toString().replace(/[^\d]/g,''));
-  return Math.max(a,b);
+  const raw = String(p.presupuesto_max ?? p.presupuesto ?? p.budget_max ?? p.budget ?? '')
+    .replace(/[^\d]/g,'');
+  return Number(raw||0);
 }
 function warnBadges(p, ctx){
   const warns=[];
   const assetNeedsReform = fold(ctx.ref_tip)!=='no';
   if(assetNeedsReform && fold(p.reforma)==='no'){ warns.push({title:'No quiere inmuebles con reforma', icon:'🚧'}); }
   const assetNoElevator = fold(ctx.asc)==='no';
-  if(assetNoElevator && fold(p.asc)==='si'){ warns.push({title:'Requiere ascensor', icon:'🛗'}); }
+  if(assetNoElevator && (fold(p.ascensor)==='si'||fold(p.asc)==='si')){ warns.push({title:'Requiere ascensor', icon:'🛗'}); }
   const budget = prospectBudget(p);
   if(budget>0 && Number(ctx.inv_total||0) > budget){ warns.push({title:'Excede su presupuesto', icon:'💰'}); }
   return warns;
 }
-function isSearching(p){
-  const f=fold(p.fase);
-  // Soporta BUSQUEDA, BUSCANDO, EN BUSQUEDA, etc.
-  return /(busq|busc|^bus)/.test(f);
+function matchLoc(wantLoc, p){
+  if(!wantLoc) return false;
+  const locs = splitLocs(p.locs_text);
+  if(locs.includes(wantLoc)) return true;
+  // tolera “langreo (centro)” vs “langreo”
+  return locs.some(l => l.includes(wantLoc) || wantLoc.includes(l));
 }
-
 function suggestProspects(ctx){
   const list=Store.pros||[];
   const mB=id('m_bruta'), mN=id('m_neta'), mF=id('m_flujo');
@@ -453,19 +470,17 @@ function suggestProspects(ctx){
   list.forEach(p=>{
     if(!isSearching(p)) return;
     if(fold(p.pref_tipo)!==wantTipo) return;
+    if(!matchLoc(wantLoc, p)) return;
 
-    const locs=splitLocs(p.locs_text);
-    if(!locs.includes(wantLoc)) return;
+    const main = fold(p.obj_main || ''); // 'bruta' | 'neta' | 'flujo'
+    const objB = toPct(Number(p.obj_bruta||0));
+    const objN = toPct(Number(p.obj_neta||0));
+    const objF_m = Number(p.obj_flujo||0); // €/mes
+    const objF_a = objF_m>0 ? objF_m*12 : 0;
 
-    const principal = fold(p.obj_tipo||p.obj_main||'');
-    const raw = num(p.obj_raw);
-
-    if(principal==='bruta' && raw>0 && Number(ctx.bruta) >= raw) brutaOK.push(p);
-    if(principal==='neta'  && raw>0 && Number(ctx.neta)  >= raw) netaOK.push(p);
-    if(principal==='flujo' && raw>0){
-      const objetivoAnual = raw*12; // raw en €/mes
-      if(Number(ctx.flujo) >= objetivoAnual) flujoOK.push(p);
-    }
+    if(main==='bruta' && objB>0 && Number(ctx.bruta)>=objB) brutaOK.push(p);
+    if(main==='neta'  && objN>0 && Number(ctx.neta) >=objN) netaOK.push(p);
+    if(main==='flujo' && objF_a>0 && Number(ctx.flujo)>=objF_a) flujoOK.push(p);
   });
 
   const chip = (p, warns)=>{
@@ -535,7 +550,7 @@ function limpiar(){
 /* ===== Preload desde Evaluaciones (solo si existe) ===== */
 function preloadIfAny(){
   const evId = localStorage.getItem('load_eval');
-  if(!evId) return;
+  if(!evId) return; // abre en blanco si no viene de Evaluaciones
   const e=(Store.evals||[]).find(x=>x.id===evId); if(!e) return;
 
   id('e_loc').value = e.loc || '';
