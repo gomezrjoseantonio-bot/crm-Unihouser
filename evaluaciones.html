@@ -14,6 +14,7 @@
 .uh-d-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #eef2f7}
 .uh-d-body{padding:16px 16px 24px;overflow:auto;height:calc(100% - 60px)}
 .uh-meta{font-size:12px;color:#667085;margin-bottom:12px}
+.divider{height:1px;background:#eef2f7;margin:12px 0}
 
 /* KPIs */
 .kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
@@ -38,9 +39,20 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin-bottom:8px}
 .kv .k{color:#667085;font-size:12px}
 .kv .v{font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* Prospects list */
 .uh-list-pros{display:grid;gap:6px}
 .uh-list-pros label{display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid #eef2f7;border-radius:10px;background:#fff}
 .uh-list-pros input{width:16px;height:16px}
+.pros-head{display:flex;align-items:center;justify-content:space-between;margin:8px 0}
+.small{font-size:12px;color:#667085}
+
+/* Badges de aviso */
+.badges{display:inline-flex;gap:6px;margin-left:6px}
+.badge-warn{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#b45309;background:#fff7ed;border:1px solid #fde68a;border-radius:999px;padding:2px 6px}
+.badge-warn .ico{width:12px;height:12px;display:inline-block}
 
 /* Filtros */
 .filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
@@ -129,20 +141,57 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
   <div class="uh-d-body">
     <div class="uh-meta" id="d_fecha">—</div>
 
-    <div class="kv"><div class="k">Localidad</div><div class="v" id="d_loc">—</div></div>
-    <div class="kv"><div class="k">Calle</div><div class="v" id="d_calle">—</div></div>
-    <div class="kv"><div class="k">Tipo</div><div class="v" id="d_tipo">—</div></div>
+    <!-- Resumen principal -->
+    <div class="grid2">
+      <div class="kv"><div class="k">Localidad</div><div class="v" id="d_loc">—</div></div>
+      <div class="kv"><div class="k">Calle</div><div class="v" id="d_calle">—</div></div>
+      <div class="kv"><div class="k">Tipo</div><div class="v" id="d_tipo">—</div></div>
+      <div class="kv"><div class="k">URL</div><div class="v" id="d_url">—</div></div>
+    </div>
 
-    <div class="kv"><div class="k">Precio</div><div class="v" id="d_precio">—</div></div>
-    <div class="kv"><div class="k">Alquiler</div><div class="v" id="d_alq">—</div></div>
-    <div class="kv"><div class="k">Bruta</div><div class="v" id="d_bruta">—</div></div>
-    <div class="kv"><div class="k">Neta</div><div class="v" id="d_neta">—</div></div>
-    <div class="kv"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
-    <div class="kv"><div class="k">Precio máx.</div><div class="v" id="d_pmax">—</div></div>
-    <div class="kv"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
-    <div class="kv"><div class="k">URL</div><div class="v" id="d_url">—</div></div>
+    <div class="grid3" style="margin-top:4px">
+      <div class="kv"><div class="k">Precio</div><div class="v" id="d_precio">—</div></div>
+      <div class="kv"><div class="k">Alquiler</div><div class="v" id="d_alq">—</div></div>
+      <div class="kv"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
+      <div class="kv"><div class="k">Bruta</div><div class="v" id="d_bruta">—</div></div>
+      <div class="kv"><div class="k">Neta</div><div class="v" id="d_neta">—</div></div>
+      <div class="kv"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
+      <div class="kv"><div class="k">P. máx</div><div class="v" id="d_pmax">—</div></div>
+    </div>
 
-    <h3 style="margin:14px 0 8px">Asignar a prospects</h3>
+    <div class="divider"></div>
+
+    <!-- Datos completos -->
+    <h3 style="margin:0 0 6px">Datos completos</h3>
+    <div class="grid3">
+      <div class="kv"><div class="k">m²</div><div class="v" id="d_m2">—</div></div>
+      <div class="kv"><div class="k">Año</div><div class="v" id="d_anio">—</div></div>
+      <div class="kv"><div class="k">Altura</div><div class="v" id="d_alt">—</div></div>
+      <div class="kv"><div class="k">Ascensor</div><div class="v" id="d_asc">—</div></div>
+      <div class="kv"><div class="k">Bajo</div><div class="v" id="d_bajo">—</div></div>
+      <div class="kv"><div class="k">Hab./Baños</div><div class="v" id="d_hb">—</div></div>
+    </div>
+
+    <div class="grid3" style="margin-top:6px">
+      <div class="kv"><div class="k">Reforma</div><div class="v" id="d_ref_tip">—</div></div>
+      <div class="kv"><div class="k">ITP</div><div class="v" id="d_itp">—</div></div>
+      <div class="kv"><div class="k">Notaría</div><div class="v" id="d_notaria">—</div></div>
+      <div class="kv"><div class="k">PSI</div><div class="v" id="d_psi">—</div></div>
+      <div class="kv"><div class="k">Comunidad</div><div class="v" id="d_comu">—</div></div>
+      <div class="kv"><div class="k">IBI</div><div class="v" id="d_ibi">—</div></div>
+      <div class="kv"><div class="k">Hogar</div><div class="v" id="d_hogar">—</div></div>
+      <div class="kv"><div class="k">Impago</div><div class="v" id="d_impago">—</div></div>
+      <div class="kv"><div class="k">Gestión</div><div class="v" id="d_gestion">—</div></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Asignación de prospects -->
+    <h3 style="margin:0 0 6px">Asignar a prospects</h3>
+    <div class="pros-head">
+      <div class="small" id="pros_info">—</div>
+      <label class="small"><input type="checkbox" id="pros_show_all"> Ver todos</label>
+    </div>
     <div id="p_list" class="uh-list-pros">—</div>
 
     <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
@@ -174,6 +223,12 @@ function toast(msg,kind){
 }
 function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function toPct(raw){ let v=Number(raw||0); if(v>0&&v<=1)v*=100; while(v>=100)v/=10; return v; }
+function fold(s){ return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
+function boolLike(x){
+  if(x===true) return true; if(x===false) return false;
+  const s=String(x||'').toLowerCase();
+  return s==='si'||s==='sí'||s==='true'||s==='1';
+}
 
 /* ===== Store ===== */
 const Store={
@@ -232,7 +287,7 @@ function get(o,k){
   return (o[k]||'').toString().toLowerCase();
 }
 
-/* ===== Render tabla (sin template literals largos) ===== */
+/* ===== Render tabla ===== */
 function render(){
   const tb=id('tbody'); tb.innerHTML='';
   view.forEach(e=>{
@@ -261,7 +316,7 @@ function render(){
 
     html += '<button class="iconbtn" title="Borrar" data-act="del" aria-label="Borrar">'+
               '<svg class="icon" viewBox="0 0 24 24" fill="none">'+
-              '<path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12" stroke="#111827" stroke-width="1.5" stroke-linecap="round"/></svg>'+
+              '<path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0  1 2v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12" stroke="#111827" stroke-width="1.5" stroke-linecap="round"/></svg>'+
             '</button>';
 
     html += '</div></td>';
@@ -277,6 +332,7 @@ function openDrawer(idEv){
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e) return;
 
   id('d_fecha').textContent=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
+
   id('d_loc').textContent =e.loc||'—';
   id('d_calle').textContent=e.calle||'—';
   id('d_tipo').textContent =e.tipo||'—';
@@ -294,20 +350,31 @@ function openDrawer(idEv){
     id('d_url').textContent = '—';
   }
 
-  const wrap=id('p_list'); wrap.innerHTML='';
-  const pros=Store.pros||[]; const set=new Set(e.prospect_ids||[]);
-  if(!pros.length){ wrap.textContent='No hay prospects guardados.'; }
-  else{
-    pros.forEach(p=>{
-      const row=document.createElement('label');
-      const cb=document.createElement('input'); cb.type='checkbox';
-      cb.value=p.id||p.email||p.nombre; cb.checked=set.has(cb.value);
-      const sp=document.createElement('span');
-      sp.textContent=(p.nombre||'—')+' · '+(p.pref_tipo||'-')+' · '+(p.locs_text||'');
-      row.appendChild(cb); row.appendChild(sp);
-      wrap.appendChild(row);
-    });
-  }
+  /* Completar todos los datos */
+  id('d_m2').textContent = (e.m2||'—');
+  id('d_anio').textContent = (e.anio||'—');
+  id('d_alt').textContent = (e.alt||'—');
+  id('d_asc').textContent = (e.asc||'—');
+  id('d_bajo').textContent = (e.bajo||'—');
+  id('d_hb').textContent = (e.habs||'-')+' / '+(e.banos||'-');
+  id('d_ref_tip').textContent = (e.ref_tip||'—');
+  id('d_itp').textContent = e0(e.itp||0);
+  id('d_notaria').textContent = e0(e.notaria||0);
+  id('d_psi').textContent = e0(e.psi||0);
+  id('d_comu').textContent = e0(e.comu||0);
+  id('d_ibi').textContent = e0(e.ibi||0);
+  id('d_hogar').textContent = e0(e.hogar||0);
+  id('d_impago').textContent = e0(e.impago||0);
+  id('d_gestion').textContent = e0(e.gestion||0);
+
+  /* Render prospects con lógica */
+  const showAllChk = id('pros_show_all');
+  showAllChk.checked = false;
+  drawProspectsList(e, showAllChk.checked);
+
+  showAllChk.onchange = function(){
+    drawProspectsList(e, showAllChk.checked);
+  };
 
   id('uhOverlay').classList.add('open');
   id('uhDrawer').classList.add('open');
@@ -316,19 +383,155 @@ function openDrawer(idEv){
   id('d_pdf').onclick = function(){ quickPDF(e.id); };
   id('d_editar').onclick = function(){ goEvaluar(e.id); };
 }
+
 function closeDrawer(){
   id('uhOverlay').classList.remove('open');
   id('uhDrawer').classList.remove('open');
   openId=null;
 }
+
+/* ===== Lógica de match en el drawer ===== */
+function isSearching(p){
+  const f=fold(p.fase||'');
+  return f.includes('busq'); // búsqueda / buscando
+}
+function wantsNoReform(p){
+  return boolLike(p.no_reformas)||boolLike(p.no_reforma)||
+         fold(p.reforma)==='no'||fold(p.pref_reforma)==='no'||boolLike(p.prefiere_sin_reforma);
+}
+function wantsElevator(p){
+  return boolLike(p.requiere_ascensor)||boolLike(p.quiere_ascensor)||fold(p.ascensor)==='si';
+}
+function wantsNoBajo(p){
+  return boolLike(p.no_bajos)||boolLike(p.no_bajo)||fold(p.pref_bajo)==='no';
+}
+function prospectBudget(p){
+  const cand = p.presupuesto_max??p.presupuesto??p.budget_max??p.budget;
+  return Number(String(cand??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
+}
+function targetInfo(p){
+  const kind=fold(p.obj_main||p.obj_tipo||'');
+  const b=Number(p.obj_bruta||0), n=Number(p.obj_neta||0);
+  const f_m=Number(p.obj_flujo||0), f_a=Number(p.obj_flujo_anual||0);
+  if(kind==='bruta' && b>0) return {kind:'bruta', val:b};
+  if(kind==='neta'  && n>0) return {kind:'neta',  val:n};
+  if(kind==='flujo' && (f_a>0 || f_m>0)) return {kind:'flujo', val:(f_a>0?f_a:f_m*12)};
+  if(b>0) return {kind:'bruta',val:b};
+  if(n>0) return {kind:'neta', val:n};
+  if(f_a>0||f_m>0) return {kind:'flujo', val:(f_a>0?f_a:f_m*12)};
+  return {kind:'',val:0};
+}
+function evalMeetsTarget(e, tgt){
+  if(!tgt.val) return false;
+  if(tgt.kind==='bruta') return Number(toPct(e.kpi_bruta))>=tgt.val;
+  if(tgt.kind==='neta')  return Number(toPct(e.kpi_neta)) >=tgt.val;
+  if(tgt.kind==='flujo') return Number(e.kpi_flujo)>=tgt.val;
+  return false;
+}
+function warnBadgesFor(p, e){
+  const warns=[];
+  const necesitaReforma = (String(e.ref_tip||'no').toLowerCase()!=='no');
+  const sinAscensor = String(e.asc||'Sí').toLowerCase()==='no';
+  const esBajo = String(e.bajo||'No').toLowerCase()==='sí';
+
+  const budget = prospectBudget(p);
+  if(necesitaReforma && wantsNoReform(p)){
+    warns.push({title:'No quiere reforma', icon:'🚧'});
+  }
+  if(sinAscensor && wantsElevator(p)){
+    warns.push({title:'Requiere ascensor', icon:'🛗'});
+  }
+  if(esBajo && wantsNoBajo(p)){
+    warns.push({title:'No quiere bajos', icon:'⬇'});
+  }
+  if(budget>0 && Number(e.inv_total||0)>budget){
+    warns.push({title:'Excede su presupuesto', icon:'💰'});
+  }
+  return warns;
+}
+
+function drawProspectsList(e, showAll){
+  const wrap=id('p_list'); wrap.innerHTML='';
+  const pros=Store.pros||[];
+  const set=new Set(e.prospect_ids||[]);
+  const wantTipo=fold(e.tipo||'');
+  const wantLoc =fold(e.loc||'');
+
+  const matches=[], others=[];
+  pros.forEach(function(p){
+    const idp = p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
+    const sameTipo = fold(p.pref_tipo)===wantTipo;
+    const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
+    const sameLoc = locs.includes(wantLoc);
+    const faseOK  = isSearching(p);
+    const tgt=targetInfo(p);
+    const kpiOK = evalMeetsTarget(e,tgt);
+
+    const rowObj = {p, idp, warns: warnBadgesFor(p,e), checked:set.has(idp), faseOK, sameTipo, sameLoc, kpiOK};
+    if(faseOK && sameTipo && sameLoc && kpiOK){ matches.push(rowObj); } else { others.push(rowObj); }
+  });
+
+  // Info cabecera
+  id('pros_info').textContent = (matches.length)+' coincidente(s) · '+(pros.length)+' total';
+
+  // Siempre mostrar asignados, aunque no “encajen”, al principio del bloque elegido
+  function isAssigned(o){ return o.checked; }
+
+  const listToRender = showAll ? [...matches.sort((a,b)=>isAssigned(b)-isAssigned(a)), ...others.sort((a,b)=>isAssigned(b)-isAssigned(a))] 
+                               : [...matches.sort((a,b)=>isAssigned(b)-isAssigned(a))];
+
+  if(!listToRender.length){
+    const empty=document.createElement('div');
+    empty.className='small';
+    empty.textContent = showAll? 'No hay prospects.' : 'No hay coincidencias. Activa “Ver todos” para mostrar el resto.';
+    wrap.appendChild(empty);
+    return;
+  }
+
+  listToRender.forEach(function(o){
+    const row=document.createElement('label');
+
+    const cb=document.createElement('input'); 
+    cb.type='checkbox'; cb.value=o.idp; cb.checked=o.checked;
+    row.appendChild(cb);
+
+    const name=document.createElement('span');
+    name.textContent = (o.p.nombre||'—');
+    row.appendChild(name);
+
+    if(o.warns.length){
+      const bWrap=document.createElement('span'); bWrap.className='badges';
+      o.warns.forEach(function(w){
+        const b=document.createElement('span'); b.className='badge-warn'; b.title=w.title;
+        const i=document.createElement('span'); i.className='ico'; i.textContent=w.icon;
+        b.appendChild(i);
+        const t=document.createElement('span'); t.textContent=w.title;
+        b.appendChild(t);
+        bWrap.appendChild(b);
+      });
+      row.appendChild(bWrap);
+    }
+
+    // Si mostramos todos y no encaja, un matiz visual sutil
+    if(!o.faseOK || !o.sameTipo || !o.sameLoc || !o.kpiOK){
+      row.style.opacity = showAll ? .7 : 1;
+    }
+
+    wrap.appendChild(row);
+  });
+}
+
 function saveAssign(){
   if(!openId) return;
   const list=Store.evals||[];
   const idx=list.findIndex(x=>x.id===openId); if(idx<0) return;
+
   const choices=[].slice.call(id('p_list').querySelectorAll('input[type=checkbox]'));
-  list[idx].prospect_ids = choices.filter(c=>c.checked).map(c=>c.value);
+  const selected = choices.filter(c=>c.checked).map(c=>c.value);
+
+  list[idx].prospect_ids = selected;
   Store.evals=list;
-  toast('Asignación guardada','ok');
+  toast('Asignación guardada para '+selected.length+' prospecto(s)','ok');
   closeDrawer();
   load();
 }
