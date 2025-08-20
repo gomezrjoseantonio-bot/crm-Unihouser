@@ -20,7 +20,16 @@
 #matchWrap{display:grid;gap:8px}
 .match-col{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
 .match-col h4{margin:0 0 8px}
-.tag{display:inline-block;background:#eef2f7;border-radius:999px;padding:4px 8px;margin:2px 4px;font-size:12px}
+.tag{display:inline-flex;align-items:center;gap:6px;background:#eef2f7;border-radius:999px;padding:4px 10px;margin:3px 4px;font-size:12px}
+
+/* Badges de advertencia */
+.badge-warn{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#b45309;background:#fff7ed;border:1px solid #fde68a;border-radius:999px;padding:2px 6px}
+.badge-warn svg{width:12px;height:12px}
+
+/* Toasts (para confirmar guardados) */
+.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
+.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
+.toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
 </style>
 </head>
 <body>
@@ -144,7 +153,7 @@
         <div class="match-col"><h4>Flujo ≥ objetivo</h4><div id="m_flujo">—</div></div>
       </div>
       <div class="actions" style="margin-top:8px">
-        <select id="assign_cli" size="6" style="min-width:320px"></select>
+        <select id="assign_cli" size="6" multiple style="min-width:320px"></select>
         <button class="btn" id="save_only">Guardar evaluación</button>
         <button class="btn primary" id="save_assign">Guardar y asignar</button>
       </div>
@@ -279,7 +288,7 @@ function bindAuto(){
   tipoEl.addEventListener('change',updAlq);
 }
 
-/* ===== estado interno para evitar duplicados ===== */
+/* ===== Estado: fijar ID para evitar duplicados ===== */
 let CURRENT_ID = null;
 
 /* ===== Cálculos financieros ===== */
@@ -347,7 +356,8 @@ function calc(){
     bruta, neta, flujo,
     inv_total,
     ref_tip: id('e_ref_nec').value||'no',
-    asc: id('e_asc').value||'Sí'
+    asc: id('e_asc').value||'Sí',
+    bajo: id('e_bajo').value||'No'
   });
 
   id('e_result').hidden=false;
@@ -416,33 +426,47 @@ function drawChart(real, objetivo){
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects (tolerante a tu esquema) ===== */
-function isSearching(p){
-  // Acepta "BÚSQUEDA", "BUSQUEDA", "buscando", etc.
-  const f=(p.fase||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  return f.includes('busq'); // clave: 'busq' para cubrir "busqueda/búsqueda"
+/* ===== Matching prospects (fase, tipo, localidad; avisos) ===== */
+function fold(s){return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
+function isSearching(p){ const f=fold(p.fase||''); return f.includes('busq')||f.includes('busc'); }
+function parseMoney(v){ if(v==null) return 0; return Number(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0; }
+function boolLike(x){ if(x===true) return true; if(x===false) return false; const s=fold(x); return s==='si'||s==='sí'||s==='true'||s==='1'; }
+function wantsNoReform(p){ const r=fold(p.reforma||p.ref||p.pref_reforma||''); return r==='no'||r==='sin reforma'||boolLike(p.no_reformas)||boolLike(p.no_reforma)||boolLike(p.prefiere_sin_reforma); }
+function wantsElevator(p){ const a=fold(p.asc||p.ascensor||p.requiere_ascensor||p.quiere_ascensor||''); return a==='si'||a==='sí'||a==='true'||a==='1'; }
+function wantsNoGround(p){ const b=fold(p.bajos||p.bajo||p.evitar_bajos||''); return b==='no'||b==='evitar'||b==='sin bajos'||b==='evitar bajos'; }
+function prospectBudget(p){
+  return (parseMoney(p.max_compra)||parseMoney(p.maxCompra)||parseMoney(p.presupuesto_max)||parseMoney(p.presupuesto)||parseMoney(p.budget_max)||parseMoney(p.budget)||0);
 }
+
+/* construir badge de aviso */
+function warnBadges(p, ctx){
+  const warns=[];
+  const necesitaReforma = (ctx.ref_tip && ctx.ref_tip !== 'no');
+  const sinAscensor = fold(ctx.asc)==='no';
+  const esBajo = fold(ctx.bajo)==='si';
+  const budget = prospectBudget(p);
+
+  if(necesitaReforma && wantsNoReform(p)) warns.push({title:'No quiere reforma', icon:'🚧'});
+  if(sinAscensor && wantsElevator(p))     warns.push({title:'Requiere ascensor', icon:'🛗'});
+  if(esBajo && wantsNoGround(p))          warns.push({title:'No quiere bajos', icon:'🏷'});
+  if(budget>0 && Number(ctx.inv_total||0) > budget) warns.push({title:'Excede presupuesto', icon:'💰'});
+  return warns;
+}
+
 function norm(s){ return (s||'').toString().trim().toLowerCase(); }
 function getTargetInfo(p){
-  // Devuelve {kind:'bruta'|'neta'|'flujo', val:number(anual para flujo)}
-  const kind=(p.obj_tipo||p.obj_main||'').toString().toLowerCase().trim();
-  const raw = Number(p.obj_raw ?? 0);
-  const b   = Number(p.obj_bruta ?? 0);
-  const n   = Number(p.obj_neta ?? 0);
-  const f_m = Number(p.obj_flujo ?? 0);     // mensual
-  const f_a = Number(p.obj_flujo_anual ?? 0);
-
-  if(kind==='bruta' && raw>0) return {kind:'bruta', val:raw};
-  if(kind==='neta'  && raw>0) return {kind:'neta',  val:raw};
-  if(kind==='flujo' && (raw>0 || f_m>0 || f_a>0)){
-    const val = f_a>0 ? f_a : (raw>0 ? raw*12 : f_m*12);
-    return {kind:'flujo', val:val};
-  }
+  // Devuelve una preferencia principal si existe
+  const main=(p.obj_main||p.obj_tipo||'').toString().toLowerCase().trim();
+  const b=Number(p.obj_bruta||0), n=Number(p.obj_neta||0), fm=Number(p.obj_flujo||0), fa=Number(p.obj_flujo_anual||0);
+  if(main==='bruta' && b>0) return {kind:'bruta', val:b};
+  if(main==='neta'  && n>0) return {kind:'neta',  val:n};
+  if(main==='flujo' && (fm>0||fa>0)) return {kind:'flujo', val:(fa>0?fa:fm*12)};
   if(b>0) return {kind:'bruta', val:b};
   if(n>0) return {kind:'neta',  val:n};
-  if(f_a>0 || f_m>0) return {kind:'flujo', val: (f_a>0?f_a:f_m*12)};
+  if(fa>0||fm>0) return {kind:'flujo', val:(fa>0?fa:fm*12)};
   return {kind:'', val:0};
 }
+
 function suggestProspects(ctx){
   const list=Store.pros||[];
   const mB=id('m_bruta'), mN=id('m_neta'), mF=id('m_flujo');
@@ -455,43 +479,53 @@ function suggestProspects(ctx){
   const wantLoc  = norm(ctx.loc);
 
   const brutaOK=[], netaOK=[], flujoOK=[];
-  const addOptionSet=new Set();
+  const added = new Set();
 
   list.forEach(p=>{
     if(!isSearching(p)) return;
     if(norm(p.pref_tipo)!==wantTipo) return;
-
     const locs=(p.locs_text||'').split(',').map(s=>norm(s)).filter(Boolean);
     if(!locs.includes(wantLoc)) return;
 
     const tgt = getTargetInfo(p);
     if(!tgt.val) return;
 
-    if(tgt.kind==='bruta' && Number(ctx.bruta)>=tgt.val){ brutaOK.push(p); }
-    if(tgt.kind==='neta'  && Number(ctx.neta) >=tgt.val){ netaOK.push(p); }
-    if(tgt.kind==='flujo' && Number(ctx.flujo)>=tgt.val){ flujoOK.push(p); }
+    if(tgt.kind==='bruta' && Number(ctx.bruta)>=tgt.val) brutaOK.push(p);
+    if(tgt.kind==='neta'  && Number(ctx.neta) >=tgt.val) netaOK.push(p);
+    if(tgt.kind==='flujo' && Number(ctx.flujo)>=tgt.val) flujoOK.push(p);
   });
 
-  const renderChips=(arr,el)=>{
+  const chip = (p, warns)=>{
+    const span=document.createElement('span');
+    span.className='tag';
+    const name=document.createElement('span'); name.textContent=p.nombre||'-';
+    span.appendChild(name);
+    warns.forEach(w=>{
+      const b=document.createElement('span'); b.className='badge-warn'; b.title=w.title;
+      b.innerHTML='<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.2"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.6" stroke-linecap="round"/></svg>'+w.icon;
+      span.appendChild(b);
+    });
+    return span;
+  };
+
+  function render(arr, el){
     if(!arr.length){ el.textContent='—'; return; }
     el.innerHTML='';
     arr.forEach(p=>{
-      const span=document.createElement('span');
-      span.className='tag';
-      span.textContent=p.nombre||'-';
-      el.appendChild(span);
-
-      const val=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
-      if(!addOptionSet.has(val)){
-        addOptionSet.add(val);
-        const opt=document.createElement('option'); opt.value=val; opt.textContent=p.nombre||'-';
+      const warns=warnBadges(p, ctx);
+      el.appendChild(chip(p, warns));
+      const key=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
+      if(!added.has(key)){
+        added.add(key);
+        const opt=document.createElement('option'); opt.value=key; opt.textContent=p.nombre||'-';
         asignSel.appendChild(opt);
       }
     });
-  };
-  renderChips(brutaOK,mB);
-  renderChips(netaOK,mN);
-  renderChips(flujoOK,mF);
+  }
+
+  render(brutaOK, mB);
+  render(netaOK,  mN);
+  render(flujoOK, mF);
 }
 
 /* ===== Guardar / Asignar ===== */
@@ -499,32 +533,29 @@ function gather(){ return calc(); }
 function save(alsoAssign){
   const e=gather();
 
-  // Si venimos de Evaluaciones, respetar el id original
-  const loadKey = localStorage.getItem('load_eval') || localStorage.getItem('load_eval') || '';
+  // Si venimos de Evaluaciones, respetar ID original
+  const loaded = localStorage.getItem('load_eval');
   let list=Store.evals||[];
-  if(loadKey){
-    const idx=list.findIndex(x=>x.id===loadKey);
+  if(loaded){
+    const idx=list.findIndex(x=>x.id===loaded);
     if(idx>=0){ e.id=list[idx].id; e.ts=list[idx].ts; CURRENT_ID=e.id; }
     localStorage.removeItem('load_eval');
-    localStorage.removeItem('load_eval');
   }
-
-  if(CURRENT_ID) e.id = CURRENT_ID; // mantener mismo id tras el primer guardado
+  if(CURRENT_ID) e.id = CURRENT_ID; // mantener mismo id tras primer guardado
 
   if(alsoAssign){
     const sel=[...document.getElementById('assign_cli').options].filter(o=>o.selected).map(o=>o.value);
-    e.prospect_ids = sel;
+    e.prospect_ids = sel; // se vuelca en Evaluaciones (columna Asignados)
   }
 
   const idx2=list.findIndex(x=>x.id===e.id);
   if(idx2>=0) list[idx2]=e; else list.push(e);
   Store.evals = list;
 
-  CURRENT_ID = e.id; // fijar id para siguientes guardados
+  CURRENT_ID = e.id;
 
   if(alsoAssign){
-    const n = (e.prospect_ids||[]).length;
-    toast('Guardado y asignado a '+n+' cliente(s)','ok');
+    toast('Guardado y asignado a '+(e.prospect_ids?.length||0)+' cliente(s)','ok');
   }else{
     toast('Evaluación guardada','ok');
   }
@@ -539,13 +570,13 @@ function limpiar(){
     else s.selectedIndex=0;
   });
   document.getElementById('e_result').hidden=true;
-  CURRENT_ID = null;
+  CURRENT_ID=null;
 }
 
 /* ===== Preload desde Evaluaciones (solo si existe) ===== */
 function preloadIfAny(){
-  const evId = localStorage.getItem('load_eval') || localStorage.getItem('load_eval');
-  if(!evId) return; // abrir en blanco si no viene de Evaluaciones
+  const evId = localStorage.getItem('load_eval');
+  if(!evId) return;
   const e=(Store.evals||[]).find(x=>x.id===evId); if(!e) return;
 
   CURRENT_ID = e.id;
@@ -580,7 +611,7 @@ function preloadIfAny(){
   calc();
 }
 
-/* ===== PDF rápido (opcional, sin template strings) ===== */
+/* ===== PDF rápido (opcional) ===== */
 function quickPDFfrom(e){
   const fecha=new Date(e.ts||Date.now()).toLocaleString('es-ES');
   const htmlParts = [
@@ -638,5 +669,7 @@ function attach(){
 document.addEventListener('DOMContentLoaded', attach);
 })();
 </script>
+
+<div id="toasts" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
 </body>
 </html>
