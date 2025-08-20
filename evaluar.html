@@ -11,23 +11,12 @@
 .small{font-size:12px;color:#667085}
 .kpi .muted{color:#667085;font-weight:600;margin-left:6px}
 .canvasWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
-
-/* Grid 3 columnas responsive */
 .group3{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}
 @media(max-width:1000px){.group3{grid-template-columns:1fr}}
-
-/* Matching UI */
 #matchWrap{display:grid;gap:8px}
 .match-col{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
 .match-col h4{margin:0 0 8px}
-.tag{display:inline-flex;align-items:center;gap:6px;background:#eef2f7;border-radius:999px;padding:4px 10px;margin:3px 4px;font-size:12px}
-.badge-warn{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#b45309;background:#fff7ed;border:1px solid #fde68a;border-radius:999px;padding:2px 6px}
-.badge-warn svg{width:12px;height:12px}
-
-/* Toasts */
-.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
-.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
-.toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
+.tag{display:inline-block;background:#eef2f7;border-radius:999px;padding:4px 8px;margin:2px 4px;font-size:12px}
 </style>
 </head>
 <body>
@@ -162,8 +151,6 @@
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
-<div id="toasts" class="toast-wrap"></div>
-
 <script>
 (function(){
 "use strict";
@@ -195,10 +182,12 @@ function moneyLive(){
   });
 }
 function toast(msg,kind){
-  const wrap=id('toasts');
+  const wrap = document.getElementById('toasts') || (function(){
+    const d=document.createElement('div'); d.id='toasts'; d.className='toast-wrap'; document.body.appendChild(d); return d;
+  })();
   const el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
   wrap.appendChild(el); setTimeout(()=>el.style.opacity='0',1600);
-  setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
+  setTimeout(()=>{ try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 
 /* ===== Store (localStorage) ===== */
@@ -345,16 +334,7 @@ function calc(){
   drawChart(bruta, obj_bruta);
 
   // Sugerencias
-  suggestProspects({
-    tipo,
-    loc: id('e_loc').value||'',
-    bruta: bruta,
-    neta: neta,
-    flujo: flujo,
-    inv_total: inv_total,
-    ref_tip: id('e_ref_nec').value||'no',
-    asc: id('e_asc').value||'Sí'
-  });
+  suggestProspects({ tipo, loc: id('e_loc').value||'', bruta, neta, flujo, obj_bruta, obj_neta });
 
   id('e_result').hidden=false;
 
@@ -373,12 +353,12 @@ function calc(){
     banos: id('e_banos').value || '',
     ref_tip: id('e_ref_nec').value || 'no',
     url: id('e_url').value || '',
-    tipo: tipo,
-    precio: precio, itp: itp, notaria: notari, psi: honor, reforma: ref,
-    comu: comu, ibi: ibi, hogar: hogar, impago: impago, gestion: gest,
+    tipo,
+    precio, itp, notaria:notari, psi: honor, reforma: ref,
+    comu:comu, ibi:ibi, hogar:hogar, impago:impago, gestion:gest,
     alq: alq_m,
-    inv_total: inv_total, kpi_bruta: bruta, kpi_neta: neta, kpi_flujo: flujo,
-    pmax: pmax
+    inv_total, kpi_bruta: bruta, kpi_neta: neta, kpi_flujo: flujo,
+    pmax
   };
 }
 function gapText(g){
@@ -427,62 +407,7 @@ function isSearching(p){
   const f=(p.fase||'').toString().toLowerCase();
   return f.includes('busc'); // “búsqueda”, “buscando”, etc.
 }
-function fold(s){
-  return (s||'').toString()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .toLowerCase().trim();
-}
-function parseMoneyLoose(v){
-  if(v==null) return 0;
-  return Number(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
-}
-function boolLike(x){
-  if(x===true) return true; if(x===false) return false;
-  const s=String(x||'').toLowerCase();
-  return s==='si'||s==='sí'||s==='true'||s==='1';
-}
-function wantsNoReform(p){
-  const r=(p.reforma||p.ref||p.pref_reforma||'').toString().toLowerCase();
-  // acepta “no”, “sin”, etc. Si pone “Lavado de cara” o “Integral”, NO es “no reforma”
-  if(r==='no' || r==='sin') return true;
-  return boolLike(p.no_reformas)||boolLike(p.no_reforma)||boolLike(p.prefiere_sin_reforma);
-}
-function wantsElevator(p){
-  return boolLike(p.requiere_ascensor)||boolLike(p.quiere_ascensor)||String(p.ascensor||p.asc||'').toLowerCase()==='si';
-}
-function prospectBudget(p){
-  return parseMoneyLoose(p.max_compra??p.pmax_compra??p.presupuesto_max??p.presupuesto??p.budget);
-}
-// objetivo por tipo para tu esquema real (obj_tipo + obj_raw) o alternativo
-function objFor(p, kind){
-  const t=(p.obj_tipo||p.obj_main||'').toString().toLowerCase();
-  if(kind==='bruta'){
-    if(t.startsWith('bru')) return Number(p.obj_raw||0);
-    return Number(p.obj_bruta||0);
-  }
-  if(kind==='neta'){
-    if(t.startsWith('net')) return Number(p.obj_raw||0);
-    return Number(p.obj_neta||0);
-  }
-  if(kind==='flujo'){
-    // Preferimos mensual, lo pasamos a anual
-    const mes = (t.startsWith('flu') ? Number(p.obj_raw||0) : Number(p.obj_flujo||p.obj_flujo_mes||0));
-    const ano = Number(p.obj_flujo_ano||0);
-    return ano>0? ano : (mes>0? mes*12 : 0);
-  }
-  return 0;
-}
-function warnBadges(p, ctx){
-  const warns=[];
-  const necesitaReforma = (ctx.ref_tip && ctx.ref_tip !== 'no');
-  const sinAscensor = String(ctx.asc||'Sí').toLowerCase()==='no';
-  const budget = prospectBudget(p);
-  if(necesitaReforma && wantsNoReform(p)){ warns.push({icon:'🚧', title:'No quiere inmuebles con reforma'}); }
-  if(sinAscensor && wantsElevator(p)){ warns.push({icon:'🛗', title:'Requiere ascensor'}); }
-  if(budget>0 && Number(ctx.inv_total||0) > budget){ warns.push({icon:'💰', title:'Excede su presupuesto'}); }
-  return warns;
-}
-
+function norm(s){ return (s||'').toString().trim().toLowerCase(); }
 function suggestProspects(ctx){
   const list=Store.pros||[];
   const mB=id('m_bruta'), mN=id('m_neta'), mF=id('m_flujo');
@@ -491,59 +416,49 @@ function suggestProspects(ctx){
 
   if(!list.length){ return; }
 
-  const wantTipo = fold(ctx.tipo);
-  const wantLoc  = fold(ctx.loc);
+  const wantTipo = norm(ctx.tipo);
+  const wantLoc  = norm(ctx.loc);
 
-  const brutaOK=[], netaOK=[], flujoOK=[];
-  const addOptionSet=new Set();
+  const brutaOK=[], netaOK=[], flujoOK=[], assignOptions=[];
 
-  list.forEach(function(p){
+  list.forEach(p=>{
     if(!isSearching(p)) return;
-    if(fold(p.pref_tipo)!==wantTipo) return;
-
-    const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
+    if(norm(p.pref_tipo)!==wantTipo) return;
+    const locs=(p.locs_text||'').split(',').map(s=>norm(s));
     if(!locs.includes(wantLoc)) return;
 
-    const b=objFor(p,'bruta');
-    const n=objFor(p,'neta');
-    const f=objFor(p,'flujo'); // anual
+    const main=(p.obj_main||'bruta').toLowerCase();
+    const objB=Number(p.obj_bruta||0);
+    const objN=Number(p.obj_neta||0);
+    const objF_ano=(Number(p.obj_flujo||0)*12)||0; // prospect en €/mes → anual
 
-    if(b>0 && Number(ctx.bruta)>=b) brutaOK.push(p);
-    if(n>0 && Number(ctx.neta) >=n) netaOK.push(p);
-    if(f>0 && Number(ctx.flujo)>=f) flujoOK.push(p);
+    if(main==='bruta' && ctx.bruta>=objB){ brutaOK.push(p); assignOptions.push(p); }
+    if(main==='neta'  && ctx.neta>=objN){  netaOK.push(p);  assignOptions.push(p); }
+    if(main==='flujo' && ctx.flujo>=objF_ano){ flujoOK.push(p); assignOptions.push(p); }
   });
 
-  function chip(p, warns){
-    const span=document.createElement('span');
-    span.className='tag';
-    const name=document.createElement('span'); name.textContent=p.nombre||'-';
-    span.appendChild(name);
-    warns.forEach(function(w){
-      const b=document.createElement('span'); b.className='badge-warn'; b.title=w.title;
-      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.2"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.6" stroke-linecap="round"/></svg>'+w.icon;
-      span.appendChild(b);
-    });
-    return span;
-  }
-
-  function render(arr, el){
+  const renderChips=(arr,el)=>{
     if(!arr.length){ el.textContent='—'; return; }
     el.innerHTML='';
-    arr.forEach(function(p){
-      const warns = warnBadges(p, ctx);
-      el.appendChild(chip(p, warns));
-      const key=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
-      if(!addOptionSet.has(key)){
-        addOptionSet.add(key);
-        const opt=document.createElement('option'); opt.value=key; opt.textContent=p.nombre||'-';
-        asignSel.appendChild(opt);
-      }
+    arr.forEach(p=>{
+      const span=document.createElement('span');
+      span.className='tag';
+      span.textContent=p.nombre||'-';
+      el.appendChild(span);
     });
-  }
+  };
+  renderChips(brutaOK,mB);
+  renderChips(netaOK,mN);
+  renderChips(flujoOK,mF);
 
-  render(brutaOK, mB);
-  render(netaOK,  mN);
-  render(flujoOK, mF);
+  // select múltiple para asignar (unión de los tres, sin duplicados)
+  const seen=new Set();
+  [...brutaOK,...netaOK,...flujoOK].forEach(p=>{
+    const val=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
+    if(seen.has(val)) return; seen.add(val);
+    const opt=document.createElement('option'); opt.value=val; opt.textContent=p.nombre||'-';
+    asignSel.appendChild(opt);
+  });
 }
 
 /* ===== Guardar / Asignar ===== */
@@ -558,18 +473,13 @@ function save(alsoAssign){
     localStorage.removeItem('load_eval');
   }
   if(alsoAssign){
-    const selAll=[].slice.call(document.getElementById('assign_cli').options);
-    let sel=selAll.filter(o=>o.selected).map(o=>o.value);
-    if(sel.length===0 && selAll.length>0){
-      // si no seleccionas, asignamos a todos los que matchean
-      sel = selAll.map(o=>o.value);
-    }
+    const sel=[...document.getElementById('assign_cli').options].filter(o=>o.selected).map(o=>o.value);
     e.prospect_ids = sel;
   }
   const idx2=list.findIndex(x=>x.id===e.id);
   if(idx2>=0) list[idx2]=e; else list.push(e);
   Store.evals = list;
-  toast(alsoAssign? 'Guardado y asignado' : 'Evaluación guardada', 'ok');
+  toast('Evaluación guardada','ok');
 }
 
 /* ===== Limpiar ===== */
@@ -665,10 +575,10 @@ function attach(){
   bindAuto();
 
   id('e_calc').addEventListener('click', calc);
-  id('e_save').addEventListener('click', function(){ save(false); });
-  id('e_save_assign').addEventListener('click', function(){ save(true); });
-  if(id('save_only')) id('save_only').addEventListener('click', function(){ save(false); });
-  if(id('save_assign')) id('save_assign').addEventListener('click', function(){ save(true); });
+  id('e_save').addEventListener('click', ()=>save(false));
+  id('e_save_assign').addEventListener('click', ()=>save(true));
+  id('save_only') && id('save_only').addEventListener('click', ()=>save(false));
+  id('save_assign') && id('save_assign').addEventListener('click', ()=>save(true));
   id('e_clean').addEventListener('click', limpiar);
 
   preloadIfAny(); // solo precarga si venimos de Evaluaciones
