@@ -10,6 +10,8 @@
 .dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
 .small{font-size:12px;color:#667085}
 .kpi .muted{color:#667085;font-weight:600;margin-left:6px}
+
+/* chart wrapper (fondo blanco, borde suave) */
 .canvasWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
 
 /* Grid 3 columnas responsive */
@@ -21,11 +23,8 @@
 .match-col{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
 .match-col h4{margin:0 0 8px}
 .tag{display:inline-flex;align-items:center;gap:6px;background:#eef2f7;border-radius:999px;padding:4px 10px;margin:3px 4px;font-size:12px}
-
-/* Toasts (para ver avisos de guardado) */
-.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
-.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
-.toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
+.badge-warn{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#b45309;background:#fff7ed;border:1px solid #fde68a;border-radius:999px;padding:2px 6px}
+.badge-warn svg{width:12px;height:12px}
 </style>
 </head>
 <body>
@@ -160,8 +159,6 @@
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
-<div id="toasts" class="toast-wrap"></div>
-
 <script>
 (function(){
 "use strict";
@@ -193,10 +190,12 @@ function moneyLive(){
   });
 }
 function toast(msg,kind){
-  const wrap=id('toasts'); if(!wrap) return;
+  const wrap = document.getElementById('toasts') || (function(){
+    const d=document.createElement('div'); d.id='toasts'; d.className='toast-wrap'; document.body.appendChild(d); return d;
+  })();
   const el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
   wrap.appendChild(el); setTimeout(()=>el.style.opacity='0',1600);
-  setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
+  setTimeout(()=>{ try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 
 /* ===== Store (localStorage) ===== */
@@ -245,6 +244,9 @@ function getCfg(){
     obj_neta_hab:   Number((c.objetivos?.habitaciones?.neta_pct) ?? 7.0)
   };
 }
+
+/* ===== Estado local de la página (id/ts para no duplicar) ===== */
+let CUR = { id:null, ts:null };
 
 /* ===== Autocálculos dependientes ===== */
 function bindAuto(){
@@ -342,7 +344,7 @@ function calc(){
   // Gráfico
   drawChart(bruta, obj_bruta);
 
-  // Sugerencias (no cambiadas)
+  // Sugerencias (pasamos datos para avisos)
   suggestProspects({
     tipo,
     loc: id('e_loc').value||'',
@@ -354,10 +356,8 @@ function calc(){
 
   id('e_result').hidden=false;
 
-  // objeto evaluación
+  // devuelvo objeto de evaluación (sin generar id nuevo aquí)
   return {
-    id: 'ev_'+Date.now(),
-    ts: Date.now(),
     loc: id('e_loc').value || '',
     calle: id('e_calle').value || '',
     m2: id('e_m2').value || '',
@@ -418,10 +418,10 @@ function drawChart(real, objetivo){
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects (igual que tu estable) ===== */
+/* ===== Matching prospects (fase + tipo + localidad + ≥ objetivo) ===== */
 function isSearching(p){
   const f=(p.fase||'').toString().toLowerCase();
-  return f.includes('busc'); // “búsqueda”, “buscando”, etc.
+  return f.includes('busc'); // “búsqueda”, “buscando”, “BUSQUEDA”
 }
 function fold(s){ return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
 function parseMoney(v){
@@ -441,16 +441,23 @@ function wantsElevator(p){
   return boolLike(p.requiere_ascensor)||boolLike(p.quiere_ascensor)||String(p.ascensor||'').toLowerCase()==='si';
 }
 function prospectBudget(p){
-  return parseMoney(p.presupuesto_max??p.presupuesto??p.budget_max??p.budget);
+  return parseMoney(p.presupuesto_max??p.max_compra??p.presupuesto??p.budget_max??p.budget);
 }
+
 function warnBadges(p, ctx){
   const warns=[];
   const necesitaReforma = (ctx.ref_tip && ctx.ref_tip !== 'no');
   const sinAscensor = String(ctx.asc||'Sí').toLowerCase()==='no';
   const budget = prospectBudget(p);
-  if(necesitaReforma && wantsNoReform(p)){ warns.push('🚧'); }
-  if(sinAscensor && wantsElevator(p)){ warns.push('🛗'); }
-  if(budget>0 && Number(ctx.inv_total||0) > budget){ warns.push('💰'); }
+  if(necesitaReforma && wantsNoReform(p)){
+    warns.push({icon:'🚧', title:'No quiere inmuebles con reforma'});
+  }
+  if(sinAscensor && wantsElevator(p)){
+    warns.push({icon:'🛗', title:'Requiere ascensor'});
+  }
+  if(budget>0 && Number(ctx.inv_total||0) > budget){
+    warns.push({icon:'💰', title:'Excede su presupuesto'});
+  }
   return warns;
 }
 
@@ -470,19 +477,22 @@ function suggestProspects(ctx){
 
   list.forEach(p=>{
     if(!isSearching(p)) return;
+
+    // Tipo & localidad
     if(fold(p.pref_tipo)!==wantTipo) return;
     const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
     if(!locs.includes(wantLoc)) return;
 
-    const objB=Number(p.obj_bruta||0);
-    const objN=Number(p.obj_neta||0);
-    const objFmes=Number(p.obj_flujo||0);
-    const objF_ano=objFmes>0? objFmes*12 : 0;
+    // Objetivo principal & valores
+    const main=(p.obj_main||p.obj_tipo||'bruta').toString().toLowerCase();
+    const obB = Number(p.obj_bruta ?? (main==='bruta' ? p.obj_raw : 0)) || 0;
+    const obN = Number(p.obj_neta  ?? (main==='neta'  ? p.obj_raw : 0)) || 0;
+    const obFmes = Number(p.obj_flujo_mes ?? p.obj_flujo ?? 0) || 0;
+    const obFano = obFmes>0 ? obFmes*12 : 0;
 
-    // Si no tiene objetivo para un KPI (0), no lo mostramos en esa columna.
-    if(objB>0 && Number(ctx.bruta)>=objB) brutaOK.push(p);
-    if(objN>0 && Number(ctx.neta) >=objN) netaOK.push(p);
-    if(objF_ano>0 && Number(ctx.flujo)>=objF_ano) flujoOK.push(p);
+    if(obB>0 && Number(ctx.bruta)>=obB) brutaOK.push(p);
+    if(obN>0 && Number(ctx.neta) >=obN) netaOK.push(p);
+    if(obFano>0 && Number(ctx.flujo)>=obFano) flujoOK.push(p);
   });
 
   const chip = (p, warns)=>{
@@ -491,7 +501,8 @@ function suggestProspects(ctx){
     const name=document.createElement('span'); name.textContent=p.nombre||'-';
     span.appendChild(name);
     warns.forEach(w=>{
-      const b=document.createElement('span'); b.textContent=w;
+      const b=document.createElement('span'); b.className='badge-warn'; b.title=w.title;
+      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.2"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.6" stroke-linecap="round"/></svg>' + w.icon;
       span.appendChild(b);
     });
     return span;
@@ -501,7 +512,8 @@ function suggestProspects(ctx){
     if(!arr.length){ el.textContent='—'; return; }
     el.innerHTML='';
     arr.forEach(p=>{
-      el.appendChild(chip(p, warnBadges(p, ctx)));
+      const warns = warnBadges(p, ctx);
+      el.appendChild(chip(p, warns));
       const key=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
       if(!addOptionSet.has(key)){ addOptionSet.add(key);
         const opt=document.createElement('option'); opt.value=key; opt.textContent=p.nombre||'-';
@@ -516,35 +528,36 @@ function suggestProspects(ctx){
 }
 
 /* ===== Guardar / Asignar ===== */
-function gather(){ return calc(); }
-
-/* FIX: leer selección ANTES de recalcular (calc repinta el select) */
+function selectedAssignIds(){
+  return [...document.getElementById('assign_cli').options]
+          .filter(o=>o.selected).map(o=>o.value);
+}
 function save(alsoAssign){
-  let sel=[];
-  if(alsoAssign){
-    sel=[...document.getElementById('assign_cli').options]
-        .filter(o=>o.selected).map(o=>o.value);
-  }
+  // 1) capturo selección ANTES de recalcular (para no perderla)
+  const selIds = alsoAssign ? selectedAssignIds() : [];
 
-  const e=gather(); // recalcula y devuelve el objeto
+  // 2) recalculo y obtengo datos
+  const core = calc();
 
-  const loaded = localStorage.getItem('load_eval');
+  // 3) mantener id/ts estables mientras editas en esta página
+  if(!CUR.id){ CUR.id = 'ev_'+Date.now(); CUR.ts = Date.now(); }
+
+  const e = {
+    id: CUR.id,
+    ts: CUR.ts,
+    ...core
+  };
+  if(alsoAssign) e.prospect_ids = selIds;
+
+  // 4) guardar/actualizar
   let list=Store.evals||[];
-  if(loaded){
-    const idx=list.findIndex(x=>x.id===loaded);
-    if(idx>=0){ e.id=list[idx].id; e.ts=list[idx].ts; }
-    localStorage.removeItem('load_eval');
-  }
-  if(alsoAssign){ e.prospect_ids = sel; }
-
-  const idx2=list.findIndex(x=>x.id===e.id);
-  if(idx2>=0) list[idx2]=e; else list.push(e);
+  const idx=list.findIndex(x=>x.id===e.id);
+  if(idx>=0) list[idx]=e; else list.push(e);
   Store.evals = list;
 
-  toast(alsoAssign
-        ? (sel.length? 'Evaluación guardada y asignada' : 'Evaluación guardada (sin asignar)')
-        : 'Evaluación guardada',
-        'ok');
+  // 5) feedback
+  if(alsoAssign) toast(Evaluación guardada y asignada (${selIds.length}),'ok');
+  else toast('Evaluación guardada','ok');
 }
 
 /* ===== Limpiar ===== */
@@ -556,6 +569,7 @@ function limpiar(){
     else s.selectedIndex=0;
   });
   document.getElementById('e_result').hidden=true;
+  CUR.id=null; CUR.ts=null; // nueva evaluación en blanco
 }
 
 /* ===== Preload desde Evaluaciones (solo si existe) ===== */
@@ -563,6 +577,8 @@ function preloadIfAny(){
   const evId = localStorage.getItem('load_eval');
   if(!evId) return; // abrir en blanco si no viene de Evaluaciones
   const e=(Store.evals||[]).find(x=>x.id===evId); if(!e) return;
+
+  CUR.id = e.id; CUR.ts = e.ts;
 
   id('e_loc').value = e.loc || '';
   id('e_calle').value = e.calle||'';
@@ -592,9 +608,10 @@ function preloadIfAny(){
   id('e_alq').value = n0(e.alq||0);
 
   calc();
+  localStorage.removeItem('load_eval');
 }
 
-/* ===== PDF rápido (sin template strings) ===== */
+/* ===== PDF rápido (opcional, sin template strings) ===== */
 function quickPDFfrom(e){
   const fecha=new Date(e.ts||Date.now()).toLocaleString('es-ES');
   const htmlParts = [
