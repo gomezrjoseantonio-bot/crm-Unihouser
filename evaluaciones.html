@@ -57,15 +57,17 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 
 /* Adjuntos */
 .att-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-.att-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-@media(max-width:600px){.att-grid{grid-template-columns:1fr 1fr}}
-.att-card{position:relative;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;display:flex;flex-direction:column;gap:6px}
-.att-thumb{width:100%;height:120px;object-fit:cover;border-radius:6px;border:1px solid #eef2f7;background:#f8fafc}
+.att-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+@media(max-width:640px){.att-grid{grid-template-columns:1fr 1fr 1fr}}
+.att-card{position:relative;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:6px;display:flex;flex-direction:column;gap:6px}
+.att-thumb{width:100%;height:72px;object-fit:cover;border-radius:6px;border:1px solid #eef2f7;background:#f8fafc}
 .att-name{font-size:12px;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .att-ctl{display:flex;gap:6px}
-.att-ctl .mini{padding:6px 8px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-size:12px;cursor:pointer}
+.att-ctl .mini{padding:4px 6px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-size:12px;cursor:pointer}
 .att-ctl .mini:hover{background:#f8fafc}
 .att-empty{font-size:12px;color:#667085}
+.att-section h4{margin:10px 0 6px}
+.btn-ghost{background:#fff;border:1px dashed #e5e7eb}
 </style>
 </head>
 <body>
@@ -191,25 +193,48 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
       <div class="kv"><div class="k">P. máx</div><div class="v" id="d_pmax">—</div></div>
     </div>
 
-    <!-- 5) Adjuntos -->
-    <h3 class="section-title">Adjuntos</h3>
-    <div class="block">
-      <div class="att-actions">
-        <button class="btn" id="a_upload">Subir archivos</button>
-        <input type="file" id="a_file" accept="image/,video/,.pdf,application/pdf" multiple hidden>
-        <button class="btn" id="a_link">Añadir enlace</button>
-        <div class="small">Imágenes/Vídeos/PDF. Máx 2 MB por archivo (para no saturar el navegador). Para vídeos grandes, usa “Añadir enlace”.</div>
-      </div>
-      <div id="att_grid" class="att-grid"><div class="att-empty">Sin adjuntos.</div></div>
-    </div>
-
-    <!-- Asignación -->
+    <!-- 5) Asignación (AHORA VA ANTES DE ADJUNTOS) -->
     <h3 class="section-title">Asignar a prospects</h3>
     <div class="pros-head">
       <div class="small" id="pros_info">—</div>
       <label class="small"><input type="checkbox" id="pros_show_all"> Ver todos</label>
     </div>
     <div id="p_list" class="uh-list-pros">—</div>
+
+    <!-- 6) Adjuntos (secciones separadas) -->
+    <h3 class="section-title">Adjuntos</h3>
+    <div class="block att-section">
+      <h4>Imágenes</h4>
+      <div class="att-actions">
+        <button class="btn" id="a_img_upload">Subir imágenes</button>
+        <input type="file" id="a_img_file" accept="image/*" multiple hidden>
+        <button class="btn btn-ghost" id="a_img_link">Añadir enlace</button>
+        <div class="small">Miniaturas. Máx 2 MB/imagen.</div>
+      </div>
+      <div id="att_images" class="att-grid"><div class="att-empty">Sin imágenes.</div></div>
+    </div>
+
+    <div class="block att-section">
+      <h4>Vídeos</h4>
+      <div class="att-actions">
+        <button class="btn" id="a_vid_upload">Subir vídeos</button>
+        <input type="file" id="a_vid_file" accept="video/*" multiple hidden>
+        <button class="btn btn-ghost" id="a_vid_link">Añadir enlace</button>
+        <div class="small">Para vídeos pesados, usa enlace (YouTube/Drive).</div>
+      </div>
+      <div id="att_videos" class="att-grid"><div class="att-empty">Sin vídeos.</div></div>
+    </div>
+
+    <div class="block att-section">
+      <h4>PDFs</h4>
+      <div class="att-actions">
+        <button class="btn" id="a_pdf_upload">Subir PDFs</button>
+        <input type="file" id="a_pdf_file" accept=".pdf,application/pdf" multiple hidden>
+        <button class="btn btn-ghost" id="a_pdf_link">Añadir enlace</button>
+        <div class="small">Puedes fusionarlos con el Informe al exportar.</div>
+      </div>
+      <div id="att_pdfs" class="att-grid"><div class="att-empty">Sin PDFs.</div></div>
+    </div>
 
     <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
       <button class="btn primary" id="d_guardar">Guardar asignación</button>
@@ -241,11 +266,7 @@ function toast(msg,kind){
 function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function toPct(raw){ let v=Number(raw||0); if(v>0&&v<=1)v*=100; while(v>=100)v/=10; return v; }
 function fold(s){ return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
-function boolLike(x){
-  if(x===true) return true; if(x===false) return false;
-  const s=String(x||'').toLowerCase();
-  return s==='si'||s==='sí'||s==='true'||s==='1';
-}
+function boolLike(x){ if(x===true) return true; if(x===false) return false; const s=String(x||'').toLowerCase(); return s==='si'||s==='sí'||s==='true'||s==='1'; }
 
 /* ===== Store ===== */
 const Store={
@@ -331,7 +352,6 @@ function render(){
               '<circle cx="12" cy="12" r="3" stroke="#111827" stroke-width="1.5"/></svg>'+
             '</button>';
 
-    /* Trash icon corregido */
     html += '<button class="iconbtn" title="Borrar" data-act="del" aria-label="Borrar">'+
               '<svg class="icon" viewBox="0 0 24 24" fill="none">'+
               '<path d="M6 7h12M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m-1 0-1 12a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2L7 7" stroke="#111827" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
@@ -361,11 +381,7 @@ function openDrawer(idEv){
   id('d_asc').textContent = (e.asc||'—');
   id('d_bajo').textContent = (e.bajo||'—');
   id('d_hb').textContent = (e.habs||'-')+' / '+(e.banos||'-');
-  if(e.url){
-    id('d_url').innerHTML = '<a href="'+esc(e.url)+'" target="_blank" rel="noopener">Abrir anuncio</a>';
-  }else{
-    id('d_url').textContent = '—';
-  }
+  if(e.url){ id('d_url').innerHTML = '<a href="'+esc(e.url)+'" target="_blank" rel="noopener">Abrir anuncio</a>'; } else { id('d_url').textContent = '—'; }
 
   /* Adquisición */
   id('d_precio').textContent=e0(e.precio);
@@ -389,20 +405,25 @@ function openDrawer(idEv){
   id('d_inv').textContent   = e0(e.inv_total);
   id('d_pmax').textContent  = e0(e.pmax);
 
-  /* Adjuntos */
-  id('a_upload').onclick = ()=> id('a_file').click();
-  id('a_file').onchange = function(ev){ if(ev.target.files && ev.target.files.length){ addFilesToEval(e.id, ev.target.files); ev.target.value=''; } };
-  id('a_link').onclick = function(){
-    const url = prompt('Pega el enlace (YouTube, Drive, imagen, PDF...)');
-    if(!url) return;
-    addLinkToEval(e.id, url);
-  };
-  renderAttachments(e.id);
-
   /* Prospects */
   const showAllChk = id('pros_show_all'); showAllChk.checked = false;
   drawProspectsList(e, showAllChk.checked);
   showAllChk.onchange = function(){ drawProspectsList(e, showAllChk.checked); };
+
+  /* Adjuntos: binds por sección */
+  id('a_img_upload').onclick = ()=> id('a_img_file').click();
+  id('a_img_file').onchange = ev => { if(ev.target.files && ev.target.files.length){ addFilesToEval(e.id, ev.target.files, 'image'); ev.target.value=''; } };
+  id('a_img_link').onclick = ()=>{ const url=prompt('URL de la imagen'); if(url){ addLinkToEval(e.id,url,'image'); } };
+
+  id('a_vid_upload').onclick = ()=> id('a_vid_file').click();
+  id('a_vid_file').onchange = ev => { if(ev.target.files && ev.target.files.length){ addFilesToEval(e.id, ev.target.files, 'video'); ev.target.value=''; } };
+  id('a_vid_link').onclick = ()=>{ const url=prompt('URL del vídeo (YouTube/Drive/MP4)'); if(url){ addLinkToEval(e.id,url,'video'); } };
+
+  id('a_pdf_upload').onclick = ()=> id('a_pdf_file').click();
+  id('a_pdf_file').onchange = ev => { if(ev.target.files && ev.target.files.length){ addFilesToEval(e.id, ev.target.files, 'pdf'); ev.target.value=''; } };
+  id('a_pdf_link').onclick = ()=>{ const url=prompt('URL del PDF'); if(url){ addLinkToEval(e.id,url,'pdf'); } };
+
+  renderAttachments(e.id);
 
   id('uhOverlay').classList.add('open');
   id('uhDrawer').classList.add('open');
@@ -418,188 +439,14 @@ function closeDrawer(){
   openId=null;
 }
 
-/* ===== Adjuntos: helpers ===== */
-const MAX_FILE_BYTES = 2*1024*1024; // 2MB/archivo
-function mimeKind(m){
-  m = (m||'').toLowerCase();
-  if(m.startsWith('image/')) return 'image';
-  if(m.startsWith('video/')) return 'video';
-  if(m==='application/pdf' || m.endsWith('/pdf') || /\.pdf(\?|$)/i.test(m)) return 'pdf';
-  return 'file';
-}
-function urlKind(url){
-  const u = String(url||'').toLowerCase();
-  if(/\.(png|jpg|jpeg|webp|gif)(\?|$)/.test(u)) return 'image';
-  if(/\.(mp4|webm|ogg|mov)(\?|$)/.test(u) || /youtube\.com|youtu\.be|vimeo\.com/.test(u)) return 'video';
-  if(/\.pdf(\?|$)/.test(u)) return 'pdf';
-  return 'link';
-}
-function getEvalById(eid){
-  const list=Store.evals||[]; const idx=list.findIndex(x=>x.id===eid);
-  if(idx<0) return {list, idx:-1};
-  return {list, idx};
-}
-function persistEval(list){ Store.evals=list; load(); }
-
-/* Añadir archivos locales (dataURL) */
-function addFilesToEval(eid, fileList){
-  const {list, idx} = getEvalById(eid); if(idx<0) return;
-  list[idx].attachments = list[idx].attachments || [];
-  const att=list[idx].attachments;
-
-  const files = Array.from(fileList||[]);
-  let added=0, skipped=0;
-
-  const next = (i)=>{
-    if(i>=files.length){
-      persistEval(list);
-      renderAttachments(eid);
-      toast('Adjuntos: '+added+' añadido(s), '+skipped+' omitido(s)','ok');
-      return;
-    }
-    const f = files[i];
-    if(f.size>MAX_FILE_BYTES){ skipped++; return next(i+1); }
-
-    const reader = new FileReader();
-    reader.onload = function(){
-      const kind = mimeKind(f.type);
-      const item = {
-        id: 'att_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-        name: f.name || ('archivo.'+(f.type.split('/')[1]||'bin')),
-        type: f.type || '',
-        size: f.size || 0,
-        kind,
-        src: reader.result // dataURL
-      };
-      att.push(item);
-      added++;
-      // Comprobación simple de espacio
-      try {
-        Store.evals = list;
-      } catch(e){
-        // revertir último push si falla
-        att.pop();
-        toast('Sin espacio para guardar en el navegador','bad');
-      }
-      next(i+1);
-    };
-    reader.onerror = function(){ skipped++; next(i+1); };
-    reader.readAsDataURL(f);
-  };
-  next(0);
-}
-
-/* Añadir enlace */
-function addLinkToEval(eid, url){
-  const {list, idx} = getEvalById(eid); if(idx<0) return;
-  list[idx].attachments = list[idx].attachments || [];
-  const kind = urlKind(url);
-  list[idx].attachments.push({
-    id: 'att_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-    name: url.split('/').pop() || 'enlace',
-    type: 'link',
-    size: 0,
-    kind,
-    src: url
-  });
-  persistEval(list);
-  renderAttachments(eid);
-  toast('Enlace añadido','ok');
-}
-
-/* Eliminar adjunto */
-function deleteAttachment(eid, aid){
-  const {list, idx} = getEvalById(eid); if(idx<0) return;
-  const arr = list[idx].attachments||[];
-  const n = arr.length;
-  list[idx].attachments = arr.filter(x=>x.id!==aid);
-  if(arr.length!==n){
-    persistEval(list);
-    renderAttachments(eid);
-    toast('Adjunto eliminado','ok');
-  }
-}
-
-/* Render adjuntos */
-function renderAttachments(eid){
-  const {list, idx} = getEvalById(eid); if(idx<0) return;
-  const g = id('att_grid'); g.innerHTML = '';
-  const atts = (list[idx].attachments||[]);
-  if(!atts.length){
-    const d=document.createElement('div'); d.className='att-empty'; d.textContent='Sin adjuntos.';
-    g.appendChild(d); return;
-  }
-  atts.forEach(a=>{
-    const card=document.createElement('div'); card.className='att-card';
-
-    // preview
-    if(a.kind==='image'){
-      const img=document.createElement('img'); img.className='att-thumb'; img.alt=a.name;
-      img.src=a.src; card.appendChild(img);
-    }else if(a.kind==='video'){
-      if(a.src.startsWith('data:')){
-        const v=document.createElement('video'); v.className='att-thumb'; v.src=a.src; v.controls=true; card.appendChild(v);
-      }else{
-        const v=document.createElement('div'); v.className='att-thumb'; v.style.display='flex'; v.style.alignItems='center'; v.style.justifyContent='center';
-        v.textContent='🎬 Vídeo (enlace)'; card.appendChild(v);
-      }
-    }else if(a.kind==='pdf'){
-      const p=document.createElement('div'); p.className='att-thumb'; p.style.display='flex'; p.style.alignItems='center'; p.style.justifyContent='center';
-      p.textContent='📄 PDF'; card.appendChild(p);
-    }else{
-      const l=document.createElement('div'); l.className='att-thumb'; l.style.display='flex'; l.style.alignItems='center'; l.style.justifyContent='center';
-      l.textContent='🔗 Enlace'; card.appendChild(l);
-    }
-
-    // name
-    const name=document.createElement('div'); name.className='att-name'; name.textContent=a.name; card.appendChild(name);
-
-    // controls
-    const ctl=document.createElement('div'); ctl.className='att-ctl';
-
-    const bOpen=document.createElement('button'); bOpen.className='mini'; bOpen.textContent='Abrir';
-    bOpen.onclick=()=>{ window.open(a.src,'_blank'); };
-    ctl.appendChild(bOpen);
-
-    if(a.src.startsWith('data:')){
-      const bDl=document.createElement('a'); bDl.className='mini'; bDl.textContent='Descargar';
-      bDl.href=a.src; bDl.download=a.name||'archivo'; ctl.appendChild(bDl);
-    }
-
-    const bDel=document.createElement('button'); bDel.className='mini'; bDel.textContent='Borrar';
-    bDel.onclick=()=> deleteAttachment(eid, a.id);
-    ctl.appendChild(bDel);
-
-    card.appendChild(ctl);
-
-    g.appendChild(card);
-  });
-}
-
-/* ===== Lógica de match en el drawer (igual que versión estable mejorada) ===== */
-function isSearching(p){
-  const f=fold(p.fase||'');
-  return f.includes('busq'); // búsqueda / buscando
-}
-function wantsNoReform(p){
-  return boolLike(p.no_reformas)||boolLike(p.no_reforma)||
-         fold(p.reforma)==='no'||fold(p.pref_reforma)==='no'||boolLike(p.prefiere_sin_reforma);
-}
-function wantsElevator(p){
-  return boolLike(p.requiere_ascensor)||boolLike(p.quiere_ascensor)||fold(p.ascensor)==='si';
-}
-function wantsNoBajo(p){
-  return boolLike(p.no_bajos)||boolLike(p.no_bajo)||fold(p.pref_bajo)==='no';
-}
-function prospectBudget(p){
-  const cand = p.presupuesto_max??p.presupuesto??p.budget_max??p.budget;
-  return Number(String(cand??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
-}
+/* ===== Matching en Drawer ===== */
+function isSearching(p){ const f=fold(p.fase||''); return f.includes('busq'); }
+function wantsNoReform(p){ return boolLike(p.no_reformas)||boolLike(p.no_reforma)||fold(p.reforma)==='no'||fold(p.pref_reforma)==='no'||boolLike(p.prefiere_sin_reforma); }
+function wantsElevator(p){ return boolLike(p.requiere_ascensor)||boolLike(p.quiere_ascensor)||fold(p.ascensor)==='si'; }
+function wantsNoBajo(p){ return boolLike(p.no_bajos)||boolLike(p.no_bajo)||fold(p.pref_bajo)==='no'; }
+function prospectBudget(p){ const cand = p.presupuesto_max??p.presupuesto??p.budget_max??p.budget; return Number(String(cand??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0; }
 function hasAnyTargetMatch(e,p){
-  const b=Number(p.obj_bruta||0);
-  const n=Number(p.obj_neta||0);
-  const fm=Number(p.obj_flujo||0);
-  const fa=Number(p.obj_flujo_anual||0);
+  const b=Number(p.obj_bruta||0), n=Number(p.obj_neta||0), fm=Number(p.obj_flujo||0), fa=Number(p.obj_flujo_anual||0);
   const flujoObj = fa>0? fa : (fm>0? fm*12 : 0);
   const okB = b>0 && Number(toPct(e.kpi_bruta))>=b;
   const okN = n>0 && Number(toPct(e.kpi_neta)) >=n;
@@ -618,13 +465,11 @@ function warnBadgesFor(p, e){
   if(budget>0 && Number(e.inv_total||0)>budget){ warns.push({title:'Excede presupuesto', icon:'💰'}); }
   return warns;
 }
-
 function drawProspectsList(e, showAll){
   const wrap=id('p_list'); wrap.innerHTML='';
   const pros=Store.pros||[];
   const set=new Set(e.prospect_ids||[]);
-  const wantTipo=fold(e.tipo||'');
-  const wantLoc =fold(e.loc||'');
+  const wantTipo=fold(e.tipo||''); const wantLoc =fold(e.loc||'');
 
   const matches=[], others=[];
   pros.forEach(function(p){
@@ -647,80 +492,176 @@ function drawProspectsList(e, showAll){
     : [...matches.sort((a,b)=>isAssigned(b)-isAssigned(a))];
 
   if(!listToRender.length){
-    const empty=document.createElement('div');
-    empty.className='small';
-    empty.textContent = showAll? 'No hay prospects.' : 'No hay coincidencias. Activa “Ver todos” para mostrar el resto.';
-    wrap.appendChild(empty);
-    return;
+    const empty=document.createElement('div'); empty.className='small';
+    empty.textContent = showAll? 'No hay prospects.' : 'No hay coincidencias. Activa “Ver todos”.';
+    wrap.appendChild(empty); return;
   }
 
   listToRender.forEach(function(o){
     const row=document.createElement('label');
-
-    const cb=document.createElement('input'); 
-    cb.type='checkbox'; cb.value=o.idp; cb.checked=o.checked;
-    row.appendChild(cb);
-
-    const name=document.createElement('span');
-    name.textContent = (o.p.nombre||'—');
-    row.appendChild(name);
-
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.value=o.idp; cb.checked=o.checked; row.appendChild(cb);
+    const name=document.createElement('span'); name.textContent = (o.p.nombre||'—'); row.appendChild(name);
     if(o.warns.length){
       const bWrap=document.createElement('span'); bWrap.className='badges';
       o.warns.forEach(function(w){
         const b=document.createElement('span'); b.className='badge-warn'; b.title=w.title;
-        const i=document.createElement('span'); i.className='ico'; i.textContent=w.icon;
-        b.appendChild(i);
-        const t=document.createElement('span'); t.textContent=w.title;
-        b.appendChild(t);
+        const i=document.createElement('span'); i.className='ico'; i.textContent=w.icon; b.appendChild(i);
+        const t=document.createElement('span'); t.textContent=w.title; b.appendChild(t);
         bWrap.appendChild(b);
       });
       row.appendChild(bWrap);
     }
-
-    if(!o.faseOK || !o.sameTipo || !o.sameLoc || !o.kpiOK){
-      row.style.opacity = showAll ? .72 : 1;
-    }
-
+    if(!o.faseOK || !o.sameTipo || !o.sameLoc || !o.kpiOK){ row.style.opacity = showAll ? .72 : 1; }
     wrap.appendChild(row);
   });
 }
-
 function saveAssign(){
   if(!openId) return;
   const list=Store.evals||[];
   const idx=list.findIndex(x=>x.id===openId); if(idx<0) return;
-
   const choices=[].slice.call(id('p_list').querySelectorAll('input[type=checkbox]'));
   const selected = choices.filter(c=>c.checked).map(c=>c.value);
-
   list[idx].prospect_ids = selected;
   Store.evals=list;
   toast('Asignación guardada para '+selected.length+' prospecto(s)','ok');
-  closeDrawer();
-  load();
+  closeDrawer(); load();
 }
 
-/* ===== PDF (mantenemos el look sobrio por ahora) ===== */
+/* ===== Adjuntos ===== */
+const MAX_FILE_BYTES = 2*1024*1024; // 2MB/archivo
+function mimeKind(m){
+  m = (m||'').toLowerCase();
+  if(m.startsWith('image/')) return 'image';
+  if(m.startsWith('video/')) return 'video';
+  if(m==='application/pdf' || m.endsWith('/pdf')) return 'pdf';
+  return 'file';
+}
+function urlKind(url){
+  const u = String(url||'').toLowerCase();
+  if(/\.(png|jpg|jpeg|webp|gif)(\?|$)/.test(u)) return 'image';
+  if(/\.(mp4|webm|ogg|mov)(\?|$)/.test(u) || /youtube\.com|youtu\.be|vimeo\.com/.test(u)) return 'video';
+  if(/\.pdf(\?|$)/.test(u)) return 'pdf';
+  return 'link';
+}
+function getEvalById(eid){
+  const list=Store.evals||[]; const idx=list.findIndex(x=>x.id===eid);
+  if(idx<0) return {list, idx:-1};
+  return {list, idx};
+}
+function persistEval(list){ Store.evals=list; load(); }
+
+function addFilesToEval(eid, fileList, forceKind){
+  const {list, idx} = getEvalById(eid); if(idx<0) return;
+  list[idx].attachments = list[idx].attachments || [];
+  const att=list[idx].attachments;
+  const files = Array.from(fileList||[]);
+  let added=0, skipped=0;
+
+  const next = (i)=>{
+    if(i>=files.length){
+      persistEval(list); renderAttachments(eid);
+      toast('Adjuntos: '+added+' añadido(s), '+skipped+' omitido(s)','ok'); return;
+    }
+    const f = files[i];
+    if(f.size>MAX_FILE_BYTES){ skipped++; return next(i+1); }
+    const reader = new FileReader();
+    reader.onload = function(){
+      const kind = forceKind || mimeKind(f.type);
+      const item = {
+        id: 'att_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+        name: f.name || ('archivo.'+(f.type.split('/')[1]||'bin')),
+        type: f.type || '',
+        size: f.size || 0,
+        kind,
+        src: reader.result
+      };
+      att.push(item);
+      try { Store.evals=list; added++; } catch(e){ att.pop(); skipped++; toast('Sin espacio para guardar en el navegador','bad'); }
+      next(i+1);
+    };
+    reader.onerror = function(){ skipped++; next(i+1); };
+    reader.readAsDataURL(f);
+  };
+  next(0);
+}
+function addLinkToEval(eid, url, forceKind){
+  const {list, idx} = getEvalById(eid); if(idx<0) return;
+  list[idx].attachments = list[idx].attachments || [];
+  const kind = forceKind || urlKind(url);
+  list[idx].attachments.push({
+    id: 'att_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+    name: url.split('/').pop() || 'enlace',
+    type: 'link', size: 0, kind, src: url
+  });
+  persistEval(list); renderAttachments(eid); toast('Enlace añadido','ok');
+}
+function deleteAttachment(eid, aid){
+  const {list, idx} = getEvalById(eid); if(idx<0) return;
+  const arr = list[idx].attachments||[];
+  list[idx].attachments = arr.filter(x=>x.id!==aid);
+  persistEval(list); renderAttachments(eid); toast('Adjunto eliminado','ok');
+}
+function renderAttachments(eid){
+  const {list, idx} = getEvalById(eid); if(idx<0) return;
+  const atts = (list[idx].attachments||[]);
+  const imgs = atts.filter(a=>a.kind==='image');
+  const vids = atts.filter(a=>a.kind==='video');
+  const pdfs = atts.filter(a=>a.kind==='pdf');
+
+  const gImg=id('att_images'), gVid=id('att_videos'), gPdf=id('att_pdfs');
+  function fillGrid(grid, arr, placeholder){
+    grid.innerHTML='';
+    if(!arr.length){ const d=document.createElement('div'); d.className='att-empty'; d.textContent=placeholder; grid.appendChild(d); return; }
+    arr.forEach(a=>{
+      const card=document.createElement('div'); card.className='att-card';
+      if(a.kind==='image'){
+        const img=document.createElement('img'); img.className='att-thumb'; img.alt=a.name; img.src=a.src; card.appendChild(img);
+      }else if(a.kind==='video'){
+        const thumb=document.createElement('div'); thumb.className='att-thumb'; thumb.style.display='flex'; thumb.style.alignItems='center'; thumb.style.justifyContent='center'; thumb.textContent='🎬'; card.appendChild(thumb);
+      }else if(a.kind==='pdf'){
+        const thumb=document.createElement('div'); thumb.className='att-thumb'; thumb.style.display='flex'; thumb.style.alignItems='center'; thumb.style.justifyContent='center'; thumb.textContent='📄'; card.appendChild(thumb);
+      }
+      const name=document.createElement('div'); name.className='att-name'; name.textContent=a.name; card.appendChild(name);
+      const ctl=document.createElement('div'); ctl.className='att-ctl';
+      const bOpen=document.createElement('button'); bOpen.className='mini'; bOpen.textContent='Abrir'; bOpen.onclick=()=>window.open(a.src,'_blank'); ctl.appendChild(bOpen);
+      if(a.src.startsWith('data:')){ const bDl=document.createElement('a'); bDl.className='mini'; bDl.textContent='Descargar'; bDl.href=a.src; bDl.download=a.name||'archivo'; ctl.appendChild(bDl); }
+      const bDel=document.createElement('button'); bDel.className='mini'; bDel.textContent='Borrar'; bDel.onclick=()=>deleteAttachment(eid, a.id); ctl.appendChild(bDel);
+      card.appendChild(ctl); grid.appendChild(card);
+    });
+  }
+  fillGrid(gImg, imgs, 'Sin imágenes.');
+  fillGrid(gVid, vids, 'Sin vídeos.');
+  fillGrid(gPdf, pdfs, 'Sin PDFs.');
+}
+
+/* ===== PDF (pregunta si fusionar y look&feel Unihouser) ===== */
 function quickPDF(idEv){
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e){toast('No encontrado','bad');return;}
+  const wantsMerge = confirm('¿Quieres fusionar el Informe con los PDFs adjuntos (si hay)?');
+  if(wantsMerge){
+    const pdfs = (e.attachments||[]).filter(a=>a.kind==='pdf');
+    if(!pdfs.length){ alert('No hay PDFs adjuntos. Genero solo el Informe.'); }
+    else if(!window.PDFLib){ alert('Para fusionar en navegador necesitas PDF-LIB (window.PDFLib). De momento genero el Informe y podrás unirlos manualmente.'); }
+  }
+
   const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
   const css=[
-    '*{box-sizing:border-box}body{font-family:Inter,Arial,Helvetica,sans-serif;margin:0;color:#0f172a}',
-    '.brand{display:flex;align-items:center;gap:10px;padding:14px 18px;background:#0f172a;color:#fff}',
-    '.brand .title{font-weight:800;font-size:18px}', '.brand .meta{margin-left:auto;font-size:12px;opacity:.85}',
+    '*{box-sizing:border-box} body{font-family:Inter,Arial,Helvetica,sans-serif;margin:0;color:#0f172a}',
+    '.brand{display:flex;align-items:center;gap:12px;padding:16px 20px;background:#0f172a;color:#fff;border-bottom:4px solid #ff5a1f}',
+    '.brand .title{font-weight:900;font-size:18px;letter-spacing:.2px}.brand .meta{margin-left:auto;font-size:12px;opacity:.9}',
     '.wrap{padding:18px}',
-    '.grid{display:grid;gap:10px}',
-    '.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}',
-    '.card{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff}',
-    '.h{margin:0 0 8px;font-size:16px}', '.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px}',
-    '.kv .k{font-size:12px;color:#64748b}.kv .v{font-weight:700}',
-    '.kpi{display:flex;flex-direction:column;gap:4px;text-align:center}.kpi .big{font-size:22px;font-weight:800}',
-    '.muted{color:#64748b;font-size:12px}'
+    '.grid{display:grid;gap:12px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}',
+    '.card{border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#fff;box-shadow:0 1px 0 rgba(15,23,42,.03)}',
+    '.h{margin:0 0 8px;font-size:16px}',
+    '.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px}.kv .k{font-size:12px;color:#64748b}.kv .v{font-weight:700}',
+    '.kpi{display:flex;flex-direction:column;gap:4px;text-align:center}.kpi .big{font-size:22px;font-weight:900;color:#0f172a}',
+    '.muted{color:#64748b;font-size:12px}',
+    '.pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#fff1e8;color:#7a2e0e;font-weight:700;font-size:12px}'
   ].join('');
+
   const html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — '+esc(e.loc||'')+
   '</title><style>'+css+'</style></head><body>'+
-  '<div class="brand"><div class="title">Unihouser — Informe BuyBox</div><div class="meta">'+esc(fecha)+'</div></div>'+
+  '<div class="brand"><div class="title">Unihouser — Informe BuyBox</div><div class="pill">Privado</div><div class="meta">'+esc(fecha)+'</div></div>'+
   '<div class="wrap grid g2">'+
     '<div class="card"><h3 class="h">Resumen KPIs</h3>'+
       '<div class="grid g3">'+
@@ -801,9 +742,7 @@ function onTableClick(ev){
     const act=btn.dataset.act;
     if(act==='ver') openDrawer(idEv);
     if(act==='del'){ if(confirm('¿Borrar esta evaluación?')){ Store.evals=(Store.evals||[]).filter(x=>x.id!==idEv); load(); } }
-  }else{
-    openDrawer(idEv);
-  }
+  }else{ openDrawer(idEv); }
 }
 function bindSort(){
   const ths=document.querySelectorAll('#tbl th[data-k]');
