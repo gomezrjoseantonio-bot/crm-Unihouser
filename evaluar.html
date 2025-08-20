@@ -11,8 +11,12 @@
 .small{font-size:12px;color:#667085}
 .kpi .muted{color:#667085;font-weight:600;margin-left:6px}
 .canvasWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
+
+/* Grid 3 columnas responsive */
 .group3{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}
 @media(max-width:1000px){.group3{grid-template-columns:1fr}}
+
+/* Matching UI */
 #matchWrap{display:grid;gap:8px}
 .match-col{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
 .match-col h4{margin:0 0 8px}
@@ -275,6 +279,9 @@ function bindAuto(){
   tipoEl.addEventListener('change',updAlq);
 }
 
+/* ===== estado interno para evitar duplicados ===== */
+let CURRENT_ID = null;
+
 /* ===== Cálculos financieros ===== */
 function calc(){
   const cfg=getCfg();
@@ -334,13 +341,20 @@ function calc(){
   drawChart(bruta, obj_bruta);
 
   // Sugerencias
-  suggestProspects({ tipo, loc: id('e_loc').value||'', bruta, neta, flujo, obj_bruta, obj_neta });
+  suggestProspects({
+    tipo,
+    loc: id('e_loc').value||'',
+    bruta, neta, flujo,
+    inv_total,
+    ref_tip: id('e_ref_nec').value||'no',
+    asc: id('e_asc').value||'Sí'
+  });
 
   id('e_result').hidden=false;
 
   // objeto evaluación
   return {
-    id: 'ev_'+Date.now(),
+    id: CURRENT_ID || ('ev_'+Date.now()),
     ts: Date.now(),
     loc: id('e_loc').value || '',
     calle: id('e_calle').value || '',
@@ -402,12 +416,33 @@ function drawChart(real, objetivo){
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects ===== */
+/* ===== Matching prospects (tolerante a tu esquema) ===== */
 function isSearching(p){
-  const f=(p.fase||'').toString().toLowerCase();
-  return f.includes('busc'); // “búsqueda”, “buscando”, etc.
+  // Acepta "BÚSQUEDA", "BUSQUEDA", "buscando", etc.
+  const f=(p.fase||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  return f.includes('busq'); // clave: 'busq' para cubrir "busqueda/búsqueda"
 }
 function norm(s){ return (s||'').toString().trim().toLowerCase(); }
+function getTargetInfo(p){
+  // Devuelve {kind:'bruta'|'neta'|'flujo', val:number(anual para flujo)}
+  const kind=(p.obj_tipo||p.obj_main||'').toString().toLowerCase().trim();
+  const raw = Number(p.obj_raw ?? 0);
+  const b   = Number(p.obj_bruta ?? 0);
+  const n   = Number(p.obj_neta ?? 0);
+  const f_m = Number(p.obj_flujo ?? 0);     // mensual
+  const f_a = Number(p.obj_flujo_anual ?? 0);
+
+  if(kind==='bruta' && raw>0) return {kind:'bruta', val:raw};
+  if(kind==='neta'  && raw>0) return {kind:'neta',  val:raw};
+  if(kind==='flujo' && (raw>0 || f_m>0 || f_a>0)){
+    const val = f_a>0 ? f_a : (raw>0 ? raw*12 : f_m*12);
+    return {kind:'flujo', val:val};
+  }
+  if(b>0) return {kind:'bruta', val:b};
+  if(n>0) return {kind:'neta',  val:n};
+  if(f_a>0 || f_m>0) return {kind:'flujo', val: (f_a>0?f_a:f_m*12)};
+  return {kind:'', val:0};
+}
 function suggestProspects(ctx){
   const list=Store.pros||[];
   const mB=id('m_bruta'), mN=id('m_neta'), mF=id('m_flujo');
@@ -419,22 +454,22 @@ function suggestProspects(ctx){
   const wantTipo = norm(ctx.tipo);
   const wantLoc  = norm(ctx.loc);
 
-  const brutaOK=[], netaOK=[], flujoOK=[], assignOptions=[];
+  const brutaOK=[], netaOK=[], flujoOK=[];
+  const addOptionSet=new Set();
 
   list.forEach(p=>{
     if(!isSearching(p)) return;
     if(norm(p.pref_tipo)!==wantTipo) return;
-    const locs=(p.locs_text||'').split(',').map(s=>norm(s));
+
+    const locs=(p.locs_text||'').split(',').map(s=>norm(s)).filter(Boolean);
     if(!locs.includes(wantLoc)) return;
 
-    const main=(p.obj_main||'bruta').toLowerCase();
-    const objB=Number(p.obj_bruta||0);
-    const objN=Number(p.obj_neta||0);
-    const objF_ano=(Number(p.obj_flujo||0)*12)||0; // prospect en €/mes → anual
+    const tgt = getTargetInfo(p);
+    if(!tgt.val) return;
 
-    if(main==='bruta' && ctx.bruta>=objB){ brutaOK.push(p); assignOptions.push(p); }
-    if(main==='neta'  && ctx.neta>=objN){  netaOK.push(p);  assignOptions.push(p); }
-    if(main==='flujo' && ctx.flujo>=objF_ano){ flujoOK.push(p); assignOptions.push(p); }
+    if(tgt.kind==='bruta' && Number(ctx.bruta)>=tgt.val){ brutaOK.push(p); }
+    if(tgt.kind==='neta'  && Number(ctx.neta) >=tgt.val){ netaOK.push(p); }
+    if(tgt.kind==='flujo' && Number(ctx.flujo)>=tgt.val){ flujoOK.push(p); }
   });
 
   const renderChips=(arr,el)=>{
@@ -445,41 +480,54 @@ function suggestProspects(ctx){
       span.className='tag';
       span.textContent=p.nombre||'-';
       el.appendChild(span);
+
+      const val=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
+      if(!addOptionSet.has(val)){
+        addOptionSet.add(val);
+        const opt=document.createElement('option'); opt.value=val; opt.textContent=p.nombre||'-';
+        asignSel.appendChild(opt);
+      }
     });
   };
   renderChips(brutaOK,mB);
   renderChips(netaOK,mN);
   renderChips(flujoOK,mF);
-
-  // select múltiple para asignar (unión de los tres, sin duplicados)
-  const seen=new Set();
-  [...brutaOK,...netaOK,...flujoOK].forEach(p=>{
-    const val=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
-    if(seen.has(val)) return; seen.add(val);
-    const opt=document.createElement('option'); opt.value=val; opt.textContent=p.nombre||'-';
-    asignSel.appendChild(opt);
-  });
 }
 
 /* ===== Guardar / Asignar ===== */
 function gather(){ return calc(); }
 function save(alsoAssign){
   const e=gather();
-  const loaded = localStorage.getItem('load_eval');
+
+  // Si venimos de Evaluaciones, respetar el id original
+  const loadKey = localStorage.getItem('load_eval') || localStorage.getItem('load_eval') || '';
   let list=Store.evals||[];
-  if(loaded){
-    const idx=list.findIndex(x=>x.id===loaded);
-    if(idx>=0){ e.id=list[idx].id; e.ts=list[idx].ts; }
+  if(loadKey){
+    const idx=list.findIndex(x=>x.id===loadKey);
+    if(idx>=0){ e.id=list[idx].id; e.ts=list[idx].ts; CURRENT_ID=e.id; }
+    localStorage.removeItem('load_eval');
     localStorage.removeItem('load_eval');
   }
+
+  if(CURRENT_ID) e.id = CURRENT_ID; // mantener mismo id tras el primer guardado
+
   if(alsoAssign){
     const sel=[...document.getElementById('assign_cli').options].filter(o=>o.selected).map(o=>o.value);
     e.prospect_ids = sel;
   }
+
   const idx2=list.findIndex(x=>x.id===e.id);
   if(idx2>=0) list[idx2]=e; else list.push(e);
   Store.evals = list;
-  toast('Evaluación guardada','ok');
+
+  CURRENT_ID = e.id; // fijar id para siguientes guardados
+
+  if(alsoAssign){
+    const n = (e.prospect_ids||[]).length;
+    toast('Guardado y asignado a '+n+' cliente(s)','ok');
+  }else{
+    toast('Evaluación guardada','ok');
+  }
 }
 
 /* ===== Limpiar ===== */
@@ -491,13 +539,16 @@ function limpiar(){
     else s.selectedIndex=0;
   });
   document.getElementById('e_result').hidden=true;
+  CURRENT_ID = null;
 }
 
 /* ===== Preload desde Evaluaciones (solo si existe) ===== */
 function preloadIfAny(){
-  const evId = localStorage.getItem('load_eval');
+  const evId = localStorage.getItem('load_eval') || localStorage.getItem('load_eval');
   if(!evId) return; // abrir en blanco si no viene de Evaluaciones
   const e=(Store.evals||[]).find(x=>x.id===evId); if(!e) return;
+
+  CURRENT_ID = e.id;
 
   id('e_loc').value = e.loc || '';
   id('e_calle').value = e.calle||'';
