@@ -9,12 +9,12 @@
 /* Overlay + Drawer */
 .uh-overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
 .uh-overlay.open{display:block}
-.uh-drawer{position:fixed;top:0;right:-520px;height:100%;width:520px;max-width:100%;background:#fff;border-left:1px solid #e5e7eb;box-shadow:0 10px 24px rgba(0,0,0,.25);transition:right .2s ease;z-index:90}
+.uh-drawer{position:fixed;top:0;right:-560px;height:100%;width:560px;max-width:100%;background:#fff;border-left:1px solid #e5e7eb;box-shadow:0 10px 24px rgba(0,0,0,.25);transition:right .2s ease;z-index:90}
 .uh-drawer.open{right:0}
 .uh-d-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #eef2f7}
 .uh-d-body{padding:16px 16px 24px;overflow:auto;height:calc(100% - 60px)}
 .uh-meta{font-size:12px;color:#667085;margin-bottom:12px}
-.divider{height:1px;background:#eef2f7;margin:12px 0}
+.section-title{margin:10px 0 6px;font-weight:700}
 
 /* KPIs */
 .kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px}
@@ -35,12 +35,13 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 .iconbtn:hover{background:#f8fafc}
 .icon{width:18px;height:18px;display:block}
 
-/* Drawer detail list */
-.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin-bottom:8px}
-.kv .k{color:#667085;font-size:12px}
-.kv .v{font-weight:700}
+/* Drawer: pares clave-valor */
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin-bottom:6px}
+.kv .k{color:#667085;font-size:12px;line-height:1.2}
+.kv .v{font-weight:600;font-size:14px;line-height:1.2}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.block{border:1px solid #eef2f7;border-radius:12px;padding:10px;background:#fff;margin-bottom:10px}
 
 /* Prospects list */
 .uh-list-pros{display:grid;gap:6px}
@@ -50,7 +51,7 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 .small{font-size:12px;color:#667085}
 
 /* Badges de aviso */
-.badges{display:inline-flex;gap:6px;margin-left:6px}
+.badges{display:inline-flex;gap:6px;margin-left:6px;flex-wrap:wrap}
 .badge-warn{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#b45309;background:#fff7ed;border:1px solid #fde68a;border-radius:999px;padding:2px 6px}
 .badge-warn .ico{width:12px;height:12px;display:inline-block}
 
@@ -141,42 +142,34 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
   <div class="uh-d-body">
     <div class="uh-meta" id="d_fecha">—</div>
 
-    <!-- Resumen principal -->
-    <div class="grid2">
+    <!-- 1) Datos del inmueble -->
+    <h3 class="section-title">Datos del inmueble</h3>
+    <div class="block grid3">
       <div class="kv"><div class="k">Localidad</div><div class="v" id="d_loc">—</div></div>
       <div class="kv"><div class="k">Calle</div><div class="v" id="d_calle">—</div></div>
       <div class="kv"><div class="k">Tipo</div><div class="v" id="d_tipo">—</div></div>
-      <div class="kv"><div class="k">URL</div><div class="v" id="d_url">—</div></div>
-    </div>
-
-    <div class="grid3" style="margin-top:4px">
-      <div class="kv"><div class="k">Precio</div><div class="v" id="d_precio">—</div></div>
-      <div class="kv"><div class="k">Alquiler</div><div class="v" id="d_alq">—</div></div>
-      <div class="kv"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
-      <div class="kv"><div class="k">Bruta</div><div class="v" id="d_bruta">—</div></div>
-      <div class="kv"><div class="k">Neta</div><div class="v" id="d_neta">—</div></div>
-      <div class="kv"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
-      <div class="kv"><div class="k">P. máx</div><div class="v" id="d_pmax">—</div></div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Datos completos -->
-    <h3 style="margin:0 0 6px">Datos completos</h3>
-    <div class="grid3">
-      <div class="kv"><div class="k">m²</div><div class="v" id="d_m2">—</div></div>
+      <div class="kv"><div class="k">Superficie</div><div class="v" id="d_m2">—</div></div>
       <div class="kv"><div class="k">Año</div><div class="v" id="d_anio">—</div></div>
       <div class="kv"><div class="k">Altura</div><div class="v" id="d_alt">—</div></div>
       <div class="kv"><div class="k">Ascensor</div><div class="v" id="d_asc">—</div></div>
       <div class="kv"><div class="k">Bajo</div><div class="v" id="d_bajo">—</div></div>
       <div class="kv"><div class="k">Hab./Baños</div><div class="v" id="d_hb">—</div></div>
+      <div class="kv" style="grid-column:1/-1"><div class="k">URL</div><div class="v" id="d_url">—</div></div>
     </div>
 
-    <div class="grid3" style="margin-top:6px">
-      <div class="kv"><div class="k">Reforma</div><div class="v" id="d_ref_tip">—</div></div>
+    <!-- 2) Gastos de adquisición -->
+    <h3 class="section-title">Gastos de adquisición</h3>
+    <div class="block grid3">
+      <div class="kv"><div class="k">Precio</div><div class="v" id="d_precio">—</div></div>
       <div class="kv"><div class="k">ITP</div><div class="v" id="d_itp">—</div></div>
       <div class="kv"><div class="k">Notaría</div><div class="v" id="d_notaria">—</div></div>
       <div class="kv"><div class="k">PSI</div><div class="v" id="d_psi">—</div></div>
+      <div class="kv"><div class="k">Reforma</div><div class="v" id="d_ref_tip">—</div></div>
+    </div>
+
+    <!-- 3) Gastos de mantenimiento -->
+    <h3 class="section-title">Gastos de mantenimiento</h3>
+    <div class="block grid3">
       <div class="kv"><div class="k">Comunidad</div><div class="v" id="d_comu">—</div></div>
       <div class="kv"><div class="k">IBI</div><div class="v" id="d_ibi">—</div></div>
       <div class="kv"><div class="k">Hogar</div><div class="v" id="d_hogar">—</div></div>
@@ -184,10 +177,19 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
       <div class="kv"><div class="k">Gestión</div><div class="v" id="d_gestion">—</div></div>
     </div>
 
-    <div class="divider"></div>
+    <!-- 4) Explotación e ingresos -->
+    <h3 class="section-title">Explotación e ingresos</h3>
+    <div class="block grid3">
+      <div class="kv"><div class="k">Alquiler</div><div class="v" id="d_alq">—</div></div>
+      <div class="kv"><div class="k">Bruta</div><div class="v" id="d_bruta">—</div></div>
+      <div class="kv"><div class="k">Neta</div><div class="v" id="d_neta">—</div></div>
+      <div class="kv"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
+      <div class="kv"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
+      <div class="kv"><div class="k">P. máx</div><div class="v" id="d_pmax">—</div></div>
+    </div>
 
-    <!-- Asignación de prospects -->
-    <h3 style="margin:0 0 6px">Asignar a prospects</h3>
+    <!-- Asignación -->
+    <h3 class="section-title">Asignar a prospects</h3>
     <div class="pros-head">
       <div class="small" id="pros_info">—</div>
       <label class="small"><input type="checkbox" id="pros_show_all"> Ver todos</label>
@@ -310,13 +312,14 @@ function render(){
 
     html += '<button class="iconbtn" title="Ver" data-act="ver" aria-label="Ver">'+
               '<svg class="icon" viewBox="0 0 24 24" fill="none">'+
-              '<path d="M12 5c5 0 9 4 10 7-1 3-5 7-10 7S3 15 2 12c1-3 5-7 10-7Z" stroke="#111827" stroke-width="1.5"/>'+
+              '<path d="M12 5c5 0 9 4 10 7-1 3-5 7-10 7S3 15 2 12c1-3 5-7 10-7Z" stroke="#111827" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'+
               '<circle cx="12" cy="12" r="3" stroke="#111827" stroke-width="1.5"/></svg>'+
             '</button>';
 
+    /* Trash icon corregido (Heroicons outline) */
     html += '<button class="iconbtn" title="Borrar" data-act="del" aria-label="Borrar">'+
               '<svg class="icon" viewBox="0 0 24 24" fill="none">'+
-              '<path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0  1 2v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12" stroke="#111827" stroke-width="1.5" stroke-linecap="round"/></svg>'+
+              '<path d="M6 7h12M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m-1 0-1 12a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2L7 7" stroke="#111827" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
             '</button>';
 
     html += '</div></td>';
@@ -333,48 +336,48 @@ function openDrawer(idEv){
 
   id('d_fecha').textContent=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
 
+  /* Datos del inmueble */
   id('d_loc').textContent =e.loc||'—';
   id('d_calle').textContent=e.calle||'—';
   id('d_tipo').textContent =e.tipo||'—';
-  id('d_precio').textContent=e0(e.precio);
-  id('d_alq').textContent =e0(e.alq);
-  id('d_bruta').textContent =fmtN1.format(toPct(e.kpi_bruta))+' %';
-  id('d_neta').textContent =fmtN1.format(toPct(e.kpi_neta))+' %';
-  id('d_flujo').textContent =e0(e.kpi_flujo);
-  id('d_pmax').textContent =e0(e.pmax);
-  id('d_inv').textContent =e0(e.inv_total);
-
-  if(e.url){
-    id('d_url').innerHTML = '<a href="'+esc(e.url)+'" target="_blank" rel="noopener">Abrir anuncio</a>';
-  }else{
-    id('d_url').textContent = '—';
-  }
-
-  /* Completar todos los datos */
   id('d_m2').textContent = (e.m2||'—');
   id('d_anio').textContent = (e.anio||'—');
   id('d_alt').textContent = (e.alt||'—');
   id('d_asc').textContent = (e.asc||'—');
   id('d_bajo').textContent = (e.bajo||'—');
   id('d_hb').textContent = (e.habs||'-')+' / '+(e.banos||'-');
-  id('d_ref_tip').textContent = (e.ref_tip||'—');
+  if(e.url){
+    id('d_url').innerHTML = '<a href="'+esc(e.url)+'" target="_blank" rel="noopener">Abrir anuncio</a>';
+  }else{
+    id('d_url').textContent = '—';
+  }
+
+  /* Adquisición */
+  id('d_precio').textContent=e0(e.precio);
   id('d_itp').textContent = e0(e.itp||0);
   id('d_notaria').textContent = e0(e.notaria||0);
   id('d_psi').textContent = e0(e.psi||0);
+  id('d_ref_tip').textContent = (e.ref_tip||'—');
+
+  /* Mantenimiento */
   id('d_comu').textContent = e0(e.comu||0);
   id('d_ibi').textContent = e0(e.ibi||0);
   id('d_hogar').textContent = e0(e.hogar||0);
   id('d_impago').textContent = e0(e.impago||0);
   id('d_gestion').textContent = e0(e.gestion||0);
 
-  /* Render prospects con lógica */
-  const showAllChk = id('pros_show_all');
-  showAllChk.checked = false;
-  drawProspectsList(e, showAllChk.checked);
+  /* Explotación e ingresos */
+  id('d_alq').textContent = e0(e.alq);
+  id('d_bruta').textContent = fmtN1.format(toPct(e.kpi_bruta))+' %';
+  id('d_neta').textContent  = fmtN1.format(toPct(e.kpi_neta))+' %';
+  id('d_flujo').textContent = e0(e.kpi_flujo);
+  id('d_inv').textContent   = e0(e.inv_total);
+  id('d_pmax').textContent  = e0(e.pmax);
 
-  showAllChk.onchange = function(){
-    drawProspectsList(e, showAllChk.checked);
-  };
+  /* Prospects: lógica */
+  const showAllChk = id('pros_show_all'); showAllChk.checked = false;
+  drawProspectsList(e, showAllChk.checked);
+  showAllChk.onchange = function(){ drawProspectsList(e, showAllChk.checked); };
 
   id('uhOverlay').classList.add('open');
   id('uhDrawer').classList.add('open');
@@ -409,44 +412,27 @@ function prospectBudget(p){
   const cand = p.presupuesto_max??p.presupuesto??p.budget_max??p.budget;
   return Number(String(cand??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
 }
-function targetInfo(p){
-  const kind=fold(p.obj_main||p.obj_tipo||'');
-  const b=Number(p.obj_bruta||0), n=Number(p.obj_neta||0);
-  const f_m=Number(p.obj_flujo||0), f_a=Number(p.obj_flujo_anual||0);
-  if(kind==='bruta' && b>0) return {kind:'bruta', val:b};
-  if(kind==='neta'  && n>0) return {kind:'neta',  val:n};
-  if(kind==='flujo' && (f_a>0 || f_m>0)) return {kind:'flujo', val:(f_a>0?f_a:f_m*12)};
-  if(b>0) return {kind:'bruta',val:b};
-  if(n>0) return {kind:'neta', val:n};
-  if(f_a>0||f_m>0) return {kind:'flujo', val:(f_a>0?f_a:f_m*12)};
-  return {kind:'',val:0};
-}
-function evalMeetsTarget(e, tgt){
-  if(!tgt.val) return false;
-  if(tgt.kind==='bruta') return Number(toPct(e.kpi_bruta))>=tgt.val;
-  if(tgt.kind==='neta')  return Number(toPct(e.kpi_neta)) >=tgt.val;
-  if(tgt.kind==='flujo') return Number(e.kpi_flujo)>=tgt.val;
-  return false;
+function hasAnyTargetMatch(e,p){
+  const b=Number(p.obj_bruta||0);
+  const n=Number(p.obj_neta||0);
+  const fm=Number(p.obj_flujo||0);
+  const fa=Number(p.obj_flujo_anual||0);
+  const flujoObj = fa>0? fa : (fm>0? fm*12 : 0);
+  const okB = b>0 && Number(toPct(e.kpi_bruta))>=b;
+  const okN = n>0 && Number(toPct(e.kpi_neta)) >=n;
+  const okF = flujoObj>0 && Number(e.kpi_flujo)>=flujoObj;
+  return okB || okN || okF;
 }
 function warnBadgesFor(p, e){
   const warns=[];
   const necesitaReforma = (String(e.ref_tip||'no').toLowerCase()!=='no');
   const sinAscensor = String(e.asc||'Sí').toLowerCase()==='no';
   const esBajo = String(e.bajo||'No').toLowerCase()==='sí';
-
   const budget = prospectBudget(p);
-  if(necesitaReforma && wantsNoReform(p)){
-    warns.push({title:'No quiere reforma', icon:'🚧'});
-  }
-  if(sinAscensor && wantsElevator(p)){
-    warns.push({title:'Requiere ascensor', icon:'🛗'});
-  }
-  if(esBajo && wantsNoBajo(p)){
-    warns.push({title:'No quiere bajos', icon:'⬇'});
-  }
-  if(budget>0 && Number(e.inv_total||0)>budget){
-    warns.push({title:'Excede su presupuesto', icon:'💰'});
-  }
+  if(necesitaReforma && wantsNoReform(p)){ warns.push({title:'No quiere reforma', icon:'🚧'}); }
+  if(sinAscensor && wantsElevator(p)){ warns.push({title:'Requiere ascensor', icon:'🛗'}); }
+  if(esBajo && wantsNoBajo(p)){ warns.push({title:'No quiere bajos', icon:'⬇'}); }
+  if(budget>0 && Number(e.inv_total||0)>budget){ warns.push({title:'Excede presupuesto', icon:'💰'}); }
   return warns;
 }
 
@@ -460,25 +446,24 @@ function drawProspectsList(e, showAll){
   const matches=[], others=[];
   pros.forEach(function(p){
     const idp = p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
-    const sameTipo = fold(p.pref_tipo)===wantTipo;
+    /* Tolerante: tipo coincide si contiene el tipo (permite valores más largos) */
+    const sameTipo = fold(p.pref_tipo).includes(wantTipo) || wantTipo.includes(fold(p.pref_tipo));
+    /* Localidad: lista separada por comas; igualdad flexible por contains */
     const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
-    const sameLoc = locs.includes(wantLoc);
+    const sameLoc = locs.some(l=>l===wantLoc || l.includes(wantLoc) || wantLoc.includes(l));
     const faseOK  = isSearching(p);
-    const tgt=targetInfo(p);
-    const kpiOK = evalMeetsTarget(e,tgt);
+    const kpiOK = hasAnyTargetMatch(e,p);
 
     const rowObj = {p, idp, warns: warnBadgesFor(p,e), checked:set.has(idp), faseOK, sameTipo, sameLoc, kpiOK};
     if(faseOK && sameTipo && sameLoc && kpiOK){ matches.push(rowObj); } else { others.push(rowObj); }
   });
 
-  // Info cabecera
-  id('pros_info').textContent = (matches.length)+' coincidente(s) · '+(pros.length)+' total';
+  id('pros_info').textContent = matches.length+' coincidencia(s) · '+pros.length+' total';
 
-  // Siempre mostrar asignados, aunque no “encajen”, al principio del bloque elegido
   function isAssigned(o){ return o.checked; }
-
-  const listToRender = showAll ? [...matches.sort((a,b)=>isAssigned(b)-isAssigned(a)), ...others.sort((a,b)=>isAssigned(b)-isAssigned(a))] 
-                               : [...matches.sort((a,b)=>isAssigned(b)-isAssigned(a))];
+  const listToRender = showAll
+    ? [...matches.sort((a,b)=>isAssigned(b)-isAssigned(a)), ...others.sort((a,b)=>isAssigned(b)-isAssigned(a))]
+    : [...matches.sort((a,b)=>isAssigned(b)-isAssigned(a))];
 
   if(!listToRender.length){
     const empty=document.createElement('div');
@@ -512,9 +497,8 @@ function drawProspectsList(e, showAll){
       row.appendChild(bWrap);
     }
 
-    // Si mostramos todos y no encaja, un matiz visual sutil
     if(!o.faseOK || !o.sameTipo || !o.sameLoc || !o.kpiOK){
-      row.style.opacity = showAll ? .7 : 1;
+      row.style.opacity = showAll ? .72 : 1;
     }
 
     wrap.appendChild(row);
@@ -536,29 +520,68 @@ function saveAssign(){
   load();
 }
 
-/* ===== PDF simple ===== */
+/* ===== PDF “wow” ===== */
 function quickPDF(idEv){
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e){toast('No encontrado','bad');return;}
   const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
-  const html =
-'<!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — '+(e.loc||'')+
-'</title><style>body{font-family:Inter,Arial;color:#101828;margin:24px}h1{font-size:22px;margin:0 0 6px}h2{font-size:16px;margin:16px 0 8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.box{border:1px solid #e5e7eb;border-radius:10px;padding:10px}.lab{font-size:12px;color:#667085}.val{font-weight:800}.foot{margin-top:16px;font-size:12px;color:#667085;text-align:center}</style></head><body>'+
-'<h1>Informe BuyBox — Unihouser</h1><div class="lab">'+fecha+'</div>'+
-'<h2>Resumen financiero</h2><div class="grid">'+
-'<div class="box"><div class="lab">Bruta</div><div class="val">'+fmtN1.format(toPct(e.kpi_bruta))+' %</div></div>'+
-'<div class="box"><div class="lab">Neta</div><div class="val">'+fmtN1.format(toPct(e.kpi_neta))+' %</div></div>'+
-'<div class="box"><div class="lab">Flujo anual</div><div class="val">'+fmtE0.format(parseNum(e.kpi_flujo))+'</div></div>'+
-'<div class="box"><div class="lab">P. máx compra</div><div class="val">'+fmtE0.format(e.pmax||0)+'</div></div></div>'+
-'<h2>Datos del inmueble</h2><div class="grid">'+
-'<div class="box"><div class="lab">Localidad</div><div class="val">'+(e.loc||'-')+'</div></div>'+
-'<div class="box"><div class="lab">Calle</div><div class="val">'+(e.calle||'-')+'</div></div>'+
-'<div class="box"><div class="lab">Tipo</div><div class="val">'+(e.tipo||'-')+'</div></div>'+
-'<div class="box"><div class="lab">Alquiler</div><div class="val">'+fmtE0.format(e.alq||0)+'</div></div>'+
-'<div class="box"><div class="lab">Precio</div><div class="val">'+fmtE0.format(e.precio||0)+'</div></div>'+
-'<div class="box"><div class="lab">Inversión total</div><div class="val">'+fmtE0.format(e.inv_total||0)+'</div></div></div>'+
-'<div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></body></html>';
+  const css=[
+    '*{box-sizing:border-box}body{font-family:Inter,Arial,Helvetica,sans-serif;margin:0;color:#0f172a}',
+    '.brand{display:flex;align-items:center;gap:10px;padding:14px 18px;background:#0f172a;color:#fff}',
+    '.brand .title{font-weight:800;font-size:18px}', '.brand .meta{margin-left:auto;font-size:12px;opacity:.85}',
+    '.wrap{padding:18px}',
+    '.grid{display:grid;gap:10px}',
+    '.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}',
+    '.card{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff}',
+    '.h{margin:0 0 8px;font-size:16px}', '.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px}',
+    '.kv .k{font-size:12px;color:#64748b}.kv .v{font-weight:700}',
+    '.kpi{display:flex;flex-direction:column;gap:4px;text-align:center}.kpi .big{font-size:22px;font-weight:800}',
+    '.muted{color:#64748b;font-size:12px}'
+  ].join('');
+  const html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Informe — '+esc(e.loc||'')+
+  '</title><style>'+css+'</style></head><body>'+
+  '<div class="brand"><div class="title">Unihouser — Informe BuyBox</div><div class="meta">'+esc(fecha)+'</div></div>'+
+  '<div class="wrap grid g2">'+
+    '<div class="card"><h3 class="h">Resumen KPIs</h3>'+
+      '<div class="grid g3">'+
+        '<div class="kpi"><div class="muted">Bruta</div><div class="big">'+fmtN1.format(toPct(e.kpi_bruta))+' %</div></div>'+
+        '<div class="kpi"><div class="muted">Neta</div><div class="big">'+fmtN1.format(toPct(e.kpi_neta))+' %</div></div>'+
+        '<div class="kpi"><div class="muted">Flujo anual</div><div class="big">'+fmtE0.format(parseNum(e.kpi_flujo))+'</div></div>'+
+        '<div class="kpi"><div class="muted">Precio máx</div><div class="big">'+fmtE0.format(e.pmax||0)+'</div></div>'+
+        '<div class="kpi"><div class="muted">Alquiler</div><div class="big">'+fmtE0.format(e.alq||0)+'</div></div>'+
+        '<div class="kpi"><div class="muted">Inversión</div><div class="big">'+fmtE0.format(e.inv_total||0)+'</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card"><h3 class="h">Datos del inmueble</h3>'+
+      '<div class="kv"><div class="k">Localidad</div><div class="v">'+esc(e.loc||'-')+'</div></div>'+
+      '<div class="kv"><div class="k">Calle</div><div class="v">'+esc(e.calle||'-')+'</div></div>'+
+      '<div class="kv"><div class="k">Tipo</div><div class="v">'+esc(e.tipo||'-')+'</div></div>'+
+      '<div class="kv"><div class="k">m²</div><div class="v">'+esc(e.m2||'-')+'</div></div>'+
+      '<div class="kv"><div class="k">Año</div><div class="v">'+esc(e.anio||'-')+'</div></div>'+
+      '<div class="kv"><div class="k">Altura</div><div class="v">'+esc(e.alt||'-')+'</div></div>'+
+      '<div class="kv"><div class="k">Ascensor</div><div class="v">'+esc(e.asc||'-')+'</div></div>'+
+      '<div class="kv"><div class="k">Bajo</div><div class="v">'+esc(e.bajo||'-')+'</div></div>'+
+      '<div class="kv"><div class="k">Hab./Baños</div><div class="v">'+esc((e.habs||'-')+' / '+(e.banos||'-'))+'</div></div>'+
+      (e.url? '<div class="kv"><div class="k">URL</div><div class="v">'+esc(e.url)+'</div></div>' : '')+
+    '</div>'+
+    '<div class="card"><h3 class="h">Gastos de adquisición</h3>'+
+      '<div class="kv"><div class="k">Precio</div><div class="v">'+fmtE0.format(e.precio||0)+'</div></div>'+
+      '<div class="kv"><div class="k">ITP</div><div class="v">'+fmtE0.format(e.itp||0)+'</div></div>'+
+      '<div class="kv"><div class="k">Notaría</div><div class="v">'+fmtE0.format(e.notaria||0)+'</div></div>'+
+      '<div class="kv"><div class="k">PSI</div><div class="v">'+fmtE0.format(e.psi||0)+'</div></div>'+
+      '<div class="kv"><div class="k">Reforma</div><div class="v">'+esc(e.ref_tip||'-')+'</div></div>'+
+    '</div>'+
+    '<div class="card"><h3 class="h">Gastos de mantenimiento</h3>'+
+      '<div class="kv"><div class="k">Comunidad</div><div class="v">'+fmtE0.format(e.comu||0)+'</div></div>'+
+      '<div class="kv"><div class="k">IBI</div><div class="v">'+fmtE0.format(e.ibi||0)+'</div></div>'+
+      '<div class="kv"><div class="k">Hogar</div><div class="v">'+fmtE0.format(e.hogar||0)+'</div></div>'+
+      '<div class="kv"><div class="k">Impago</div><div class="v">'+fmtE0.format(e.impago||0)+'</div></div>'+
+      '<div class="kv"><div class="k">Gestión</div><div class="v">'+fmtE0.format(e.gestion||0)+'</div></div>'+
+    '</div>'+
+  '</div>'+
+  '</body></html>';
 
-  const w=window.open('','_blank'); w.document.open(); w.document.write(html); w.document.close();
+  const w=window.open('','_blank'); if(!w) return;
+  w.document.open(); w.document.write(html); w.document.close();
   const tryPrint=function(){try{w.focus(); w.print();}catch(_){}}; w.onload=tryPrint; setTimeout(tryPrint,600);
 }
 
