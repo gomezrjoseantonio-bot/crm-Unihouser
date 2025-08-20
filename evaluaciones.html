@@ -55,14 +55,17 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 .badge-warn{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#b45309;background:#fff7ed;border:1px solid #fde68a;border-radius:999px;padding:2px 6px}
 .badge-warn .ico{width:12px;height:12px;display:inline-block}
 
-/* Filtros */
-.filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
-@media(max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
-
-/* Toasts */
-.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
-.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
-.toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
+/* Adjuntos */
+.att-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.att-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:600px){.att-grid{grid-template-columns:1fr 1fr}}
+.att-card{position:relative;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;display:flex;flex-direction:column;gap:6px}
+.att-thumb{width:100%;height:120px;object-fit:cover;border-radius:6px;border:1px solid #eef2f7;background:#f8fafc}
+.att-name{font-size:12px;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.att-ctl{display:flex;gap:6px}
+.att-ctl .mini{padding:6px 8px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-size:12px;cursor:pointer}
+.att-ctl .mini:hover{background:#f8fafc}
+.att-empty{font-size:12px;color:#667085}
 </style>
 </head>
 <body>
@@ -186,6 +189,18 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
       <div class="kv"><div class="k">Flujo</div><div class="v" id="d_flujo">—</div></div>
       <div class="kv"><div class="k">Inversión</div><div class="v" id="d_inv">—</div></div>
       <div class="kv"><div class="k">P. máx</div><div class="v" id="d_pmax">—</div></div>
+    </div>
+
+    <!-- 5) Adjuntos -->
+    <h3 class="section-title">Adjuntos</h3>
+    <div class="block">
+      <div class="att-actions">
+        <button class="btn" id="a_upload">Subir archivos</button>
+        <input type="file" id="a_file" accept="image/,video/,.pdf,application/pdf" multiple hidden>
+        <button class="btn" id="a_link">Añadir enlace</button>
+        <div class="small">Imágenes/Vídeos/PDF. Máx 2 MB por archivo (para no saturar el navegador). Para vídeos grandes, usa “Añadir enlace”.</div>
+      </div>
+      <div id="att_grid" class="att-grid"><div class="att-empty">Sin adjuntos.</div></div>
     </div>
 
     <!-- Asignación -->
@@ -316,7 +331,7 @@ function render(){
               '<circle cx="12" cy="12" r="3" stroke="#111827" stroke-width="1.5"/></svg>'+
             '</button>';
 
-    /* Trash icon corregido (Heroicons outline) */
+    /* Trash icon corregido */
     html += '<button class="iconbtn" title="Borrar" data-act="del" aria-label="Borrar">'+
               '<svg class="icon" viewBox="0 0 24 24" fill="none">'+
               '<path d="M6 7h12M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m-1 0-1 12a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2L7 7" stroke="#111827" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
@@ -374,7 +389,17 @@ function openDrawer(idEv){
   id('d_inv').textContent   = e0(e.inv_total);
   id('d_pmax').textContent  = e0(e.pmax);
 
-  /* Prospects: lógica */
+  /* Adjuntos */
+  id('a_upload').onclick = ()=> id('a_file').click();
+  id('a_file').onchange = function(ev){ if(ev.target.files && ev.target.files.length){ addFilesToEval(e.id, ev.target.files); ev.target.value=''; } };
+  id('a_link').onclick = function(){
+    const url = prompt('Pega el enlace (YouTube, Drive, imagen, PDF...)');
+    if(!url) return;
+    addLinkToEval(e.id, url);
+  };
+  renderAttachments(e.id);
+
+  /* Prospects */
   const showAllChk = id('pros_show_all'); showAllChk.checked = false;
   drawProspectsList(e, showAllChk.checked);
   showAllChk.onchange = function(){ drawProspectsList(e, showAllChk.checked); };
@@ -393,7 +418,165 @@ function closeDrawer(){
   openId=null;
 }
 
-/* ===== Lógica de match en el drawer ===== */
+/* ===== Adjuntos: helpers ===== */
+const MAX_FILE_BYTES = 2*1024*1024; // 2MB/archivo
+function mimeKind(m){
+  m = (m||'').toLowerCase();
+  if(m.startsWith('image/')) return 'image';
+  if(m.startsWith('video/')) return 'video';
+  if(m==='application/pdf' || m.endsWith('/pdf') || /\.pdf(\?|$)/i.test(m)) return 'pdf';
+  return 'file';
+}
+function urlKind(url){
+  const u = String(url||'').toLowerCase();
+  if(/\.(png|jpg|jpeg|webp|gif)(\?|$)/.test(u)) return 'image';
+  if(/\.(mp4|webm|ogg|mov)(\?|$)/.test(u) || /youtube\.com|youtu\.be|vimeo\.com/.test(u)) return 'video';
+  if(/\.pdf(\?|$)/.test(u)) return 'pdf';
+  return 'link';
+}
+function getEvalById(eid){
+  const list=Store.evals||[]; const idx=list.findIndex(x=>x.id===eid);
+  if(idx<0) return {list, idx:-1};
+  return {list, idx};
+}
+function persistEval(list){ Store.evals=list; load(); }
+
+/* Añadir archivos locales (dataURL) */
+function addFilesToEval(eid, fileList){
+  const {list, idx} = getEvalById(eid); if(idx<0) return;
+  list[idx].attachments = list[idx].attachments || [];
+  const att=list[idx].attachments;
+
+  const files = Array.from(fileList||[]);
+  let added=0, skipped=0;
+
+  const next = (i)=>{
+    if(i>=files.length){
+      persistEval(list);
+      renderAttachments(eid);
+      toast('Adjuntos: '+added+' añadido(s), '+skipped+' omitido(s)','ok');
+      return;
+    }
+    const f = files[i];
+    if(f.size>MAX_FILE_BYTES){ skipped++; return next(i+1); }
+
+    const reader = new FileReader();
+    reader.onload = function(){
+      const kind = mimeKind(f.type);
+      const item = {
+        id: 'att_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+        name: f.name || ('archivo.'+(f.type.split('/')[1]||'bin')),
+        type: f.type || '',
+        size: f.size || 0,
+        kind,
+        src: reader.result // dataURL
+      };
+      att.push(item);
+      added++;
+      // Comprobación simple de espacio
+      try {
+        Store.evals = list;
+      } catch(e){
+        // revertir último push si falla
+        att.pop();
+        toast('Sin espacio para guardar en el navegador','bad');
+      }
+      next(i+1);
+    };
+    reader.onerror = function(){ skipped++; next(i+1); };
+    reader.readAsDataURL(f);
+  };
+  next(0);
+}
+
+/* Añadir enlace */
+function addLinkToEval(eid, url){
+  const {list, idx} = getEvalById(eid); if(idx<0) return;
+  list[idx].attachments = list[idx].attachments || [];
+  const kind = urlKind(url);
+  list[idx].attachments.push({
+    id: 'att_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+    name: url.split('/').pop() || 'enlace',
+    type: 'link',
+    size: 0,
+    kind,
+    src: url
+  });
+  persistEval(list);
+  renderAttachments(eid);
+  toast('Enlace añadido','ok');
+}
+
+/* Eliminar adjunto */
+function deleteAttachment(eid, aid){
+  const {list, idx} = getEvalById(eid); if(idx<0) return;
+  const arr = list[idx].attachments||[];
+  const n = arr.length;
+  list[idx].attachments = arr.filter(x=>x.id!==aid);
+  if(arr.length!==n){
+    persistEval(list);
+    renderAttachments(eid);
+    toast('Adjunto eliminado','ok');
+  }
+}
+
+/* Render adjuntos */
+function renderAttachments(eid){
+  const {list, idx} = getEvalById(eid); if(idx<0) return;
+  const g = id('att_grid'); g.innerHTML = '';
+  const atts = (list[idx].attachments||[]);
+  if(!atts.length){
+    const d=document.createElement('div'); d.className='att-empty'; d.textContent='Sin adjuntos.';
+    g.appendChild(d); return;
+  }
+  atts.forEach(a=>{
+    const card=document.createElement('div'); card.className='att-card';
+
+    // preview
+    if(a.kind==='image'){
+      const img=document.createElement('img'); img.className='att-thumb'; img.alt=a.name;
+      img.src=a.src; card.appendChild(img);
+    }else if(a.kind==='video'){
+      if(a.src.startsWith('data:')){
+        const v=document.createElement('video'); v.className='att-thumb'; v.src=a.src; v.controls=true; card.appendChild(v);
+      }else{
+        const v=document.createElement('div'); v.className='att-thumb'; v.style.display='flex'; v.style.alignItems='center'; v.style.justifyContent='center';
+        v.textContent='🎬 Vídeo (enlace)'; card.appendChild(v);
+      }
+    }else if(a.kind==='pdf'){
+      const p=document.createElement('div'); p.className='att-thumb'; p.style.display='flex'; p.style.alignItems='center'; p.style.justifyContent='center';
+      p.textContent='📄 PDF'; card.appendChild(p);
+    }else{
+      const l=document.createElement('div'); l.className='att-thumb'; l.style.display='flex'; l.style.alignItems='center'; l.style.justifyContent='center';
+      l.textContent='🔗 Enlace'; card.appendChild(l);
+    }
+
+    // name
+    const name=document.createElement('div'); name.className='att-name'; name.textContent=a.name; card.appendChild(name);
+
+    // controls
+    const ctl=document.createElement('div'); ctl.className='att-ctl';
+
+    const bOpen=document.createElement('button'); bOpen.className='mini'; bOpen.textContent='Abrir';
+    bOpen.onclick=()=>{ window.open(a.src,'_blank'); };
+    ctl.appendChild(bOpen);
+
+    if(a.src.startsWith('data:')){
+      const bDl=document.createElement('a'); bDl.className='mini'; bDl.textContent='Descargar';
+      bDl.href=a.src; bDl.download=a.name||'archivo'; ctl.appendChild(bDl);
+    }
+
+    const bDel=document.createElement('button'); bDel.className='mini'; bDel.textContent='Borrar';
+    bDel.onclick=()=> deleteAttachment(eid, a.id);
+    ctl.appendChild(bDel);
+
+    card.appendChild(ctl);
+
+    g.appendChild(card);
+  });
+}
+
+/* ===== Lógica de match en el drawer (igual que versión estable mejorada) ===== */
 function isSearching(p){
   const f=fold(p.fase||'');
   return f.includes('busq'); // búsqueda / buscando
@@ -446,9 +629,7 @@ function drawProspectsList(e, showAll){
   const matches=[], others=[];
   pros.forEach(function(p){
     const idp = p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
-    /* Tolerante: tipo coincide si contiene el tipo (permite valores más largos) */
     const sameTipo = fold(p.pref_tipo).includes(wantTipo) || wantTipo.includes(fold(p.pref_tipo));
-    /* Localidad: lista separada por comas; igualdad flexible por contains */
     const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
     const sameLoc = locs.some(l=>l===wantLoc || l.includes(wantLoc) || wantLoc.includes(l));
     const faseOK  = isSearching(p);
@@ -520,7 +701,7 @@ function saveAssign(){
   load();
 }
 
-/* ===== PDF “wow” ===== */
+/* ===== PDF (mantenemos el look sobrio por ahora) ===== */
 function quickPDF(idEv){
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e){toast('No encontrado','bad');return;}
   const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
