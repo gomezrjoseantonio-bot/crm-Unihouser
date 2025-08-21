@@ -491,7 +491,8 @@ function renderKPIs(rows){
   $('k_r_ok').textContent = kpiPct(acc.REUNION.ok, acc.REUNION.ko)+'%'; $('k_r_n').textContent = acc.REUNION.ok+'/'+(acc.REUNION.ok+acc.REUNION.ko);
   $('k_ct_ok').textContent= kpiPct(acc.CONTRATO.ok, acc.CONTRATO.ko)+'%'; $('k_ct_n').textContent= acc.CONTRATO.ok+'/'+(acc.CONTRATO.ok+acc.CONTRATO.ko);
   $('k_b_ok').textContent = kpiPct(acc.BUSQUEDA.ok, acc.BUSQUEDA.ko)+'%'; $('k_b_n').textContent = acc.BUSQUEDA.ok+'/'+(
-$('k_success').textContent = rows.filter(p=>p.success_at).length;
+<div id="k_success"></div>
+
 }
 
 /* ====== Kanban / Render ====== */
