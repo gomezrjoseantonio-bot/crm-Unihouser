@@ -5,91 +5,272 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Unihouser — Dashboard CRM</title>
   <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f7f7f7; }
-    header { background:#ff6600; color:#fff; padding:10px; text-align:center; font-size:20px; }
-    .kpis { display:flex; justify-content:space-around; margin:20px; }
-    .kpi { background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); flex:1; margin:0 10px; text-align:center; }
-    .filters { margin:20px; display:flex; gap:10px; }
-    .kanban { display:flex; margin:20px; gap:10px; }
-    .phase { flex:1; border-radius:8px; padding:10px; min-height:250px; }
-    .phase h3 { text-align:center; margin-top:0; font-size:18px; }
-    .prospect { background:#fff; border-radius:6px; padding:8px; margin:6px 0; cursor:grab; box-shadow:0 1px 2px rgba(0,0,0,0.1); }
-    .prospect:active { cursor:grabbing; }
-    .drawer { position:fixed; top:0; right:-400px; width:400px; height:100%; background:#fff; box-shadow:-2px 0 5px rgba(0,0,0,0.2); transition:right 0.3s; overflow-y:auto; }
+    /* ==============================
+       ESTILOS GLOBALES
+       ============================== */
+    body { 
+      font-family: Arial, sans-serif; 
+      margin:0; 
+      padding:0; 
+      background:#f7f7f7; 
+      color:#333;
+    }
+    header { 
+      background:#ff6600; 
+      color:#fff; 
+      padding:15px; 
+      text-align:center; 
+      font-size:22px; 
+      font-weight:bold;
+      letter-spacing:1px;
+    }
+    /* ==============================
+       KPI BOXES
+       ============================== */
+    .kpis { 
+      display:flex; 
+      justify-content:space-around; 
+      margin:20px; 
+      gap:20px;
+    }
+    .kpi { 
+      background:#fff; 
+      padding:15px; 
+      border-radius:8px; 
+      box-shadow:0 2px 4px rgba(0,0,0,0.1); 
+      flex:1; 
+      text-align:center; 
+      transition:transform .2s;
+    }
+    .kpi:hover { transform:scale(1.05); }
+    .kpi h2 { margin:0; font-size:28px; color:#ff6600; }
+    .kpi p { margin:5px 0 0; font-size:14px; color:#666; }
+
+    /* ==============================
+       FILTROS Y BOTONES
+       ============================== */
+    .filters { 
+      margin:20px; 
+      display:flex; 
+      gap:10px; 
+      align-items:center;
+    }
+    .filters input { 
+      flex:1; 
+      padding:8px; 
+      border-radius:4px; 
+      border:1px solid #ccc; 
+    }
+    button { 
+      background:#ff6600; 
+      border:none; 
+      color:#fff; 
+      padding:8px 12px; 
+      border-radius:4px; 
+      cursor:pointer; 
+      font-size:14px;
+    }
+    button:hover { opacity:0.85; }
+
+    /* ==============================
+       KANBAN
+       ============================== */
+    .kanban { 
+      display:flex; 
+      margin:20px; 
+      gap:10px; 
+      overflow-x:auto;
+    }
+    .phase { 
+      background:#eee; 
+      flex:1; 
+      border-radius:8px; 
+      padding:10px; 
+      min-height:300px; 
+      display:flex; 
+      flex-direction:column;
+    }
+    .phase h3 { 
+      text-align:center; 
+      margin:0 0 10px; 
+      font-size:16px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:5px;
+    }
+    .prospect { 
+      background:#fff; 
+      border-radius:6px; 
+      padding:8px; 
+      margin:6px 0; 
+      cursor:pointer; 
+      box-shadow:0 1px 2px rgba(0,0,0,0.1); 
+      position:relative;
+    }
+    .prospect strong { display:block; font-size:14px; }
+    .prospect small { color:#666; font-size:12px; }
+    .prospect .actions { 
+      position:absolute; 
+      top:5px; 
+      right:5px; 
+      display:flex; 
+      gap:5px;
+    }
+    .prospect .actions span { cursor:pointer; font-size:16px; }
+
+    /* ==============================
+       DRAWER DETALLE
+       ============================== */
+    .drawer { 
+      position:fixed; 
+      top:0; 
+      right:-420px; 
+      width:420px; 
+      height:100%; 
+      background:#fff; 
+      box-shadow:-2px 0 5px rgba(0,0,0,0.2); 
+      transition:right 0.3s; 
+      overflow-y:auto; 
+      z-index:1000;
+    }
     .drawer.open { right:0; }
-    .drawer header { background:#ff6600; color:#fff; padding:10px; font-size:18px; }
+    .drawer header { 
+      background:#ff6600; 
+      color:#fff; 
+      padding:12px; 
+      font-size:18px; 
+    }
     .drawer-content { padding:15px; }
+    .drawer-content label { display:block; margin:10px 0 5px; font-weight:bold; }
+    .drawer-content input, .drawer-content select, .drawer-content textarea { 
+      width:100%; 
+      padding:8px; 
+      border:1px solid #ccc; 
+      border-radius:4px; 
+    }
+    textarea { min-height:80px; }
     .actions { margin-top:20px; display:flex; justify-content:space-between; }
-    button { background:#ff6600; border:none; color:#fff; padding:8px 12px; border-radius:4px; cursor:pointer; }
-    button:hover { opacity:0.8; }
-    .toast { position:fixed; bottom:20px; right:20px; background:#333; color:#fff; padding:10px 15px; border-radius:6px; display:none; }
-    /* Colores de fases */
-    .nuevo { background:#e3f2fd; }
-    .contactado { background:#fff3e0; }
-    .reunion { background:#e8f5e9; }
-    .oferta { background:#f3e5f5; }
-    .cerrado { background:#ede7f6; }
+    .actions button { flex:1; margin:0 5px; }
+
+    /* ==============================
+       TOAST
+       ============================== */
+    .toast { 
+      position:fixed; 
+      bottom:20px; 
+      right:20px; 
+      background:#333; 
+      color:#fff; 
+      padding:10px 15px; 
+      border-radius:6px; 
+      display:none; 
+      z-index:2000;
+    }
+
+    /* ==============================
+       EXTRA: PAPELERA
+       ============================== */
+    .trash-zone {
+      margin:20px;
+      padding:10px;
+      border:2px dashed #aaa;
+      border-radius:8px;
+      text-align:center;
+      color:#666;
+      font-size:14px;
+    }
   </style>
 </head>
 <body>
   <header>Unihouser CRM</header>
 
+  <!-- KPIs Superiores -->
   <div class="kpis">
-    <div class="kpi"><h2 id="kpi-total">0</h2><p>Total Prospectos</p></div>
-    <div class="kpi"><h2 id="kpi-activos">0</h2><p>En curso</p></div>
-    <div class="kpi"><h2 id="kpi-cerrados">0</h2><p>Cerrados</p></div>
+    <div class="kpi"><h2 id="kpi-total">0</h2><p>Total Clientes</p></div>
+    <div class="kpi"><h2 id="kpi-activos">0</h2><p>En Curso</p></div>
+    <div class="kpi"><h2 id="kpi-cerrados">0</h2><p>Éxitos (Notaría)</p></div>
+    <div class="kpi"><h2 id="kpi-descartados">0</h2><p>Descartados</p></div>
   </div>
 
+  <!-- Barra filtros -->
   <div class="filters">
-    <input type="text" id="search" placeholder="Buscar prospecto...">
-    <button onclick="openDrawer()">+ Nuevo Prospecto</button>
+    <input type="text" id="search" placeholder="Buscar cliente...">
+    <button onclick="openDrawer()">+ Nuevo Cliente</button>
     <button onclick="exportCSV()">Exportar CSV</button>
   </div>
 
+  <!-- Kanban -->
   <div class="kanban" id="kanban"></div>
 
+  <!-- Papelera -->
+  <div class="trash-zone">🗑️ Arrastra aquí clientes de prueba o descartados</div>
+
+  <!-- Drawer Detalle -->
   <div class="drawer" id="drawer">
-    <header>Prospecto</header>
+    <header>Detalle Cliente</header>
     <div class="drawer-content">
-      <label>Nombre:<br><input id="p-name"></label><br><br>
-      <label>Email:<br><input id="p-email"></label><br><br>
-      <label>Teléfono:<br><input id="p-phone"></label><br><br>
-      <label>Fase:<br>
-        <select id="p-phase">
-          <option value="nuevo">Nuevo</option>
-          <option value="contactado">Contactado</option>
-          <option value="reunion">Reunión</option>
-          <option value="oferta">Oferta</option>
-          <option value="cerrado">Cerrado</option>
-        </select>
-      </label>
+      <label>Nombre:</label>
+      <input id="p-name">
+      <label>Email:</label>
+      <input id="p-email">
+      <label>Teléfono:</label>
+      <input id="p-phone">
+      <label>Fase:</label>
+      <select id="p-phase">
+        <option value="contacto">📞 Contacto</option>
+        <option value="reunion">📅 Reunión</option>
+        <option value="contrato">📑 Contrato</option>
+        <option value="busqueda">🏘️ Búsqueda</option>
+        <option value="compraventa">💶 Compraventa</option>
+        <option value="financiacion">💳 Financiación</option>
+        <option value="notaria">✍️ Notaría</option>
+      </select>
+      <label>Observaciones:</label>
+      <textarea id="p-observ"></textarea>
       <div class="actions">
-        <button onclick="saveProspect()">Guardar</button>
+        <button onclick="saveClient()">Guardar</button>
         <button onclick="closeDrawer()">Cerrar</button>
-        <button style="background:#cc0000" onclick="deleteProspect()">Eliminar</button>
+        <button style="background:#cc0000" onclick="deleteClient()">Eliminar</button>
       </div>
     </div>
   </div>
 
+  <!-- Toast -->
   <div class="toast" id="toast"></div>
 
   <script>
+    /* =====================================
+       DATASTORE
+       ===================================== */
     const Store = {
-      pros: JSON.parse(localStorage.getItem('prospects') || '[]'),
-      save() { localStorage.setItem('prospects', JSON.stringify(this.pros)); }
+      clients: JSON.parse(localStorage.getItem('clients') || '[]'),
+      trash: JSON.parse(localStorage.getItem('trash') || '[]'),
+      history: JSON.parse(localStorage.getItem('history') || '[]'),
+      save() {
+        localStorage.setItem('clients', JSON.stringify(this.clients));
+        localStorage.setItem('trash', JSON.stringify(this.trash));
+        localStorage.setItem('history', JSON.stringify(this.history));
+      }
     };
 
+    /* =====================================
+       FASES PIPELINE
+       ===================================== */
     const phases = [
-      { key:"nuevo", icon:"🆕", label:"Nuevo" },
-      { key:"contactado", icon:"☎️", label:"Contactado" },
-      { key:"reunion", icon:"📅", label:"Reunión" },
-      { key:"oferta", icon:"📑", label:"Oferta" },
-      { key:"cerrado", icon:"✅", label:"Cerrado" }
+      { key:"contacto", label:"📞 Contacto" },
+      { key:"reunion", label:"📅 Reunión" },
+      { key:"contrato", label:"📑 Contrato" },
+      { key:"busqueda", label:"🏘️ Búsqueda" },
+      { key:"compraventa", label:"💶 Compraventa" },
+      { key:"financiacion", label:"💳 Financiación" },
+      { key:"notaria", label:"✍️ Notaría" }
     ];
-    let currentId = null;
+    let currentIndex = -1;
 
-    function uid() { return Date.now().toString(36)+Math.random().toString(36).substr(2,5); }
-
+    /* =====================================
+       FUNCIONES UI
+       ===================================== */
     function showToast(msg) {
       const t=document.getElementById('toast');
       t.textContent=msg; t.style.display='block';
@@ -97,31 +278,35 @@
     }
 
     function renderKPIs() {
-      document.getElementById('kpi-total').textContent = Store.pros.length;
-      document.getElementById('kpi-cerrados').textContent = Store.pros.filter(p=>p.phase==="cerrado").length;
-      document.getElementById('kpi-activos').textContent = Store.pros.filter(p=>p.phase!=="cerrado").length;
+      document.getElementById('kpi-total').textContent = Store.clients.length;
+      document.getElementById('kpi-cerrados').textContent = Store.history.length;
+      document.getElementById('kpi-activos').textContent = Store.clients.filter(c=>c.phase!=="notaria").length;
+      document.getElementById('kpi-descartados').textContent = Store.trash.length;
+    }
+
+    function daysInPhase(c) {
+      if(!c.startDate) return 0;
+      const diff=Math.floor((Date.now()-c.startDate)/86400000);
+      return diff;
     }
 
     function renderKanban() {
       const kb=document.getElementById('kanban'); kb.innerHTML='';
       phases.forEach(ph=>{
-        const col=document.createElement('div'); 
-        col.className='phase '+ph.key;
-        col.dataset.phase=ph.key;
-        col.innerHTML='<h3 title="'+ph.label+'">'+ph.icon+'</h3>';
-        col.ondragover=e=>e.preventDefault();
-        col.ondrop=e=>{
-          const id=e.dataTransfer.getData("id");
-          const p=Store.pros.find(pr=>pr.id===id);
-          if(p){ p.phase=ph.key; Store.save(); renderKanban(); }
-        };
-        Store.pros.filter(p=>p.phase===ph.key).forEach(p=>{
+        const col=document.createElement('div'); col.className='phase';
+        col.innerHTML='<h3>'+ph.label+'</h3>';
+        Store.clients.filter(c=>c.phase===ph.key).forEach((c,i)=>{
           const card=document.createElement('div'); 
           card.className='prospect';
-          card.draggable=true;
-          card.textContent=p.name||'Sin nombre';
-          card.ondragstart=e=>e.dataTransfer.setData("id",p.id);
-          card.onclick=()=>openDrawer(p.id);
+          card.innerHTML='<strong>'+ (c.name||'Sin nombre') +'</strong><small>'+daysInPhase(c)+' días en fase</small>';
+          const act=document.createElement('div'); act.className='actions';
+          const next=document.createElement('span'); next.textContent='🟢';
+          next.onclick=(e)=>{ e.stopPropagation(); advanceClient(c); };
+          const drop=document.createElement('span'); drop.textContent='🔴';
+          drop.onclick=(e)=>{ e.stopPropagation(); discardClient(c); };
+          act.appendChild(next); act.appendChild(drop);
+          card.appendChild(act);
+          card.onclick=()=>openDrawer(Store.clients.indexOf(c));
           col.appendChild(card);
         });
         kb.appendChild(col);
@@ -129,21 +314,26 @@
       renderKPIs();
     }
 
-    function openDrawer(id=null) {
-      currentId=id;
+    /* =====================================
+       DRAWER FUNCIONES
+       ===================================== */
+    function openDrawer(i=-1) {
+      currentIndex=i;
       const dr=document.getElementById('drawer');
       dr.classList.add('open');
-      if(id){
-        const p=Store.pros.find(pr=>pr.id===id);
-        document.getElementById('p-name').value=p.name||'';
-        document.getElementById('p-email').value=p.email||'';
-        document.getElementById('p-phone').value=p.phone||'';
-        document.getElementById('p-phase').value=p.phase||'nuevo';
+      if(i>=0) {
+        const c=Store.clients[i];
+        document.getElementById('p-name').value=c.name||'';
+        document.getElementById('p-email').value=c.email||'';
+        document.getElementById('p-phone').value=c.phone||'';
+        document.getElementById('p-phase').value=c.phase||'contacto';
+        document.getElementById('p-observ').value=c.observ||'';
       } else {
         document.getElementById('p-name').value='';
         document.getElementById('p-email').value='';
         document.getElementById('p-phone').value='';
-        document.getElementById('p-phase').value='nuevo';
+        document.getElementById('p-phase').value='contacto';
+        document.getElementById('p-observ').value='';
       }
     }
 
@@ -151,57 +341,95 @@
       document.getElementById('drawer').classList.remove('open');
     }
 
-    function saveProspect() {
-      const p={
-        id: currentId || uid(),
+    function saveClient() {
+      const c={
         name:document.getElementById('p-name').value,
         email:document.getElementById('p-email').value,
         phone:document.getElementById('p-phone').value,
         phase:document.getElementById('p-phase').value,
-        created: currentId ? Store.pros.find(pr=>pr.id===currentId).created : new Date().toLocaleString()
+        observ:document.getElementById('p-observ').value,
+        startDate:Date.now()
       };
-      if(currentId){
-        Store.pros=Store.pros.map(pr=>pr.id===currentId?p:pr);
-        showToast('Prospecto actualizado');
+      if(currentIndex>=0) {
+        Store.clients[currentIndex]=c;
+        showToast('Cliente actualizado');
       } else {
-        Store.pros.push(p);
-        showToast('Prospecto añadido');
+        Store.clients.push(c);
+        showToast('Cliente añadido');
       }
       Store.save(); renderKanban(); closeDrawer();
     }
 
-    function deleteProspect() {
-      if(currentId) {
-        if(confirm("¿Seguro que quieres eliminar este prospecto?")) {
-          Store.pros=Store.pros.filter(p=>p.id!==currentId);
+    function deleteClient() {
+      if(currentIndex>=0) {
+        if(confirm("¿Eliminar cliente?")) {
+          Store.clients.splice(currentIndex,1);
           Store.save();
           renderKanban();
           closeDrawer();
-          showToast('Prospecto eliminado');
+          showToast('Cliente eliminado');
         }
       }
     }
 
+    /* =====================================
+       ACCIONES PIPELINE
+       ===================================== */
+    function advanceClient(c) {
+      const idx=phases.findIndex(p=>p.key===c.phase);
+      if(idx<phases.length-1) {
+        c.phase=phases[idx+1].key;
+        c.startDate=Date.now();
+        if(c.phase==="notaria") {
+          // éxito
+          Store.history.push(c);
+          Store.clients.splice(Store.clients.indexOf(c),1);
+          showToast("Cliente finalizado con éxito");
+        }
+        Store.save(); renderKanban();
+      }
+    }
+
+    function discardClient(c) {
+      Store.trash.push(c);
+      Store.clients.splice(Store.clients.indexOf(c),1);
+      Store.save(); renderKanban();
+      showToast("Cliente descartado");
+    }
+
+    /* =====================================
+       EXPORTAR CSV
+       ===================================== */
     function exportCSV() {
-      let csv="Nombre,Email,Teléfono,Fase,Fecha creación\n";
-      Store.pros.forEach(p=>{
-        csv+=`${p.name||''},${p.email||''},${p.phone||''},${p.phase||''},${p.created||''}\n`;
+      let csv="Nombre,Email,Teléfono,Fase,Observaciones,Días en fase\n";
+      Store.clients.forEach(c=>{
+        csv+=`${c.name||''},${c.email||''},${c.phone||''},${c.phase||''},${c.observ||''},${daysInPhase(c)}\n`;
       });
       const blob=new Blob([csv],{type:'text/csv'});
       const a=document.createElement('a');
-      a.href=URL.createObjectURL(blob); a.download="prospectos.csv"; a.click();
+      a.href=URL.createObjectURL(blob); a.download="clientes.csv"; a.click();
     }
 
+    /* =====================================
+       FILTRO BUSCAR
+       ===================================== */
     document.getElementById('search').addEventListener('input',function(){
       const val=this.value.toLowerCase();
       const kb=document.getElementById('kanban'); kb.innerHTML='';
       phases.forEach(ph=>{
-        const col=document.createElement('div'); col.className='phase '+ph.key;
-        col.innerHTML='<h3 title="'+ph.label+'">'+ph.icon+'</h3>';
-        Store.pros.filter(p=>(p.phase===ph.key)&&(p.name||'').toLowerCase().includes(val)).forEach(p=>{
+        const col=document.createElement('div'); col.className='phase';
+        col.innerHTML='<h3>'+ph.label+'</h3>';
+        Store.clients.filter(c=>(c.phase===ph.key)&&(c.name||'').toLowerCase().includes(val)).forEach((c,i)=>{
           const card=document.createElement('div'); card.className='prospect';
-          card.textContent=p.name||'Sin nombre';
-          card.onclick=()=>openDrawer(p.id);
+          card.innerHTML='<strong>'+ (c.name||'Sin nombre') +'</strong><small>'+daysInPhase(c)+' días en fase</small>';
+          const act=document.createElement('div'); act.className='actions';
+          const next=document.createElement('span'); next.textContent='🟢';
+          next.onclick=(e)=>{ e.stopPropagation(); advanceClient(c); };
+          const drop=document.createElement('span'); drop.textContent='🔴';
+          drop.onclick=(e)=>{ e.stopPropagation(); discardClient(c); };
+          act.appendChild(next); act.appendChild(drop);
+          card.appendChild(act);
+          card.onclick=()=>openDrawer(Store.clients.indexOf(c));
           col.appendChild(card);
         });
         kb.appendChild(col);
@@ -209,6 +437,7 @@
       renderKPIs();
     });
 
+    /* Inicializar */
     renderKanban();
   </script>
 </body>
