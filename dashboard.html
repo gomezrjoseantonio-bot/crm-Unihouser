@@ -3,691 +3,949 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unihouser — Dashboard</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23ff6a3d'/%3E%3C/svg%3E">
+<title>Unihouser — Dashboard CRM</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23DB824B'/%3E%3C/svg%3E">
 <style>
-:root{--accent:#ff6a3d;--ok:#16a34a;--warn:#f59e0b;--bad:#ef4444;--muted:#667085;--border:#e5e7eb;--text:#101828}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:#fff;color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-.container{max-width:1100px;margin:0 auto;padding:16px}
+:root{
+  --granate:#B53928; --terracota:#DB824B; --verde:#58736F; --gris:#DDD5D2;
+  --text:#101828; --muted:#667085; --border:#e5e7eb;
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0;background:#fff;color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.container{max-width:1180px;margin:0 auto;padding:16px}
 .topbar{background:#fff;border-bottom:1px solid var(--border)}
 .brand .title{font-weight:800}
 .nav a{margin:0 8px;text-decoration:none;color:#475467}
-.nav a.active{color:var(--accent);font-weight:800;border-bottom:none;padding-bottom:0}
-
-/* Título igual que el resto de la web */
-.page-title{
-margin:14px 0 8px;
-color:#101828;
-font-weight:800;
-letter-spacing:-.02em;
-font-size:clamp(22px,2.4vw,28px);
-border-bottom:none;
-}
-
+.nav a.active{color:var(--terracota);font-weight:800}
+.page-title{margin:14px 0 8px;color:#101828;font-weight:800;letter-spacing:-.02em;font-size:clamp(22px,2.4vw,28px)}
 .card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,.04);padding:12px}
 
+/* KPI resumen */
 .kpis{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
 @media(min-width:900px){.kpis{grid-template-columns:repeat(6,1fr)}}
 .kpi .lab{font-size:12px;color:var(--muted)} .kpi .val{font-size:22px;font-weight:800;margin-top:4px}
+.kpi .sub{font-size:12px;color:#475467;margin-top:2px}
 
+/* Filtros */
 .filters{display:grid;gap:10px;grid-template-columns:1fr}
-@media(min-width:1000px){.filters{grid-template-columns:1.2fr .8fr .8fr 1fr .8fr auto}}
+@media(min-width:980px){.filters{grid-template-columns:1fr .8fr .8fr .8fr auto}}
 .field label{display:block;font-size:12px;color:#667085;margin-bottom:4px}
-input,select,button{padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px}
+input,select,button,textarea{padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px}
+textarea{resize:vertical}
 .btn{background:#f9fafb;border:1px solid var(--border);color:var(--text);font-weight:700;cursor:pointer}
-.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
-/* Botones pequeños y acciones de filtros en línea */
+.btn.primary{background:var(--terracota);color:#fff;border-color:transparent}
+.btn.ghost{background:#fff}
 .btn.sm{padding:8px 12px;font-size:13px}
-.btn[disabled]{opacity:.5;cursor:not-allowed}
-.filters .actions{display:flex;gap:8px;align-items:flex-end;flex-wrap:nowrap}
+.btn.warn{background:var(--granate);color:#fff;border-color:transparent}
 
+/* Kanban */
 .kanban{display:grid;gap:12px;grid-template-columns:1fr}
-@media(min-width:1100px){.kanban{grid-template-columns:repeat(5,1fr)}}
-.column{min-height:260px;padding:8px}
-.column h4{margin:2px 6px 8px;color:#344054}
+@media(min-width:1160px){.kanban{grid-template-columns:repeat(6,1fr)}}
+.column{min-height:260px;padding:8px;border:2px dashed var(--gris);border-radius:12px}
+.column h4{margin:2px 6px 8px;color:#344054;display:flex;justify-content:space-between;align-items:center}
+.column.addable{background:#fafafa}
+.badge{background:#f2f4f7;color:#344054;border:1px solid #e4e7ec;border-radius:999px;padding:2px 8px;font-weight:700;font-size:12px}
 .card-mini{padding:10px;margin:6px 4px;border:1px solid var(--border);border-radius:12px;background:#fff}
 .card-mini[draggable="true"]{cursor:grab}.card-mini.dragging{opacity:.6;transform:scale(.98)}
-.badge{background:#f2f4f7;color:#344054;border:1px solid #e4e7ec;border-radius:999px;padding:2px 8px;font-weight:700}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .tag{background:#f9fafb;color:#344054;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px}
-.actions-row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
-.icon-btn{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:6px 8px;cursor:pointer}
-
+.actions-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.icon-btn{background:#fff;border:1px solid var(--border);border-radius:10px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.icon{width:16px;height:16px;display:inline-block}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
-.dot.green{background:var(--ok)} .dot.amber{background:var(--warn)} .dot.red{background:var(--bad)} .dot.gray{background:#d0d5dd}
+.dot.green{background:var(--verde)} .dot.red{background:var(--granate)} .dot.gray{background:#d0d5dd}
+.age{font-size:12px;color:#475467}
 
-.table-wrap{margin-top:12px}
-.table{width:100%;border-collapse:separate;border-spacing:0;border-radius:12px;overflow:hidden}
-.table th,.table td{padding:10px 12px;border-bottom:1px solid #f2f4f7;text-align:left}
-.table th{background:#f9fafb;color:#344054}
-
-.drawer{position:fixed;right:0;top:0;bottom:0;width:460px;max-width:92vw;background:#fff;border-left:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);transition:.25s;z-index:50}
+/* Drawer */
+.drawer{position:fixed;right:0;top:0;bottom:0;width:520px;max-width:92vw;background:#fff;border-left:1px solid var(--border);box-shadow:0 10px 24px rgba(0,0,0,.12);transform:translateX(100%);transition:.25s;z-index:50}
 .drawer.open{transform:translateX(0)}
 .drawer-header{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid var(--border)}
 .drawer-body{padding:12px}
 .pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#f9fafb;color:#344054}
+.row{display:grid;gap:8px;grid-template-columns:1fr}
+@media(min-width:680px){.row.two{grid-template-columns:1fr 1fr} .row.three{grid-template-columns:1fr 1fr 1fr}}
 
+/* Modal */
 .modal{position:fixed;inset:0;background:rgba(16,24,40,.5);display:none;align-items:center;justify-content:center;z-index:60}
 .modal.open{display:flex}
-.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:920px;max-width:98vw;max-height:90vh;display:flex;flex-direction:column}
+.modal-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,.2);width:980px;max-width:98vw;max-height:90vh;display:flex;flex-direction:column}
 .modal-head{padding:12px 16px;border-bottom:1px solid var(--border)}
 .modal-body{padding:12px 16px;overflow:auto}
 .modal-actions{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 16px;background:#fff;border-top:1px solid var(--border)}
-.section{margin:6px 0 10px}.section h4{margin:0 0 6px;color:#344054}
-.row{display:grid;gap:8px;grid-template-columns:1fr}
-@media (min-width:680px){ .row.two{grid-template-columns:1fr 1fr} .row.three{grid-template-columns:1fr 1fr 1fr} .row.four{grid-template-columns:1fr 1fr 1fr 1fr} }
 
+/* BÚSQUEDA — adjuntos mini */
+.attach-grid{display:grid;gap:6px;grid-template-columns:repeat(6,1fr)}
+.thumb{border:1px solid var(--border);border-radius:10px;overflow:hidden;position:relative;background:#fafafa}
+.thumb img, .thumb video, .thumb .pdf{display:block;width:100%;height:64px;object-fit:cover}
+.thumb .pdf{display:flex;align-items:center;justify-content:center;font-size:12px;color:#475467}
+.thumb .x{position:absolute;top:2px;right:2px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px}
+.help{font-size:12px;color:#667085}
+
+/* Toasts */
 .toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:80}
 .toast{background:#111827;color:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 10px 24px rgba(0,0,0,.25);opacity:.96}
-.toast.ok{background:#15803d} .toast.warn{background:#b45309} .toast.bad{background:#b91c1c}
-.flex{display:flex}.between{justify-content:space-between}.center{align-items:center}
-.hint{color:#667085;font-size:12px}
+.toast.ok{background:var(--verde)} .toast.warn{background:var(--terracota)} .toast.bad{background:var(--granate)}
 .foot{margin:20px 0 10px;text-align:center;color:#667085}
 </style>
 </head>
 <body>
 <header class="topbar">
-<div class="container flex between center">
-<div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
-<nav class="nav">
-<a href="evaluar.html">Evaluar</a>
-<a href="evaluaciones.html">Evaluaciones</a>
-<a href="prospectos.html">Prospectos</a>
-<a href="dashboard.html" class="active">Dashboard</a>
-<a href="configuracion.html">Configuración</a>
-</nav>
-</div>
+  <div class="container" style="display:flex;justify-content:space-between;align-items:center">
+    <div class="brand" style="display:flex;align-items:center;gap:10px">
+      <img src="logo-unihouser.svg" alt="Unihouser" onerror="this.style.display='none'" style="height:26px">
+      <div class="title">Unihouser — CRM & BuyBox</div>
+    </div>
+    <nav class="nav">
+      <a href="evaluar.html">Evaluar</a>
+      <a href="evaluaciones.html">Evaluaciones</a>
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="configuracion.html">Configuración</a>
+    </nav>
+  </div>
 </header>
 
 <main class="container">
-<h2 class="page-title">Dashboard</h2>
+  <h2 class="page-title">Dashboard CRM</h2>
 
-<section class="kpis">
-<div class="kpi card"><div class="lab">Prospectos activos</div><div class="val" id="k_total">—</div></div>
-<div class="kpi card"><div class="lab">Contacto</div><div class="val" id="k_contacto">—</div></div>
-<div class="kpi card"><div class="lab">Reunión</div><div class="val" id="k_reunion">—</div></div>
-<div class="kpi card"><div class="lab">Búsqueda</div><div class="val" id="k_busqueda">—</div></div>
-<div class="kpi card"><div class="lab">Compraventa</div><div class="val" id="k_compra">—</div></div>
-<div class="kpi card"><div class="lab">Notaría</div><div class="val" id="k_notaria">—</div></div>
-</section>
+  <!-- KPIs -->
+  <section class="kpis">
+    <div class="kpi card"><div class="lab">Prospectos activos</div><div class="val" id="k_total">—</div></div>
+    <div class="kpi card"><div class="lab">Contacto OK/KO</div><div class="val" id="k_c_ok">0%</div><div class="sub" id="k_c_n">0/0</div></div>
+    <div class="kpi card"><div class="lab">Reunión OK/KO</div><div class="val" id="k_r_ok">0%</div><div class="sub" id="k_r_n">0/0</div></div>
+    <div class="kpi card"><div class="lab">Contrato OK/KO</div><div class="val" id="k_ct_ok">0%</div><div class="sub" id="k_ct_n">0/0</div></div>
+    <div class="kpi card"><div class="lab">Búsqueda OK/KO</div><div class="val" id="k_b_ok">0%</div><div class="sub" id="k_b_n">0/0</div></div>
+    <div class="kpi card"><div class="lab">Compraventa éxitos</div><div class="val" id="k_success">0</div></div>
+  </section>
 
-<section class="card" style="margin-top:12px">
-<h2 style="margin:0 0 10px">Filtros</h2>
-<div class="filters">
-<div class="field"><label>Buscar</label><input id="f_q" placeholder="Nombre, email o teléfono"></div>
-<div class="field"><label>Fase</label>
-<select id="f_fase">
-<option value="">Todas</option>
-<option value="CONTACTO">Contacto</option>
-<option value="REUNION">Reunión</option>
-<option value="BUSQUEDA">Búsqueda</option>
-<option value="COMPRAVENTA">Compraventa</option>
-<option value="NOTARIA">Notaría</option>
-</select>
-</div>
-<div class="field"><label>Tipo</label>
-<select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
-</div>
-<div class="field"><label>Localidades contiene</label><input id="f_loc" placeholder="Oviedo, Gijón…"></div>
-<div class="field"><label>Financiación</label>
-<select id="f_fin"><option value="">Todas</option><option>Sí</option><option>No</option></select>
-</div>
-<div class="actions">
-<button class="btn sm" id="f_clear" type="button">Limpiar</button>
-<button class="btn sm primary" id="f_apply" type="button">Filtrar</button>
-<button class="btn sm" id="btn_csv" type="button">Exportar CSV</button>
-</div>
-</div>
-</section>
+  <!-- Filtros -->
+  <section class="card" style="margin-top:12px">
+    <h3 style="margin:0 0 10px">Filtros</h3>
+    <div class="filters">
+      <div class="field"><label>Buscar</label><input id="f_q" placeholder="Nombre, email o teléfono"></div>
+      <div class="field"><label>Fase</label>
+        <select id="f_fase">
+          <option value="">Todas</option>
+          <option>CONTACTO</option>
+          <option>REUNION</option>
+          <option>CONTRATO</option>
+          <option>BUSQUEDA</option>
+          <option>COMPRAVENTA</option>
+          <option>PAPELERA</option>
+        </select>
+      </div>
+      <div class="field"><label>Tipo</label>
+        <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
+      </div>
+      <div class="field"><label>Localidades contiene</label><input id="f_loc" placeholder="Oviedo, Gijón…"></div>
+      <div class="actions" style="display:flex;gap:8px;align-items:flex-end">
+        <button class="btn sm" id="f_clear" type="button">Limpiar</button>
+        <button class="btn sm primary" id="f_apply" type="button">Filtrar</button>
+      </div>
+    </div>
+  </section>
 
-<section class="kanban" id="kanban">
-<div class="column card" data-col="CONTACTO" data-drop="1"><h4>Contacto</h4></div>
-<div class="column card" data-col="REUNION" data-drop="1"><h4>Reunión</h4></div>
-<div class="column card" data-col="BUSQUEDA" data-drop="1"><h4>Búsqueda</h4></div>
-<div class="column card" data-col="COMPRAVENTA" data-drop="1"><h4>Compraventa</h4></div>
-<div class="column card" data-col="NOTARIA" data-drop="1"><h4>Notaría</h4></div>
-</section>
-
-<div class="card table-wrap" id="tableWrap" style="display:none">
-<h2 style="margin:10px">Listado</h2>
-<table class="table" id="tab">
-<thead><tr>
-<th>Nombre</th><th>Email</th><th>Teléfono</th>
-<th>Fase</th><th>Subestado</th><th>Tipo</th>
-<th>Localidades</th><th>Objetivo</th><th>Presupuesto</th><th>Acciones</th>
-</tr></thead>
-<tbody id="tbody">
-<tr><td colspan="10" style="text-align:center;color:#667085">Sin datos</td></tr>
-</tbody>
-</table>
-</div>
+  <!-- Kanban -->
+  <section class="kanban" id="kanban" style="margin-top:12px">
+    <div class="column card addable" data-col="CONTACTO" data-drop="1">
+      <h4>Contacto <button class="btn sm" id="btn_add_contacto" type="button">+ Nuevo</button></h4>
+    </div>
+    <div class="column card" data-col="REUNION" data-drop="1"><h4>Reunión</h4></div>
+    <div class="column card" data-col="CONTRATO" data-drop="1"><h4>Contrato</h4></div>
+    <div class="column card" data-col="BUSQUEDA" data-drop="1"><h4>Búsqueda</h4></div>
+    <div class="column card" data-col="COMPRAVENTA" data-drop="1"><h4>Compraventa</h4></div>
+    <div class="column card" data-col="PAPELERA" data-drop="1"><h4>Papelera</h4></div>
+  </section>
 </main>
 
-<!-- Drawer lateral -->
+<!-- Drawer prospecto -->
 <aside class="drawer" id="drawer" aria-hidden="true">
-<div class="drawer-header">
-<strong id="dv_title">Prospecto</strong>
-<button class="btn" id="dv_close" type="button">Cerrar</button>
-</div>
-<div class="drawer-body">
-<div class="pills">
-<div class="pill" id="dv_fase">Fase: —</div>
-<div class="pill" id="dv_tipo">Tipo: —</div>
-<div class="pill" id="dv_obj">Objetivo: —</div>
-<div class="pill" id="dv_evals">Evaluaciones: 0</div>
-</div>
+  <div class="drawer-header">
+    <strong id="dv_title">Prospecto</strong>
+    <button class="btn" id="dv_close" type="button">Cerrar</button>
+  </div>
+  <div class="drawer-body">
+    <div class="pills">
+      <div class="pill" id="dv_fase">Fase: —</div>
+      <div class="pill" id="dv_tipo">Tipo: —</div>
+      <div class="pill" id="dv_age">Días en fase: 0</div>
+    </div>
 
-<div class="field"><label>Nombre</label><input id="dv_nombre"></div>
-<div class="field"><label>Email</label><input id="dv_email"></div>
-<div class="field"><label>Teléfono</label><input id="dv_tel"></div>
-<div class="field"><label>Localidades</label><input id="dv_locs"></div>
+    <!-- Datos básicos -->
+    <div class="row two">
+      <div class="field"><label>Nombre</label><input id="dv_nombre"></div>
+      <div class="field"><label>Tipo</label>
+        <select id="dv_tipo_sel"><option>Tradicional</option><option>Habitaciones</option></select>
+      </div>
+    </div>
+    <div class="row two">
+      <div class="field"><label>Email</label><input id="dv_email"></div>
+      <div class="field"><label>Teléfono</label><input id="dv_tel"></div>
+    </div>
+    <div class="field"><label>Localidades</label><input id="dv_locs" placeholder="Oviedo, Gijón…"></div>
 
-<div class="row two" style="margin-top:8px">
-<div class="field">
-<label>Fase</label>
-<select id="dv_fase_sel">
-<option value="CONTACTO">Contacto</option>
-<option value="REUNION">Reunión</option>
-<option value="BUSQUEDA">Búsqueda</option>
-<option value="COMPRAVENTA">Compraventa</option>
-<option value="NOTARIA">Notaría</option>
-</select>
-</div>
-<div class="field">
-<label>Subestado</label>
-<select id="dv_sub_sel"></select>
-</div>
-</div>
+    <!-- Mensaje inicial (CONTACTO) -->
+    <div id="block_contacto" class="card" style="margin-top:10px">
+      <h4 style="margin:0 0 6px;color:#344054">Mensaje inicial (editable)</h4>
+      <textarea id="dv_msg" rows="9"></textarea>
+      <div class="actions-row">
+        <button class="btn" id="dv_copy" type="button">Copiar</button>
+        <button class="btn" id="dv_mailto" type="button">Abrir email</button>
+      </div>
+    </div>
 
-<div class="actions" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
-<button class="btn" id="dv_email_btn" type="button">Enviar resumen</button>
-<button class="btn" id="dv_contract_btn" type="button">Enviar contrato</button>
-<button class="btn" id="dv_whatsapp_btn" type="button">WhatsApp</button>
-<button class="btn" id="dv_meeting_btn" type="button">Completar datos de reunión</button>
-<button class="btn" id="dv_evals_btn" type="button">Ver evaluaciones</button>
-<button class="btn" id="dv_delete" type="button">Eliminar</button>
-<button class="btn primary" id="dv_save" type="button">Guardar</button>
-<button class="btn primary" id="dv_adv_btn" type="button">Avanzar fase</button>
-</div>
-</div>
+    <!-- Botones principales -->
+    <div class="actions-row" style="margin:10px 0">
+      <button class="btn" id="dv_save" type="button">Guardar</button>
+      <button class="btn" id="dv_wa" type="button">WhatsApp</button>
+      <button class="btn warn" id="dv_discard" type="button">🔴 Descartar</button>
+      <button class="btn primary" id="dv_advance" type="button">🟢 Avanzar</button>
+      <button class="btn ghost" id="dv_delete" type="button">Mover a Papelera</button>
+    </div>
+
+    <!-- Enlaces a bloques avanzados -->
+    <div class="pills">
+      <div class="pill"><button class="btn sm" id="openMeeting" type="button">Datos de reunión</button></div>
+      <div class="pill"><button class="btn sm" id="openContrato" type="button">Contrato</button></div>
+      <div class="pill"><button class="btn sm" id="openBusqueda" type="button">Búsqueda — Propuestas</button></div>
+      <div class="pill"><button class="btn sm" id="openCompra" type="button">Compraventa</button></div>
+    </div>
+
+    <!-- BLOQUE: Contrato (inline) -->
+    <div id="block_contrato" class="card" style="margin-top:6px;display:none">
+      <h4 style="margin:0 0 6px;color:#344054">Contrato</h4>
+      <div class="row two">
+        <div class="field">
+          <label>Subir plantilla (.docx / .pdf)</label>
+          <input id="ct_file" type="file" accept=".doc,.docx,.pdf">
+          <small class="help">Se guarda referencia en localStorage (base64 pequeño). Para archivos grandes, mejor enviarlo por email.</small>
+        </div>
+        <div class="field"><label>Asunto email</label><input id="ct_subject" placeholder="Unihouser — Contrato de servicio"></div>
+      </div>
+      <div class="field"><label>Mensaje</label><textarea id="ct_msg" rows="5" placeholder="Adjunto propuesta de contrato..."></textarea></div>
+      <div class="actions-row">
+        <button class="btn" id="ct_mail" type="button">Abrir email</button>
+      </div>
+    </div>
+
+    <!-- BLOQUE: Búsqueda (inline) -->
+    <div id="block_busqueda" class="card" style="margin-top:6px;display:none">
+      <h4 style="margin:0 0 6px;color:#344054">Búsqueda — Propuestas</h4>
+      <div class="field"><label>Elegir hasta 4 activos (de Evaluaciones)</label>
+        <select id="b_evals" multiple size="6" style="width:100%"></select>
+        <small class="help">Fuente: localStorage.evals (id — localidad — calle — bruta — neta)</small>
+      </div>
+      <div class="row three" style="margin-top:8px">
+        <div class="field">
+          <label>Imágenes</label>
+          <input id="up_imgs" type="file" accept="image/*" multiple>
+          <div id="g_imgs" class="attach-grid" style="margin-top:6px"></div>
+        </div>
+        <div class="field">
+          <label>Vídeos (≤ 2MB c/u)</label>
+          <input id="up_vids" type="file" accept="video/*" multiple>
+          <div id="g_vids" class="attach-grid" style="margin-top:6px"></div>
+        </div>
+        <div class="field">
+          <label>PDFs</label>
+          <input id="up_pdfs" type="file" accept="application/pdf" multiple>
+          <div id="g_pdfs" class="attach-grid" style="margin-top:6px"></div>
+        </div>
+      </div>
+      <div class="actions-row" style="margin-top:8px">
+        <button class="btn" id="b_preview" type="button">Fusionar PDFs (BETA) — Vista previa</button>
+      </div>
+    </div>
+
+    <!-- BLOQUE: Compraventa (inline) -->
+    <div id="block_compra" class="card" style="margin-top:6px;display:none">
+      <h4 style="margin:0 0 6px;color:#344054">Compraventa</h4>
+      <div class="row two">
+        <div class="field">
+          <label>Días de financiación (0–90)</label>
+          <input id="cv_fin_dias" type="number" min="0" max="90" value="0">
+        </div>
+        <div class="field">
+          <label>Fecha de notaría</label>
+          <input id="cv_nota" type="date">
+        </div>
+      </div>
+    </div>
+
+  </div>
 </aside>
 
-<!-- Modal Reunión -->
+<!-- Modal Reunión (mantengo tu versión completa y añado Observaciones) -->
 <div class="modal" id="meetModal" aria-hidden="true">
-<div class="modal-card">
-<div class="modal-head"><h3 style="margin:0">Completar datos de reunión</h3></div>
-<div class="modal-body">
-<div class="section">
-<h4>1) Datos personales</h4>
-<div class="row two">
-<div class="field"><label>DNI</label><input id="m_dni"></div>
-<div class="field"><label>Dirección</label><input id="m_dir"></div>
-</div>
-<div class="row three">
-<div class="field"><label>Localidad (residencia)</label><input id="m_locres"></div>
-<div class="field"><label>Email</label><input id="m_email"></div>
-<div class="field"><label>Teléfono</label><input id="m_tel"></div>
-</div>
+  <div class="modal-card">
+    <div class="modal-head"><h3 style="margin:0">Completar datos de reunión</h3></div>
+    <div class="modal-body">
+      <div class="section">
+        <h4>1) Datos personales</h4>
+        <div class="row two">
+          <div class="field"><label>DNI</label><input id="m_dni"></div>
+          <div class="field"><label>Dirección</label><input id="m_dir"></div>
+        </div>
+        <div class="row three">
+          <div class="field"><label>Localidad (residencia)</label><input id="m_locres"></div>
+          <div class="field"><label>Email</label><input id="m_email"></div>
+          <div class="field"><label>Teléfono</label><input id="m_tel"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>2) Características del activo deseado</h4>
+        <div class="row two">
+          <div class="field">
+            <label>Tipo alquiler</label>
+            <select id="m_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
+          </div>
+          <div class="field"><label>Localidades objetivo</label><input id="m_locsobj" placeholder="Oviedo, Gijón…"></div>
+        </div>
+        <div class="row four">
+          <div class="field"><label>Nº de activos</label><input id="m_nact" inputmode="numeric" value="1"></div>
+          <div class="field"><label>¿Ascensor?</label><select id="m_asc"><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label>Altura máxima</label><input id="m_altmax" inputmode="numeric" value="1"></div>
+          <div class="field"><label>¿Bajo?</label><select id="m_bajo"><option>No</option><option>Sí</option></select></div>
+        </div>
+        <div class="row three">
+          <div class="field"><label>Acepta reforma</label>
+            <select id="m_ref"><option>No</option><option>Lavado de cara</option><option>Integral</option></select>
+          </div>
+          <div class="field"><label>Mes inicio búsqueda</label><input id="m_mesini" type="month"></div>
+          <div class="field"><label>Mes fin (auto +5)</label><input id="m_mesfin" type="month" disabled></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>3) Presupuesto y precio máximo de compra</h4>
+        <div class="row three">
+          <div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric" data-money-live></div>
+          <div class="field"><label>Incluir honorarios (PSI)</label>
+            <select id="m_inchonor"><option value="si">Sí</option><option value="no">No</option></select>
+          </div>
+          <div class="field"><label>Precio máx. compra (auto)</label><input id="m_pmax" disabled></div>
+        </div>
+        <small class="help">Se usan ITP/Notaría/Honorarios de Config.</small>
+      </div>
+
+      <div class="section">
+        <h4>4) Financiación</h4>
+        <div class="row three">
+          <div class="field"><label>Financiación</label><select id="m_fin"><option>Sí</option><option>No</option></select></div>
+          <div class="field"><label>¿Necesita broker?</label><select id="m_broker"><option>No</option><option>Sí</option></select></div>
+          <div class="field"><label>% financiación (sobre precio)</label><input id="m_finp" inputmode="numeric" value="80"></div>
+        </div>
+        <div class="row two">
+          <div class="field"><label>Financiado estimado (€)</label><input id="m_fin_imp" disabled></div>
+          <div class="field"><label>Aportación propia estimada (€)</label><input id="m_aport" disabled></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>5) Objetivo del cliente</h4>
+        <div class="row three">
+          <div class="field"><label>Objetivo principal</label>
+            <select id="m_objt">
+              <option value="bruta">Rentabilidad bruta %</option>
+              <option value="neta">Rentabilidad neta %</option>
+              <option value="flujo">Flujo de caja €</option>
+            </select>
+          </div>
+          <div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
+          <div class="field"><label>Alquiler mensual sugerido (auto)</label><input id="m_alq_sug" disabled></div>
+        </div>
+        <small class="help">El alquiler sugerido para “bruta %” usa coste total <b>sin honorarios</b>.</small>
+      </div>
+
+      <div class="section">
+        <h4>6) Logística de reunión</h4>
+        <div class="row three">
+          <div class="field"><label>Fecha</label><input id="m_fecha" type="date"></div>
+          <div class="field"><label>Hora</label><input id="m_hora" type="time"></div>
+          <div class="field"><label>Medio</label>
+            <select id="m_medio"><option>Google Meet</option><option>Teléfono</option><option>Presencial</option></select>
+          </div>
+        </div>
+        <div class="field"><label>Observaciones</label><textarea id="m_obs" rows="4" placeholder="Notas/observaciones de la reunión"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="m_cancel" type="button">Cancelar</button>
+      <button class="btn primary" id="m_save" type="button">Guardar</button>
+    </div>
+  </div>
 </div>
 
-<div class="section">
-<h4>2) Características del activo deseado</h4>
-<div class="row two">
-<div class="field">
-<label>Tipo alquiler</label>
-<select id="m_tipo"><option>Tradicional</option><option>Habitaciones</option></select>
-</div>
-<div class="field"><label>Localidades objetivo</label><input id="m_locsobj" placeholder="Oviedo, Gijón…"></div>
-</div>
-<div class="row four">
-<div class="field"><label>Nº de activos</label><input id="m_nact" inputmode="numeric" value="1"></div>
-<div class="field"><label>¿Ascensor?</label><select id="m_asc"><option>Sí</option><option>No</option></select></div>
-<div class="field"><label>Altura máxima</label><input id="m_altmax" inputmode="numeric" value="1"></div>
-<div class="field"><label>¿Bajo?</label><select id="m_bajo"><option>No</option><option>Sí</option></select></div>
-</div>
-<div class="row three">
-<div class="field"><label>Acepta reforma</label>
-<select id="m_ref"><option>No</option><option>Lavado de cara</option><option>Integral</option></select>
-</div>
-<div class="field"><label>Mes inicio búsqueda</label><input id="m_mesini" type="month"></div>
-<div class="field"><label>Mes fin (auto +5)</label><input id="m_mesfin" type="month" disabled></div>
-</div>
-</div>
-
-<div class="section">
-<h4>3) Presupuesto y precio máximo de compra</h4>
-<div class="row three">
-<div class="field"><label>Presupuesto total (€)</label><input id="m_budget" inputmode="numeric" data-money-live></div>
-<div class="field"><label>Incluir honorarios (PSI)</label>
-<select id="m_inchonor"><option value="si">Sí</option><option value="no">No</option></select>
-</div>
-<div class="field"><label>Precio máx. compra (auto)</label><input id="m_pmax" disabled></div>
-</div>
-<small class="hint">Se usan ITP/Notaría/Honorarios de Config.</small>
-</div>
-
-<div class="section">
-<h4>4) Financiación</h4>
-<div class="row three">
-<div class="field"><label>Financiación</label><select id="m_fin"><option>Sí</option><option>No</option></select></div>
-<div class="field"><label>¿Necesita broker?</label><select id="m_broker"><option>No</option><option>Sí</option></select></div>
-<div class="field"><label>% financiación (sobre precio)</label><input id="m_finp" inputmode="numeric" value="80"></div>
-</div>
-<div class="row two">
-<div class="field"><label>Financiado estimado (€)</label><input id="m_fin_imp" disabled></div>
-<div class="field"><label>Aportación propia estimada (€)</label><input id="m_aport" disabled></div>
-</div>
-</div>
-
-<div class="section">
-<h4>5) Objetivo del cliente</h4>
-<div class="row three">
-<div class="field"><label>Objetivo principal</label>
-<select id="m_objt">
-<option value="bruta">Rentabilidad bruta %</option>
-<option value="neta">Rentabilidad neta %</option>
-<option value="flujo">Flujo de caja €</option>
-</select>
-</div>
-<div class="field"><label>Valor objetivo</label><input id="m_objv" inputmode="numeric" placeholder="10 (o 2500€)"></div>
-<div class="field"><label>Alquiler mensual sugerido (auto)</label><input id="m_alq_sug" disabled></div>
-</div>
-<small class="hint">El alquiler sugerido para “bruta %” usa coste total <b>sin honorarios</b>.</small>
-</div>
-</div>
-
-<div class="modal-actions">
-<button class="btn" id="m_cancel" type="button">Cancelar</button>
-<button class="btn primary" id="m_save" type="button">Guardar</button>
-</div>
-</div>
+<!-- Modal preview PDFs -->
+<div class="modal" id="pdfModal" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head"><h3 style="margin:0">Vista previa — PDFs seleccionados</h3></div>
+    <div class="modal-body">
+      <div id="pdf_list" class="attach-grid"></div>
+      <p class="help">Esta es una previsualización apilada. La fusión real la activaremos más adelante en este mismo flujo.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="pdf_close" type="button">Cerrar</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast-wrap" id="toasts"></div>
-<footer class="foot"><div class="container">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
+<footer class="foot"><div class="container">© 2025 Unihouser · unihouser.es · 644 300 200</div></footer>
 
 <script>
 (function(){
 "use strict";
-/* ===== Store ===== */
-var Store = {
-get pros(){ try{return JSON.parse(localStorage.getItem("pros")||"[]");}catch(_){return[];} },
-set pros(v){ localStorage.setItem("pros", JSON.stringify(v)); },
-get evals(){ try{return JSON.parse(localStorage.getItem("evals")||"[]");}catch(_){return[];} },
-set evals(v){ localStorage.setItem("evals", JSON.stringify(v)); },
-get cfg(){ try{return JSON.parse(localStorage.getItem("cfg")||"{}");}catch(_){return{};} },
-set cfg(v){ localStorage.setItem("cfg", JSON.stringify(v)); }
+
+/* ====== Store ====== */
+const Store={
+  get pros(){ try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]} },
+  set pros(v){ localStorage.setItem('pros', JSON.stringify(v)); },
+  get evals(){ try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]} },
+  set evals(v){ localStorage.setItem('evals', JSON.stringify(v)); }
 };
-/* ===== Utils ===== */
-var fmtN0=new Intl.NumberFormat("es-ES",{maximumFractionDigits:0});
-var fmtN1=new Intl.NumberFormat("es-ES",{maximumFractionDigits:1});
-function $(id){return document.getElementById(id);}
-function toNum(v){var s=String(v||"").replace(/\./g,"").replace(",","."); var n=Number(s); return Number.isFinite(n)?n:0;}
-function uid(){return "p_"+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);}
-function toast(msg,t){var w=$("toasts"); if(!w) return; var d=document.createElement("div"); d.className="toast "+(t||""); d.textContent=msg; w.appendChild(d); setTimeout(function(){d.style.opacity="0"},1800); setTimeout(function(){try{w.removeChild(d);}catch(e){}},2400);}
-let _toastLock=false; function toastOnce(msg,kind){ if(_toastLock) return; _toastLock=true; const wrap=$("toasts"); if(wrap) wrap.innerHTML=""; toast(msg,kind); setTimeout(()=>{_toastLock=false},600); }
-function normPhone(t){return t?String(t).replace(/[^\d+]/g,""):""}
-function onClick(sel,fn){document.addEventListener("click",function(e){var t=e.target;while(t&&t!==document){if(t.matches&&t.matches(sel)){fn.call(t,e);return} t=t.parentNode;}});}
-function attachMoneyLive(){
-document.addEventListener("input", function(e){
-var t=e.target; if(!t.matches||!t.matches("input[data-money-live]")) return;
-var digits=(t.value||"").replace(/[^\d]/g,""); t.value=digits?fmtN0.format(+digits):"";
-});
-document.addEventListener("blur", function(e){
-var t=e.target; if(!t.matches||!t.matches("input[data-money-live]")) return;
-t.value = toNum(t.value)?fmtN0.format(toNum(t.value)):"";
-}, true);
+
+/* ====== Utils ====== */
+const $=id=>document.getElementById(id);
+const fmtN0=new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+const fmtN1=new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
+const today=()=> (new Date()).toISOString().slice(0,10);
+const diffDays=(iso)=>{ if(!iso) return 0; const a=new Date(iso); const b=new Date(); return Math.max(0, Math.round((b-a)/86400000)); };
+function toast(msg,kind){ const w=$('toasts'); const d=document.createElement('div'); d.className='toast '+(kind||''); d.textContent=msg; w.appendChild(d); setTimeout(()=>d.style.opacity='0',1800); setTimeout(()=>{try{w.removeChild(d)}catch(_){}} ,2400); }
+function copy(text){ navigator.clipboard?.writeText(text).then(()=>toast('Copiado','ok')).catch(()=>{}); }
+function toNum(v){ const s=String(v||'').replace(/\./g,'').replace(',', '.'); const n=Number(s); return Number.isFinite(n)?n:0; }
+function normPhone(t){return t?String(t).replace(/[^\d+]/g,''):""}
+function uid(){return 'p_'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);}
+
+const MAIL_INTRO=`Hola!
+
+Gracias por escribirnos y por el interés en lo que hacemos en Unihouser.
+
+Cada inversor es distinto —algunos buscáis dar vuestro primer paso, otros ya tenéis experiencia— así que preferimos contar de forma clara cómo trabajamos y qué aportamos, para que tú decidas si tiene sentido avanzar juntos.
+
+🏠 ¿En qué podemos ayudarte?
+
+✔ Analizamos y filtramos oportunidades con sentido real, mirando números, zonas y estado del inmueble.
+✔ Estimamos contigo todos los costes asociados: compra, reforma, gestión, posibles imprevistos.
+✔ Te damos una visión clara del rendimiento esperado (habitaciones, tradicional o mixto).
+
+💬 ¿Qué necesitamos de ti?
+Ganas de avanzar si aparece la oportunidad adecuada. Nos ayuda saber presupuesto orientativo, zonas de interés y expectativas de rentabilidad.
+
+💶 ¿Cómo trabajamos?
+Honorario fijo y transparente, sin comisiones de agencia. Estamos de tu parte, no del vendedor.
+
+✨ ¿Seguimos hablando?
+Si te encaja, cuéntanos:
+1) Presupuesto aproximado
+2) Tipo de inmueble
+3) Modelo (habitaciones / tradicional / mixto)
+
+Gracias,
+Equipo Unihouser`;
+
+/* ====== Fases ====== */
+const PHASES=['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA','PAPELERA'];
+function nextPhase(p){ const i=PHASES.indexOf(p||'CONTACTO'); if(i<0) return 'REUNION'; if(i>=0 && i<PHASES.length-2) return PHASES[i+1]; return 'COMPRAVENTA'; } // papelera no avanza
+function ensureIds(){
+  const arr=Store.pros||[]; let ch=false;
+  arr.forEach(p=>{
+    if(!p.id){ p.id=uid(); ch=true; }
+    if(!p.fase){ p.fase='CONTACTO'; ch=true; }
+    if(!p.phase_start){ p.phase_start=today(); ch=true; }
+    if(!p.history){ p.history={}; ch=true; }
+    if(!p.attach){ p.attach={imgs:[], vids:[], pdfs:[]}; ch=true; }
+    if(!p.proposals){ p.proposals=[]; ch=true; }
+  });
+  if(ch) Store.pros=arr;
 }
-/* ===== Fases ===== */
-var phases=["CONTACTO","REUNION","BUSQUEDA","COMPRAVENTA","NOTARIA"];
-var subestados={
-CONTACTO:["Pendiente contactar","Contactado","Descartado"],
-REUNION:["Reunión agendada","Reunión hecha","Descartado"],
-BUSQUEDA:["Propuesta enviada","Reserva","Arras firmadas","Descartado"],
-COMPRAVENTA:["Notaría fijada","Pendiente financiación","Descartado"],
-NOTARIA:["Escritura firmada","Descartado"]
-};
-function nextPhase(f){var i=phases.indexOf(f||"CONTACTO"); if(i<0)i=0; return (i>=phases.length-1)?phases[i]:phases[i+1];}
-/* ===== IDs & Evals ===== */
-function ensureIds(){var a=Store.pros||[],ch=false; for(var i=0;i<a.length;i++){ if(!a[i].id){a[i].id=uid(); ch=true;} } if(ch) Store.pros=a;}
-function evalsByProspect(pid){var evs=Store.evals||[]; return evs.filter(function(e){return Array.isArray(e.prospect_ids)&&e.prospect_ids.indexOf(pid)>-1;});}
-function scoreDotFor(p){
-var objT=p.obj_tipo, goal=toNum(p.obj_raw); if(!objT||!goal) return "gray";
-var evs=evalsByProspect(p.id); if(!evs.length) return "gray";
-var best=null; for(var i=0;i<evs.length;i++){if(evs[i].kpi_tipo===objT){best=evs[i];break;}} if(!best) best=evs[0];
-var val=Number(best.kpi_val)||0;
-if(objT==="flujo"){ if(val>=goal) return "green"; if(val>=goal*0.9) return "amber"; return "red"; }
-else{ if(val>=goal) return "green"; if(val>=goal-1) return "amber"; return "red"; }
-}
-/* ===== Filtros ===== */
-function readFilters(){return{
-q:($("f_q")&&$("f_q").value||"").trim().toLowerCase(),
-fase:$("f_fase")&&$("f_fase").value||"",
-tipo:$("f_tipo")&&$("f_tipo").value||"",
-loc:($("f_loc")&&$("f_loc").value||"").trim().toLowerCase(),
-fin:($("f_fin")&&$("f_fin").value||"")
+
+/* ====== Filtros / KPIs ====== */
+function readFilters(){ return {
+  q: ($('f_q').value||'').toLowerCase().trim(),
+  fase: $('f_fase').value||'',
+  tipo: $('f_tipo').value||'',
+  loc: ($('f_loc').value||'').toLowerCase().trim()
 };}
 function applyFilters(rows,f){
-var out=[]; for(var i=0;i<rows.length;i++){ var p=rows[i]; if(!p) continue;
-var hay=(String(p.nombre||"")+" "+String(p.email||"")+" "+String(p.tel||"")).toLowerCase();
-if(f.q && hay.indexOf(f.q)===-1) continue;
-if(f.fase && (p.fase||"CONTACTO")!==f.fase) continue;
-if(f.tipo && (p.pref_tipo||"")!==f.tipo) continue;
-if(f.loc && String(p.locs_text||"").toLowerCase().indexOf(f.loc)===-1) continue;
-if(f.fin && (p.financia||"")!==f.fin) continue;
-out.push(p);
-} return out;
+  return rows.filter(p=>{
+    const hay=(p.nombre||'')+' '+(p.email||'')+' '+(p.tel||''); 
+    if(f.q && !hay.toLowerCase().includes(f.q)) return false;
+    if(f.fase && (p.fase||'CONTACTO')!==f.fase) return false;
+    if(f.tipo && (p.pref_tipo||'')!==f.tipo) return false;
+    if(f.loc && !(p.locs_text||'').toLowerCase().includes(f.loc)) return false;
+    return true;
+  });
 }
-/* ===== KPIs ===== */
+function kpiPct(ok,ko){ const t=ok+ko; return t? Math.round(ok*1000/t)/10 : 0; }
 function renderKPIs(rows){
-var c={CONTACTO:0,REUNION:0,BUSQUEDA:0,COMPRAVENTA:0,NOTARIA:0};
-for(var i=0;i<rows.length;i++){ var f=rows[i].fase||"CONTACTO"; c[f]=(c[f]||0)+1; }
-$("k_total").textContent=rows.length||0;
-$("k_contacto").textContent=c.CONTACTO||0;
-$("k_reunion").textContent=c.REUNION||0;
-$("k_busqueda").textContent=c.BUSQUEDA||0;
-$("k_compra").textContent=c.COMPRAVENTA||0;
-$("k_notaria").textContent=c.NOTARIA||0;
+  $('k_total').textContent=rows.filter(p=>p.fase!=='PAPELERA').length;
+  const acc={CONTACTO:{ok:0,ko:0},REUNION:{ok:0,ko:0},CONTRATO:{ok:0,ko:0},BUSQUEDA:{ok:0,ko:0}};
+  rows.forEach(p=>{
+    const h=(p.history||{});
+    ['CONTACTO','REUNION','CONTRATO','BUSQUEDA'].forEach(ph=>{
+      if(h[ph]==='OK') acc[ph].ok++; else if(h[ph]==='KO') acc[ph].ko++;
+    });
+  });
+  $('k_c_ok').textContent = kpiPct(acc.CONTACTO.ok, acc.CONTACTO.ko)+'%'; $('k_c_n').textContent = acc.CONTACTO.ok+'/'+(acc.CONTACTO.ok+acc.CONTACTO.ko);
+  $('k_r_ok').textContent = kpiPct(acc.REUNION.ok, acc.REUNION.ko)+'%'; $('k_r_n').textContent = acc.REUNION.ok+'/'+(acc.REUNION.ok+acc.REUNION.ko);
+  $('k_ct_ok').textContent= kpiPct(acc.CONTRATO.ok, acc.CONTRATO.ko)+'%'; $('k_ct_n').textContent= acc.CONTRATO.ok+'/'+(acc.CONTRATO.ok+acc.CONTRATO.ko);
+  $('k_b_ok').textContent = kpiPct(acc.BUSQUEDA.ok, acc.BUSQUEDA.ko)+'%'; $('k_b_n').textContent = acc.BUSQUEDA.ok+'/'+(
+$('k_success').textContent = rows.filter(p=>p.success_at).length;
 }
-/* ===== Kanban ===== */
+
+/* ====== Kanban / Render ====== */
+function svgEye(){return '<svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 5c5.2 0 9.46 3.65 10.5 7-1.04 3.35-5.3 7-10.5 7S2.54 15.35 1.5 12C2.54 8.65 6.8 5 12 5Z" stroke="#58736F" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="#58736F" stroke-width="1.6"/></svg>'; }
+function svgTrash(){return '<svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12" stroke="#B53928" stroke-width="1.6" stroke-linecap="round"/></svg>'; }
+
 function cardHTML(p, idx){
-var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
-var dot=scoreDotFor(p);
-var chips=""; if(p.locs_text){ var parts=String(p.locs_text).split(","); for(var k=0;k<parts.length&&k<2;k++){ var x=parts[k].trim(); if(x) chips+='<span class="tag">'+x+'</span>'; } }
-var html='';
-html+='<div class="card-mini" draggable="true" data-i="'+idx+'" data-id="'+(p.id||'')+'">';
-html+='<div class="flex between"><div><strong>'+(p.nombre||"—")+'</strong></div>';
-html+='<span class="badge">'+(p.pref_tipo||"—")+' <span class="dot '+dot+'"></span></span></div>';
-html+='<div style="margin-top:4px;font-size:13px;color:#475467">'+String(p.obj_tipo||"").toUpperCase()+' '+objTxt+'</div>';
-html+='<div class="tags">'+(chips||"")+'</div>';
-html+='<div class="actions-row">';
-html+='<button class="icon-btn act-mail" title="Email" data-i="'+idx+'">✉️</button>';
-html+='<button class="icon-btn act-wa" title="WhatsApp" data-i="'+idx+'">🗨️</button>';
-html+='<button class="icon-btn act-open" title="Abrir" data-i="'+idx+'">➤</button>';
-html+='<button class="icon-btn act-next" title="Avanzar fase" data-i="'+idx+'">➡️</button>';
-html+='<button class="icon-btn act-del" title="Eliminar" data-i="'+idx+'">🗑️</button>';
-html+='</div></div>';
-return html;
+  const dot = p.history?.[p.fase]==='KO' ? 'red' : (p.history?.[p.fase]==='OK' ? 'green' : 'gray');
+  const chips = (p.locs_text||'').split(',').map(s=>s.trim()).filter(Boolean).slice(0,2).map(x=>'<span class="tag">'+x+'</span>').join('');
+  return ''+
+  '<div class="card-mini" draggable="true" data-i="'+idx+'" data-id="'+(p.id||'')+'">'+
+    '<div class="flex between">'+
+      '<div><strong>'+(p.nombre||'—')+'</strong></div>'+
+      '<span class="badge">'+(p.pref_tipo||'—')+' <span class="dot '+dot+'"></span></span>'+
+    '</div>'+
+    '<div class="age">Días en fase: '+diffDays(p.phase_start)+'</div>'+
+    '<div class="tags">'+chips+'</div>'+
+    '<div class="actions-row">'+
+      '<button class="icon-btn act-open" data-i="'+idx+'" title="Abrir">'+svgEye()+' Abrir</button>'+
+      '<button class="icon-btn act-advance" data-i="'+idx+'" title="Avanzar">🟢</button>'+
+      '<button class="icon-btn act-discard" data-i="'+idx+'" title="Descartar">🔴</button>'+
+      '<button class="icon-btn act-trash" data-i="'+idx+'" title="Mover a papelera">'+svgTrash()+'</button>'+
+    '</div>'+
+  '</div>';
 }
+
 function renderKanban(rows){
-var wrap=$("kanban"); if(!wrap) return;
-var cols=wrap.querySelectorAll(".column"); for(var c=0;c<cols.length;c++){ var h=cols[c].querySelector("h4"); cols[c].innerHTML="<h4>"+h.textContent+"</h4>"; cols[c].classList.add("dropzone"); }
-for(var i=0;i<rows.length;i++){ var p=rows[i]; p.__idx=i; var col=wrap.querySelector('.column[data-col="'+(p.fase||"CONTACTO")+'"]'); if(col){ col.insertAdjacentHTML("beforeend", cardHTML(p,i)); } }
-enableDnD();
+  const wrap=$('kanban'); const cols=wrap.querySelectorAll('.column');
+  cols.forEach(col=>{ const title=col.querySelector('h4'); col.innerHTML=''; col.appendChild(title); col.classList.add('dropzone'); });
+  const byPhase={}; PHASES.forEach(ph=>byPhase[ph]=[]);
+  rows.forEach(p=>byPhase[p.fase||'CONTACTO'].push(p));
+  byPhase.REUNION.sort((a,b)=> (a.meet_date||'') < (b.meet_date||'') ? -1 : 1);
+  PHASES.forEach(ph=>{
+    const col=wrap.querySelector('.column[data-col="'+ph+'"]');
+    byPhase[ph].forEach(p=>{
+      const idx = (Store.pros||[]).findIndex(x=>x.id===p.id);
+      col.insertAdjacentHTML('beforeend', cardHTML(p, idx));
+    });
+  });
+  enableDnD();
 }
-/* ===== Tabla ===== */
-function renderTable(rows){
-var tb=$("tbody"); if(!tb) return;
-if(!rows.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#667085">Sin datos</td></tr>'; return;}
-var html=""; for(var i=0;i<rows.length;i++){ var p=rows[i]; var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
-html+='<tr>'+
-'<td>'+(p.nombre||"—")+'</td>'+
-'<td>'+(p.email||"—")+'</td>'+
-'<td>'+(p.tel||"—")+'</td>'+
-'<td>'+(p.fase||"CONTACTO")+'</td>'+
-'<td>'+(p.sub||"—")+'</td>'+
-'<td>'+(p.pref_tipo||"—")+'</td>'+
-'<td>'+(p.locs_text||"—")+'</td>'+
-'<td>'+String(p.obj_tipo||"").toUpperCase()+' '+objTxt+'</td>'+
-'<td>'+(p.budget?fmtN0.format(p.budget):"—")+'</td>'+
-'<td><button class="btn open-drawer" data-i="'+i+'">Abrir</button></td>'+
-'</tr>';
+
+function renderAll(){
+  ensureIds();
+  const all=Store.pros||[];
+  const rows=applyFilters(all, readFilters());
+  renderKPIs(rows);
+  renderKanban(rows);
 }
-tb.innerHTML=html;
+
+/* ====== Drag & Drop ====== */
+function enableDnD(){
+  const cards=document.querySelectorAll('.card-mini');
+  cards.forEach(card=>{
+    card.addEventListener('dragstart', e=>{
+      card.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', card.getAttribute('data-i')||'');
+    });
+    card.addEventListener('dragend', ()=>{ card.classList.remove('dragging'); });
+  });
+  const cols=document.querySelectorAll('.column[data-drop="1"]');
+  cols.forEach(col=>{
+    col.addEventListener('dragover', e=>{ e.preventDefault(); });
+    col.addEventListener('drop', e=>{
+      e.preventDefault();
+      const idx = +e.dataTransfer.getData('text/plain');
+      const arr=Store.pros||[]; const p=arr[idx]; if(!p) return;
+      const newPhase = col.getAttribute('data-col')||'CONTACTO';
+      p.fase = newPhase;
+      p.phase_start = today();
+      Store.pros=arr;
+      renderAll();
+      toast('Movido a '+newPhase,'ok');
+    });
+  });
 }
-/* ===== Drawer ===== */
-function fillSubestadosSel(fase,current){
-var sel=$("dv_sub_sel"); if(!sel) return; sel.innerHTML="";
-var arr=subestados[fase]||["—"]; for(var i=0;i<arr.length;i++){ var o=document.createElement("option"); o.value=arr[i]; o.textContent=arr[i]; if(arr[i]===current) o.selected=true; sel.appendChild(o); }
+
+/* ====== Drawer ====== */
+let OPEN_IDX=-1;
+
+function showBlocksByPhase(phase){
+  const bC = $('block_contacto'), bCt=$('block_contrato'), bB=$('block_busqueda'), bCv=$('block_compra');
+  if(bC) bC.style.display = (phase==='CONTACTO')?'block':'none';
+  if(bCt) bCt.style.display = (phase==='CONTRATO')?'block':'none';
+  if(bB)  bB.style.display  = (phase==='BUSQUEDA')?'block':'none';
+  if(bCv) bCv.style.display = (phase==='COMPRAVENTA')?'block':'none';
 }
-function resumenProspecto(p){
-const partes=[];
-if (p.nombre) partes.push("Nombre: "+p.nombre);
-if (p.email) partes.push("Email: "+p.email);
-if (p.tel) partes.push("Teléfono: "+p.tel);
-if (p.pref_tipo) partes.push("Tipo: "+p.pref_tipo);
-if (p.locs_text) partes.push("Zonas: "+p.locs_text);
-if (p.obj_tipo){
-const v = p.obj_tipo==="flujo" ? (fmtN0.format(p.obj_raw)+" €") : (fmtN1.format(p.obj_raw)+" %");
-partes.push("Objetivo: "+String(p.obj_tipo).toUpperCase()+" "+v);
+
+function loadEvalsToSelect(selectedIds){
+  const evs = Store.evals||[];
+  const sel = $('b_evals'); if(!sel) return;
+  sel.innerHTML='';
+  evs.forEach(e=>{
+    const o=document.createElement('option');
+    o.value=e.id||e.ts||('');
+    const b = (e.kpi_bruta!=null)? fmtN1.format(Number(e.kpi_bruta))+'%' : '—';
+    const n = (e.kpi_neta!=null)? fmtN1.format(Number(e.kpi_neta))+'%' : '—';
+    o.textContent = (e.id||'')+' — '+(e.loc||'-')+' — '+(e.calle||'-')+' — B:'+b+' / N:'+n;
+    if(selectedIds && selectedIds.includes(o.value)) o.selected=true;
+    sel.appendChild(o);
+  });
 }
-if (p.budget) partes.push("Presupuesto: "+fmtN0.format(p.budget)+" €");
-if (p.pmax_compra) partes.push("Precio máx. compra: "+fmtN0.format(p.pmax_compra)+" €");
-if (p.financia) partes.push("Financiación: "+p.financia+(p.fin_pct?(" ("+p.fin_pct+"%)"):""));
-return "Resumen prospecto:\n- " + partes.join("\n- ");
+
+function renderThumbGrid(arr, gridEl, kind){
+  gridEl.innerHTML='';
+  (arr||[]).forEach((item,i)=>{
+    const box=document.createElement('div'); box.className='thumb';
+    let inner='';
+    if(kind==='img') inner = '<img src="'+item.data+'" alt="img">';
+    if(kind==='vid') inner = '<video src="'+item.data+'" muted></video>';
+    if(kind==='pdf') inner = '<div class="pdf">PDF</div>';
+    box.innerHTML = inner + '<button class="x" data-i="'+i+'" title="Quitar">✖</button>';
+    gridEl.appendChild(box);
+  });
+  gridEl.querySelectorAll('.x').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i=+btn.getAttribute('data-i');
+      const arrRef = (kind==='img')?'imgs':(kind==='vid')?'vids':'pdfs';
+      const pros=Store.pros||[]; const p=pros[OPEN_IDX]; if(!p) return;
+      (p.attach[arrRef]||[]).splice(i,1);
+      Store.pros=pros;
+      // re-render
+      renderThumbGrid(p.attach[arrRef], gridEl, kind);
+    });
+  });
 }
-function updateCommButtons(p){
-const bEmail = $("dv_email_btn");
-const bContr = $("dv_contract_btn");
-const bWa = $("dv_whatsapp_btn");
-const hasEmail = !!(p.email && String(p.email).includes("@"));
-const tel = normPhone(p.tel);
-bEmail.disabled = !hasEmail; bContr.disabled = !hasEmail; bWa.disabled = !tel;
-if (hasEmail){ bEmail.dataset.to=p.email; bContr.dataset.to=p.email; } else { delete bEmail.dataset.to; delete bContr.dataset.to; }
-if (tel){ bWa.dataset.tel=tel; } else { delete bWa.dataset.tel; }
+
+function openDrawer(p, idx){
+  OPEN_IDX=idx;
+  $('dv_title').textContent = p.nombre || 'Prospecto';
+  $('dv_fase').textContent  = 'Fase: ' + (p.fase||'CONTACTO');
+  $('dv_tipo').textContent  = 'Tipo: ' + (p.pref_tipo||'—');
+  $('dv_age').textContent   = 'Días en fase: ' + diffDays(p.phase_start);
+
+  $('dv_nombre').value = p.nombre||'';
+  $('dv_tipo_sel').value = p.pref_tipo||'Tradicional';
+  $('dv_email').value = p.email||'';
+  $('dv_tel').value = p.tel||'';
+  $('dv_locs').value = p.locs_text||'';
+
+  // Mensaje inicial
+  $('dv_msg').value = p.first_msg || MAIL_INTRO;
+
+  // Reunión (modal usa estos campos)
+  $('m_fecha').value = p.meet_date || '';
+  $('m_hora').value  = p.meet_time || '';
+  $('m_medio').value = p.meet_medio || 'Google Meet';
+  $('m_obs').value   = p.meet_obs || '';
+
+  // Contrato inline
+  $('ct_subject').value = p.ct_subject || 'Unihouser — Contrato de servicio';
+  $('ct_msg').value = p.ct_msg || 'Adjunto propuesta de contrato. Quedamos a tu disposición para cualquier duda.';
+
+  // Búsqueda
+  loadEvalsToSelect(p.proposals||[]);
+  renderThumbGrid(p.attach?.imgs||[], $('g_imgs'), 'img');
+  renderThumbGrid(p.attach?.vids||[], $('g_vids'), 'vid');
+  renderThumbGrid(p.attach?.pdfs||[], $('g_pdfs'), 'pdf');
+
+  showBlocksByPhase(p.fase||'CONTACTO');
+
+  $('drawer').classList.add('open');
+  $('drawer').setAttribute('aria-hidden','false');
 }
-function openDrawer(p){
-$("dv_title").textContent=p.nombre||"Prospecto";
-$("dv_fase").textContent="Fase: "+(p.fase||"CONTACTO");
-$("dv_tipo").textContent="Tipo: "+(p.pref_tipo||"—");
-var objTxt=(p.obj_tipo==="flujo")?(fmtN0.format(p.obj_raw)+" €"):(fmtN1.format(p.obj_raw)+" %");
-$("dv_obj").textContent="Objetivo: "+String(p.obj_tipo||"").toUpperCase()+" "+objTxt;
-$("dv_evals").textContent="Evaluaciones: "+(evalsByProspect(p.id).length||0);
-$("dv_nombre").value=p.nombre||""; $("dv_email").value=p.email||""; $("dv_tel").value=p.tel||""; $("dv_locs").value=p.locs_text||"";
-$("dv_fase_sel").value=p.fase||"CONTACTO"; fillSubestadosSel(p.fase||"CONTACTO", p.sub||"");
-$("dv_adv_btn").dataset.idx=p.__idx; $("dv_save").dataset.idx=p.__idx; $("dv_delete").dataset.idx=p.__idx;
-$("dv_meeting_btn").dataset.idx=p.__idx; $("dv_evals_btn").dataset.pid=p.id||"";
-updateCommButtons(p);
-$("drawer").classList.add("open"); $("drawer").setAttribute("aria-hidden","false");
+
+function closeDrawer(){
+  const d=$('drawer');
+  if(d){ d.classList.remove('open'); d.setAttribute('aria-hidden','true'); }
+  OPEN_IDX=-1;
 }
-function closeDrawer(){ var d=$("drawer"); if(d){ d.classList.remove("open"); d.setAttribute("aria-hidden","true"); } }
-/* ===== Config & Cálculos reunión (exactos, honorarios con IVA) ===== */
+
+/* ====== Actions ====== */
+function saveCurrent(){
+  if(OPEN_IDX<0) return;
+  const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p) return;
+  p.nombre = $('dv_nombre').value;
+  p.pref_tipo = $('dv_tipo_sel').value;
+  p.email = $('dv_email').value;
+  p.tel   = $('dv_tel').value;
+  p.locs_text = $('dv_locs').value;
+
+  // mensaje inicial
+  p.first_msg = $('dv_msg').value;
+
+  // contrato inline
+  p.ct_subject = $('ct_subject').value;
+  p.ct_msg     = $('ct_msg').value;
+
+  // búsqueda: proposals (máx 4)
+  const sel=[...$('b_evals').options].filter(o=>o.selected).map(o=>o.value).slice(0,4);
+  p.proposals = sel;
+
+  Store.pros=arr;
+  renderAll();
+  toast('Guardado','ok');
+}
+
+function doAdvance(){
+  if(OPEN_IDX<0) return;
+  const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p) return;
+  // marca OK en fase actual
+  p.history = p.history || {};
+  p.history[p.fase||'CONTACTO']='OK';
+
+  // éxito al salir de COMPRAVENTA
+  if(p.fase==='COMPRAVENTA'){ p.success_at = new Date().toISOString(); }
+
+  p.fase = nextPhase(p.fase);
+  p.phase_start = today();
+  Store.pros=arr;
+  renderAll();
+  openDrawer(p, OPEN_IDX); // re-pinta con nueva fase
+  toast('Avanzado a '+p.fase,'ok');
+}
+
+function doDiscard(){
+  if(OPEN_IDX<0) return;
+  const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p) return;
+  p.history = p.history || {};
+  p.history[p.fase||'CONTACTO']='KO';
+  Store.pros=arr;
+  renderAll();
+  openDrawer(p, OPEN_IDX);
+  toast('Marcado como KO en '+p.fase,'warn');
+}
+
+function moveToTrash(){
+  if(OPEN_IDX<0) return;
+  const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p) return;
+  p.fase='PAPELERA';
+  p.phase_start=today();
+  Store.pros=arr;
+  renderAll();
+  closeDrawer();
+  toast('Movido a papelera','ok');
+}
+
+/* ====== Upload handlers (Búsqueda) ====== */
+function fileToDataURL(file){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>res(fr.result);
+    fr.onerror=rej;
+    fr.readAsDataURL(file);
+  });
+}
+
+$('up_imgs')?.addEventListener('change', async (e)=>{
+  if(OPEN_IDX<0) return;
+  const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p) return;
+  p.attach = p.attach || {imgs:[],vids:[],pdfs:[]};
+  const files = [...e.target.files];
+  for(const f of files){
+    try{
+      const data = await fileToDataURL(f);
+      p.attach.imgs.push({name:f.name, data});
+    }catch(_){}
+  }
+  Store.pros=arr;
+  renderThumbGrid(p.attach.imgs, $('g_imgs'), 'img');
+  e.target.value='';
+});
+
+$('up_vids')?.addEventListener('change', async (e)=>{
+  if(OPEN_IDX<0) return;
+  const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p) return;
+  p.attach = p.attach || {imgs:[],vids:[],pdfs:[]};
+  const files = [...e.target.files];
+  for(const f of files){
+    if(f.size>2*1024*1024){ toast('Vídeo '+f.name+' supera 2MB','bad'); continue; }
+    try{
+      const data = await fileToDataURL(f);
+      p.attach.vids.push({name:f.name, data});
+    }catch(_){}
+  }
+  Store.pros=arr;
+  renderThumbGrid(p.attach.vids, $('g_vids'), 'vid');
+  e.target.value='';
+});
+
+$('up_pdfs')?.addEventListener('change', async (e)=>{
+  if(OPEN_IDX<0) return;
+  const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p) return;
+  p.attach = p.attach || {imgs:[],vids:[],pdfs:[]};
+  const files = [...e.target.files];
+  for(const f of files){
+    if(!/pdf$/i.test(f.type)){ continue; }
+    try{
+      const data = await fileToDataURL(f);
+      p.attach.pdfs.push({name:f.name, data});
+    }catch(_){}
+  }
+  Store.pros=arr;
+  renderThumbGrid(p.attach.pdfs, $('g_pdfs'), 'pdf');
+  e.target.value='';
+});
+
+/* ====== PDF preview (BETA) ====== */
+$('b_preview')?.addEventListener('click', ()=>{
+  if(OPEN_IDX<0) return;
+  const p=(Store.pros||[])[OPEN_IDX]; if(!p) return;
+  const list=$('pdf_list'); list.innerHTML='';
+  (p.attach?.pdfs||[]).forEach((pdf,i)=>{
+    const box=document.createElement('div'); box.className='thumb';
+    box.innerHTML='<div class="pdf">PDF '+(i+1)+'</div>';
+    box.addEventListener('click', ()=>{ window.open(pdf.data, '_blank'); });
+    list.appendChild(box);
+  });
+  $('pdfModal').classList.add('open');
+  $('pdfModal').setAttribute('aria-hidden','false');
+});
+$('pdf_close')?.addEventListener('click', ()=>{
+  $('pdfModal').classList.remove('open');
+  $('pdfModal').setAttribute('aria-hidden','true');
+});
+
+/* ====== Meeting modal (respeta tu flujo + Observaciones) ====== */
+function monthPlus5(v){ if(!v||!/^\d{4}-\d{2}$/.test(v))return""; var y=parseInt(v.substr(0,4),10), m=parseInt(v.substr(5,2),10)+5; while(m>12){m-=12;y++;} return y+"-"+(m<10?"0"+m:m); }
 function cfgOrDefaults(){
-const c = Store.cfg || {};
-const itpPct = toNum(c.itp_pct) || 8; // %
-const notaria = toNum(c.notaria) || 1500; // €
-const basePsi = toNum(c.honorarios) || 3500; // € (base sin IVA)
-const honorIVA = Math.round(basePsi * 1.21); // € con IVA (21%)
-return {
-itp_pct : itpPct,
-not_eur : notaria,
-honor_eur : honorIVA
-};
+  const c=JSON.parse(localStorage.getItem('cfg')||'{}');
+  const itpPct = toNum(c.itp_pct)||8;
+  const notaria= toNum(c.notaria)||1500;
+  const basePsi= toNum(c.honorarios)||3500;
+  const honorIVA=Math.round(basePsi*1.21);
+  return { itp_pct:itpPct, not_eur:notaria, honor_eur:honorIVA };
 }
 function calcPrecioMaxCompra(budget, includeHonor){
-const c = cfgOrDefaults();
-const t = c.itp_pct / 100;
-const N = c.not_eur;
-const H = includeHonor ? c.honor_eur : 0;
-const numerador = Math.max(0, budget - N - H);
-if (numerador <= 0) return 0;
-return Math.floor(numerador / (1 + t));
+  const c=cfgOrDefaults(); const t=c.itp_pct/100; const N=c.not_eur; const H=includeHonor?c.honor_eur:0;
+  const numerador=Math.max(0,budget-N-H); if(numerador<=0) return 0;
+  return Math.floor(numerador/(1+t));
 }
-function monthPlus5(v){ if(!v||!/^\d{4}-\d{2}$/.test(v))return""; var y=parseInt(v.substr(0,4),10), m=parseInt(v.substr(5,2),10)+5; while(m>12){m-=12;y++;} return y+"-"+(m<10?"0"+m:m); }
-function openMeeting(p){
-$("m_dni").value=p.dni||""; $("m_dir").value=p.dir||""; $("m_locres").value=p.loc_res||"";
-$("m_email").value=p.email||""; $("m_tel").value=p.tel||"";
-$("m_tipo").value=p.pref_tipo||"Tradicional"; $("m_locsobj").value=p.locs_text||"";
-$("m_nact").value=p.n_activos||1; $("m_asc").value=p.ascensor||"Sí"; $("m_altmax").value=p.altura_max||1; $("m_bajo").value=p.bajo||"No";
-$("m_ref").value=p.reforma||"No"; $("m_mesini").value=p.mes_ini||""; $("m_mesfin").value=p.mes_fin||"";
-$("m_budget").value=p.budget?fmtN0.format(p.budget):""; $("m_inchonor").value=p.incluir_honor||"si"; $("m_pmax").value=p.pmax_compra?fmtN0.format(p.pmax_compra):"";
-$("m_fin").value=p.financia||"Sí"; $("m_broker").value=p.broker||"No"; $("m_finp").value=p.fin_pct||"80";
-$("m_fin_imp").value=p.fin_importe?fmtN0.format(p.fin_importe):""; $("m_aport").value=p.aportacion?fmtN0.format(p.aportacion):"";
-$("m_objt").value=p.obj_tipo||"bruta"; $("m_objv").value=p.obj_raw||""; $("m_alq_sug").value=p.alq_sugerido?fmtN0.format(p.alq_sugerido):"";
-$("m_save").dataset.idx=p.__idx;
-$("meetModal").classList.add("open"); $("meetModal").setAttribute("aria-hidden","false");
-}
-function closeMeeting(){ var m=$("meetModal"); if(m){ m.classList.remove("open"); m.setAttribute("aria-hidden","true"); } }
 function recalcMeeting(){
-const c = cfgOrDefaults();
-const t = c.itp_pct / 100;
-const N = c.not_eur;
-const H = c.honor_eur;
-
-const B = toNum(($("m_budget")?.value) || 0);
-const includeHonor = (($("m_inchonor")?.value) || "si") === "si";
-
-// 1) Precio máximo de compra
-const P = calcPrecioMaxCompra(B, includeHonor);
-if ($("m_pmax")) $("m_pmax").value = P ? fmtN0.format(P) : "";
-
-// Valores auxiliares
-const ITPval = Math.round(P * t);
-const Tsin = P + ITPval + N; // sin honorarios
-const Tcon = Tsin + H; // con honorarios
-
-// 2) Financiación
-const fin = (($("m_fin")?.value) || "Sí") === "Sí";
-const finp = toNum(($("m_finp")?.value) || 80);
-const F = fin ? Math.round(P * (finp / 100)) : 0;
-
-// 3) Aportación
-const A = includeHonor ? Math.max(0, Tcon - F) : Math.max(0, Tsin - F + H);
-
-if ($("m_fin_imp")) $("m_fin_imp").value = F ? fmtN0.format(F) : "";
-if ($("m_aport")) $("m_aport").value = A ? fmtN0.format(A) : "";
-
-// 4) Alquiler sugerido (bruta %) sobre coste SIN honorarios
-const objt = ($("m_objt")?.value) || "bruta";
-const objv = toNum(($("m_objv")?.value) || 0);
-if (objt === "bruta" && objv > 0){
-const anual = Math.round((objv / 100) * Tsin);
-$("m_alq_sug").value = fmtN0.format(Math.max(0, Math.round(anual / 12)));
-} else {
-$("m_alq_sug").value = "";
+  const c=cfgOrDefaults(); const t=c.itp_pct/100; const N=c.not_eur; const H=c.honor_eur;
+  const B=toNum($('m_budget').value||0);
+  const includeHonor = ($('m_inchonor').value||'si')==='si';
+  const P=calcPrecioMaxCompra(B, includeHonor);
+  $('m_pmax').value = P? fmtN0.format(P) : '';
+  const ITPval = Math.round(P*t);
+  const Tsin = P + ITPval + N;
+  const fin = ($('m_fin').value||'Sí')==='Sí';
+  const finp = toNum($('m_finp').value||80);
+  const F = fin ? Math.round(P*(finp/100)) : 0;
+  const A = includeHonor ? Math.max(0, Tsin+H - F) : Math.max(0, Tsin - F + H);
+  $('m_fin_imp').value = F? fmtN0.format(F) : '';
+  $('m_aport').value = A? fmtN0.format(A) : '';
+  const objt = $('m_objt').value||'bruta';
+  const objv = toNum($('m_objv').value||0);
+  if(objt==='bruta' && objv>0){
+    const anual = Math.round((objv/100)*Tsin);
+    $('m_alq_sug').value = fmtN0.format(Math.max(0, Math.round(anual/12)));
+  }else{
+    $('m_alq_sug').value='';
+  }
+  const mi=$('m_mesini').value||''; if(mi) $('m_mesfin').value=monthPlus5(mi);
 }
 
-// 5) Mes fin auto
-const mi = ($("m_mesini")?.value) || "";
-if (mi && $("m_mesfin")) $("m_mesfin").value = monthPlus5(mi);
-}
-/* ===== Render ===== */
-function renderAll(){
-ensureIds();
-var all=(Store.pros||[]); for(var i=0;i<all.length;i++){ all[i].__idx=i; }
-var rows=applyFilters(all, readFilters());
-renderKPIs(rows); renderKanban(rows); renderTable(rows);
-}
-/* ===== Drag & Drop ===== */
-function enableDnD(){
-var cards=document.querySelectorAll(".card-mini");
-for(var i=0;i<cards.length;i++){
-(function(card){
-card.addEventListener("dragstart", function(e){ card.classList.add("dragging"); e.dataTransfer.setData("text/plain", card.getAttribute("data-i")||""); });
-card.addEventListener("dragend", function(){ card.classList.remove("dragging"); var cc=document.querySelectorAll(".column"); for(var j=0;j<cc.length;j++){ cc[j].classList.remove("drop-target"); }});
-})(cards[i]);
-}
-var cols=document.querySelectorAll(".column[data-drop='1']");
-for(var k=0;k<cols.length;k++){
-(function(col){
-col.addEventListener("dragover", function(e){ e.preventDefault(); col.classList.add("drop-target"); });
-col.addEventListener("dragleave", function(){ col.classList.remove("drop-target"); });
-col.addEventListener("drop", function(e){
-e.preventDefault(); col.classList.remove("drop-target");
-var idx=parseInt(e.dataTransfer.getData("text/plain"),10); var arr=Store.pros||[]; var p=arr[idx]; if(!p) return;
-p.fase=col.getAttribute("data-col")||"CONTACTO"; p.sub=""; Store.pros=arr; renderAll(); toastOnce("Movido a "+p.fase,"ok");
-});
-})(cols[k]);
-}
-}
-/* ===== CSV ===== */
-function downloadCSV(){
-var rows=applyFilters(Store.pros||[], readFilters()); if(!rows.length){ toast("Nada que exportar","warn"); return; }
-var lines=[["Nombre","Email","Teléfono","Fase","Subestado","Tipo","Localidades","Objetivo","Valor","Presupuesto"].join(";")];
-for(var i=0;i<rows.length;i++){
-var p=rows[i];
-lines.push([p.nombre||"",p.email||"",p.tel||"",p.fase||"",p.sub||"",p.pref_tipo||"",String(p.locs_text||"").replace(/;/g,","),(p.obj_tipo||"").toUpperCase(),p.obj_raw||"",p.budget||""].join(";"));
-}
-var blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
-var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="prospectos.csv"; a.click(); setTimeout(function(){URL.revokeObjectURL(a.href)},800);
-}
-/* ===== Eventos ===== */
-function attach(){
-attachMoneyLive();
-onClick("#f_clear", function(){ $("f_q").value=""; $("f_fase").value=""; $("f_tipo").value=""; $("f_loc").value=""; $("f_fin").value=""; renderAll(); toast("Filtros limpiados","ok"); });
-onClick("#f_apply", function(){ renderAll(); toast("Filtros aplicados","ok"); });
-onClick("#btn_csv", function(){ downloadCSV(); });
+/* ====== Event wiring ====== */
+document.addEventListener('click', (e)=>{
+  const t=e.target;
 
-onClick(".act-mail", function(){
-const p=(Store.pros||[])[+this.getAttribute("data-i")]; if(!p||!p.email) return;
-const body="Hola "+(p.nombre||"")+","+
-"%0D%0A%0D%0A"+encodeURIComponent(resumenProspecto(p))+
-"%0D%0A%0D%0AUn saludo.";
-location.href="mailto:"+encodeURIComponent(p.email)+
-"?subject="+encodeURIComponent("Unihouser — Resumen de reunión")+
-"&body="+body;
-});
-onClick(".act-wa", function(){ const p=(Store.pros||[])[+this.getAttribute("data-i")]; if(!p) return; const tel=normPhone(p.tel); if(!tel) return; const text="Hola "+(p.nombre||"")+". Te escribo para enviarte el resumen.%0A%0A"+encodeURIComponent(resumenProspecto(p)); window.open("https://wa.me/"+tel+"?text="+text,"_blank"); });
-onClick(".act-open, .open-drawer", function(){ var p=(Store.pros||[])[+this.getAttribute("data-i")]; if(!p) return; p.__idx=+this.getAttribute("data-i"); openDrawer(p); });
-onClick(".act-next", function(){ var arr=Store.pros||[]; var p=arr[+this.getAttribute("data-i")]; if(!p) return; p.fase=nextPhase(p.fase||"CONTACTO"); p.sub=""; Store.pros=arr; renderAll(); toastOnce("Movido a "+p.fase,"ok"); });
-onClick(".act-del", function(){ var arr=Store.pros||[]; var i=+this.getAttribute("data-i"); if(arr[i] && confirm("Eliminar este prospecto?")){arr.splice(i,1); Store.pros=arr; renderAll(); toast("Eliminado","ok"); }});
+  if(t.closest('#f_apply')){ renderAll(); toast('Filtros aplicados','ok'); }
+  if(t.closest('#f_clear')){ $('f_q').value=''; $('f_fase').value=''; $('f_tipo').value=''; $('f_loc').value=''; renderAll(); toast('Filtros limpiados','ok'); }
 
-onClick("#dv_close", function(){ closeDrawer(); });
-onClick("#dv_save", function(){ var i=+this.getAttribute("data-idx"), arr=Store.pros||[]; var p=arr[i]; if(!p) return;
-p.nombre=$("dv_nombre").value; p.email=$("dv_email").value; p.tel=$("dv_tel").value; p.locs_text=$("dv_locs").value;
-p.fase=$("dv_fase_sel").value; p.sub=$("dv_sub_sel").value; arr[i]=p; Store.pros=arr; renderAll(); toast("Prospecto actualizado","ok");
-});
-onClick("#dv_delete", function(){ var i=+this.getAttribute("data-idx"), arr=Store.pros||[]; if(arr[i] && confirm("Eliminar este prospecto?")){ arr.splice(i,1); Store.pros=arr; closeDrawer(); renderAll(); toast("Eliminado","ok"); }});
-onClick("#dv_adv_btn", function(){ var i=+this.getAttribute("data-idx"), arr=Store.pros||[]; var p=arr[i]; if(!p) return; p.fase=nextPhase(p.fase||"CONTACTO"); p.sub=""; Store.pros=arr; openDrawer(p); renderAll(); toast("Avanzado a "+p.fase,"ok"); });
+  if(t.closest('#btn_add_contacto')){
+    const arr=Store.pros||[];
+    arr.push({ id:uid(), nombre:'', email:'', tel:'', pref_tipo:'Tradicional', locs_text:'', fase:'CONTACTO', phase_start:today(), history:{}, first_msg:MAIL_INTRO, attach:{imgs:[],vids:[],pdfs:[]}, proposals:[] });
+    Store.pros=arr; renderAll(); toast('Contacto creado','ok');
+  }
 
-// botones de comunicación del drawer
-onClick("#dv_email_btn", function(){
-const arr = Store.pros || []; const i = $("dv_save").getAttribute("data-idx"); const p = arr[+i]; if (!p || !p.email) return;
-const body = "Hola "+(p.nombre||"")+","+"%0D%0A%0D%0A"+encodeURIComponent(resumenProspecto(p))+"%0D%0A%0D%0AUn saludo.";
-location.href="mailto:"+encodeURIComponent(p.email)+"?subject="+encodeURIComponent("Unihouser — Resumen de reunión")+"&body="+body;
-});
-onClick("#dv_contract_btn", function(){
-const arr = Store.pros || []; const i = $("dv_save").getAttribute("data-idx"); const p = arr[+i]; if (!p || !p.email) return;
-const body = "Hola "+(p.nombre||"")+","+"%0D%0A%0D%0AAdjunto propuesta de contrato. Revísalo y me dices."+"%0D%0A%0D%0A"+encodeURIComponent(resumenProspecto(p))+"%0D%0A%0D%0AUn saludo.";
-location.href="mailto:"+encodeURIComponent(p.email)+"?subject="+encodeURIComponent("Unihouser — Contrato de servicio")+"&body="+body;
-});
-onClick("#dv_whatsapp_btn", function(){
-const arr = Store.pros || []; const i = $("dv_save").getAttribute("data-idx"); const p = arr[+i]; if (!p) return;
-const tel = normPhone(p.tel); if (!tel) return;
-const text = "Hola "+(p.nombre||"")+". Te escribo para enviarte el resumen.%0A%0A"+encodeURIComponent(resumenProspecto(p));
-window.open("https://wa.me/"+tel+"?text="+text, "_blank");
+  if(t.closest('.act-open')){
+    const i=+t.closest('.act-open').getAttribute('data-i'); const p=(Store.pros||[])[i]; if(!p) return;
+    openDrawer(p,i);
+  }
+  if(t.closest('.act-advance')){
+    const i=+t.closest('.act-advance').getAttribute('data-i'); const arr=Store.pros||[]; const p=arr[i]; if(!p) return;
+    OPEN_IDX=i; doAdvance();
+  }
+  if(t.closest('.act-discard')){
+    const i=+t.closest('.act-discard').getAttribute('data-i'); const arr=Store.pros||[]; const p=arr[i]; if(!p) return;
+    OPEN_IDX=i; doDiscard();
+  }
+  if(t.closest('.act-trash')){
+    const i=+t.closest('.act-trash').getAttribute('data-i'); const arr=Store.pros||[]; const p=arr[i]; if(!p) return;
+    p.fase='PAPELERA'; p.phase_start=today(); Store.pros=arr; renderAll(); toast('Movido a papelera','ok');
+  }
+
+  if(t.closest('#dv_close')) closeDrawer();
+  if(t.closest('#dv_save'))  saveCurrent();
+  if(t.closest('#dv_advance')) doAdvance();
+  if(t.closest('#dv_discard')) doDiscard();
+  if(t.closest('#dv_delete'))  moveToTrash();
+
+  if(t.closest('#openMeeting')){ $('meetModal').classList.add('open'); $('meetModal').setAttribute('aria-hidden','false'); }
+  if(t.closest('#m_cancel')){ $('meetModal').classList.remove('open'); $('meetModal').setAttribute('aria-hidden','true'); }
+  if(t.closest('#m_save')){
+    if(OPEN_IDX<0) return;
+    const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p) return;
+    p.dni=$('m_dni').value; p.dir=$('m_dir').value; p.loc_res=$('m_locres').value;
+    p.email=$('m_email').value; p.tel=$('m_tel').value;
+    p.pref_tipo=$('m_tipo').value; p.locs_text=$('m_locsobj').value;
+    p.n_activos=toNum($('m_nact').value); p.ascensor=$('m_asc').value; p.altura_max=toNum($('m_altmax').value); p.bajo=$('m_bajo').value; p.reforma=$('m_ref').value;
+    p.mes_ini=$('m_mesini').value; p.mes_fin=$('m_mesfin').value;
+    p.budget=toNum($('m_budget').value); p.incluir_honor=$('m_inchonor').value; p.pmax_compra=toNum($('m_pmax').value);
+    p.financia=$('m_fin').value; p.broker=$('m_broker').value; p.fin_pct=toNum($('m_finp').value);
+    p.fin_importe=toNum($('m_fin_imp').value); p.aportacion=toNum($('m_aport').value);
+    p.obj_tipo=$('m_objt').value; p.obj_raw=toNum($('m_objv').value); p.alq_sugerido=toNum($('m_alq_sug').value);
+    p.meet_date=$('m_fecha').value; p.meet_time=$('m_hora').value; p.meet_medio=$('m_medio').value; p.meet_obs=$('m_obs').value;
+
+    Store.pros=arr; $('meetModal').classList.remove('open'); $('meetModal').setAttribute('aria-hidden','true');
+    renderAll(); openDrawer(p, OPEN_IDX);
+    toast('Reunión guardada','ok');
+  }
+
+  if(t.closest('#openContrato')){ showBlocksByPhase('CONTRATO'); }
+  if(t.closest('#openBusqueda')){ showBlocksByPhase('BUSQUEDA'); }
+  if(t.closest('#openCompra'))  { showBlocksByPhase('COMPRAVENTA'); }
+
+  if(t.closest('#dv_copy')){ copy($('dv_msg').value||''); }
+  if(t.closest('#dv_mailto')){
+    const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p||!p.email) return toast('Falta email','warn');
+    const body=encodeURIComponent($('dv_msg').value||MAIL_INTRO);
+    location.href='mailto:'+encodeURIComponent(p.email)+'?subject='+encodeURIComponent('Unihouser — Primer contacto')+'&body='+body;
+  }
+  if(t.closest('#ct_mail')){
+    const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p||!p.email) return toast('Falta email','warn');
+    const subj=encodeURIComponent($('ct_subject').value||'Unihouser — Contrato de servicio');
+    const body=encodeURIComponent($('ct_msg').value||'Adjunto propuesta de contrato.');
+    location.href='mailto:'+encodeURIComponent(p.email)+'?subject='+subj+'&body='+body;
+  }
+  if(t.closest('#dv_wa')){
+    const arr=Store.pros||[]; const p=arr[OPEN_IDX]; if(!p) return;
+    const tel=normPhone(p.tel); if(!tel) return toast('Falta teléfono','warn');
+    const text=encodeURIComponent('Hola '+(p.nombre||'')+'. '+($('dv_msg').value||''));
+    window.open('https://wa.me/'+tel+'?text='+text,'_blank');
+  }
 });
 
-onClick("#dv_meeting_btn", function(){ var p=(Store.pros||[])[+this.getAttribute("data-idx")]; if(!p) return; p.__idx=+this.getAttribute("data-idx"); openMeeting(p); });
-onClick("#dv_evals_btn", function(){ var pid=this.getAttribute("data-pid")||""; if(!pid) return; location.href="evaluaciones.html?prospect="+encodeURIComponent(pid); });
-
-var ids=["m_budget","m_inchonor","m_fin","m_finp","m_objt","m_objv","m_mesini"];
-for(var z=0;z<ids.length;z++){
-(function(id){
-document.addEventListener("input", function(e){ if(e.target && e.target.id===id) recalcMeeting(); });
-document.addEventListener("change", function(e){ if(e.target && e.target.id===id) recalcMeeting(); });
-})(ids[z]);
-}
-onClick("#m_cancel", function(){ closeMeeting(); });
-onClick("#m_save", function(){
-var i=+this.getAttribute("data-idx"), arr=Store.pros||[]; var p=arr[i]; if(!p) return;
-p.dni=$("m_dni").value; p.dir=$("m_dir").value; p.loc_res=$("m_locres").value; p.email=$("m_email").value; p.tel=$("m_tel").value;
-p.pref_tipo=$("m_tipo").value; p.locs_text=$("m_locsobj").value; p.n_activos=toNum($("m_nact").value);
-p.ascensor=$("m_asc").value; p.altura_max=toNum($("m_altmax").value); p.bajo=$("m_bajo").value; p.reforma=$("m_ref").value;
-p.mes_ini=$("m_mesini").value; p.mes_fin=$("m_mesfin").value;
-p.budget=toNum($("m_budget").value); p.incluir_honor=$("m_inchonor").value; p.pmax_compra=toNum($("m_pmax").value);
-p.financia=$("m_fin").value; p.broker=$("m_broker").value; p.fin_pct=toNum($("m_finp").value);
-p.fin_importe=toNum($("m_fin_imp").value); p.aportacion=toNum($("m_aport").value);
-p.obj_tipo=$("m_objt").value; p.obj_raw=toNum($("m_objv").value); p.alq_sugerido=toNum($("m_alq_sug").value);
-arr[i]=p; Store.pros=arr; closeMeeting(); renderAll(); toast("Reunión guardada","ok");
+/* Meeting reactive fields */
+['m_budget','m_inchonor','m_fin','m_finp','m_objt','m_objv','m_mesini'].forEach(id=>{
+  document.addEventListener('input', e=>{ if(e.target && e.target.id===id) recalcMeeting(); });
+  document.addEventListener('change', e=>{ if(e.target && e.target.id===id) recalcMeeting(); });
 });
 
-document.body.insertAdjacentHTML("beforeend",
-'<div style="position:fixed;right:16px;top:96px;z-index:9"><button class="btn" id="toggleTable">Mostrar tabla</button></div>');
-onClick("#toggleTable", function(){ var el=$("tableWrap"); if(!el) return; var on=el.style.display!=="none"; el.style.display=on?"none":"block"; this.textContent=on?"Mostrar tabla":"Ocultar tabla"; });
-
-document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ closeMeeting(); closeDrawer(); } });
-}
-/* ===== Init ===== */
-document.addEventListener("DOMContentLoaded", function(){
-try{ attach(); ensureIds(); renderAll(); }
-catch(err){
-var msg=document.createElement("pre");
-msg.textContent="Error de carga Dashboard: "+(err&&err.message?err.message:String(err));
-msg.style.background="#fee2e2"; msg.style.border="1px solid #ef4444"; msg.style.padding="12px"; msg.style.whiteSpace="pre-wrap";
-document.body.prepend(msg); console.error(err);
-}
+/* ====== Init ====== */
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    ensureIds();
+    renderAll();
+  }catch(err){
+    const pre=document.createElement('pre');
+    pre.textContent='Error de carga Dashboard CRM: '+(err&&err.message?err.message:String(err));
+    pre.style.background='#fee2e2'; pre.style.border='1px solid #ef4444'; pre.style.padding='12px'; pre.style.whiteSpace='pre-wrap';
+    document.body.prepend(pre); console.error(err);
+  }
 });
 })();
 </script>
