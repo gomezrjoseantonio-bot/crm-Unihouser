@@ -3,442 +3,142 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unihouser — Dashboard CRM</title>
+  <title>Unihouser CRM</title>
   <style>
-    /* ==============================
-       ESTILOS GLOBALES
-       ============================== */
-    body { 
-      font-family: Arial, sans-serif; 
-      margin:0; 
-      padding:0; 
-      background:#f7f7f7; 
-      color:#333;
-    }
-    header { 
-      background:#ff6600; 
-      color:#fff; 
-      padding:15px; 
-      text-align:center; 
-      font-size:22px; 
-      font-weight:bold;
-      letter-spacing:1px;
-    }
-    /* ==============================
-       KPI BOXES
-       ============================== */
-    .kpis { 
-      display:flex; 
-      justify-content:space-around; 
-      margin:20px; 
-      gap:20px;
-    }
-    .kpi { 
-      background:#fff; 
-      padding:15px; 
-      border-radius:8px; 
-      box-shadow:0 2px 4px rgba(0,0,0,0.1); 
-      flex:1; 
-      text-align:center; 
-      transition:transform .2s;
-    }
-    .kpi:hover { transform:scale(1.05); }
-    .kpi h2 { margin:0; font-size:28px; color:#ff6600; }
-    .kpi p { margin:5px 0 0; font-size:14px; color:#666; }
-
-    /* ==============================
-       FILTROS Y BOTONES
-       ============================== */
-    .filters { 
-      margin:20px; 
-      display:flex; 
-      gap:10px; 
-      align-items:center;
-    }
-    .filters input { 
-      flex:1; 
-      padding:8px; 
-      border-radius:4px; 
-      border:1px solid #ccc; 
-    }
-    button { 
-      background:#ff6600; 
-      border:none; 
-      color:#fff; 
-      padding:8px 12px; 
-      border-radius:4px; 
-      cursor:pointer; 
-      font-size:14px;
-    }
-    button:hover { opacity:0.85; }
-
-    /* ==============================
-       KANBAN
-       ============================== */
-    .kanban { 
-      display:flex; 
-      margin:20px; 
-      gap:10px; 
-      overflow-x:auto;
-    }
-    .phase { 
-      background:#eee; 
-      flex:1; 
-      border-radius:8px; 
-      padding:10px; 
-      min-height:300px; 
-      display:flex; 
-      flex-direction:column;
-    }
-    .phase h3 { 
-      text-align:center; 
-      margin:0 0 10px; 
-      font-size:16px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:5px;
-    }
-    .prospect { 
-      background:#fff; 
-      border-radius:6px; 
-      padding:8px; 
-      margin:6px 0; 
-      cursor:pointer; 
-      box-shadow:0 1px 2px rgba(0,0,0,0.1); 
-      position:relative;
-    }
-    .prospect strong { display:block; font-size:14px; }
-    .prospect small { color:#666; font-size:12px; }
-    .prospect .actions { 
-      position:absolute; 
-      top:5px; 
-      right:5px; 
-      display:flex; 
-      gap:5px;
-    }
-    .prospect .actions span { cursor:pointer; font-size:16px; }
-
-    /* ==============================
-       DRAWER DETALLE
-       ============================== */
-    .drawer { 
-      position:fixed; 
-      top:0; 
-      right:-420px; 
-      width:420px; 
-      height:100%; 
-      background:#fff; 
-      box-shadow:-2px 0 5px rgba(0,0,0,0.2); 
-      transition:right 0.3s; 
-      overflow-y:auto; 
-      z-index:1000;
-    }
-    .drawer.open { right:0; }
-    .drawer header { 
-      background:#ff6600; 
-      color:#fff; 
-      padding:12px; 
-      font-size:18px; 
-    }
-    .drawer-content { padding:15px; }
-    .drawer-content label { display:block; margin:10px 0 5px; font-weight:bold; }
-    .drawer-content input, .drawer-content select, .drawer-content textarea { 
-      width:100%; 
-      padding:8px; 
-      border:1px solid #ccc; 
-      border-radius:4px; 
-    }
-    textarea { min-height:80px; }
-    .actions { margin-top:20px; display:flex; justify-content:space-between; }
-    .actions button { flex:1; margin:0 5px; }
-
-    /* ==============================
-       TOAST
-       ============================== */
-    .toast { 
-      position:fixed; 
-      bottom:20px; 
-      right:20px; 
-      background:#333; 
-      color:#fff; 
-      padding:10px 15px; 
-      border-radius:6px; 
-      display:none; 
-      z-index:2000;
-    }
-
-    /* ==============================
-       EXTRA: PAPELERA
-       ============================== */
-    .trash-zone {
-      margin:20px;
-      padding:10px;
-      border:2px dashed #aaa;
-      border-radius:8px;
-      text-align:center;
-      color:#666;
-      font-size:14px;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f7f9fc; color: #333; }
+    .sidebar { width: 250px; background: #2d3436; color: #fff; padding: 20px; }
+    .sidebar h2 { margin-bottom: 20px; font-size: 22px; }
+    .sidebar ul { list-style: none; }
+    .sidebar li { padding: 10px; margin-bottom: 5px; background: #636e72; cursor: pointer; border-radius: 5px; }
+    .sidebar li.active { background: #00cec9; }
+    .content { flex: 1; padding: 20px; display: flex; flex-direction: column; }
+    header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    header h1 { font-size: 24px; }
+    .stats { display: flex; gap: 20px; }
+    .stat { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; text-align: center; }
+    .grid { background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 10px; flex: 1; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; }
+    th { background: #f1f1f1; }
+    .btn { cursor: pointer; padding: 5px 8px; border: none; border-radius: 5px; }
+    .btn-green { background: #2ecc71; color: white; }
+    .btn-red { background: #e74c3c; color: white; }
+    .btn-gray { background: #95a5a6; color: white; }
+    .days { font-size: 12px; color: #555; }
+    .reunion-panel { background: #fff; padding: 15px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .reunion-panel h3 { margin-bottom: 10px; }
+    textarea { width: 100%; min-height: 100px; margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    .phases { display: flex; gap: 10px; margin-bottom: 15px; }
+    .phase { flex: 1; text-align: center; padding: 10px; border-radius: 5px; background: #dfe6e9; cursor: pointer; font-size: 14px; }
+    .phase.active { background: #00cec9; color: white; }
   </style>
 </head>
 <body>
-  <header>Unihouser CRM</header>
-
-  <!-- KPIs Superiores -->
-  <div class="kpis">
-    <div class="kpi"><h2 id="kpi-total">0</h2><p>Total Clientes</p></div>
-    <div class="kpi"><h2 id="kpi-activos">0</h2><p>En Curso</p></div>
-    <div class="kpi"><h2 id="kpi-cerrados">0</h2><p>Éxitos (Notaría)</p></div>
-    <div class="kpi"><h2 id="kpi-descartados">0</h2><p>Descartados</p></div>
+  <div class="sidebar">
+    <h2>📑 Unihouser</h2>
+    <ul>
+      <li class="active">📞 Contacto</li>
+      <li>📅 Reunión</li>
+      <li>📃 Contrato</li>
+      <li>🏠 Búsqueda</li>
+      <li>💶 Financiación</li>
+      <li>🖊️ Notaría</li>
+    </ul>
   </div>
 
-  <!-- Barra filtros -->
-  <div class="filters">
-    <input type="text" id="search" placeholder="Buscar cliente...">
-    <button onclick="openDrawer()">+ Nuevo Cliente</button>
-    <button onclick="exportCSV()">Exportar CSV</button>
-  </div>
-
-  <!-- Kanban -->
-  <div class="kanban" id="kanban"></div>
-
-  <!-- Papelera -->
-  <div class="trash-zone">🗑️ Arrastra aquí clientes de prueba o descartados</div>
-
-  <!-- Drawer Detalle -->
-  <div class="drawer" id="drawer">
-    <header>Detalle Cliente</header>
-    <div class="drawer-content">
-      <label>Nombre:</label>
-      <input id="p-name">
-      <label>Email:</label>
-      <input id="p-email">
-      <label>Teléfono:</label>
-      <input id="p-phone">
-      <label>Fase:</label>
-      <select id="p-phase">
-        <option value="contacto">📞 Contacto</option>
-        <option value="reunion">📅 Reunión</option>
-        <option value="contrato">📑 Contrato</option>
-        <option value="busqueda">🏘️ Búsqueda</option>
-        <option value="compraventa">💶 Compraventa</option>
-        <option value="financiacion">💳 Financiación</option>
-        <option value="notaria">✍️ Notaría</option>
-      </select>
-      <label>Observaciones:</label>
-      <textarea id="p-observ"></textarea>
-      <div class="actions">
-        <button onclick="saveClient()">Guardar</button>
-        <button onclick="closeDrawer()">Cerrar</button>
-        <button style="background:#cc0000" onclick="deleteClient()">Eliminar</button>
+  <div class="content">
+    <header>
+      <h1>Dashboard CRM</h1>
+      <div class="stats">
+        <div class="stat">
+          <h3>Éxito</h3>
+          <p id="successRate">0%</p>
+        </div>
+        <div class="stat">
+          <h3>Descartados</h3>
+          <p id="discardRate">0%</p>
+        </div>
       </div>
+    </header>
+
+    <div class="phases">
+      <div class="phase active">📞</div>
+      <div class="phase">📅</div>
+      <div class="phase">📃</div>
+      <div class="phase">🏠</div>
+      <div class="phase">💶</div>
+      <div class="phase">🖊️</div>
+    </div>
+
+    <div class="grid">
+      <table id="clientsTable">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Fase</th>
+            <th>Días en fase</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sergio López</td>
+            <td>📞 Contacto</td>
+            <td class="days">2</td>
+            <td>
+              <button class="btn btn-green">🟢</button>
+              <button class="btn btn-red">🔴</button>
+              <button class="btn btn-gray">🗑️</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Juan Pedro</td>
+            <td>📅 Reunión</td>
+            <td class="days">5</td>
+            <td>
+              <button class="btn btn-green">🟢</button>
+              <button class="btn btn-red">🔴</button>
+              <button class="btn btn-gray">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="reunion-panel">
+      <h3>📝 Observaciones Reunión</h3>
+      <textarea placeholder="Escribe aquí lo hablado en la reunión..."></textarea>
+      <button class="btn btn-green">Guardar</button>
     </div>
   </div>
 
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
-
   <script>
-    /* =====================================
-       DATASTORE
-       ===================================== */
-    const Store = {
-      clients: JSON.parse(localStorage.getItem('clients') || '[]'),
-      trash: JSON.parse(localStorage.getItem('trash') || '[]'),
-      history: JSON.parse(localStorage.getItem('history') || '[]'),
-      save() {
-        localStorage.setItem('clients', JSON.stringify(this.clients));
-        localStorage.setItem('trash', JSON.stringify(this.trash));
-        localStorage.setItem('history', JSON.stringify(this.history));
+    const table = document.getElementById("clientsTable");
+    const successRate = document.getElementById("successRate");
+    const discardRate = document.getElementById("discardRate");
+
+    function updateStats() {
+      const rows = Array.from(table.querySelectorAll("tbody tr"));
+      const total = rows.length;
+      const success = rows.filter(r => r.dataset.status === "success").length;
+      const discard = rows.filter(r => r.dataset.status === "discard").length;
+      successRate.textContent = total ? Math.round(success * 100 / total) + "%" : "0%";
+      discardRate.textContent = total ? Math.round(discard * 100 / total) + "%" : "0%";
+    }
+
+    table.addEventListener("click", e => {
+      if (e.target.classList.contains("btn-green")) {
+        e.target.closest("tr").dataset.status = "success";
+      } else if (e.target.classList.contains("btn-red")) {
+        e.target.closest("tr").dataset.status = "discard";
+      } else if (e.target.classList.contains("btn-gray")) {
+        e.target.closest("tr").remove();
       }
-    };
-
-    /* =====================================
-       FASES PIPELINE
-       ===================================== */
-    const phases = [
-      { key:"contacto", label:"📞 Contacto" },
-      { key:"reunion", label:"📅 Reunión" },
-      { key:"contrato", label:"📑 Contrato" },
-      { key:"busqueda", label:"🏘️ Búsqueda" },
-      { key:"compraventa", label:"💶 Compraventa" },
-      { key:"financiacion", label:"💳 Financiación" },
-      { key:"notaria", label:"✍️ Notaría" }
-    ];
-    let currentIndex = -1;
-
-    /* =====================================
-       FUNCIONES UI
-       ===================================== */
-    function showToast(msg) {
-      const t=document.getElementById('toast');
-      t.textContent=msg; t.style.display='block';
-      setTimeout(()=>t.style.display='none',2000);
-    }
-
-    function renderKPIs() {
-      document.getElementById('kpi-total').textContent = Store.clients.length;
-      document.getElementById('kpi-cerrados').textContent = Store.history.length;
-      document.getElementById('kpi-activos').textContent = Store.clients.filter(c=>c.phase!=="notaria").length;
-      document.getElementById('kpi-descartados').textContent = Store.trash.length;
-    }
-
-    function daysInPhase(c) {
-      if(!c.startDate) return 0;
-      const diff=Math.floor((Date.now()-c.startDate)/86400000);
-      return diff;
-    }
-
-    function renderKanban() {
-      const kb=document.getElementById('kanban'); kb.innerHTML='';
-      phases.forEach(ph=>{
-        const col=document.createElement('div'); col.className='phase';
-        col.innerHTML='<h3>'+ph.label+'</h3>';
-        Store.clients.filter(c=>c.phase===ph.key).forEach((c,i)=>{
-          const card=document.createElement('div'); 
-          card.className='prospect';
-          card.innerHTML='<strong>'+ (c.name||'Sin nombre') +'</strong><small>'+daysInPhase(c)+' días en fase</small>';
-          const act=document.createElement('div'); act.className='actions';
-          const next=document.createElement('span'); next.textContent='🟢';
-          next.onclick=(e)=>{ e.stopPropagation(); advanceClient(c); };
-          const drop=document.createElement('span'); drop.textContent='🔴';
-          drop.onclick=(e)=>{ e.stopPropagation(); discardClient(c); };
-          act.appendChild(next); act.appendChild(drop);
-          card.appendChild(act);
-          card.onclick=()=>openDrawer(Store.clients.indexOf(c));
-          col.appendChild(card);
-        });
-        kb.appendChild(col);
-      });
-      renderKPIs();
-    }
-
-    /* =====================================
-       DRAWER FUNCIONES
-       ===================================== */
-    function openDrawer(i=-1) {
-      currentIndex=i;
-      const dr=document.getElementById('drawer');
-      dr.classList.add('open');
-      if(i>=0) {
-        const c=Store.clients[i];
-        document.getElementById('p-name').value=c.name||'';
-        document.getElementById('p-email').value=c.email||'';
-        document.getElementById('p-phone').value=c.phone||'';
-        document.getElementById('p-phase').value=c.phase||'contacto';
-        document.getElementById('p-observ').value=c.observ||'';
-      } else {
-        document.getElementById('p-name').value='';
-        document.getElementById('p-email').value='';
-        document.getElementById('p-phone').value='';
-        document.getElementById('p-phase').value='contacto';
-        document.getElementById('p-observ').value='';
-      }
-    }
-
-    function closeDrawer() {
-      document.getElementById('drawer').classList.remove('open');
-    }
-
-    function saveClient() {
-      const c={
-        name:document.getElementById('p-name').value,
-        email:document.getElementById('p-email').value,
-        phone:document.getElementById('p-phone').value,
-        phase:document.getElementById('p-phase').value,
-        observ:document.getElementById('p-observ').value,
-        startDate:Date.now()
-      };
-      if(currentIndex>=0) {
-        Store.clients[currentIndex]=c;
-        showToast('Cliente actualizado');
-      } else {
-        Store.clients.push(c);
-        showToast('Cliente añadido');
-      }
-      Store.save(); renderKanban(); closeDrawer();
-    }
-
-    function deleteClient() {
-      if(currentIndex>=0) {
-        if(confirm("¿Eliminar cliente?")) {
-          Store.clients.splice(currentIndex,1);
-          Store.save();
-          renderKanban();
-          closeDrawer();
-          showToast('Cliente eliminado');
-        }
-      }
-    }
-
-    /* =====================================
-       ACCIONES PIPELINE
-       ===================================== */
-    function advanceClient(c) {
-      const idx=phases.findIndex(p=>p.key===c.phase);
-      if(idx<phases.length-1) {
-        c.phase=phases[idx+1].key;
-        c.startDate=Date.now();
-        if(c.phase==="notaria") {
-          // éxito
-          Store.history.push(c);
-          Store.clients.splice(Store.clients.indexOf(c),1);
-          showToast("Cliente finalizado con éxito");
-        }
-        Store.save(); renderKanban();
-      }
-    }
-
-    function discardClient(c) {
-      Store.trash.push(c);
-      Store.clients.splice(Store.clients.indexOf(c),1);
-      Store.save(); renderKanban();
-      showToast("Cliente descartado");
-    }
-
-    /* =====================================
-       EXPORTAR CSV
-       ===================================== */
-    function exportCSV() {
-      let csv="Nombre,Email,Teléfono,Fase,Observaciones,Días en fase\n";
-      Store.clients.forEach(c=>{
-        csv+=`${c.name||''},${c.email||''},${c.phone||''},${c.phase||''},${c.observ||''},${daysInPhase(c)}\n`;
-      });
-      const blob=new Blob([csv],{type:'text/csv'});
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(blob); a.download="clientes.csv"; a.click();
-    }
-
-    /* =====================================
-       FILTRO BUSCAR
-       ===================================== */
-    document.getElementById('search').addEventListener('input',function(){
-      const val=this.value.toLowerCase();
-      const kb=document.getElementById('kanban'); kb.innerHTML='';
-      phases.forEach(ph=>{
-        const col=document.createElement('div'); col.className='phase';
-        col.innerHTML='<h3>'+ph.label+'</h3>';
-        Store.clients.filter(c=>(c.phase===ph.key)&&(c.name||'').toLowerCase().includes(val)).forEach((c,i)=>{
-          const card=document.createElement('div'); card.className='prospect';
-          card.innerHTML='<strong>'+ (c.name||'Sin nombre') +'</strong><small>'+daysInPhase(c)+' días en fase</small>';
-          const act=document.createElement('div'); act.className='actions';
-          const next=document.createElement('span'); next.textContent='🟢';
-          next.onclick=(e)=>{ e.stopPropagation(); advanceClient(c); };
-          const drop=document.createElement('span'); drop.textContent='🔴';
-          drop.onclick=(e)=>{ e.stopPropagation(); discardClient(c); };
-          act.appendChild(next); act.appendChild(drop);
-          card.appendChild(act);
-          card.onclick=()=>openDrawer(Store.clients.indexOf(c));
-          col.appendChild(card);
-        });
-        kb.appendChild(col);
-      });
-      renderKPIs();
+      updateStats();
     });
 
-    /* Inicializar */
-    renderKanban();
+    updateStats();
   </script>
 </body>
 </html>
