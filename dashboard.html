@@ -6,11 +6,11 @@
 <title>Unihouser — Dashboard CRM</title>
 <style>
   :root{
-    /* Paleta (naranja predominante) */
-    --naranja:#c7530c;        /* primario */
-    --granate:#B53928;        /* peligro */
-    --verde:#58736F;          /* ok */
-    --gris:#DDD5D2;           /* fondo suave */
+    /* Paleta: naranja vivo */
+    --naranja:#c7530c;
+    --granate:#B53928;
+    --verde:#58736F;
+    --gris:#DDD5D2;
     --card:#ffffff;
     --texto:#2b2b2b;
     --muted:#7a6f6b;
@@ -29,8 +29,9 @@
   .nav a{padding:8px 10px;border-radius:10px;text-decoration:none;color:#4a3f3b}
   .nav a.active{background:rgba(199,83,12,.16);color:var(--naranja)}
   .actions-top{display:flex;gap:8px;align-items:center}
-  /* Controles */
-  input,select,textarea,button{font:inherit;border:1px solid #d8cfca;border-radius:10px;padding:8px 10px;background:#fff;color:var(--texto);outline:none}
+  /* Controles (compactos para caber sin scroll) */
+  input,select,textarea,button{font:inherit;border:1px solid #d8cfca;border-radius:10px;padding:6px 8px;background:#fff;color:var(--texto);outline:none;height:32px}
+  textarea{height:32px}
   input[type="number"]{text-align:right}
   button{cursor:pointer;background:#fff}
   .primary{background:var(--naranja);color:#fff;border-color:transparent}
@@ -43,7 +44,7 @@
   .circle:hover{filter:brightness(0.95)}
   /* KPIs */
   .kpis{margin:14px 16px 18px;display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));gap:12px}
-  .kpi{background:var(--card);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;min-height:62px}
+  .kpi{background:var(--card);border-radius:14px;padding:8px 10px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px;min-height:58px}
   .kpi h3{font-size:12px;margin:0;font-weight:800;color:#594f4b;letter-spacing:.3px;text-transform:uppercase}
   .kpi .row{display:flex;justify-content:space-between;align-items:baseline}
   .kpi b{font-size:20px}
@@ -62,14 +63,15 @@
   /* Card */
   .card{border:1px solid #eee3de;border-radius:14px;padding:10px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
   .card .top{display:flex;justify-content:space-between;align-items:center}
-  .name{font-weight:800}
+  .name{font-weight:800;display:flex;align-items:center;gap:6px}
+  .grip{width:16px;height:16px;border-radius:4px;background:rgba(199,83,12,.15);border:1px solid rgba(199,83,12,.35);display:inline-flex;align-items:center;justify-content:center;cursor:grab}
+  .grip:before{content:'≡';font-size:12px;color:#8b3c05;line-height:1}
   .badges{display:flex;gap:6px;flex-wrap:wrap}
   .badge{font-size:12px;background:#fff4ec;border:1px solid #ffd8bf;color:#a04f26;border-radius:999px;padding:3px 8px;display:inline-flex;gap:6px;align-items:center}
   .badge.gray{background:#f3efed;border:1px solid #eadfd9;color:#544a46}
   .days{font-size:12px;color:#6f6460}
   .actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-  .iconbtn{display:inline-flex;gap:6px;align-items:center;padding:6px 8px;border-radius:10px;border:1px solid #eadfd9;background:#fff}
-  .iconbtn.small{padding:4px 6px}
+  .iconbtn{display:inline-flex;gap:6px;align-items:center;padding:4px 6px;border-radius:10px;border:1px solid #eadfd9;background:#fff;height:28px}
   .emoji{font-size:16px;line-height:1}
   .houses{display:flex;gap:4px}
   .house{width:12px;height:12px;border-radius:3px;background:#e8e1dc;border:1px solid #d8cfca}
@@ -79,21 +81,21 @@
   .toast{background:#fff;border-left:6px solid var(--verde);padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);min-width:260px}
   .toast.warn{border-left-color:var(--naranja)}
   .toast.bad{border-left-color:var(--granate)}
-  .small{font-size:12px;color:var(--muted)}
-  /* Modal centrado (sin scroll en desktop) */
+  .small{font-size:12px;color:#7a6f6b}
+  /* Modal centrado — SIN SCROLL en desktop */
   #overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.2s;z-index:250}
   #overlay.open{opacity:1;pointer-events:auto}
   #modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:300;pointer-events:none}
   #modal .sheet{width:1024px;max-width:96vw;background:#fff;border-radius:18px;box-shadow:0 30px 60px rgba(0,0,0,.2);transform:translateY(12px) scale(.98);opacity:0;transition:.22s;pointer-events:auto;display:flex;flex-direction:column;max-height:92vh}
   #modal.open .sheet{transform:none;opacity:1}
-  .sheet header{padding:10px 14px;border-bottom:2px solid rgba(199,83,12,.25);display:flex;justify-content:space-between;align-items:center;background:#fff}
-  .sheet h3{margin:0}
-  .sheet .body{padding:10px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+  .sheet header{padding:8px 12px;border-bottom:2px solid rgba(199,83,12,.25);display:flex;justify-content:space-between;align-items:center;background:#fff}
+  .sheet h3{margin:0;font-size:16px}
+  .sheet .body{padding:8px;display:flex;flex-direction:column;gap:8px;overflow:hidden} /* <— sin scroll */
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .grid.two{grid-template-columns:repeat(2,1fr)}
-  .group{border:1px solid #ffe1ce;background:#fff7f2;border-radius:12px;padding:10px}
-  .group h4{margin:0 0 6px 0;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#a04f26}
-  .sheet footer{position:sticky;bottom:0;background:#fff;border-top:2px solid rgba(199,83,12,.25);padding:10px 14px;display:flex;justify-content:flex-end;gap:8px}
+  .group{border:1px solid #ffe1ce;background:#fff7f2;border-radius:12px;padding:8px}
+  .group h4{margin:0 0 4px 0;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#a04f26}
+  .sheet footer{position:sticky;bottom:0;background:#fff;border-top:2px solid rgba(199,83,12,.25);padding:8px 12px;display:flex;justify-content:flex-end;gap:8px}
   /* Multiselect chips */
   .chips{display:flex;flex-wrap:wrap;gap:6px}
   .chip{background:#f3efed;border:1px solid #eadfd9;border-radius:999px;padding:4px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
@@ -104,7 +106,7 @@
   @media (max-width: 680px){ .grid{grid-template-columns:1fr} }
 </style>
 <script>
-/* Defino el fallback antes de que cargue el <img> para evitar ReferenceError */
+/* Fallback del logo — definido antes del <img> */
 function logoFallback(e){
   var svg="<svg xmlns='http://www.w3.org/2000/svg' width='120' height='28' viewBox='0 0 120 28'><rect rx='6' ry='6' width='120' height='28' fill='%23c7530c'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='14' fill='white'>Unihouser</text></svg>";
   e.target.onerror=null;
@@ -171,15 +173,15 @@ function logoFallback(e){
 
   <!-- Modal central -->
   <div id="overlay" aria-hidden="true"></div>
-  <div id="modal" aria-hidden="true" role="dialog" aria-label="Ficha del cliente">
+  <div id="modal" role="dialog" aria-modal="true" aria-label="Ficha del cliente">
     <div class="sheet">
       <header>
         <h3 id="modalTitle">Ficha</h3>
-        <button class="iconbtn" id="btnCloseModal">✖️ Cerrar</button>
+        <button class="iconbtn" id="btnCloseModal" draggable="false">✖️ Cerrar</button>
       </header>
       <div class="body" id="modalBody"></div>
       <footer>
-        <button class="primary" id="modalSave">💾 Guardar</button>
+        <button class="primary" id="modalSave" draggable="false">💾 Guardar</button>
       </footer>
     </div>
   </div>
@@ -284,6 +286,7 @@ function renderColumns(){
     const col=document.getElementById('col-'+ph); if(!col) continue;
     const keep= ph==='CONTACTO' ? [document.getElementById('newContactBox')] : [];
     col.innerHTML=''; for(const k of keep){ if(k) col.appendChild(k) }
+
     const s = document.querySelector(`section[data-phase="${ph}"]`);
     s.addEventListener('dragover', e=>{e.preventDefault(); s.classList.add('drag-over')});
     s.addEventListener('dragleave', ()=>s.classList.remove('drag-over'));
@@ -296,6 +299,7 @@ function renderColumns(){
       LS.setPros(PROS); renderAll(); toast(`Movido a ${ph} ➜`, 'ok');
     });
   }
+
   /* Ordenar REUNION por proximidad a hoy */
   const now=Date.now();
   const byPhase={}; for(const ph of PHASES) byPhase[ph]=[];
@@ -314,8 +318,7 @@ function renderColumns(){
 }
 
 function makeCard(p){
-  const el=document.createElement('div'); el.className='card'; el.dataset.id=p.id; el.draggable=true;
-  el.addEventListener('dragstart', e=>{e.dataTransfer.setData('text/plain', p.id)});
+  const el=document.createElement('div'); el.className='card'; el.dataset.id=p.id; /* NO draggable en la tarjeta */
   const d=daysSince(p.phase_entered_at);
   const pr=p.profile||{};
   const tipo = pr.tipo || 'Tradicional';
@@ -330,25 +333,37 @@ function makeCard(p){
       </div>` : '';
   el.innerHTML=`
     <div class="top">
-      <div>
-        <div class="name">👤 ${escapeHtml(p.name||'Sin nombre')}</div>
-        <div class="badges">
-          <span class="badge">🏷️ ${escapeHtml(tipo)}</span>
-          <span class="badge">🎯 ${escapeHtml(objt)}</span>
-          ${meetBadge}
-        </div>
+      <div class="name">
+        <span class="grip" title="Arrastrar"></span>
+        <span>👤 ${escapeHtml(p.name||'Sin nombre')}</span>
       </div>
       <div class="days">⏱️ ${d} ${d===1?'día':'días'}</div>
     </div>
+    <div class="badges">
+      <span class="badge">🏷️ ${escapeHtml(tipo)}</span>
+      <span class="badge">🎯 ${escapeHtml(objt)}</span>
+      ${meetBadge}
+    </div>
     <div class="actions">
-      <button class="iconbtn small" data-act="details" title="Ver/editar"><span class="emoji">👁️</span></button>
+      <button class="iconbtn" data-act="details" draggable="false" title="Ver/editar"><span class="emoji">👁️</span></button>
       ${p.phase==='CONTACTO'
-        ? `<button class="iconbtn small bad" data-act="trash" title="Descartar (solo Contacto)">🗑️</button>`
-        : `<button class="circle ok" data-act="ok" title="Interesa">✔</button>
-           <button class="circle ko" data-act="ko" title="No interesa">✖</button>`}
+        ? `<button class="iconbtn bad" data-act="trash" draggable="false" title="Descartar (solo Contacto)">🗑️</button>`
+        : `<button class="circle ok" data-act="ok" draggable="false" title="Interesa">✔</button>
+           <button class="circle ko" data-act="ko" draggable="false" title="No interesa">✖</button>`}
       ${busqHouses}
     </div>
   `;
+
+  /* Drag solo desde la "grip" */
+  const grip=el.querySelector('.grip');
+  grip.setAttribute('draggable','true');
+  grip.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', p.id); });
+
+  /* Evitar que los clicks se "pierdan" por el drag */
+  el.querySelectorAll('[data-act]').forEach(b=>{
+    b.addEventListener('click', ev=>{ ev.stopPropagation(); });
+  });
+
   el.querySelector('[data-act="details"]').addEventListener('click', ()=>openModalFor(p));
   if(p.phase==='CONTACTO'){
     el.querySelector('[data-act="trash"]').addEventListener('click', ()=>discardContact(p));
@@ -385,27 +400,59 @@ function discardContact(p){
   toast('Descartado en Contacto (no computa). 🗑️','bad');
 }
 
-/* ======= MODAL (central) ======= */
+/* ======= MODAL (central, sin scroll, focus-trap, sin warning aria) ======= */
 const overlay=document.getElementById('overlay');
 const modal=document.getElementById('modal');
 const modalBody=document.getElementById('modalBody');
 const modalTitle=document.getElementById('modalTitle');
-document.getElementById('btnCloseModal').addEventListener('click', closeModal);
-document.getElementById('modalSave').addEventListener('click', saveModal);
+const btnCloseModal=document.getElementById('btnCloseModal');
+const btnSave=document.getElementById('modalSave');
+btnCloseModal.addEventListener('click', closeModal);
+btnSave.addEventListener('click', saveModal);
 
 let CURRENT=null;
+let lastOpener=null;
+let inertNodes=[];
+
+function setBackgroundInert(on){
+  const rootChildren=[...document.body.children];
+  inertNodes = rootChildren.filter(n=> n!==modal && n!==overlay);
+  inertNodes.forEach(n=>{
+    if(on){
+      n.setAttribute('aria-hidden','true');
+      n.inert = true; // si el navegador lo soporta
+    }else{
+      n.removeAttribute('aria-hidden');
+      try{ n.inert = false; }catch(_){}
+    }
+  });
+}
+
+function trapFocus(e){
+  if(!modal.classList.contains('open')) return;
+  if(e.key!=='Tab') return;
+  const focusables = modal.querySelectorAll('a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])');
+  const list = Array.from(focusables).filter(el=>el.offsetParent!==null);
+  if(!list.length) return;
+  const first=list[0], last=list[list.length-1];
+  if(e.shiftKey && document.activeElement===first){ last.focus(); e.preventDefault(); }
+  else if(!e.shiftKey && document.activeElement===last){ first.focus(); e.preventDefault(); }
+}
+
 function openModalFor(p){
   CURRENT=p;
+  lastOpener=document.activeElement;
   modalTitle.textContent = `👤 ${p.name||'Sin nombre'} — Detalle`;
   const pr=p.profile||(p.profile={});
   const m=p.meeting||(p.meeting={date:'',notas:''});
   // normaliza localidades a array
   if(typeof pr.locs==='string'){ pr.locs = pr.locs.split(',').map(s=>s.trim()).filter(Boolean); }
   if(!Array.isArray(pr.locs)) pr.locs=[];
+
   const itp = CFG.itp_pct, not = CFG.notaria, hon = CFG.honorarios;
 
   modalBody.innerHTML=`
-    <!-- DATOS PERSONALES -->
+    <!-- 1. DATOS PERSONALES -->
     <div class="group">
       <h4>Datos personales</h4>
       <div class="grid">
@@ -415,20 +462,20 @@ function openModalFor(p){
       </div>
       <div class="grid">
         <div><label>DNI</label><input id="f_dni" value="${escapeHtml(pr.dni||'')}"></div>
+        <div style="grid-column:span 2"><label>Dirección</label><input id="f_dir" value="${escapeHtml(pr.dir||'')}" placeholder="C/ … nº …"></div>
+      </div>
+    </div>
+
+    <!-- 2. INVERSION -->
+    <div class="group">
+      <h4>Inversión</h4>
+      <div class="grid">
         <div>
           <label>Localidades (multi)</label>
           <div class="chips" id="loc_chips"></div>
           <input id="loc_input" list="loc_list" placeholder="Añadir localidad y Enter">
           <datalist id="loc_list">${CFG.localidades.map(l=>`<option value="${escapeHtml(l)}">`).join('')}</datalist>
         </div>
-        <div style="grid-column:span 1"><label>Dirección</label><input id="f_dir" value="${escapeHtml(pr.dir||'')}" placeholder="C/ … nº …"></div>
-      </div>
-    </div>
-
-    <!-- INVERSION -->
-    <div class="group">
-      <h4>Inversión</h4>
-      <div class="grid">
         <div><label>Tipo de alquiler</label>
           <select id="f_tipo">
             <option ${pr.tipo==='Tradicional'?'selected':''}>Tradicional</option>
@@ -436,39 +483,39 @@ function openModalFor(p){
           </select>
         </div>
         <div><label>Nº activos</label><input id="f_nact" value="${escapeHtml(pr.nact||'')}" inputmode="numeric"></div>
-        <div><label>Acepta reforma</label>
-          <select id="f_ref"><option ${pr.ref==='No'?'selected':''}>No</option><option ${pr.ref==='Lavado de cara'?'selected':''}>Lavado de cara</option><option ${pr.ref==='Integral'?'selected':''}>Integral</option></select>
-        </div>
       </div>
       <div class="grid">
+        <div><label>Acepta reforma</label><select id="f_ref"><option ${pr.ref==='No'?'selected':''}>No</option><option ${pr.ref==='Lavado de cara'?'selected':''}>Lavado de cara</option><option ${pr.ref==='Integral'?'selected':''}>Integral</option></select></div>
         <div><label>¿Ascensor?</label><select id="f_asc"><option ${pr.asc!=='No'?'selected':''}>Sí</option><option ${pr.asc==='No'?'selected':''}>No</option></select></div>
         <div><label>Altura máx.</label><input id="f_alt" value="${escapeHtml(pr.alt||'')}" inputmode="numeric"></div>
-        <div><label>¿Bajos?</label><select id="f_bajos"><option ${pr.bajos!=='Sí'?'selected':''}>No</option><option ${pr.bajos==='Sí'?'selected':''}>Sí</option></select></div>
       </div>
       <div class="grid">
+        <div><label>¿Bajos?</label><select id="f_bajos"><option ${pr.bajos!=='Sí'?'selected':''}>No</option><option ${pr.bajos==='Sí'?'selected':''}>Sí</option></select></div>
         <div><label>Presupuesto TOTAL (€)</label><input id="f_budget" value="${pr.budget!=null?Math.round(pr.budget):''}" inputmode="numeric"></div>
         <div><label>Precio máx. COMPRA (auto)</label><input id="f_pmax" value="${pr.pmax!=null?Math.round(pr.pmax):''}" disabled></div>
-        <div><label>ITP estimado (auto)</label><input id="f_itp" value="${pr.pmax?Math.round(pr.pmax*itp):''}" disabled></div>
       </div>
-      <small class="small">Notaría: ${eur(not)} · Honorarios: ${eur(hon)} (desde Config)</small>
+      <div class="grid">
+        <div><label>ITP estimado (auto)</label><input id="f_itp" value="${pr.pmax?Math.round(pr.pmax*itp):''}" disabled></div>
+        <div style="grid-column:span 2;display:flex;align-items:center"><small class="small">Notaría: ${eur(not)} · Honorarios: ${eur(hon)} (Config)</small></div>
+      </div>
     </div>
 
-    <!-- FINANCIACION -->
+    <!-- 3. FINANCIACION -->
     <div class="group">
       <h4>Financiación</h4>
       <div class="grid">
         <div><label>Financiación bancaria</label><select id="f_fin"><option ${pr.fin!=='No'?'selected':''}>Sí</option><option ${pr.fin==='No'?'selected':''}>No</option></select></div>
         <div><label>% financiación</label><input id="f_pct" value="${pr.pct!=null?String(pr.pct).replace('.',','):''}" placeholder="80,0"></div>
-        <div><label>Hipoteca estimada</label><input id="f_hip" value="${pr.hip!=null?Math.round(pr.hip):''}" disabled></div>
+        <div><label>Hipoteca (auto)</label><input id="f_hip" value="${pr.hip!=null?Math.round(pr.hip):''}" disabled></div>
       </div>
       <div class="grid two">
         <div><label>Fondos propios</label><input id="f_prop" value="${pr.prop!=null?Math.round(pr.prop):''}" disabled></div>
       </div>
     </div>
 
-    <!-- OBJETIVOS -->
+    <!-- 4. OBJETIVO -->
     <div class="group">
-      <h4>Objetivos</h4>
+      <h4>Objetivo</h4>
       <div class="grid">
         <div><label>Objetivo principal</label>
           <select id="f_objt">
@@ -479,13 +526,13 @@ function openModalFor(p){
         </div>
         <div><label>Valor objetivo</label><input id="f_objv" value="${pr.objv!=null?String(pr.objv).replace('.',','):''}" placeholder="7,5 o 300"></div>
         <div class="grid two" id="row_alq" style="display:${(pr.objt||'bruta')==='bruta'?'grid':'none'}">
-          <div><label>Alquiler máx. orientativo (€/mes)</label><input id="f_alq" value="${pr.alq!=null?Math.round(pr.alq):''}" disabled></div>
+          <div><label>Alquiler orientativo (€/mes)</label><input id="f_alq" value="${pr.alq!=null?Math.round(pr.alq):''}" disabled></div>
         </div>
       </div>
-      <small class="small">Para Rb% el alquiler se calcula como: <b>((Total − Honorarios) × Rb%) / 12</b>.</small>
+      <small class="small">Fórmula Rb%: <b>((Total − Honorarios) × Rb%) / 12</b>.</small>
     </div>
 
-    <!-- NOTAS / REUNION -->
+    <!-- 5. REUNION / NOTAS -->
     <div class="group">
       <h4>${p.phase==='CONTACTO'?'Reunión':'Notas'}</h4>
       <div class="grid two">
@@ -510,11 +557,11 @@ function openModalFor(p){
         <button class="iconbtn" id="b_send_${p.id}">📤 Enviar documentación</button>
       </div>
       `:''}
-      ${p.phase!=='BUSQUEDA'?'<p class="small">La selección de activos se gestiona en la fase <b>Búsqueda</b>.</p>':''}
+      ${p.phase!=='BUSQUEDA'?'<p class="small">La selección de activos se gestiona en <b>Búsqueda</b>.</p>':''}
     </div>
   `;
 
-  /* Multiselect localidades (sin botón limpiar; se eliminan con la ✖ de cada chip) */
+  // Multiselect localidades
   const chipsBox=document.getElementById('loc_chips');
   const locInput=document.getElementById('loc_input');
   function renderLocs(){
@@ -540,7 +587,7 @@ function openModalFor(p){
 
   if(p.phase==='BUSQUEDA'){ mountBusquedaInModal(p); }
 
-  openModal();
+  openModal(); // gestionar focus y fondo
 }
 
 function recalcDerived(){
@@ -573,54 +620,38 @@ function recalcDerived(){
     if(row){ row.style.display = objt==='bruta' ? 'grid':'none'; }
     if(objt==='bruta'){
       const rb = objv/100;
-      const alq = ((budget - hon) * rb) / 12;
+      const alq = ((budget - CFG.honorarios) * rb) / 12;
       alqEl.value = alq?Math.round(alq):'';
     }else{
       alqEl.value='';
     }
   }
 }
-function openModal(){ overlay.classList.add('open'); modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); overlay.setAttribute('aria-hidden','false'); }
-function closeModal(){ overlay.classList.remove('open'); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); overlay.setAttribute('aria-hidden','true'); CURRENT=null; }
 
-function saveModal(){
-  if(!CURRENT) return;
-  const p=CURRENT;
-  const pr=p.profile||(p.profile={});
-  // personales
-  p.name=document.getElementById('f_name').value.trim();
-  p.phone=document.getElementById('f_tel').value.trim();
-  p.email=document.getElementById('f_email').value.trim();
-  pr.dni=document.getElementById('f_dni').value.trim();
-  pr.dir=document.getElementById('f_dir').value.trim();
-  pr.locs=pr.locs||[];
-  // inversión
-  pr.tipo=document.getElementById('f_tipo').value;
-  pr.nact=document.getElementById('f_nact').value.trim();
-  pr.asc=document.getElementById('f_asc').value;
-  pr.alt=document.getElementById('f_alt').value.trim();
-  pr.bajos=document.getElementById('f_bajos').value;
-  pr.ref=document.getElementById('f_ref').value;
-  pr.budget=num(document.getElementById('f_budget').value);
-  pr.pmax=num(document.getElementById('f_pmax').value);
-  // financiación
-  pr.fin=document.getElementById('f_fin').value;
-  pr.pct=num(document.getElementById('f_pct').value);
-  pr.hip=num(document.getElementById('f_hip').value);
-  pr.prop=num(document.getElementById('f_prop').value);
-  // objetivos
-  pr.objt=document.getElementById('f_objt').value;
-  pr.objv=num(document.getElementById('f_objv').value);
-  pr.alq=num(document.getElementById('f_alq').value);
-  // notas / reunión
-  const notas=document.getElementById('f_notas').value.trim();
-  let dt=null; if(p.phase==='CONTACTO'){ dt=document.getElementById('f_meet').value; }
-  p.meeting={date:dt||p.meeting?.date||'', notas};
-  if(p.phase==='CONTACTO' && dt){ p.phase='REUNION'; p.phase_entered_at=Date.now(); }
-  LS.setPros(PROS);
-  renderAll();
-  toast('Ficha guardada ✅','ok'); closeModal();
+/* ======= Abrir/Cerrar modal con accesibilidad ======= */
+function getFocusableInModal(){
+  return Array.from(modal.querySelectorAll('a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])')).filter(el=>el.offsetParent!==null);
 }
+function openModal(){
+  overlay.classList.add('open');
+  modal.classList.add('open');
+  setBackgroundInert(true);
+  document.addEventListener('keydown', trapFocus);
+  // foco al primer control
+  const focusables=getFocusableInModal();
+  if(focusables.length){ focusables[0].focus(); }
+}
+function closeModal(){
+  // devolver foco antes de ocultar
+  if(lastOpener && document.body.contains(lastOpener)){ lastOpener.focus(); }
+  document.removeEventListener('keydown', trapFocus);
+  setBackgroundInert(false);
+  overlay.classList.remove('open');
+  modal.classList.remove('open');
+  CURRENT=null;
+}
+overlay.addEventListener('click', closeModal);
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeModal(); });
 
 /* ======= BUSQUEDA EN MODAL ======= */
 function mountBusquedaInModal(p){
