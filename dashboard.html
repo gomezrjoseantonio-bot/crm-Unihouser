@@ -1,998 +1,739 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Unihouser — Dashboard CRM</title>
-  <style>
-    :root{
-      --granate:#B53928;
-      --terracota:#DB824B;
-      --verde:#58736F;
-      --gris:#DDD5D2;
-      --texto:#2b2b2b;
-      --bg:#faf8f7;
-      --card:#ffffff;
-      --muted:#7a6f6b;
-      --shadow:0 6px 20px rgba(0,0,0,.08);
-      --radius:16px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Inter,Arial,sans-serif;
-      color:var(--texto);
-      background:linear-gradient(180deg,var(--gris) 0%, var(--bg) 18%);
-    }
-    header{display:flex;align-items:center;gap:16px;padding:16px 20px;}
-    header .brand{display:flex;align-items:center;gap:12px;}
-    header img{height:36px;width:auto}
-    header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
-    .kpis{margin:6px 20px 18px;display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));gap:12px;}
-    .kpi{background:var(--card);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-height:64px;}
-    .kpi h3{font-size:12px;margin:0;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
-    .kpi .val{display:flex;align-items:baseline;justify-content:space-between}
-    .kpi .val b{font-size:20px}
-    .kpi .pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#f1ece9}
-    .kpi.ok .pill{background:rgba(88,115,111,.12);color:var(--verde)}
-    .kpi.warn .pill{background:rgba(219,130,75,.12);color:var(--terracota)}
-    .kpi.bad .pill{background:rgba(181,57,40,.12);color:var(--granate)}
-    .board{padding:0 20px 40px;display:grid;grid-template-columns:repeat(6,1fr);gap:14px;}
-    .col{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);min-height:60vh;display:flex;flex-direction:column;}
-    .col header{padding:12px 12px 8px;border-bottom:1px solid #eee;}
-    .col header h2{margin:0;font-size:14px;text-transform:uppercase;letter-spacing:.8px;color:#4a3f3b}
-    .col .content{padding:10px;display:flex;flex-direction:column;gap:10px}
-    .new-contact{border:1px dashed #c9beb9;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;background:#fbf9f8;}
-    .row{display:flex;gap:8px}
-    .row input{flex:1}
-    input,select,textarea,button{font:inherit;border:1px solid #d8cfca;border-radius:10px;padding:8px 10px;background:#fff;color:var(--texto);outline:none;}
-    textarea{resize:vertical;min-height:64px}
-    button{cursor:pointer;background:#f6efe9;border-color:#eadfd9}
-    button.primary{background:var(--verde);color:#fff;border-color:transparent}
-    button.bad{background:var(--granate);color:#fff;border-color:transparent}
-    button.accent{background:var(--terracota);color:#fff;border-color:transparent}
-    .card{border:1px solid #eee3de;border-radius:14px;padding:10px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;}
-    .card .top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-    .name{font-weight:700}
-    .days{font-size:12px;color:var(--muted);background:#f3efed;border-radius:999px;padding:3px 8px}
-    .msg{display:flex;flex-direction:column;gap:6px}
-    .actions{display:flex;flex-wrap:wrap;gap:6px}
-    .iconbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;border:1px solid #eadfd9;background:#fff;}
-    .icon{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center}
-    .icon svg{width:16px;height:16px;display:block}
-    .icon.eye svg{fill:var(--verde)}
-    .icon.trash svg{fill:var(--granate)}
-    #overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.2s ease;z-index:50;}
-    #drawer{position:fixed;top:0;right:0;width:560px;max-width:96vw;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,.18);transform:translateX(100%);transition:.28s cubic-bezier(.2,.8,.2,1);z-index:60;display:flex;flex-direction:column;}
-    #drawer.open{transform:none}
-    #overlay.open{opacity:1;pointer-events:all}
-    .dr-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 10px;border-bottom:1px solid #eee}
-    .dr-title{font-weight:700}
-    /* Cuerpo sin scroll — usamos tabs para dividir la info */
-    .dr-body{display:flex;flex-direction:column;gap:10px;padding:12px;height:calc(100vh - 66px);}
-    .tabs{display:flex;gap:6px;flex-wrap:wrap}
-    .tabs button{border:1px solid #eadfd9;background:#fbf9f8;border-radius:999px;padding:6px 10px}
-    .tabs button.active{background:var(--granate);color:#fff;border-color:transparent}
-    .tabarea{flex:1;min-height:0;border:1px solid #eee3de;border-radius:12px;background:#fff;padding:10px;display:flex}
-    .tab{display:none;flex:1}
-    .tab.active{display:block}
-    .frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .frow.three{grid-template-columns:1fr 1fr 1fr}
-    .fcol small.hint{display:block;color:#6f6460;margin-top:4px}
-    .pin-actions{display:flex;justify-content:space-between;gap:8px}
-    .toaster{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100}
-    .toast{background:#fff;border-left:6px solid var(--verde);padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);min-width:260px;}
-    .toast.warn{border-left-color:var(--terracota)}
-    .toast.bad{border-left-color:var(--granate)}
-    .muted{color:var(--muted)}
-    .sr-only{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;}
-    .small{font-size:12px}
-    .tight{margin:0}
-
-    /* Lista visual de evaluaciones */
-    .eval-list{display:flex;flex-direction:column;gap:8px;max-height:32vh;overflow:auto;border:1px solid #eee;border-radius:10px;padding:8px;background:#faf9f8}
-    .eval-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid #eee3de;border-radius:10px;padding:8px;background:#fff}
-    .eval-title{font-weight:600}
-    .eval-sub{color:#6f6460;font-size:12px}
-    .chips{display:flex;flex-wrap:wrap;gap:6px}
-    .chip{background:#f3efed;border:1px solid #eadfd9;border-radius:999px;padding:4px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
-    .chip button{background:transparent;border:none;padding:0 2px;cursor:pointer}
-    .thumbs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
-    .thumbs img,.thumbs video,.thumbs .pdf{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid #e7ded9;border-radius:8px;background:#f7f3f1;}
-    .pdf{display:flex;align-items:center;justify-content:center;font-size:10px;color:#6b5e58}
-    .beta-stack{display:flex;flex-direction:column;gap:8px;max-height:42vh;overflow:auto;border:1px solid #eee;border-radius:12px;padding:8px;}
-    .beta-stack object{width:100%;height:260px;border:1px solid #eee;border-radius:8px;}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unihouser — Dashboard CRM</title>
+<style>
+  :root{
+    --granate:#B53928; --terracota:#DB824B; --verde:#58736F; --gris:#DDD5D2;
+    --texto:#2b2b2b; --muted:#7a6f6b; --bg:#faf8f7; --card:#fff;
+    --shadow:0 8px 26px rgba(0,0,0,.08); --radius:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,var(--gris) 0%, var(--bg) 22%);color:var(--texto)}
+  /* Topbar */
+  .topbar{background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.06);position:sticky;top:0;z-index:100}
+  .container{max-width:1200px;margin:0 auto;padding:10px 16px}
+  .flex{display:flex;gap:12px}
+  .between{justify-content:space-between}.center{align-items:center}
+  .brand{gap:10px}
+  .brand img{height:28px}
+  .title{font-weight:700}
+  .nav a{padding:8px 10px;border-radius:10px;text-decoration:none;color:#4a3f3b}
+  .nav a.active{background:rgba(181,57,40,.12);color:var(--granate)}
+  /* KPIs */
+  .kpis{margin:14px 16px 18px;display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));gap:12px}
+  .kpi{background:var(--card);border-radius:14px;padding:12px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-height:68px}
+  .kpi h3{font-size:12px;margin:0;font-weight:700;color:#594f4b;letter-spacing:.3px;text-transform:uppercase}
+  .kpi .row{display:flex;justify-content:space-between;align-items:baseline}
+  .kpi b{font-size:20px}
+  .kpi .pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#f1ece9}
+  .kpi.ok .pill{background:rgba(88,115,111,.12);color:var(--verde)}
+  .kpi.warn .pill{background:rgba(219,130,75,.12);color:var(--terracota)}
+  .kpi.bad .pill{background:rgba(181,57,40,.12);color:var(--granate)}
+  /* Board */
+  .board{padding:0 16px 40px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+  .col{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);min-height:60vh;display:flex;flex-direction:column}
+  .col header{padding:10px 12px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+  .col header h2{margin:0;font-size:14px;text-transform:uppercase;letter-spacing:.6px}
+  .content{padding:10px;display:flex;flex-direction:column;gap:10px}
+  /* New contact */
+  .new-contact{border:1px dashed #c9beb9;border-radius:12px;padding:10px;background:#fbf9f8;display:flex;flex-direction:column;gap:8px}
+  input,select,textarea,button{font:inherit;border:1px solid #d8cfca;border-radius:10px;padding:8px 10px;background:#fff;color:var(--texto);outline:none}
+  button{cursor:pointer;background:#f6efe9;border-color:#eadfd9}
+  .primary{background:var(--verde);color:#fff;border-color:transparent}
+  .ghost{background:#fff}
+  .bad{background:var(--granate);color:#fff;border-color:transparent}
+  .accent{background:var(--terracota);color:#fff;border-color:transparent}
+  /* Card */
+  .card{border:1px solid #eee3de;border-radius:14px;padding:10px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+  .card .top{display:flex;justify-content:space-between;align-items:center}
+  .name{font-weight:800}
+  .badges{display:flex;gap:6px;flex-wrap:wrap}
+  .badge{font-size:12px;background:#f3efed;border:1px solid #eadfd9;border-radius:999px;padding:3px 8px;display:inline-flex;gap:6px;align-items:center}
+  .days{font-size:12px;color:#6f6460}
+  .actions{display:flex;gap:6px;flex-wrap:wrap}
+  .iconbtn{display:inline-flex;gap:6px;align-items:center;padding:6px 8px;border-radius:10px;border:1px solid #eadfd9;background:#fff}
+  .iconbtn.small{padding:4px 6px}
+  .emoji{font-size:16px;line-height:1}
+  /* Toaster */
+  .toaster{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:400}
+  .toast{background:#fff;border-left:6px solid var(--verde);padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);min-width:260px}
+  .toast.warn{border-left-color:var(--terracota)}
+  .toast.bad{border-left-color:var(--granate)}
+  .small{font-size:12px;color:var(--muted)}
+  /* Modal centrado */
+  #overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.2s;z-index:250}
+  #overlay.open{opacity:1;pointer-events:auto}
+  #modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:300;pointer-events:none}
+  #modal .sheet{width:920px;max-width:96vw;background:#fff;border-radius:18px;box-shadow:0 30px 60px rgba(0,0,0,.2);transform:translateY(12px) scale(.98);opacity:0;transition:.22s;pointer-events:auto}
+  #modal.open .sheet{transform:none;opacity:1}
+  .sheet header{padding:12px 14px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+  .sheet h3{margin:0}
+  .sheet .body{padding:12px;display:flex;flex-direction:column;gap:10px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .grid.two{grid-template-columns:repeat(2,1fr)}
+  .grid.four{grid-template-columns:repeat(4,1fr)}
+  .group{border:1px solid #eee3de;border-radius:12px;padding:10px;background:#fbf9f8}
+  .group h4{margin:0 0 6px 0;font-size:13px;text-transform:uppercase;letter-spacing:.4px}
+  .sheet footer{padding:12px 14px;border-top:1px solid #eee;display:flex;justify-content:flex-end}
+  /* Eval list */
+  .eval-list{display:flex;flex-direction:column;gap:8px;border:1px solid #eee;border-radius:10px;padding:8px;background:#faf9f8;max-height:36vh;overflow:auto}
+  .eval-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid #eee3de;border-radius:10px;padding:8px;background:#fff}
+  .eval-title{font-weight:700}
+  .match.ok{color:var(--verde)} .match.warn{color:var(--terracota)} .match.bad{color:var(--granate)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{background:#f3efed;border:1px solid #eadfd9;border-radius:999px;padding:4px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+  /* Drag & drop helpers */
+  .col.drag-over{outline:2px dashed var(--terracota);outline-offset:-6px}
+</style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <img src="logo-unihouser.svg" alt="Unihouser" onerror="logoFallback(event)">
-      <h1>Dashboard CRM</h1>
+  <!-- Topbar con navegación -->
+  <header class="topbar">
+    <div class="container flex between center">
+      <div class="brand flex center">
+        <img src="logo-unihouser.svg" alt="Unihouser" onerror="logoFallback(event)">
+        <div class="title">Unihouser — CRM & BuyBox</div>
+      </div>
+      <nav class="nav">
+        <a href="evaluar.html">Evaluar</a>
+        <a href="evaluaciones.html">Evaluaciones</a>
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="configuracion.html">Configuración</a>
+      </nav>
     </div>
   </header>
 
-  <section class="kpis" id="kpis"></section>
+  <section class="kpis container" id="kpis"></section>
 
   <main class="board" id="board">
     <section class="col" data-phase="CONTACTO">
-      <header><h2>Contacto</h2></header>
+      <header><h2>📥 Contacto</h2><span class="small" id="count-CONTACTO"></span></header>
       <div class="content" id="col-CONTACTO">
         <div class="new-contact" id="newContactBox">
-          <div class="row">
-            <input id="nc_name" placeholder="Nombre y apellidos" />
+          <div class="flex">
+            <input id="nc_name" placeholder="Nombre y apellidos">
           </div>
-          <div class="row">
-            <input id="nc_email" placeholder="Email" type="email" />
-            <input id="nc_phone" placeholder="Teléfono" />
+          <div class="flex">
+            <input id="nc_email" placeholder="Email" type="email">
+            <input id="nc_phone" placeholder="Teléfono">
           </div>
-          <button class="primary" id="btnCreate">Crear contacto</button>
-          <p class="small muted tight">El mensaje inicial se autocompleta desde Config y queda editable en la tarjeta.</p>
+          <button class="primary" id="btnCreate">➕ Crear contacto</button>
+          <p class="small">Se autocompleta un mensaje inicial (editable en la tarjeta). ✉️</p>
         </div>
       </div>
     </section>
-
     <section class="col" data-phase="REUNION">
-      <header><h2>Reunión</h2></header>
+      <header><h2>📆 Reunión</h2><span class="small" id="count-REUNION"></span></header>
       <div class="content" id="col-REUNION"></div>
     </section>
-
     <section class="col" data-phase="CONTRATO">
-      <header><h2>Contrato</h2></header>
+      <header><h2>🖋️ Contrato</h2><span class="small" id="count-CONTRATO"></span></header>
       <div class="content" id="col-CONTRATO"></div>
     </section>
-
     <section class="col" data-phase="BUSQUEDA">
-      <header><h2>Búsqueda</h2></header>
+      <header><h2>🔎 Búsqueda</h2><span class="small" id="count-BUSQUEDA"></span></header>
       <div class="content" id="col-BUSQUEDA"></div>
     </section>
-
     <section class="col" data-phase="COMPRAVENTA">
-      <header><h2>Compraventa</h2></header>
+      <header><h2>🏁 Compraventa</h2><span class="small" id="count-COMPRAVENTA"></span></header>
       <div class="content" id="col-COMPRAVENTA"></div>
-    </section>
-
-    <section class="col" data-phase="PAPELERA">
-      <header><h2>Papelera</h2></header>
-      <div class="content" id="col-PAPELERA"></div>
     </section>
   </main>
 
+  <!-- Modal central -->
   <div id="overlay" aria-hidden="true"></div>
-  <aside id="drawer" aria-hidden="true" aria-label="Panel lateral">
-    <div class="dr-head">
-      <div class="dr-title" id="drTitle">Detalle</div>
-      <button id="btnCloseDrawer" class="iconbtn"><span class="icon">
-        <svg viewBox="0 0 24 24"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.9 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.9a1 1 0 0 0 1.41-1.41L13.41 12l4.9-4.89a1 1 0 0 0-.01-1.4z"/></svg>
-      </span>Cerrar</button>
+  <div id="modal" aria-hidden="true" role="dialog" aria-label="Ficha del cliente">
+    <div class="sheet">
+      <header>
+        <h3 id="modalTitle">Ficha</h3>
+        <button class="iconbtn" id="btnCloseModal"><span class="emoji">✖️</span> Cerrar</button>
+      </header>
+      <div class="body" id="modalBody"></div>
+      <footer>
+        <button class="primary" id="modalSave">💾 Guardar</button>
+      </footer>
     </div>
-    <div class="dr-body" id="drBody"></div>
-  </aside>
+  </div>
 
   <div class="toaster" id="toaster" aria-live="polite" aria-atomic="true"></div>
 
-  <script>
-  'use strict';
+<script>
+'use strict';
 
-  /* ======= DEFAULTS & HELPERS ======= */
-  const PHASES = ['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA','PAPELERA'];
-  const ES = 'es-ES';
-  const fmtPct = new Intl.NumberFormat(ES,{style:'percent',minimumFractionDigits:0,maximumFractionDigits:0});
+/* ======= CONSTS & HELPERS ======= */
+const PHASES = ['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA']; // sin Papelera
+const ES='es-ES';
+const fmtPct = new Intl.NumberFormat(ES,{style:'percent',minimumFractionDigits:0,maximumFractionDigits:0});
+const eur = n => new Intl.NumberFormat(ES,{style:'currency',currency:'EUR'}).format(n||0);
+const uid = p => p+'_'+Math.random().toString(36).slice(2,8);
+const daysSince = ts => ts? Math.max(0, Math.floor((Date.now()-ts)/(86400000))) : 0;
+const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
+const bytes=n=> n<1024? n+' B' : n<1048576? (n/1024).toFixed(1).replace('.',',')+' KB' : (n/1048576).toFixed(1).replace('.',',')+' MB';
+const escapeHtml=s=>(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 
-  const DEFAULT_INITIAL_MESSAGE = `Hola!
+/* normaliza %: 9.8 => 0.098, 0.098 => 0.098, 98 => 0.98 */
+function normPct(v){
+  if(v==null||isNaN(v)) return null;
+  const x = Number(v);
+  if(x>1 && x<=100) return x/100;
+  if(x>100) return 1;
+  if(x<0) return 0;
+  return x;
+}
+
+function logoFallback(e){
+  e.target.onerror=null;
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='28' viewBox='0 0 120 28'>
+    <rect rx='6' ry='6' width='120' height='28' fill='%23B53928'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='14' fill='white'>Unihouser</text>
+  </svg>`;
+  e.target.src='data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+}
+
+function toast(msg,type='ok'){
+  const t=document.createElement('div'); t.className='toast'+(type==='warn'?' warn':type==='bad'?' bad':''); t.textContent=msg;
+  document.getElementById('toaster').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0'; setTimeout(()=>t.remove(),240)},2600);
+}
+
+/* ======= STORAGE ======= */
+const LS={
+  getCfg(){try{return JSON.parse(localStorage.getItem('cfg')||'null')}catch(_){return null}},
+  setCfg(o){localStorage.setItem('cfg',JSON.stringify(o))},
+  getPros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return []}},
+  setPros(a){localStorage.setItem('pros',JSON.stringify(a))},
+  getEvals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return []}},
+  setEvals(a){localStorage.setItem('evals',JSON.stringify(a))},
+};
+
+const DEFAULT_CFG={
+  itp_pct:0.08, notaria:1200, honorarios:3630,
+  messages:{ initial_subject:'Inicio — Unihouser', initial:`Hola!
 
 Gracias por escribirnos y por el interés en lo que hacemos en Unihouser.
 
-Cada inversor es distinto —algunos buscáis dar vuestro primer paso, otros ya tenéis experiencia— así que preferimos contar de forma clara cómo trabajamos y qué aportamos, para que tú decidas si tiene sentido avanzar juntos.
-
 🏠 ¿En qué podemos ayudarte?
 
-✔ Analizamos y filtramos oportunidades con sentido real, mirando números, zonas y estado del inmueble.
-✔ Estimamos contigo todos los costes asociados: compra, reforma, gestión, posibles imprevistos.
-✔ Te damos una visión clara del rendimiento esperado (habitaciones, tradicional o mixto).
+✔ Analizamos y filtramos oportunidades con sentido real (números, zonas, estado).
+✔ Estimamos contigo todos los costes asociados.
+✔ Te damos una visión clara del rendimiento esperado.
 
 💬 ¿Qué necesitamos de ti?
-Ganas de avanzar si aparece la oportunidad adecuada. Nos ayuda saber presupuesto orientativo, zonas de interés y expectativas de rentabilidad.
-
-💶 ¿Cómo trabajamos?
-Honorario fijo y transparente, sin comisiones de agencia. Estamos de tu parte, no del vendedor.
-
-✨ ¿Seguimos hablando?
-Si te encaja, cuéntanos:
-1) Presupuesto aproximado
-2) Tipo de inmueble
-3) Modelo (habitaciones / tradicional / mixto)
+Presupuesto orientativo, zonas y expectativas de rentabilidad.
 
 Gracias,
-Equipo Unihouser`;
+Equipo Unihouser` },
+  emailTemplates:{contract:{subject:'Propuesta de Contrato — Unihouser', body:'Hola, te adjuntamos la plantilla de contrato para revisión.\n\nGracias,\nEquipo Unihouser'}}
+};
 
-  const DEFAULT_CFG = {
-    itp_pct: 0.08,
-    notaria: 1200,
-    honorarios: 3630,
-    kpis: {},
-    messages:{ initial: DEFAULT_INITIAL_MESSAGE, initial_subject: 'Inicio — Unihouser' },
-    emailTemplates:{ contract:{ subject:'Propuesta de Contrato — Unihouser', body:`Hola,
+function ensureCfgShape(c){
+  const x=c&&typeof c==='object'?c:{};
+  x.itp_pct=typeof x.itp_pct==='number'?x.itp_pct:DEFAULT_CFG.itp_pct;
+  x.notaria=typeof x.notaria==='number'?x.notaria:DEFAULT_CFG.notaria;
+  x.honorarios=typeof x.honorarios==='number'?x.honorarios:DEFAULT_CFG.honorarios;
+  x.messages=Object.assign({},DEFAULT_CFG.messages,x.messages||{});
+  x.emailTemplates=Object.assign({},DEFAULT_CFG.emailTemplates,x.emailTemplates||{});
+  return x;
+}
 
-Te adjuntamos la plantilla de contrato para revisión. Si te encaja, dínoslo y avanzamos con la firma.
+/* ======= EVALS helpers ======= */
+function evId(e){return e.id||e.ev_id||e.key||e.uuid||null}
+function evEnsureId(e){if(!evId(e)) e.id='ev_'+Math.random().toString(36).slice(2,8); return evId(e)}
+function evTitle(e){return e.titulo||e.title||e.nombre||e.direccion||e.dirección||e.ref||('Evaluación '+(evId(e)||''))}
+function evYieldNeta(e){
+  const keys=['neta','kpi_neta','rent_neta','rentabilidad_neta','rn']; for(const k of keys){ if(typeof e[k]==='number') return normPct(e[k]) }
+  if(e.kpis&&typeof e.kpis.neta==='number') return normPct(e.kpis.neta);
+  return null;
+}
+function evYieldBruta(e){
+  const keys=['bruta','kpi_bruta','rent_bruta','rentabilidad_bruta','rb']; for(const k of keys){ if(typeof e[k]==='number') return normPct(e[k]) }
+  if(e.kpis&&typeof e.kpis.bruta==='number') return normPct(e.kpis.bruta);
+  return null;
+}
 
-Gracias,
-Equipo Unihouser` } }
+/* ======= STATE ======= */
+let CFG=ensureCfgShape(LS.getCfg()); LS.setCfg(CFG);
+let PROS=LS.getPros();
+let EVALS=LS.getEvals();
+(function ensureEvalIds(){let changed=false;for(const e of EVALS){if(!evId(e)){evEnsureId(e);changed=true}} if(changed) LS.setEvals(EVALS)})();
+
+/* ======= RENDER ======= */
+function renderAll(){ renderKPIs(); renderColumns(); }
+
+function renderKPIs(){
+  const wrap=document.getElementById('kpis'); wrap.innerHTML='';
+  const counts={}; for(const ph of PHASES) counts[ph]=0;
+  for(const p of PROS){ if(PHASES.includes(p.phase)) counts[p.phase]++; }
+  const per=(ok,ko)=>{const tot=ok+ko; return tot?fmtPct.format(ok/tot):fmtPct.format(0);}
+  // Para % OK/KO por fase, usamos history registrado
+  const hist={}; for(const ph of PHASES) hist[ph]={ok:0,ko:0};
+  for(const p of PROS){
+    const h=p.history||{};
+    for(const k in h){ if(hist[k]){ if(h[k]==='OK') hist[k].ok++; else if(h[k]==='KO') hist[k].ko++; } }
+  }
+  const add=(title,phase)=>{
+    const card=document.createElement('div'); card.className='kpi';
+    const h=hist[phase]||{ok:0,ko:0};
+    card.innerHTML=`<h3>${title}</h3>
+      <div class="row"><b>${per(h.ok,h.ko)}</b><span class="pill">${counts[phase]} clientes</span></div>`;
+    const pct=h.ok+(h.ko)||0? h.ok/(h.ok+h.ko):0;
+    if(pct>=.7) card.classList.add('ok'); else if(pct>=.4) card.classList.add('warn'); else card.classList.add('bad');
+    wrap.appendChild(card);
   };
+  add('Contacto','CONTACTO'); add('Reunión','REUNION'); add('Contrato','CONTRATO'); add('Búsqueda','BUSQUEDA'); add('Compraventa','COMPRAVENTA');
+}
 
-  const num = (s)=>{ if(typeof s==='number') return s; const t=(s||'').toString().replace(/\./g,'').replace(',','.'); const v=parseFloat(t); return isNaN(v)?0:v; };
-  const fmtMoney = (v)=>{ if(v==null||isNaN(v)) return ''; return Math.round(v).toString(); };
-  function eur(n){ return new Intl.NumberFormat(ES,{style:'currency',currency:'EUR'}).format(n||0); }
-  function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,8); }
-  function daysSince(ts){ if(!ts) return 0; const d = Math.floor((Date.now()-ts)/(1000*60*60*24)); return d<0?0:d; }
-  function nextPhase(ph){ const i = PHASES.indexOf(ph); return i>=0 && i<PHASES.length-2 ? PHASES[i+1] : (ph==='COMPRAVENTA'?'COMPRAVENTA':'PAPELERA'); }
-  function toast(msg,type='ok'){
-    const t = document.createElement('div');
-    t.className = 'toast' + (type==='warn'?' warn': type==='bad'?' bad':'');
-    t.textContent = msg;
-    document.getElementById('toaster').appendChild(t);
-    setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),240); }, 2500);
-  }
-  function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
-  function bytes(n){ if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1).replace('.',',')+' KB'; return (n/1048576).toFixed(1).replace('.',',')+' MB'; }
-  function isoLocal(v){ const d=new Date(v); const p=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes()); }
-  function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#039;' }[m])); }
-
-  function logoFallback(e){
-    e.target.onerror=null;
-    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='36' viewBox='0 0 120 36'>
-      <rect rx='6' ry='6' width='120' height='36' fill='%23B53928'/>
-      <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='16' fill='white'>Unihouser</text>
-    </svg>`;
-    e.target.src = 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
-  }
-
-  /* ======= LOCALSTORAGE ======= */
-  const LS = {
-    getRawCfg(){ const raw = localStorage.getItem('cfg'); if(!raw) return null; try{ return JSON.parse(raw); }catch(_){ return null; } },
-    setCfg(cfg){ localStorage.setItem('cfg', JSON.stringify(cfg)); },
-    getPros(){ const raw = localStorage.getItem('pros'); if(!raw) return []; try{ return JSON.parse(raw); }catch(_){ return []; } },
-    setPros(list){ localStorage.setItem('pros', JSON.stringify(list)); },
-    getEvals(){ const raw = localStorage.getItem('evals'); if(!raw) return []; try{ return JSON.parse(raw); }catch(_){ return []; } },
-    setEvals(list){ localStorage.setItem('evals', JSON.stringify(list)); },
-  };
-
-  function ensureCfgShape(cfgIn){
-    const cfg = cfgIn && typeof cfgIn==='object' ? cfgIn : {};
-    cfg.itp_pct = typeof cfg.itp_pct==='number' ? cfg.itp_pct : DEFAULT_CFG.itp_pct;
-    cfg.notaria = typeof cfg.notaria==='number' ? cfg.notaria : DEFAULT_CFG.notaria;
-    cfg.honorarios = typeof cfg.honorarios==='number' ? cfg.honorarios : DEFAULT_CFG.honorarios;
-    cfg.kpis = cfg.kpis && typeof cfg.kpis==='object' ? cfg.kpis : {};
-    cfg.messages = Object.assign({}, DEFAULT_CFG.messages, cfg.messages||{});
-    cfg.emailTemplates = cfg.emailTemplates && typeof cfg.emailTemplates==='object' ? cfg.emailTemplates : {};
-    cfg.emailTemplates.contract = Object.assign({}, DEFAULT_CFG.emailTemplates.contract, (cfg.emailTemplates&&cfg.emailTemplates.contract)||{});
-    return cfg;
-  }
-
-  function getInitialMessage(){
-    return (CFG.messages && typeof CFG.messages.initial==='string' && CFG.messages.initial.trim())
-      ? CFG.messages.initial
-      : DEFAULT_INITIAL_MESSAGE;
-  }
-  function getInitialSubject(){
-    return (CFG.messages && CFG.messages.initial_subject) ? CFG.messages.initial_subject : 'Unihouser';
-  }
-
-  /* ======= EVALS helpers (tolerantes) ======= */
-  function evId(ev){ return ev.id || ev.ev_id || ev.key || ev.uuid; }
-  function evEnsureId(ev){ if(!evId(ev)){ ev.id = 'ev_'+Math.random().toString(36).slice(2,8); } return evId(ev); }
-  function evTitle(ev){
-    return ev.titulo || ev.title || ev.nombre || ev.direccion || ev.dirección || ev.ref || ('Evaluación '+(evId(ev)||''));
-  }
-  function evPrice(ev){
-    const keys = ['precio','precio_compra','p_compra','price','pmax','precioMax'];
-    for(const k of keys){ if(typeof ev[k]==='number') return ev[k]; }
-    if(ev.costes && typeof ev.costes.compra==='number') return ev.costes.compra;
-    return null;
-  }
-  function evYieldBruta(ev){
-    const keys = ['bruta','kpi_bruta','rent_bruta','rentabilidad_bruta','rb'];
-    for(const k of keys){ if(typeof ev[k]==='number') return ev[k]; }
-    if(ev.kpis && typeof ev.kpis.bruta==='number') return ev.kpis.bruta;
-    return null;
-  }
-  function evYieldNeta(ev){
-    const keys = ['neta','kpi_neta','rent_neta','rentabilidad_neta','rn'];
-    for(const k of keys){ if(typeof ev[k]==='number') return ev[k]; }
-    if(ev.kpis && typeof ev.kpis.neta==='number') return ev.kpis.neta;
-    return null;
-  }
-
-  /* ======= Estado ======= */
-  let CFG = ensureCfgShape(LS.getRawCfg());
-  LS.setCfg(CFG);
-  let PROS = LS.getPros();
-  let EVALS = LS.getEvals();
-
-  (function ensureEvalIds(){
-    let changed = false;
-    for(const ev of EVALS){ if(!evId(ev)){ evEnsureId(ev); changed = true; } }
-    if(changed){ LS.setEvals(EVALS); }
-  })();
-
-  function renderAll(){ renderKPIs(); renderColumns(); }
-
-  function renderKPIs(){
-    const wrap = document.getElementById('kpis'); wrap.innerHTML = '';
-    const counts = {}; let exitos = 0;
-    for(const ph of PHASES) counts[ph] = {ok:0,ko:0};
-    for(const p of PROS){
-      if(p.success) exitos++;
-      if(p.phase==='PAPELERA') continue;
-      const h = p.history||{};
-      for(const ph of Object.keys(h)){
-        if(!counts[ph]) counts[ph] = {ok:0,ko:0};
-        const v = h[ph];
-        if(v==='OK') counts[ph].ok++; else if(v==='KO') counts[ph].ko++;
-      }
-    }
-    const makeCard = (title, ok, ko) =>{
-      const tot = ok+ko, okPct = tot? (ok/tot):0;
-      const div = document.createElement('div'); div.className='kpi';
-      div.innerHTML = `<h3>${title}</h3>
-        <div class="val"><b>${fmtPct.format(okPct)}</b><span class="pill">${ok} OK / ${ko} KO</span></div>`;
-      if(okPct>=.7) div.classList.add('ok'); else if(okPct>=.4) div.classList.add('warn'); else div.classList.add('bad');
-      return div;
-    };
-    wrap.appendChild(makeCard('Contacto', counts.CONTACTO.ok, counts.CONTACTO.ko));
-    wrap.appendChild(makeCard('Reunión', counts.REUNION.ok, counts.REUNION.ko));
-    wrap.appendChild(makeCard('Contrato', counts.CONTRATO.ok, counts.CONTRATO.ko));
-    wrap.appendChild(makeCard('Búsqueda', counts.BUSQUEDA.ok, counts.BUSQUEDA.ko));
-    wrap.appendChild(makeCard('Compraventa', counts.COMPRAVENTA.ok, counts.COMPRAVENTA.ko));
-    const ex = document.createElement('div'); ex.className='kpi ok';
-    ex.innerHTML = `<h3>Éxitos</h3><div class="val"><b>${exitos}</b><span class="pill">Cierres notaría</span></div>`;
-    wrap.appendChild(ex);
-  }
-
-  function renderColumns(){
-    for(const ph of PHASES){
-      const col = document.getElementById('col-'+ph);
-      if(!col) continue;
-      const keep = ph==='CONTACTO' ? [document.getElementById('newContactBox')] : [];
-      col.innerHTML = '';
-      for(const k of keep){ if(k) col.appendChild(k); }
-    }
-    const copy = PROS.slice();
-    const prosByPhase = {}; for(const ph of PHASES){ prosByPhase[ph]=[]; }
-    for(const p of copy){ prosByPhase[p.phase||'CONTACTO'].push(p); }
-    prosByPhase['REUNION'].sort((a,b)=>{
-      const ad = a.meeting?.date ? new Date(a.meeting.date).getTime(): Number.MAX_SAFE_INTEGER;
-      const bd = b.meeting?.date ? new Date(b.meeting.date).getTime(): Number.MAX_SAFE_INTEGER;
-      return ad - bd;
+function renderColumns(){
+  for(const ph of PHASES){
+    const col=document.getElementById('col-'+ph); if(!col) continue;
+    const keep= ph==='CONTACTO' ? [document.getElementById('newContactBox')] : [];
+    col.innerHTML=''; for(const k of keep){ if(k) col.appendChild(k) }
+    // dragover highlight
+    const s = document.querySelector(`section[data-phase="${ph}"]`);
+    s.addEventListener('dragover', e=>{e.preventDefault(); s.classList.add('drag-over')});
+    s.addEventListener('dragleave', ()=>s.classList.remove('drag-over'));
+    s.addEventListener('drop', e=>{
+      e.preventDefault(); s.classList.remove('drag-over');
+      const id=e.dataTransfer.getData('text/plain'); const p=PROS.find(x=>x.id===id); if(!p) return;
+      const from=PHASES.indexOf(p.phase), to=PHASES.indexOf(ph);
+      if(Math.abs(from-to)!==1){ toast('Solo puedes mover a la fase anterior/siguiente. ⚠️','warn'); return; }
+      // avanzar / retroceder con traza OK solo al avanzar
+      if(to>from){ p.history=p.history||{}; p.history[p.phase]='OK'; }
+      p.phase=ph; p.phase_entered_at=Date.now();
+      LS.setPros(PROS); renderAll(); toast(`Movido a ${ph} ➜`, 'ok');
     });
-    for(const ph of PHASES){
-      const list = prosByPhase[ph];
-      for(const p of list){
-        if(p.success) continue;
-        const card = makeCard(p);
-        document.getElementById('col-'+ph).appendChild(card);
-      }
-    }
   }
-
-  function makeCard(p){
-    const el = document.createElement('div');
-    el.className='card'; el.dataset.id = p.id;
-    const d = daysSince(p.phase_entered_at);
-    const msgVal = (typeof p.message==='string' && p.message.trim()) ? p.message : getInitialMessage();
-    el.innerHTML = `
-      <div class="top">
-        <div class="name">${escapeHtml(p.name||'Sin nombre')}</div>
-        <div class="days">${d} ${d===1?'día':'días'}</div>
-      </div>
-      <div class="msg">
-        <textarea data-role="msg">${escapeHtml(msgVal)}</textarea>
-        <div class="actions">
-          <button class="iconbtn" data-act="copy"><span class="icon">
-            <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
-          </span>Copiar</button>
-          <a class="iconbtn" data-act="email" href="${mailtoHref(p, msgVal)}"><span class="icon">
-            <svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 18V8l8 6 8-6v10H4z"/></svg>
-          </span>Email</a>
-          <button class="iconbtn" data-act="details"><span class="icon eye">
-            <svg viewBox="0 0 24 24"><path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/></svg>
-          </span>Detalles</button>
-          ${p.phase!=='PAPELERA' ? `<button class="primary" data-act="advance">Avanzar</button>
-          <button class="bad" data-act="discard">Descartar</button>` :
-          `<button class="accent" data-act="restore">Restaurar</button>
-           <button class="bad" data-act="delete">Eliminar</button>`}
-        </div>
-      </div>
-    `;
-    el.querySelector('[data-role="msg"]').addEventListener('input', (e)=>{
-      p.message = e.target.value; persistPros();
-    });
-    el.querySelector('[data-act="copy"]').addEventListener('click', ()=>{
-      copyToClipboard((p.message||getInitialMessage())); toast('Mensaje copiado','ok');
-    });
-    el.querySelector('[data-act="email"]').addEventListener('click', (ev)=>{
-      ev.currentTarget.setAttribute('href', mailtoHref(p, (p.message||getInitialMessage())));
-    });
-    const det = el.querySelector('[data-act="details"]'); if(det) det.addEventListener('click', ()=> openDrawerFor(p));
-    const adv = el.querySelector('[data-act="advance"]'); if(adv) adv.addEventListener('click', ()=> advanceProspect(p));
-    const disc = el.querySelector('[data-act="discard"]'); if(disc) disc.addEventListener('click', ()=> discardProspect(p));
-    const rest = el.querySelector('[data-act="restore"]'); if(rest) rest.addEventListener('click', ()=> restoreFromBin(p));
-    const del = el.querySelector('[data-act="delete"]'); if(del) del.addEventListener('click', ()=> deleteForever(p));
-    return el;
-  }
-
-  function mailtoHref(p, bodyText){
-    const subj = encodeURIComponent(getInitialSubject());
-    const body = encodeURIComponent((bodyText||'').trim());
-    const to = encodeURIComponent(p.email||'');
-    return `mailto:${to}?subject=${subj}&body=${body}`;
-  }
-
-  function copyToClipboard(text){
-    const ta = document.createElement('textarea');
-    ta.className='sr-only'; ta.value = text;
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-  }
-  function persistPros(){ LS.setPros(PROS); renderKPIs(); }
-
-  function advanceProspect(p){
-    const from = p.phase;
-    const to = nextPhase(from);
-    if(to===from){ toast('Ya estás en la última fase.','warn'); return; }
-    p.history = p.history||{}; p.history[from] = 'OK';
-    p.phase = to; p.phase_entered_at = Date.now();
-    persistPros(); renderColumns(); toast(`Avanzado a ${to}`,'ok');
-  }
-  function discardProspect(p){
-    const from = p.phase;
-    p.history = p.history||{}; p.history[from] = 'KO';
-    p.phase = 'PAPELERA'; p.phase_entered_at = Date.now();
-    persistPros(); renderColumns(); toast('Movido a Papelera','bad');
-  }
-  function restoreFromBin(p){ p.phase = 'CONTACTO'; p.phase_entered_at = Date.now(); persistPros(); renderColumns(); toast('Restaurado a Contacto','ok'); }
-  function deleteForever(p){ PROS = PROS.filter(x=>x.id!==p.id); persistPros(); renderColumns(); toast('Prospecto eliminado','bad'); }
-
-  /* ======= CREACIÓN CONTACTO ======= */
-  document.getElementById('btnCreate').addEventListener('click', ()=>{
-    const name = (document.getElementById('nc_name').value||'').trim();
-    const email = (document.getElementById('nc_email').value||'').trim();
-    const phone = (document.getElementById('nc_phone').value||'').trim();
-    if(!name){ toast('Pon un nombre para crear el contacto.','warn'); return; }
-    const p = {
-      id: uid('p'),
-      name, email, phone,
-      phase: 'CONTACTO',
-      phase_entered_at: Date.now(),
-      history: {},
-      message: getInitialMessage(),
-      meeting: { date:'', notas:'' },         // ← sin “canal”, una sola “Notas”
-      profile: {},
-      contract: { template:null },
-      busqueda: { propuestas:[], adjuntos:[] },
-      compraventa: { financiacion:0, notaria:'' },
-      success: false
-    };
-    PROS.push(p); persistPros(); renderColumns();
-    document.getElementById('nc_name').value='';
-    document.getElementById('nc_email').value='';
-    document.getElementById('nc_phone').value='';
-    toast('Contacto creado','ok');
+  // ordenar REUNION por proximidad a hoy
+  const now=Date.now();
+  const listReu=PROS.filter(p=>p.phase==='REUNION').sort((a,b)=>{
+    const ad=a.meeting?.date? Math.abs(new Date(a.meeting.date).getTime()-now) : Number.MAX_SAFE_INTEGER;
+    const bd=b.meeting?.date? Math.abs(new Date(b.meeting.date).getTime()-now) : Number.MAX_SAFE_INTEGER;
+    return ad-bd;
   });
+  const byPhase={}; for(const ph of PHASES) byPhase[ph]=[];
+  for(const p of PROS){ byPhase[p.phase||'CONTACTO'].push(p); }
+  byPhase['REUNION']=listReu;
 
-  /* ======= DRAWER ======= */
-  const overlay = document.getElementById('overlay');
-  const drawer = document.getElementById('drawer');
-  const drTitle = document.getElementById('drTitle');
-  const drBody = document.getElementById('drBody');
-  document.getElementById('btnCloseDrawer').addEventListener('click', closeDrawer);
-  overlay.addEventListener('click', closeDrawer);
-  let CURRENT = null;
-
-  function openDrawerFor(p){
-    CURRENT = p;
-    drTitle.textContent = `${p.name||'Sin nombre'} — ${phaseLabel(p.phase)}`;
-    drBody.innerHTML = '';
-    if(p.phase==='REUNION'){ renderMeeting(p); }
-    else if(p.phase==='CONTRATO'){ renderContract(p); }
-    else if(p.phase==='BUSQUEDA'){ renderBusqueda(p); }
-    else if(p.phase==='COMPRAVENTA'){ renderCompraventa(p); }
-    else { renderQuick(p); }
-    overlay.classList.add('open'); drawer.classList.add('open');
-    drawer.setAttribute('aria-hidden','false'); overlay.setAttribute('aria-hidden','false');
-  }
-  function closeDrawer(){
-    drawer.classList.remove('open'); overlay.classList.remove('open');
-    drawer.setAttribute('aria-hidden','true'); overlay.setAttribute('aria-hidden','true');
-    setTimeout(()=>{ drBody.innerHTML=''; CURRENT=null; }, 220);
-  }
-  function phaseLabel(ph){
-    switch(ph){
-      case 'CONTACTO': return 'Contacto';
-      case 'REUNION': return 'Reunión';
-      case 'CONTRATO': return 'Contrato';
-      case 'BUSQUEDA': return 'Búsqueda';
-      case 'COMPRAVENTA': return 'Compraventa';
-      case 'PAPELERA': return 'Papelera';
-      default: return ph;
+  for(const ph of PHASES){
+    const col=document.getElementById('col-'+ph);
+    for(const p of byPhase[ph]){
+      const card=makeCard(p); col.appendChild(card);
     }
+    document.getElementById('count-'+ph).textContent = `${byPhase[ph].length} clientes`;
   }
+}
 
-  function renderQuick(p){
-    drBody.innerHTML = `
-      <div class="frow">
-        <div><label>Nombre</label><input value="${escapeHtml(p.name||'')}" id="q_name"/></div>
-        <div><label>Teléfono</label><input value="${escapeHtml(p.phone||'')}" id="q_phone"/></div>
-      </div>
-      <div><label>Email</label><input value="${escapeHtml(p.email||'')}" id="q_email"/></div>
-      <button class="primary" id="q_save">Guardar</button>
-    `;
-    document.getElementById('q_save').addEventListener('click', ()=>{
-      p.name = document.getElementById('q_name').value;
-      p.phone = document.getElementById('q_phone').value;
-      p.email = document.getElementById('q_email').value;
-      persistPros(); renderColumns(); toast('Guardado','ok');
-      drTitle.textContent = `${p.name||'Sin nombre'} — ${phaseLabel(p.phase)}`;
-    });
-  }
-
-  /* ======= REUNIÓN (sin scroll, orden lógico, tabs) ======= */
-  function renderMeeting(p){
-    const m = p.meeting || (p.meeting={date:'', notas:''});
-    const pr = p.profile || (p.profile={});
-
-    drBody.innerHTML = `
-      <div class="tabs" role="tablist">
-        <button class="active" data-tab="t1" role="tab" aria-selected="true">Datos</button>
-        <button data-tab="t2" role="tab">Inversión</button>
-        <button data-tab="t3" role="tab">Financiación</button>
-        <button data-tab="t4" role="tab">Objetivos</button>
-        <button data-tab="t5" role="tab">Notas</button>
-      </div>
-
-      <div class="tabarea">
-        <div id="t1" class="tab active" role="tabpanel" aria-labelledby="Datos">
-          <div class="frow three">
-            <div class="fcol"><label>Fecha y hora</label><input type="datetime-local" id="m_date" value="${m.date? isoLocal(m.date):''}"></div>
-            <div class="fcol"><label>DNI</label><input id="pf_dni" value="${escapeHtml(pr.dni||'')}" placeholder="00000000X"></div>
-            <div class="fcol"><label>Localidad (residencia)</label><input id="pf_locres" value="${escapeHtml(pr.locres||'')}"></div>
-          </div>
-          <div class="frow three">
-            <div class="fcol"><label>Teléfono</label><input id="pf_tel" value="${escapeHtml(p.phone||pr.tel||'')}"></div>
-            <div class="fcol"><label>Email</label><input id="pf_email" value="${escapeHtml(p.email||pr.email||'')}"></div>
-            <div class="fcol"><label>Dirección</label><input id="pf_dir" value="${escapeHtml(pr.dir||'')}" placeholder="C/ … nº …"></div>
-          </div>
-        </div>
-
-        <div id="t2" class="tab" role="tabpanel" aria-labelledby="Inversión">
-          <div class="frow three">
-            <div class="fcol"><label>Localidades objetivo</label><input id="pf_locs" value="${escapeHtml(pr.locs||'')}" placeholder="Oviedo, Gijón, Avilés"></div>
-            <div class="fcol"><label>Tipo de alquiler</label>
-              <select id="pf_tipo">
-                <option ${pr.tipo==='Tradicional'?'selected':''}>Tradicional</option>
-                <option ${pr.tipo==='Habitaciones'?'selected':''}>Habitaciones</option>
-              </select>
-            </div>
-            <div class="fcol"><label>Nº activos</label><input id="pf_nact" value="${escapeHtml(pr.nact||'')}" inputmode="numeric" placeholder="1"></div>
-          </div>
-          <div class="frow three">
-            <div class="fcol"><label>¿Ascensor?</label><select id="pf_asc"><option ${pr.asc!=='No'?'selected':''}>Sí</option><option ${pr.asc==='No'?'selected':''}>No</option></select></div>
-            <div class="fcol"><label>Altura máx.</label><input id="pf_alt" value="${escapeHtml(pr.alt||'')}" inputmode="numeric" placeholder="3"></div>
-            <div class="fcol"><label>¿Bajos?</label><select id="pf_bajos"><option ${pr.bajos!=='Sí'?'selected':''}>No</option><option ${pr.bajos==='Sí'?'selected':''}>Sí</option></select></div>
-          </div>
-          <div class="frow three">
-            <div class="fcol"><label>Acepta reforma</label>
-              <select id="pf_ref"><option ${pr.ref==='No'?'selected':''}>No</option><option ${pr.ref==='Lavado de cara'?'selected':''}>Lavado de cara</option><option ${pr.ref==='Integral'?'selected':''}>Integral</option></select>
-            </div>
-            <div class="fcol"><label>Presupuesto TOTAL (€)</label><input id="pf_budget" value="${pr.budget!=null?fmtMoney(pr.budget):''}" placeholder="150000"></div>
-            <div class="fcol"><label>Precio máx. COMPRA</label><input id="pf_pmax" value="${pr.pmax!=null?fmtMoney(pr.pmax):''}" disabled><small class="small muted">Usa ITP/Notaría/Honorarios de Config.</small></div>
-          </div>
-        </div>
-
-        <div id="t3" class="tab" role="tabpanel" aria-labelledby="Financiación">
-          <div class="frow three">
-            <div class="fcol"><label>Financiación bancaria</label><select id="pf_fin"><option ${pr.fin!=='No'?'selected':''}>Sí</option><option ${pr.fin==='No'?'selected':''}>No</option></select></div>
-            <div class="fcol"><label>¿Necesita broker?</label><select id="pf_broker"><option ${pr.broker!=='Sí'?'selected':''}>No</option><option ${pr.broker==='Sí'?'selected':''}>Sí</option></select></div>
-            <div class="fcol"><label>% financiación</label><input id="pf_pct" value="${pr.pct!=null?String(pr.pct).replace('.',','):''}" placeholder="80,0"></div>
-          </div>
-          <div class="frow three">
-            <div class="fcol"><label>Hipoteca estimada</label><input id="pf_hip" value="${pr.hip!=null?fmtMoney(pr.hip):''}" disabled></div>
-            <div class="fcol"><label>Fondos propios</label><input id="pf_prop" value="${pr.prop!=null?fmtMoney(pr.prop):''}" disabled></div>
-            <div class="fcol"><small class="small muted">El % se aplica al P. máx. compra.</small></div>
-          </div>
-        </div>
-
-        <div id="t4" class="tab" role="tabpanel" aria-labelledby="Objetivos">
-          <div class="frow three">
-            <div class="fcol"><label>Objetivo principal</label>
-              <select id="pf_objt">
-                <option value="bruta" ${pr.objt==='bruta'?'selected':''}>Rentabilidad bruta (%)</option>
-                <option value="neta" ${pr.objt==='neta'?'selected':''}>Rentabilidad neta (%)</option>
-                <option value="flujo" ${pr.objt==='flujo'?'selected':''}>Flujo de caja (€/mes)</option>
-              </select>
-            </div>
-            <div class="fcol"><label>Valor objetivo</label><input id="pf_objv" value="${pr.objv!=null?String(pr.objv).replace('.',','):''}" placeholder="7,5 o 300"></div>
-            <div class="fcol"><label>Periodo</label>
-              <div class="frow"><input id="pf_ini" value="${escapeHtml(pr.ini||'')}" placeholder="MM/AAAA"><input id="pf_finmes" value="${escapeHtml(pr.finmes||'')}" placeholder="MM/AAAA"></div>
-            </div>
-          </div>
-          <div class="frow" id="row_alq">
-            <div class="fcol">
-              <label>Alquiler máx. orientativo (€/mes)</label>
-              <input id="pf_alq" value="${pr.alq!=null?fmtMoney(pr.alq):''}" disabled>
-              <small class="small muted">Rb% × (Presupuesto TOTAL / 12).</small>
-            </div>
-          </div>
-        </div>
-
-        <div id="t5" class="tab" role="tabpanel" aria-labelledby="Notas">
-          <div><label>Notas (final)</label><textarea id="m_notas" rows="6">${escapeHtml(m.notas||'')}</textarea></div>
+function makeCard(p){
+  const el=document.createElement('div'); el.className='card'; el.dataset.id=p.id; el.draggable=true;
+  el.addEventListener('dragstart', e=>{e.dataTransfer.setData('text/plain', p.id)});
+  const d=daysSince(p.phase_entered_at);
+  const pr=p.profile||{};
+  const tipo = pr.tipo || 'Tradicional';
+  const objt = pr.objt ? (pr.objt==='bruta'?'Rb%':pr.objt==='neta'?'Rn%':'Flujo') : 'Obj';
+  el.innerHTML=`
+    <div class="top">
+      <div>
+        <div class="name">👤 ${escapeHtml(p.name||'Sin nombre')}</div>
+        <div class="badges">
+          <span class="badge">🏷️ ${escapeHtml(tipo)}</span>
+          <span class="badge">🎯 ${escapeHtml(objt)}</span>
         </div>
       </div>
+      <div class="days">⏱️ ${d} ${d===1?'día':'días'}</div>
+    </div>
+    <div class="actions">
+      <button class="iconbtn small" data-act="details"><span class="emoji">👁️</span></button>
+      <div class="iconbtn small" data-act="contact"><span class="emoji">📞</span></div>
+      <button class="iconbtn small" data-act="back"><span class="emoji">⬅️</span></button>
+      <button class="iconbtn small primary" data-act="advance"><span class="emoji">➡️</span></button>
+      <button class="iconbtn small bad" data-act="discard"><span class="emoji">🗑️</span></button>
+    </div>
+  `;
+  el.querySelector('[data-act="details"]').addEventListener('click', ()=>openModalFor(p));
+  el.querySelector('[data-act="advance"]').addEventListener('click', ()=>advanceProspect(p));
+  el.querySelector('[data-act="back"]').addEventListener('click', ()=>backProspect(p));
+  el.querySelector('[data-act="discard"]').addEventListener('click', ()=>discardProspect(p));
+  // contacto pop
+  el.querySelector('[data-act="contact"]').addEventListener('click', (ev)=>openContactMenu(ev.currentTarget, p));
+  return el;
+}
 
-      <div class="pin-actions">
-        <button class="primary" id="pf_saveall">Guardar ficha</button>
-        <button class="iconbtn" id="m_save">Guardar fecha y notas</button>
+/* ======= ACTIONS ======= */
+function advanceProspect(p){
+  const i=PHASES.indexOf(p.phase); if(i===PHASES.length-1){ toast('Ya estás en la última fase.','warn'); return; }
+  const to=PHASES[i+1]; p.history=p.history||{}; p.history[p.phase]='OK'; p.phase=to; p.phase_entered_at=Date.now();
+  LS.setPros(PROS); renderAll(); toast(`➡️ Avanzado a ${to}`,'ok');
+}
+function backProspect(p){
+  const i=PHASES.indexOf(p.phase); if(i<=0){ toast('No puedes retroceder más.','warn'); return; }
+  const to=PHASES[i-1]; p.phase=to; p.phase_entered_at=Date.now();
+  LS.setPros(PROS); renderAll(); toast(`⬅️ Devuelto a ${to}`,'warn');
+}
+function discardProspect(p){
+  if(p.phase==='CONTACTO'){
+    PROS = PROS.filter(x=>x.id!==p.id);
+    LS.setPros(PROS); renderAll(); toast('Prospecto descartado y eliminado. 🗑️','bad');
+  }else{
+    PROS = PROS.filter(x=>x.id!==p.id); // fuera de flujo también lo quitamos (sin Papelera)
+    LS.setPros(PROS); renderAll(); toast('Prospecto eliminado.','bad');
+  }
+}
+
+/* ======= CONTACT MENU ======= */
+function mailtoHref(p, subject, body){
+  const s=encodeURIComponent(subject||CFG.messages.initial_subject||'Unihouser');
+  const b=encodeURIComponent((body||'').trim());
+  const to=encodeURIComponent(p.email||'');
+  return `mailto:${to}?subject=${s}&body=${b}`;
+}
+function whatsappHref(p, body){
+  const txt = encodeURIComponent((body||'').trim());
+  const phone = (p.phone||'').replace(/\D/g,'');
+  return `https://wa.me/${phone}?text=${txt}`;
+}
+function openContactMenu(anchor, p){
+  // mini popover simple
+  const menu=document.createElement('div');
+  menu.style.position='absolute'; const r=anchor.getBoundingClientRect();
+  menu.style.left=(window.scrollX+r.left)+'px'; menu.style.top=(window.scrollY+r.bottom+6)+'px';
+  menu.style.background='#fff'; menu.style.border='1px solid #eadfd9'; menu.style.borderRadius='10px';
+  menu.style.padding='6px'; menu.style.boxShadow='var(--shadow)'; menu.style.zIndex=500;
+  menu.innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:6px;min-width:220px">
+      <button class="iconbtn" data-a="copy">📋 Copiar mensaje inicial</button>
+      <a class="iconbtn" target="_blank" data-a="email">✉️ Email</a>
+      <a class="iconbtn" target="_blank" data-a="wa">🟢 WhatsApp</a>
+    </div>`;
+  document.body.appendChild(menu);
+  const msg=(p.message)||(CFG.messages.initial);
+  menu.querySelector('[data-a="copy"]').addEventListener('click',()=>{const ta=document.createElement('textarea');ta.value=msg;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Mensaje copiado','ok'); menu.remove();});
+  menu.querySelector('[data-a="email"]').setAttribute('href', mailtoHref(p, CFG.messages.initial_subject, msg));
+  menu.querySelector('[data-a="wa"]').setAttribute('href', whatsappHref(p, msg));
+  const closer=ev=>{ if(!menu.contains(ev.target) && ev.target!==anchor){ menu.remove(); document.removeEventListener('mousedown', closer);} };
+  setTimeout(()=>document.addEventListener('mousedown', closer),0);
+}
+
+/* ======= MODAL (central, una hoja, un botón Guardar) ======= */
+const overlay=document.getElementById('overlay');
+const modal=document.getElementById('modal');
+const modalBody=document.getElementById('modalBody');
+const modalTitle=document.getElementById('modalTitle');
+document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+document.getElementById('modalSave').addEventListener('click', saveModal);
+
+let CURRENT=null;
+function openModalFor(p){
+  CURRENT=p;
+  modalTitle.textContent = `👤 ${p.name||'Sin nombre'} — Detalle`;
+  const pr=p.profile||(p.profile={});
+  const m=p.meeting||(p.meeting={date:'',notas:''});
+  modalBody.innerHTML=`
+    <div class="group">
+      <h4>Datos personales</h4>
+      <div class="grid three">
+        <div><label>Nombre</label><input id="f_name" value="${escapeHtml(p.name||'')}"></div>
+        <div><label>Teléfono</label><input id="f_tel" value="${escapeHtml(p.phone||'')}"></div>
+        <div><label>Email</label><input id="f_email" value="${escapeHtml(p.email||'')}"></div>
       </div>
-    `;
+      <div class="grid three">
+        <div><label>DNI</label><input id="f_dni" value="${escapeHtml(pr.dni||'')}"></div>
+        <div><label>Localidad</label><input id="f_locres" value="${escapeHtml(pr.locres||'')}"></div>
+        <div><label>Dirección</label><input id="f_dir" value="${escapeHtml(pr.dir||'')}"></div>
+      </div>
+    </div>
 
-    // Tabs
-    drBody.querySelectorAll('.tabs button').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        drBody.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
-        drBody.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-        btn.classList.add('active');
-        const id = btn.getAttribute('data-tab');
-        const tab = document.getElementById(id);
-        if(tab) tab.classList.add('active');
-      });
-    });
+    <div class="group">
+      <h4>Inversión</h4>
+      <div class="grid three">
+        <div><label>Localidades objetivo</label><input id="f_locs" value="${escapeHtml(pr.locs||'')}" placeholder="Oviedo, Gijón, Avilés"></div>
+        <div><label>Tipo de alquiler</label>
+          <select id="f_tipo">
+            <option ${pr.tipo==='Tradicional'?'selected':''}>Tradicional</option>
+            <option ${pr.tipo==='Habitaciones'?'selected':''}>Habitaciones</option>
+          </select>
+        </div>
+        <div><label>Nº activos</label><input id="f_nact" value="${escapeHtml(pr.nact||'')}" inputmode="numeric"></div>
+      </div>
+      <div class="grid three">
+        <div><label>¿Ascensor?</label><select id="f_asc"><option ${pr.asc!=='No'?'selected':''}>Sí</option><option ${pr.asc==='No'?'selected':''}>No</option></select></div>
+        <div><label>Altura máx.</label><input id="f_alt" value="${escapeHtml(pr.alt||'')}" inputmode="numeric"></div>
+        <div><label>¿Bajos?</label><select id="f_bajos"><option ${pr.bajos!=='Sí'?'selected':''}>No</option><option ${pr.bajos==='Sí'?'selected':''}>Sí</option></select></div>
+      </div>
+      <div class="grid three">
+        <div><label>Acepta reforma</label>
+          <select id="f_ref"><option ${pr.ref==='No'?'selected':''}>No</option><option ${pr.ref==='Lavado de cara'?'selected':''}>Lavado de cara</option><option ${pr.ref==='Integral'?'selected':''}>Integral</option></select>
+        </div>
+        <div><label>Presupuesto TOTAL (€)</label><input id="f_budget" value="${pr.budget!=null?Math.round(pr.budget):''}" inputmode="numeric"></div>
+        <div><label>Precio máx. COMPRA</label><input id="f_pmax" value="${pr.pmax!=null?Math.round(pr.pmax):''}" disabled></div>
+      </div>
+    </div>
 
-    // Referencias ficha
-    const get = (id)=>document.getElementById(id);
-    const inputs = {
-      dni:get('pf_dni'), tel:get('pf_tel'), locres:get('pf_locres'),
-      email:get('pf_email'), dir:get('pf_dir'),
-      locs:get('pf_locs'), tipo:get('pf_tipo'), nact:get('pf_nact'),
-      asc:get('pf_asc'), alt:get('pf_alt'), bajos:get('pf_bajos'), ref:get('pf_ref'),
-      budget:get('pf_budget'), pmax:get('pf_pmax'),
-      fin:get('pf_fin'), broker:get('pf_broker'), pct:get('pf_pct'),
-      hip:get('pf_hip'), prop:get('pf_prop'),
-      objt:get('pf_objt'), objv:get('pf_objv'),
-      ini:get('pf_ini'), finmes:get('pf_finmes'),
-      alq:get('pf_alq')
-    };
+    <div class="group">
+      <h4>Financiación</h4>
+      <div class="grid three">
+        <div><label>Financiación bancaria</label><select id="f_fin"><option ${pr.fin!=='No'?'selected':''}>Sí</option><option ${pr.fin==='No'?'selected':''}>No</option></select></div>
+        <div><label>¿Broker?</label><select id="f_broker"><option ${pr.broker!=='Sí'?'selected':''}>No</option><option ${pr.broker==='Sí'?'selected':''}>Sí</option></select></div>
+        <div><label>% financiación</label><input id="f_pct" value="${pr.pct!=null?String(pr.pct).replace('.',','):''}" placeholder="80,0"></div>
+      </div>
+      <div class="grid three">
+        <div><label>Hipoteca estimada</label><input id="f_hip" value="${pr.hip!=null?Math.round(pr.hip):''}" disabled></div>
+        <div><label>Fondos propios</label><input id="f_prop" value="${pr.prop!=null?Math.round(pr.prop):''}" disabled></div>
+        <div></div>
+      </div>
+    </div>
 
-    function readProfile(){
-      return {
-        dni: inputs.dni.value.trim(), tel: inputs.tel.value.trim(), locres: inputs.locres.value.trim(),
-        email: inputs.email.value.trim(), dir: inputs.dir.value.trim(),
-        locs: inputs.locs.value.trim(), tipo: inputs.tipo.value, nact: inputs.nact.value.trim(),
-        asc: inputs.asc.value, alt: inputs.alt.value.trim(), bajos: inputs.bajos.value, ref: inputs.ref.value,
-        budget: num(inputs.budget.value), pmax: num(inputs.pmax.value),
-        fin: inputs.fin.value, broker: inputs.broker.value, pct: num(inputs.pct.value),
-        hip: num(inputs.hip.value), prop: num(inputs.prop.value),
-        objt: inputs.objt.value, objv: num(inputs.objv.value),
-        ini: inputs.ini.value.trim(), finmes: inputs.finmes.value.trim(),
-        alq: num(inputs.alq.value)
-      };
+    <div class="group">
+      <h4>Objetivos</h4>
+      <div class="grid three">
+        <div><label>Objetivo principal</label>
+          <select id="f_objt">
+            <option value="bruta" ${pr.objt==='bruta'?'selected':''}>Rentabilidad bruta (%)</option>
+            <option value="neta" ${pr.objt==='neta'?'selected':''}>Rentabilidad neta (%)</option>
+            <option value="flujo" ${pr.objt==='flujo'?'selected':''}>Flujo de caja (€/mes)</option>
+          </select>
+        </div>
+        <div><label>Valor objetivo</label><input id="f_objv" value="${pr.objv!=null?String(pr.objv).replace('.',','):''}" placeholder="7,5 o 300"></div>
+        <div class="grid two">
+          <input id="f_ini" placeholder="Inicio MM/AAAA" value="${escapeHtml(pr.ini||'')}">
+          <input id="f_finmes" placeholder="Fin MM/AAAA" value="${escapeHtml(pr.finmes||'')}">
+        </div>
+      </div>
+      <div class="grid two" id="row_alq" style="display:${(pr.objt||'bruta')==='bruta'?'grid':'none'}">
+        <div><label>Alquiler máx. orientativo (€/mes)</label><input id="f_alq" value="${pr.alq!=null?Math.round(pr.alq):''}" disabled></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <h4>Reunión</h4>
+      <div class="grid two">
+        <div><label>Fecha y hora</label><input type="datetime-local" id="f_meet" value="${m.date? toLocalDT(m.date):''}"></div>
+        <div><label>Notas</label><input id="f_notas" value="${escapeHtml(m.notas||'')}" placeholder="Ej. confirmada por WhatsApp ✅"></div>
+      </div>
+      <p class="small">Si guardas una fecha desde Contacto, el cliente avanza automáticamente a <b>Reunión</b> y se ordena por proximidad. 📆</p>
+    </div>
+  `;
+  // listeners de cálculo
+  ['f_budget','f_pct','f_fin','f_objt','f_objv'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', recalcDerived);
+    document.getElementById(id).addEventListener('change', recalcDerived);
+  });
+  document.getElementById('f_ini').addEventListener('blur', autoPeriod);
+  recalcDerived();
+  openModal();
+}
+function toLocalDT(v){ const d=new Date(v); const pad=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()); }
+
+function num(s){ if(typeof s==='number') return s; const t=(s||'').toString().replace(/\./g,'').replace(',','.'); const v=parseFloat(t); return isNaN(v)?0:v; }
+function recalcDerived(){
+  const budget=num(document.getElementById('f_budget').value);
+  const itp=CFG.itp_pct||0, not=CFG.notaria||0, hon=CFG.honorarios||0;
+  const base=budget-(not+hon); const pmax=base>0? base/(1+itp):0;
+  document.getElementById('f_pmax').value = pmax?Math.round(pmax):'';
+  const fin=document.getElementById('f_fin').value; const pct=num(document.getElementById('f_pct').value)/100;
+  const hip = fin==='Sí'? pmax*pct : 0;
+  const costeTotal = pmax*(1+itp)+not+hon;
+  const prop = costeTotal - hip;
+  document.getElementById('f_hip').value = hip?Math.round(hip):'';
+  document.getElementById('f_prop').value = prop?Math.round(prop):'';
+  const objt=document.getElementById('f_objt').value;
+  const objv=num(document.getElementById('f_objv').value);
+  const row=document.getElementById('row_alq');
+  if(objt==='bruta'){
+    row.style.display='grid';
+    const alq=(objv/100)*(budget/12);
+    document.getElementById('f_alq').value = alq?Math.round(alq):'';
+  }else{
+    row.style.display='none';
+    document.getElementById('f_alq').value='';
+  }
+}
+function autoPeriod(){
+  const ini=(document.getElementById('f_ini').value||'').trim();
+  const finI=document.getElementById('f_finmes');
+  if(!ini || (finI.value||'').trim()) return;
+  const m=ini.split('/'); if(m.length!==2) return;
+  const mm=parseInt(m[0],10)-1, yyyy=parseInt(m[1],10);
+  if(isNaN(mm)||isNaN(yyyy)) return;
+  const d=new Date(yyyy,mm,1); d.setMonth(d.getMonth()+5);
+  finI.value=String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+}
+
+function openModal(){ overlay.classList.add('open'); modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); overlay.setAttribute('aria-hidden','false'); }
+function closeModal(){ overlay.classList.remove('open'); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); overlay.setAttribute('aria-hidden','true'); CURRENT=null; }
+
+function saveModal(){
+  if(!CURRENT) return;
+  const p=CURRENT;
+  const pr=p.profile||(p.profile={});
+  // personales
+  p.name=document.getElementById('f_name').value.trim();
+  p.phone=document.getElementById('f_tel').value.trim();
+  p.email=document.getElementById('f_email').value.trim();
+  pr.dni=document.getElementById('f_dni').value.trim();
+  pr.locres=document.getElementById('f_locres').value.trim();
+  pr.dir=document.getElementById('f_dir').value.trim();
+  // inversión
+  pr.locs=document.getElementById('f_locs').value.trim();
+  pr.tipo=document.getElementById('f_tipo').value;
+  pr.nact=document.getElementById('f_nact').value.trim();
+  pr.asc=document.getElementById('f_asc').value;
+  pr.alt=document.getElementById('f_alt').value.trim();
+  pr.bajos=document.getElementById('f_bajos').value;
+  pr.ref=document.getElementById('f_ref').value;
+  pr.budget=num(document.getElementById('f_budget').value);
+  pr.pmax=num(document.getElementById('f_pmax').value);
+  // financiación
+  pr.fin=document.getElementById('f_fin').value;
+  pr.broker=document.getElementById('f_broker').value;
+  pr.pct=num(document.getElementById('f_pct').value);
+  pr.hip=num(document.getElementById('f_hip').value);
+  pr.prop=num(document.getElementById('f_prop').value);
+  // objetivos
+  pr.objt=document.getElementById('f_objt').value;
+  pr.objv=num(document.getElementById('f_objv').value);
+  pr.ini=document.getElementById('f_ini').value.trim();
+  pr.finmes=document.getElementById('f_finmes').value.trim();
+  pr.alq=num(document.getElementById('f_alq').value);
+  // reunión
+  const dt=document.getElementById('f_meet').value; const notas=document.getElementById('f_notas').value.trim();
+  p.meeting={date:dt, notas};
+  // avanzar a REUNION si procede
+  if(p.phase==='CONTACTO' && dt){
+    p.history=p.history||{}; p.history['CONTACTO']='OK';
+    p.phase='REUNION'; p.phase_entered_at=Date.now();
+  }
+  LS.setPros(PROS);
+  renderAll();
+  toast('Ficha guardada ✅','ok'); closeModal();
+}
+
+/* ======= CREACIÓN CONTACTO ======= */
+document.getElementById('btnCreate').addEventListener('click', ()=>{
+  const name=(document.getElementById('nc_name').value||'').trim();
+  const email=(document.getElementById('nc_email').value||'').trim();
+  const phone=(document.getElementById('nc_phone').value||'').trim();
+  if(!name){ toast('Pon un nombre para crear el contacto.','warn'); return; }
+  const p={ id:uid('p'), name,email,phone, phase:'CONTACTO', phase_entered_at:Date.now(), history:{}, message:CFG.messages.initial, meeting:{date:'',notas:''}, profile:{}, contract:{template:null}, busqueda:{propuestas:[],adjuntos:[]}, compraventa:{financiacion:0,notaria:''}};
+  PROS.push(p); LS.setPros(PROS); renderAll();
+  document.getElementById('nc_name').value=''; document.getElementById('nc_email').value=''; document.getElementById('nc_phone').value='';
+  toast('Contacto creado 🎉','ok');
+});
+
+/* ======= BUSQUEDA (match según objetivo) ======= */
+function renderBusquedaUI(p, root){
+  const b = p.busqueda || (p.busqueda={propuestas:[], adjuntos:[]});
+  root.innerHTML = `
+    <div class="grid two">
+      <div>
+        <label>Buscar evaluaciones</label>
+        <input id="b_q_${p.id}" placeholder="Filtrar por texto…">
+      </div>
+      <div>
+        <label>Seleccionadas (máx 4)</label>
+        <div id="b_chips_${p.id}" class="chips"></div>
+      </div>
+    </div>
+    <div class="eval-list" id="b_list_${p.id}"></div>
+    <div class="small">Adjuntar imágenes / vídeos / PDFs (para compilar un envío único).</div>
+    <input type="file" id="b_files_${p.id}" multiple accept="image/*,video/*,application/pdf">
+    <button class="iconbtn" id="b_merge_${p.id}">🧩 Fusionar PDFs (BETA)</button>
+    <a class="iconbtn" target="_blank" id="b_sendmail_${p.id}">✉️ Enviar Email</a>
+    <a class="iconbtn" target="_blank" id="b_sendwa_${p.id}">🟢 Enviar WhatsApp</a>
+  `;
+  const EVS=EVALS.map(ev=>({ _raw:ev, id:(evEnsureId(ev),evId(ev)), title:evTitle(ev), rn:evYieldNeta(ev), rb:evYieldBruta(ev) }));
+
+  const q = document.getElementById(`b_q_${p.id}`);
+  const list = document.getElementById(`b_list_${p.id}`);
+  const chips = document.getElementById(`b_chips_${p.id}`);
+  function objMatch(ev){
+    const pr=p.profile||{}; const kind=pr.objt||'neta'; const val=pr.objv||0;
+    if(kind==='neta' || kind==='bruta'){
+      const k = kind==='neta'? ev.rn : ev.rb;
+      if(k==null) return {ok:false, why:'sin dato', cls:'warn', txt:'⚪ s/d'};
+      const target = normPct(val);
+      const ok = (k >= target);
+      return {ok, why: ok?'match':'bajo', cls: ok?'ok':'bad', txt: ( (k*100).toFixed(1).replace('.',',')+'%') };
+    }else{ // flujo: no tenemos dato
+      return {ok:false, why:'flujo no disponible', cls:'warn', txt:'⚪ s/d'};
     }
-
-    function writeProfile(prx){
-      inputs.dni.value = prx.dni||'';
-      inputs.tel.value = (p.phone||prx.tel||'');
-      inputs.locres.value = prx.locres||'';
-      inputs.email.value = (p.email||prx.email||'');
-      inputs.dir.value = prx.dir||'';
-      inputs.locs.value = prx.locs||'';
-      inputs.tipo.value = prx.tipo||'Tradicional';
-      inputs.nact.value = prx.nact||'';
-      inputs.asc.value = prx.asc==='No'?'No':'Sí';
-      inputs.alt.value = prx.alt||'';
-      inputs.bajos.value = prx.bajos==='Sí'?'Sí':'No';
-      inputs.ref.value = prx.ref||'No';
-      inputs.budget.value = prx.budget!=null?fmtMoney(prx.budget):'';
-      inputs.pmax.value = prx.pmax!=null?fmtMoney(prx.pmax):'';
-      inputs.fin.value = prx.fin==='No'?'No':'Sí';
-      inputs.broker.value = prx.broker==='Sí'?'Sí':'No';
-      inputs.pct.value = prx.pct!=null?String(prx.pct).replace('.',','):'';
-      inputs.hip.value = prx.hip!=null?fmtMoney(prx.hip):'';
-      inputs.prop.value = prx.prop!=null?fmtMoney(prx.prop):'';
-      inputs.objt.value = prx.objt||'bruta';
-      inputs.objv.value = prx.objv!=null?String(prx.objv).replace('.',','):'';
-      inputs.ini.value = prx.ini||'';
-      inputs.finmes.value = prx.finmes||'';
-      inputs.alq.value = prx.alq!=null?fmtMoney(prx.alq):'';
-      document.getElementById('row_alq').style.display = inputs.objt.value==='bruta' ? 'grid' : 'none';
+  }
+  function renderChips(){
+    chips.innerHTML='';
+    for(const id of b.propuestas){
+      const e=EVS.find(x=>x.id===id); const label=e?e.title:id;
+      const span=document.createElement('span'); span.className='chip'; span.innerHTML=`${escapeHtml(label)} <button data-id="${escapeHtml(id)}">×</button>`;
+      chips.appendChild(span);
     }
-    writeProfile(pr);
-
-    function calcDerived(){
-      const budget = num(inputs.budget.value);
-      const itp = CFG.itp_pct||0; const notaria = CFG.notaria||0; const honor = CFG.honorarios||0;
-      let pmax = 0;
-      if(budget>0){
-        const base = budget - (notaria + honor);
-        pmax = base>0 ? base / (1+itp) : 0;
-      }
-      inputs.pmax.value = pmax?fmtMoney(pmax):'';
-
-      const pct = num(inputs.pct.value)/100;
-      let hip = 0, prop = 0;
-      if(inputs.fin.value==='Sí'){ hip = pmax * pct; }
-      const costeTotal = pmax*(1+itp) + notaria + honor;
-      prop = costeTotal - hip;
-      inputs.hip.value = hip?fmtMoney(hip):'';
-      inputs.prop.value = prop?fmtMoney(prop):'';
-
-      if(inputs.objt.value==='bruta'){
-        const rb = num(inputs.objv.value)/100;
-        const alq = rb * (budget/12);
-        inputs.alq.value = alq?fmtMoney(alq):'';
-        document.getElementById('row_alq').style.display = 'grid';
-      }else{
-        inputs.alq.value='';
-        document.getElementById('row_alq').style.display = 'none';
-      }
-    }
-    function maybeAutofin(){
-      const v = (inputs.ini.value||'').trim();
-      if(!v || (inputs.finmes.value||'').trim()) return;
-      const m = v.split('/'); if(m.length!==2) return;
-      const mm = parseInt(m[0],10)-1; const yyyy = parseInt(m[1],10);
-      if(isNaN(mm)||isNaN(yyyy)) return;
-      const d = new Date(yyyy, mm, 1); d.setMonth(d.getMonth()+5);
-      const mm2 = String(d.getMonth()+1).padStart(2,'0'); const yyyy2 = d.getFullYear();
-      inputs.finmes.value = `${mm2}/${yyyy2}`;
-    }
-
-    ['pf_budget','pf_pct','pf_fin','pf_objt','pf_objv'].forEach(id=>{
-      document.getElementById(id).addEventListener('input', calcDerived);
-      document.getElementById(id).addEventListener('change', calcDerived);
-    });
-    inputs.ini.addEventListener('blur', maybeAutofin);
-    calcDerived();
-
-    // Guardar ficha y reunión/NOTAS (al final)
-    document.getElementById('pf_saveall').addEventListener('click', ()=>{
-      p.email = inputs.email.value.trim();
-      p.phone = inputs.tel.value.trim();
-      p.profile = readProfile();
-      calcDerived();                       // rehace cálculos y guarda resultados
-      p.profile = readProfile();
-      toast('Ficha de prospecto guardada','ok');
-      persistPros();
-    });
-
-    document.getElementById('m_save').addEventListener('click', ()=>{
-      m.date = document.getElementById('m_date').value;
-      m.notas = document.getElementById('m_notas').value;
-      p.meeting = m;
-      persistPros(); renderColumns(); toast('Fecha y notas guardadas','ok');
+    chips.querySelectorAll('button[data-id]').forEach(btn=>{
+      btn.addEventListener('click',()=>{ const id=btn.getAttribute('data-id'); b.propuestas=b.propuestas.filter(x=>x!==id); LS.setPros(PROS); renderChips(); renderList(); toast('Quitado','warn'); });
     });
   }
-
-  function renderContract(p){
-    const c = p.contract || (p.contract={template:null});
-    const tplName = c.template?.name || 'Sin plantilla';
-    const tplInfo = c.template ? `${tplName} (${bytes(c.template.size)})` : '—';
-    drBody.innerHTML = `
-      <div><label>Plantilla de contrato (.docx/.pdf)</label>
-        <input type="file" id="c_tpl" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
-        <p class="small muted tight">Se guarda referencia (nombre y tamaño) — sin subir contenido.</p>
-      </div>
-      <div><b>Actual:</b> <span id="c_tpl_info">${escapeHtml(tplInfo)}</span></div>
-      <div class="frow">
-        <div><label>Asunto (Config)</label><input id="c_subj" value="${escapeHtml(CFG.emailTemplates.contract.subject)}"/></div>
-        <div style="display:flex;align-items:end;justify-content:flex-end"><a id="c_mailto" class="iconbtn" target="_blank">Abrir mail</a></div>
-      </div>
-      <div><label>Cuerpo (Config)</label><textarea id="c_body" rows="6">${escapeHtml(CFG.emailTemplates.contract.body)}</textarea></div>
-      <button class="primary" id="c_save">Guardar</button>
-    `;
-    const f = document.getElementById('c_tpl');
-    f.addEventListener('change', ()=>{
-      const file = f.files && f.files[0];
-      if(!file) return;
-      if(!/pdf|doc|word/i.test(file.type) && !/\.(pdf|docx?|DOCX?)$/.test(file.name)){ toast('Formato no soportado','warn'); return; }
-      p.contract = { template:{ name:file.name, size:file.size, type:file.type, at: Date.now() } };
-      document.getElementById('c_tpl_info').textContent = `${file.name} (${bytes(file.size)})`;
-      persistPros(); toast('Plantilla referenciada','ok');
-    });
-    const mailA = document.getElementById('c_mailto');
-    const subjI = document.getElementById('c_subj');
-    const bodyI = document.getElementById('c_body');
-    function refreshMailto(){
-      const s = encodeURIComponent(subjI.value||'Unihouser');
-      const b = encodeURIComponent(bodyI.value||'');
-      const to = encodeURIComponent(p.email||'');
-      mailA.href = `mailto:${to}?subject=${s}&body=${b}`;
-    }
-    subjI.addEventListener('input', refreshMailto);
-    bodyI.addEventListener('input', refreshMailto);
-    refreshMailto();
-    document.getElementById('c_save').addEventListener('click', ()=>{
-      CFG.emailTemplates.contract.subject = subjI.value;
-      CFG.emailTemplates.contract.body = bodyI.value;
-      LS.setCfg(CFG);
-      toast('Contrato actualizado (Config + prospecto)','ok');
-    });
-  }
-
-  function renderBusqueda(p){
-    const b = p.busqueda || (p.busqueda={propuestas:[], adjuntos:[]});
-
-    drBody.innerHTML = `
-      <div class="frow">
+  function renderList(){
+    list.innerHTML='';
+    const txt=(q.value||'').toLowerCase();
+    const filtered=EVS.filter(x=>!txt||(x.title||'').toLowerCase().includes(txt));
+    for(const it of filtered){
+      const sel=b.propuestas.includes(it.id);
+      const mt=objMatch(it);
+      const row=document.createElement('div'); row.className='eval-item';
+      row.innerHTML=`
         <div>
-          <label>Buscar evaluaciones</label>
-          <input id="b_q" placeholder="Filtrar por texto..." />
+          <div class="eval-title">${escapeHtml(it.title)}</div>
+          <div class="small">🎯 <span class="match ${mt.cls}">${mt.ok?'✅ Match':''} ${mt.txt}</span></div>
         </div>
         <div>
-          <label>Seleccionados (máx 4)</label>
-          <div id="b_chips" class="chips"></div>
-        </div>
-      </div>
-
-      <div class="eval-list" id="b_list"></div>
-
-      <div class="small muted">Adjuntar imágenes / vídeos / PDFs</div>
-      <input type="file" id="b_files" multiple accept="image/*,video/*,application/pdf" />
-      <p class="small muted tight">Vídeos > 2 MB → error (toast) y se descartan.</p>
-      <div class="thumbs" id="b_thumbs"></div>
-      <button class="iconbtn" id="b_merge">Fusionar PDFs (BETA)</button>
-      <div id="b_stack" class="beta-stack" style="display:none;"></div>
-      <button class="primary" id="b_save">Guardar búsqueda</button>
-    `;
-
-    const EVS = EVALS.map(ev=>{
-      evEnsureId(ev);
-      return { _raw: ev, id: evId(ev), title: evTitle(ev), price: evPrice(ev), rb: evYieldBruta(ev), rn: evYieldNeta(ev) };
-    });
-
-    const chips = document.getElementById('b_chips');
-    function renderChips(){
-      chips.innerHTML = '';
-      for(const id of b.propuestas){
-        const ev = EVS.find(x=>x.id===id);
-        const lab = ev ? ev.title : id;
-        const chip = document.createElement('span');
-        chip.className = 'chip';
-        chip.innerHTML = `${escapeHtml(lab)} <button aria-label="Quitar" data-id="${escapeHtml(id)}">×</button>`;
-        chips.appendChild(chip);
-      }
-      chips.querySelectorAll('button[data-id]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const id = btn.getAttribute('data-id');
-          b.propuestas = b.propuestas.filter(x=>x!==id);
-          persistPros(); renderChips(); renderList();
-          toast('Propuesta quitada','warn');
-        });
+          <button class="${sel?'bad':'primary'}" data-id="${escapeHtml(it.id)}">${sel?'Quitar':'Añadir'}</button>
+        </div>`;
+      row.querySelector('button').addEventListener('click',()=>{
+        const id=it.id;
+        if(sel){ b.propuestas=b.propuestas.filter(x=>x!==id); toast('Quitado','warn'); }
+        else { if(b.propuestas.length>=4){ toast('Máximo 4 propuestas','bad'); return;} b.propuestas.push(id); toast('Añadido','ok'); }
+        LS.setPros(PROS); renderChips(); renderList();
       });
+      list.appendChild(row);
     }
-
-    const list = document.getElementById('b_list');
-    const q = document.getElementById('b_q');
-
-    function renderList(){
-      const txt = (q.value||'').toLowerCase();
-      const maxed = b.propuestas.length>=4;
-      const filtered = EVS.filter(x=> !txt || (x.title||'').toLowerCase().includes(txt));
-      list.innerHTML = '';
-      for(const it of filtered){
-        const sel = b.propuestas.includes(it.id);
-        const price = (typeof it.price==='number') ? ' · '+eur(it.price) : '';
-        const rb = (typeof it.rb==='number') ? ` · Bruta ${(it.rb*100).toFixed(1).replace('.',',')}%` : '';
-        const rn = (typeof it.rn==='number') ? ` · Neta ${(it.rn*100).toFixed(1).replace('.',',')}%` : '';
-        const div = document.createElement('div');
-        div.className = 'eval-item';
-        div.innerHTML = `
-          <div>
-            <div class="eval-title">${escapeHtml(it.title)}</div>
-            <div class="eval-sub small muted">ID: ${escapeHtml(it.id)}${price}${rb}${rn}</div>
-          </div>
-          <div>
-            <button class="${sel?'bad':'primary'}" data-id="${escapeHtml(it.id)}">${sel?'Quitar':'Añadir'}</button>
-          </div>
-        `;
-        const btn = div.querySelector('button');
-        btn.addEventListener('click', ()=>{
-          const id = it.id;
-          if(b.propuestas.includes(id)){
-            b.propuestas = b.propuestas.filter(x=>x!==id);
-            toast('Propuesta quitada','warn');
-          }else{
-            if(b.propuestas.length>=4){ toast('Límite 4 propuestas','bad'); return; }
-            b.propuestas.push(id);
-            toast('Propuesta añadida','ok');
-          }
-          persistPros(); renderChips(); renderList();
-        });
-        if(maxed && !sel){ btn.disabled = true; }
-        list.appendChild(div);
-      }
-    }
-
-    renderChips(); renderList();
-
-    const thumbs = document.getElementById('b_thumbs');
-    function renderThumbs(){
-      thumbs.innerHTML='';
-      for(const a of (b.adjuntos||[])){
-        if(a.kind==='image'){
-          const img = document.createElement('img'); img.alt=a.name; if(a.preview){ img.src = a.preview; }
-          thumbs.appendChild(img);
-        }else if(a.kind==='video'){
-          const v = document.createElement('video'); v.muted=true; v.controls=false; v.loop=true; if(a.preview){ v.src=a.preview; }
-          thumbs.appendChild(v);
-        }else if(a.kind==='pdf'){
-          const div = document.createElement('div'); div.className='pdf'; div.textContent='PDF';
-          thumbs.appendChild(div);
-        }
-      }
-    }
-    renderThumbs();
-
-    document.getElementById('b_files').addEventListener('change', (e)=>{
-      const files = Array.from(e.target.files||[]);
-      b.adjuntos = b.adjuntos||[];
-      for(const f of files){
-        const isVideo = /^video\//i.test(f.type);
-        if(isVideo && f.size> (2*1024*1024)){ toast(`Vídeo demasiado grande: ${f.name}`,'bad'); continue; }
-        const kind = /^image\//i.test(f.type) ? 'image' : (isVideo ? 'video' : (/pdf/i.test(f.type)||/\.pdf$/i.test(f.name) ? 'pdf' : 'other'));
-        const item = { name:f.name, size:f.size, type:f.type, kind, at:Date.now() };
-        if(kind==='image' || kind==='video'){ item.preview = URL.createObjectURL(f); }
-        b.adjuntos.push(item);
-      }
-      renderThumbs(); persistPros(); e.target.value=''; toast('Adjuntos añadidos','ok');
-    });
-
-    document.getElementById('b_merge').addEventListener('click', ()=>{
-      const stack = document.getElementById('b_stack');
-      const pdfs = (b.adjuntos||[]).filter(x=>x.kind==='pdf');
-      if(!pdfs.length){ toast('No hay PDFs para previsualizar.','warn'); stack.style.display='none'; stack.innerHTML=''; return; }
-      stack.innerHTML='';
-      for(const ppdf of pdfs){
-        const box = document.createElement('div');
-        box.innerHTML = `<div class="small muted">${escapeHtml(ppdf.name)} (${bytes(ppdf.size)})</div>`;
-        const obj = document.createElement('object'); obj.type='application/pdf'; obj.data='';
-        box.appendChild(obj); stack.appendChild(box);
-      }
-      stack.style.display='flex'; toast('Vista apilada generada (BETA)','ok');
-    });
-
-    document.getElementById('b_save').addEventListener('click', ()=>{
-      p.busqueda = b; persistPros(); toast('Búsqueda guardada','ok');
-    });
-
-    document.getElementById('b_q').addEventListener('input', renderList);
   }
-
-  function renderCompraventa(p){
-    const c = p.compraventa || (p.compraventa={financiacion:0,notaria:''});
-    drBody.innerHTML = `
-      <div class="frow">
-        <div><label>Financiación (días 0–90)</label><input type="number" min="0" max="90" id="cv_fin" value="${Number(c.financiacion)||0}" /></div>
-        <div><label>Notaría (fecha)</label><input type="date" id="cv_not" value="${c.notaria||''}" /></div>
-      </div>
-      <button class="primary" id="cv_save">Guardar</button>
-      <button class="accent" id="cv_done">Finalizar notaría</button>
-    `;
-    document.getElementById('cv_save').addEventListener('click', ()=>{
-      c.financiacion = clamp(parseInt(document.getElementById('cv_fin').value||'0',10),0,90);
-      c.notaria = document.getElementById('cv_not').value||'';
-      p.compraventa = c; persistPros(); toast('Compraventa guardada','ok');
-    });
-    document.getElementById('cv_done').addEventListener('click', ()=>{
-      const date = document.getElementById('cv_not').value;
-      if(!date){ toast('Pon la fecha de notaría antes de finalizar.','warn'); return; }
-      p.compraventa = c; p.success = true;
-      p.history = p.history||{}; p.history['COMPRAVENTA']='OK';
-      p.phase = 'COMPRAVENTA';
-      persistPros(); renderAll(); toast('¡Éxito registrado!','ok'); closeDrawer();
-    });
+  function buildMessage(){
+    const pr=p.profile||{};
+    const lines=[`Hola ${p.name||''},`, '', `Te compartimos una selección para ${pr.tipo||'alquiler'}:`];
+    for(const id of b.propuestas){
+      const e=EVS.find(x=>x.id===id);
+      if(!e) continue;
+      const mt=objMatch(e);
+      lines.push(`• ${e.title} — ${mt.ok?'✅ match':'⚠️ bajo objetivo'} (${mt.txt})`);
+    }
+    lines.push('', 'Dinos qué te encaja y avanzamos.'); return lines.join('\n');
   }
+  document.getElementById(`b_sendmail_${p.id}`).addEventListener('click', (ev)=>{ ev.currentTarget.href = mailtoHref(p,'Selección de oportunidades — Unihouser', buildMessage()); });
+  document.getElementById(`b_sendwa_${p.id}`).addEventListener('click', (ev)=>{ ev.currentTarget.href = whatsappHref(p, buildMessage()); });
 
-  document.addEventListener('DOMContentLoaded', ()=>{ renderAll(); });
-  </script>
+  renderChips(); renderList();
+}
+
+/* ======= COLUMN DETAILS RENDERER ======= */
+function openPhaseDetails(p){
+  // reutilizamos modal para ver/editar en fases posteriores (solo lectura ligera + botón Guardar por consistencia)
+  openModalFor(p);
+}
+
+/* ======= RENDER CADA COLUMNA ======= */
+function phaseLabel(ph){switch(ph){case 'CONTACTO':return 'Contacto';case 'REUNION':return 'Reunión';case 'CONTRATO':return 'Contrato';case 'BUSQUEDA':return 'Búsqueda';case 'COMPRAVENTA':return 'Compraventa';default:return ph}}
+
+function renderColumnExtras(){
+  // Inserta UIs especiales dentro de tarjetas si abrimos detalles: usamos modal, así que nada extra aquí.
+}
+
+/* ======= INIT ======= */
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderAll();
+  // Dentro de BUSQUEDA, cuando pulsamos 👁️ abrimos modal, y si queremos UI de propuestas, la pintamos en BUSQUEDA al abrir detalles:
+  // (sobreescribimos openModalFor para fases distintas si quieres; de momento la ficha única cubre todas las fases)
+});
+
+/* ======= UTIL ======= */
+function openDrawerFor(p){ openPhaseDetails(p); } // compat con código previo
+</script>
 </body>
 </html>
