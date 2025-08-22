@@ -3,371 +3,183 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM Unihouser</title>
+  <title>CRM Unihouser - Dashboard</title>
   <style>
-    /* ====== ESTILOS GENERALES ====== */
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f5f6fa;
-      color: #333;
-    }
-    header {
-      background: linear-gradient(90deg, #FF6600, #800000);
-      color: #fff;
-      padding: 15px 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-    }
-    header h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-    nav a {
-      color: #fff;
-      margin-left: 15px;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    nav a:hover {
-      text-decoration: underline;
-    }
-
-    /* ====== CONTENEDOR ====== */
-    .container {
-      display: flex;
-      height: calc(100vh - 60px);
-    }
-
-    /* ====== BARRA LATERAL ====== */
-    .sidebar {
-      width: 280px;
-      background: #fff;
-      border-right: 1px solid #ddd;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    .sidebar h2 {
-      font-size: 18px;
-      margin-bottom: 10px;
-      border-bottom: 2px solid #FF6600;
-      padding-bottom: 5px;
-    }
-    .sidebar section {
-      margin-bottom: 25px;
-    }
-    .sidebar button {
-      width: 100%;
-      margin: 5px 0;
-      padding: 8px;
-      border: none;
-      background: #FF6600;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .sidebar button:hover {
-      background: #e05600;
-    }
-
-    /* ====== MAIN ====== */
-    .main {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-    }
-
-    /* ====== RESUMEN ====== */
-    .summary {
-      display: flex;
-      justify-content: space-between;
-      background: #fff;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .summary div {
-      text-align: center;
-    }
-    .summary h3 {
-      margin: 0;
-      color: #800000;
-    }
-
-    /* ====== FUNNEL ====== */
-    .funnel {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 15px;
-    }
-    .phase {
-      background: #fff;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
-    .phase h3 {
-      font-size: 16px;
-      margin: 0 0 10px 0;
-      border-bottom: 2px solid #FF6600;
-      padding-bottom: 5px;
-    }
-    .phase ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    .phase li {
-      background: #f5f5f5;
-      margin: 6px 0;
-      padding: 8px;
-      border-radius: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .badge {
-      font-size: 12px;
-      padding: 2px 6px;
-      border-radius: 5px;
-      color: white;
-    }
-    .badge.green { background: #28a745; }
-    .badge.red { background: #dc3545; }
-    .badge.orange { background: #ff6600; }
-
-    /* ====== BOTONES ====== */
-    .actions button {
-      margin-left: 5px;
-      padding: 4px 8px;
-      font-size: 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .advance { background: #28a745; color: white; }
-    .discard { background: #dc3545; color: white; }
-    .delete { background: #6c757d; color: white; }
-
-    /* ====== REUNIONES COLOROGRAMA ====== */
-    .soon { background: #d4edda; }
-    .upcoming { background: #fff3cd; }
-    .far { background: #f8d7da; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f9; color: #333; }
+    .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: #ff6600; color: #fff; padding-top: 20px; }
+    .sidebar h2 { text-align: center; margin-bottom: 30px; }
+    .sidebar a { display: block; padding: 12px 20px; color: #fff; text-decoration: none; transition: background 0.3s; }
+    .sidebar a:hover { background: #e65500; }
+    .main { margin-left: 240px; padding: 20px; }
+    .section { display: none; }
+    .active { display: block; }
+    h1 { color: #ff6600; margin-bottom: 15px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+    th, td { padding: 12px; border-bottom: 1px solid #eee; }
+    th { background: #fafafa; text-align: left; }
+    tr:hover { background: #f1f1f1; }
+    .btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-right: 5px;}
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    .btn-warning { background: #ffc107; color: #333; }
+    .btn-primary { background: #007bff; color: #fff; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; }
+    input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   </style>
 </head>
 <body>
-  <header>
-    <h1>CRM Unihouser</h1>
-    <nav>
-      <a href="#">Evaluar</a>
-      <a href="#">Evaluaciones</a>
-      <a href="#">Dashboard</a>
-      <a href="#">Configuración</a>
-    </nav>
-  </header>
+  <div class="sidebar">
+    <h2>Unihouser CRM</h2>
+    <a href="#" onclick="showSection('contacto')">Contacto</a>
+    <a href="#" onclick="showSection('reunion')">Reunión</a>
+    <a href="#" onclick="showSection('contrato')">Contrato</a>
+    <a href="#" onclick="showSection('busqueda')">Búsqueda</a>
+    <a href="#" onclick="showSection('compraventa')">Compraventa</a>
+  </div>
 
-  <div class="container">
-    <!-- ====== SIDEBAR ====== -->
-    <aside class="sidebar">
-      <section>
-        <h2>Cliente seleccionado</h2>
-        <p><b>Nombre:</b> <span id="clienteNombre">Sergio López</span></p>
-        <p><b>Tel:</b> <span id="clienteTel">+34 600 123 456</span></p>
-        <p><b>Email:</b> <span id="clienteEmail">sergio@correo.com</span></p>
-      </section>
-      <section>
-        <h2>Documentos</h2>
-        <button onclick="alert('Generar contrato PDF')">Contrato PDF</button>
-        <button onclick="alert('Generar acta reunión')">Acta reunión</button>
-        <button onclick="alert('Generar propuestas')">Propuestas</button>
-        <button onclick="alert('Generar arras')">Arras</button>
-      </section>
-      <section>
-        <h2>Observaciones</h2>
-        <textarea style="width:100%; height:100px;" placeholder="Notas de la reunión..."></textarea>
-      </section>
-    </aside>
-
-    <!-- ====== MAIN ====== -->
-    <main class="main">
-      <!-- RESUMEN -->
-      <div class="summary">
-        <div>
-          <h3>Prospectos</h3>
-          <p id="countContacto">2</p>
-        </div>
-        <div>
-          <h3>Reuniones</h3>
-          <p id="countReunion">2</p>
-        </div>
-        <div>
-          <h3>Contratos</h3>
-          <p id="countContrato">1</p>
-        </div>
-        <div>
-          <h3>Búsqueda</h3>
-          <p id="countBusqueda">1</p>
-        </div>
-        <div>
-          <h3>Compraventa</h3>
-          <p id="countCompraventa">1</p>
-        </div>
-        <div>
-          <h3>% Éxito</h3>
-          <p id="porcentajeExito">60%</p>
-        </div>
+  <div class="main">
+    <!-- CONTACTO -->
+    <div id="contacto" class="section active">
+      <h1>Contacto</h1>
+      <div class="card">
+        <h3>Nuevo Prospecto</h3>
+        <form id="contactForm">
+          <div class="form-group"><label>Nombre</label><input type="text" id="nombre" required></div>
+          <div class="form-group"><label>Email</label><input type="email" id="email" required></div>
+          <div class="form-group"><label>Teléfono</label><input type="text" id="telefono"></div>
+          <div class="form-group"><label>Presupuesto (€)</label><input type="number" id="presupuesto"></div>
+          <div class="form-group"><label>Zonas de interés</label><input type="text" id="zonas"></div>
+          <div class="form-group"><label>Expectativa de rentabilidad</label>
+            <select id="rentabilidad"><option>Por habitaciones</option><option>Tradicional</option><option>Mixto</option></select>
+          </div>
+          <button type="submit" class="btn btn-primary">Guardar prospecto</button>
+        </form>
       </div>
+      <table id="contactTable">
+        <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Estado</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-      <!-- FUNNEL -->
-      <div class="funnel">
-        <!-- CONTACTO -->
-        <div class="phase" id="faseContacto">
-          <h3>Contacto</h3>
-          <ul>
-            <li>
-              Sergio López
-              <div class="actions">
-                <button class="advance" onclick="moverFase(this,'Reunión')">🟢</button>
-                <button class="discard" onclick="descartar(this)">🔴</button>
-                <button class="delete" onclick="eliminar(this)">🗑️</button>
-              </div>
-            </li>
-            <li>
-              Juan Pedro
-              <div class="actions">
-                <button class="advance" onclick="moverFase(this,'Reunión')">🟢</button>
-                <button class="discard" onclick="descartar(this)">🔴</button>
-                <button class="delete" onclick="eliminar(this)">🗑️</button>
-              </div>
-            </li>
-          </ul>
-        </div>
+    <!-- REUNIÓN -->
+    <div id="reunion" class="section">
+      <h1>Reunión</h1>
+      <table id="reunionTable">
+        <thead><tr><th>Cliente</th><th>Fecha</th><th>Acciones</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-        <!-- REUNIÓN -->
-        <div class="phase" id="faseReunion">
-          <h3>Reunión</h3>
-          <ul>
-            <li class="soon">
-              09/09/2025 9:15 — Sergio López
-              <div class="actions">
-                <button class="advance" onclick="moverFase(this,'Contrato')">Enviar contrato</button>
-                <button class="discard" onclick="descartar(this)">No interesado</button>
-              </div>
-            </li>
-            <li class="upcoming">
-              10/09/2025 9:15 — Juan Pedro
-              <div class="actions">
-                <button class="advance" onclick="moverFase(this,'Contrato')">Enviar contrato</button>
-                <button class="discard" onclick="descartar(this)">No interesado</button>
-              </div>
-            </li>
-          </ul>
-        </div>
+    <!-- CONTRATO -->
+    <div id="contrato" class="section">
+      <h1>Contrato</h1>
+      <table id="contratoTable">
+        <thead><tr><th>Cliente</th><th>Documento</th><th>Acciones</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-        <!-- CONTRATO -->
-        <div class="phase" id="faseContrato">
-          <h3>Contrato</h3>
-          <ul>
-            <li>
-              Sergio López
-              <div class="actions">
-                <button class="advance" onclick="moverFase(this,'Búsqueda')">Asignar activos</button>
-              </div>
-            </li>
-          </ul>
-        </div>
+    <!-- BÚSQUEDA -->
+    <div id="busqueda" class="section">
+      <h1>Búsqueda</h1>
+      <table id="busquedaTable">
+        <thead><tr><th>Cliente</th><th>Activos presentados</th><th>Acciones</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-        <!-- BÚSQUEDA -->
-        <div class="phase" id="faseBusqueda">
-          <h3>Búsqueda</h3>
-          <ul>
-            <li>
-              Sergio López — Activos asignados: 3
-              <div class="actions">
-                <button class="advance" onclick="moverFase(this,'Compraventa')">Avanzar</button>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <!-- COMPRAVENTA -->
-        <div class="phase" id="faseCompraventa">
-          <h3>Compraventa</h3>
-          <ul>
-            <li>
-              Sergio López — Financiación
-              <div class="actions">
-                <button class="advance" onclick="moverFase(this,'Notaría')">Notaría</button>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <!-- NOTARÍA -->
-        <div class="phase" id="faseNotaria">
-          <h3>Notaría</h3>
-          <ul>
-            <li>
-              Sergio López — Éxito 🎉
-            </li>
-          </ul>
-        </div>
-      </div>
-    </main>
+    <!-- COMPRAVENTA -->
+    <div id="compraventa" class="section">
+      <h1>Compraventa</h1>
+      <table id="compraventaTable">
+        <thead><tr><th>Cliente</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
   <script>
-    // === Lógica de CRM ===
-    function moverFase(btn, destino) {
-      const li = btn.closest('li');
-      const nombre = li.innerText.split("—")[0].trim();
-      li.remove();
-
-      let destinoUl;
-      switch(destino) {
-        case 'Reunión': destinoUl = document.querySelector('#faseReunion ul'); break;
-        case 'Contrato': destinoUl = document.querySelector('#faseContrato ul'); break;
-        case 'Búsqueda': destinoUl = document.querySelector('#faseBusqueda ul'); break;
-        case 'Compraventa': destinoUl = document.querySelector('#faseCompraventa ul'); break;
-        case 'Notaría': destinoUl = document.querySelector('#faseNotaria ul'); break;
-      }
-      if (destinoUl) {
-        const nuevo = document.createElement('li');
-        nuevo.textContent = nombre + " — movido a " + destino;
-        destinoUl.appendChild(nuevo);
-      }
-      actualizarResumen();
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
     }
 
-    function descartar(btn) {
-      const li = btn.closest('li');
-      li.querySelector('.actions').innerHTML = '<span class="badge red">Descartado</span>';
-      actualizarResumen();
+    function loadData() {
+      const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+      renderTables(clientes);
     }
 
-    function eliminar(btn) {
-      btn.closest('li').remove();
-      actualizarResumen();
+    function renderTables(clientes) {
+      // Contactos
+      const contactBody = document.querySelector("#contactTable tbody");
+      contactBody.innerHTML = "";
+      clientes.forEach(c => {
+        contactBody.innerHTML += `<tr><td>${c.nombre}</td><td>${c.email}</td><td>${c.telefono}</td><td>${c.estado}</td></tr>`;
+      });
+
+      // Reuniones
+      const reunionBody = document.querySelector("#reunionTable tbody");
+      reunionBody.innerHTML = "";
+      clientes.forEach(c => {
+        reunionBody.innerHTML += `<tr><td>${c.nombre}</td><td>${c.reunion || "Pendiente"}</td>
+          <td><button class="btn btn-success" onclick="setEstado('${c.email}','Contrato')">Enviar contrato</button>
+              <button class="btn btn-danger" onclick="setEstado('${c.email}','Descartado')">Descartar</button></td></tr>`;
+      });
+
+      // Contratos
+      const contratoBody = document.querySelector("#contratoTable tbody");
+      contratoBody.innerHTML = "";
+      clientes.filter(c=>c.estado==="Contrato").forEach(c => {
+        contratoBody.innerHTML += `<tr><td>${c.nombre}</td><td>Contrato_${c.nombre}.pdf</td>
+          <td><button class="btn btn-warning">Ver PDF</button></td></tr>`;
+      });
+
+      // Búsqueda
+      const busquedaBody = document.querySelector("#busquedaTable tbody");
+      busquedaBody.innerHTML = "";
+      clientes.filter(c=>c.estado==="Contrato").forEach(c => {
+        busquedaBody.innerHTML += `<tr><td>${c.nombre}</td><td>0 activos</td>
+          <td><button class="btn btn-success" onclick="setEstado('${c.email}','Compraventa')">Aceptar</button>
+              <button class="btn btn-danger">Rechazar</button></td></tr>`;
+      });
+
+      // Compraventa
+      const compraBody = document.querySelector("#compraventaTable tbody");
+      compraBody.innerHTML = "";
+      clientes.filter(c=>c.estado==="Compraventa").forEach(c => {
+        compraBody.innerHTML += `<tr><td>${c.nombre}</td><td>Financiación pendiente</td>
+          <td><button class="btn btn-success">Marcar como Notaría</button></td></tr>`;
+      });
     }
 
-    function actualizarResumen() {
-      document.getElementById("countContacto").textContent =
-        document.querySelectorAll("#faseContacto li").length;
-      document.getElementById("countReunion").textContent =
-        document.querySelectorAll("#faseReunion li").length;
-      document.getElementById("countContrato").textContent =
-        document.querySelectorAll("#faseContrato li").length;
-      document.getElementById("countBusqueda").textContent =
-        document.querySelectorAll("#faseBusqueda li").length;
-      document.getElementById("countCompraventa").textContent =
-        document.querySelectorAll("#faseCompraventa li").length;
+    function setEstado(email, nuevoEstado) {
+      let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+      clientes = clientes.map(c => c.email === email ? {...c, estado: nuevoEstado} : c);
+      localStorage.setItem("clientes", JSON.stringify(clientes));
+      renderTables(clientes);
     }
+
+    document.getElementById("contactForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const cliente = {
+        nombre: document.getElementById("nombre").value,
+        email: document.getElementById("email").value,
+        telefono: document.getElementById("telefono").value,
+        presupuesto: document.getElementById("presupuesto").value,
+        zonas: document.getElementById("zonas").value,
+        rentabilidad: document.getElementById("rentabilidad").value,
+        estado: "Contacto"
+      };
+      const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+      clientes.push(cliente);
+      localStorage.setItem("clientes", JSON.stringify(clientes));
+      loadData();
+      this.reset();
+    });
+
+    loadData();
   </script>
 </body>
 </html>
