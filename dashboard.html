@@ -29,8 +29,9 @@
   .nav a{padding:8px 10px;border-radius:10px;text-decoration:none;color:#4a3f3b}
   .nav a.active{background:rgba(199,83,12,.16);color:var(--naranja)}
   .actions-top{display:flex;gap:8px;align-items:center}
-  /* Botones */
+  /* Controles */
   input,select,textarea,button{font:inherit;border:1px solid #d8cfca;border-radius:10px;padding:8px 10px;background:#fff;color:var(--texto);outline:none}
+  input[type="number"]{text-align:right}
   button{cursor:pointer;background:#fff}
   .primary{background:var(--naranja);color:#fff;border-color:transparent}
   .ghost{background:#fff}
@@ -42,7 +43,7 @@
   .circle:hover{filter:brightness(0.95)}
   /* KPIs */
   .kpis{margin:14px 16px 18px;display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));gap:12px}
-  .kpi{background:var(--card);border-radius:14px;padding:12px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-height:68px}
+  .kpi{background:var(--card);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;min-height:62px}
   .kpi h3{font-size:12px;margin:0;font-weight:800;color:#594f4b;letter-spacing:.3px;text-transform:uppercase}
   .kpi .row{display:flex;justify-content:space-between;align-items:baseline}
   .kpi b{font-size:20px}
@@ -79,20 +80,20 @@
   .toast.warn{border-left-color:var(--naranja)}
   .toast.bad{border-left-color:var(--granate)}
   .small{font-size:12px;color:var(--muted)}
-  /* Modal centrado */
+  /* Modal centrado (sin scroll en desktop) */
   #overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.2s;z-index:250}
   #overlay.open{opacity:1;pointer-events:auto}
   #modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:300;pointer-events:none}
   #modal .sheet{width:1024px;max-width:96vw;background:#fff;border-radius:18px;box-shadow:0 30px 60px rgba(0,0,0,.2);transform:translateY(12px) scale(.98);opacity:0;transition:.22s;pointer-events:auto;display:flex;flex-direction:column;max-height:92vh}
   #modal.open .sheet{transform:none;opacity:1}
-  .sheet header{padding:12px 14px;border-bottom:2px solid rgba(199,83,12,.25);display:flex;justify-content:space-between;align-items:center;background:#fff}
+  .sheet header{padding:10px 14px;border-bottom:2px solid rgba(199,83,12,.25);display:flex;justify-content:space-between;align-items:center;background:#fff}
   .sheet h3{margin:0}
-  .sheet .body{padding:12px;display:flex;flex-direction:column;gap:12px;overflow:auto}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .sheet .body{padding:10px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .grid.two{grid-template-columns:repeat(2,1fr)}
   .group{border:1px solid #ffe1ce;background:#fff7f2;border-radius:12px;padding:10px}
-  .group h4{margin:0 0 6px 0;font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:#a04f26}
-  .sheet footer{position:sticky;bottom:0;background:#fff;border-top:2px solid rgba(199,83,12,.25);padding:12px 14px;display:flex;justify-content:flex-end;gap:8px}
+  .group h4{margin:0 0 6px 0;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:#a04f26}
+  .sheet footer{position:sticky;bottom:0;background:#fff;border-top:2px solid rgba(199,83,12,.25);padding:10px 14px;display:flex;justify-content:flex-end;gap:8px}
   /* Multiselect chips */
   .chips{display:flex;flex-wrap:wrap;gap:6px}
   .chip{background:#f3efed;border:1px solid #eadfd9;border-radius:999px;padding:4px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
@@ -102,6 +103,14 @@
   @media (max-width: 1000px){ .grid{grid-template-columns:repeat(2,1fr)} }
   @media (max-width: 680px){ .grid{grid-template-columns:1fr} }
 </style>
+<script>
+/* Defino el fallback antes de que cargue el <img> para evitar ReferenceError */
+function logoFallback(e){
+  var svg="<svg xmlns='http://www.w3.org/2000/svg' width='120' height='28' viewBox='0 0 120 28'><rect rx='6' ry='6' width='120' height='28' fill='%23c7530c'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='14' fill='white'>Unihouser</text></svg>";
+  e.target.onerror=null;
+  e.target.src='data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+}
+</script>
 </head>
 <body>
   <!-- Topbar con navegación -->
@@ -181,28 +190,20 @@
 'use strict';
 
 /* ======= CONSTS & HELPERS ======= */
-const PHASES = ['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA']; // sin Papelera general
+const PHASES = ['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA'];
 const ES='es-ES';
 const fmtPct = new Intl.NumberFormat(ES,{style:'percent',minimumFractionDigits:0,maximumFractionDigits:0});
 const eur = n => new Intl.NumberFormat(ES,{style:'currency',currency:'EUR'}).format(n||0);
 const uid = p => p+'_'+Math.random().toString(36).slice(2,8);
 const daysSince = ts => ts? Math.max(0, Math.floor((Date.now()-ts)/(86400000))) : 0;
 const escapeHtml=s=>(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-function logoFallback(e){
-  e.target.onerror=null;
-  const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='28' viewBox='0 0 120 28'>
-    <rect rx='6' ry='6' width='120' height='28' fill='%23c7530c'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='14' fill='white'>Unihouser</text>
-  </svg>`;
-  e.target.src='data:image/svg+xml;utf8,'+encodeURIComponent(svg);
-}
 function toast(msg,type='ok'){
   const t=document.createElement('div'); t.className='toast'+(type==='warn'?' warn':type==='bad'?' bad':''); t.textContent=msg;
   document.getElementById('toaster').appendChild(t);
   setTimeout(()=>{t.style.opacity='0'; setTimeout(()=>t.remove(),240)},2600);
 }
-/* números: acepta "100.000" o "100000" o "80,5" */
+/* num: acepta "100.000" o "80,5" */
 function num(s){ if(typeof s==='number') return s; const t=(s||'').toString().replace(/\./g,'').replace(',','.'); const v=parseFloat(t); return isNaN(v)?0:v; }
-/* normaliza %: 8 => 0.08 ; 0.08 => 0.08 */
 function normPct(v){ if(v==null||isNaN(v)) return 0; const x=Number(v); if(x>1 && x<=100) return x/100; if(x>100) return 1; if(x<0) return 0; return x; }
 function toLocalDT(v){ const d=new Date(v); const pad=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()); }
 function shortDateTime(v){ if(!v) return ''; const d=new Date(v); return d.toLocaleString(ES,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}); }
@@ -216,28 +217,15 @@ const LS={
   getEvals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return []}},
   setEvals(a){localStorage.setItem('evals',JSON.stringify(a))},
 };
-
 const DEFAULT_CFG={
   itp_pct:0.08, notaria:1200, honorarios:3630,
-  localidades:["Oviedo","Gijón","Avilés","Mieres","Pola de Siero","Langreo","Gozón"],
-  messages:{ initial_subject:'Inicio — Unihouser', initial:`Hola!
-
-Gracias por escribirnos y por el interés en lo que hacemos en Unihouser.
-
-🏠 ¿En qué podemos ayudarte?
-✔ Analizamos y filtramos oportunidades con sentido real.
-✔ Estimamos contigo todos los costes asociados.
-✔ Te damos una visión clara del rendimiento esperado.
-
-Gracias,
-Equipo Unihouser` }
+  localidades:["Oviedo","Gijón","Avilés","Mieres","Pola de Siero","Langreo","Gozón"]
 };
 function ensureCfgShape(c){
   const x=c&&typeof c==='object'?c:{};
   x.itp_pct=normPct(typeof x.itp_pct==='number'?x.itp_pct:DEFAULT_CFG.itp_pct);
   x.notaria=typeof x.notaria==='number'?x.notaria:DEFAULT_CFG.notaria;
   x.honorarios=typeof x.honorarios==='number'?x.honorarios:DEFAULT_CFG.honorarios;
-  x.messages=Object.assign({},DEFAULT_CFG.messages,x.messages||{});
   x.localidades=Array.isArray(x.localidades)&&x.localidades.length?x.localidades:DEFAULT_CFG.localidades;
   return x;
 }
@@ -375,7 +363,6 @@ function makeCard(p){
 function markOK(p){
   const i=PHASES.indexOf(p.phase);
   if(i===PHASES.length-1){
-    // éxito final
     p.history=p.history||{}; p.history[p.phase]='OK';
     p.success=true; p.archived=true; p.archived_reason='SUCCESS'; p.archived_at=new Date().toISOString();
     toast('🎉 Compraventa finalizada. ¡Éxito!', 'ok');
@@ -393,8 +380,7 @@ function markKO(p){
   toast('Marcado como NO interesa. Archivado.','bad');
 }
 function discardContact(p){
-  // Descarta solo en Contacto (no se contabiliza nada). Lo eliminamos del dataset.
-  PROS = PROS.filter(x=>x.id!==p.id);
+  PROS = PROS.filter(x=>x.id!==p.id); // no computa nada
   LS.setPros(PROS); renderAll();
   toast('Descartado en Contacto (no computa). 🗑️','bad');
 }
@@ -423,19 +409,17 @@ function openModalFor(p){
     <div class="group">
       <h4>Datos personales</h4>
       <div class="grid">
-        <div style="grid-column:span 1"><label>Nombre</label><input id="f_name" value="${escapeHtml(p.name||'')}"></div>
+        <div><label>Nombre</label><input id="f_name" value="${escapeHtml(p.name||'')}"></div>
         <div><label>Teléfono</label><input id="f_tel" value="${escapeHtml(p.phone||'')}"></div>
         <div><label>Email</label><input id="f_email" value="${escapeHtml(p.email||'')}"></div>
       </div>
       <div class="grid">
         <div><label>DNI</label><input id="f_dni" value="${escapeHtml(pr.dni||'')}"></div>
-        <div><label>Localidades (multi)</label>
+        <div>
+          <label>Localidades (multi)</label>
           <div class="chips" id="loc_chips"></div>
-          <div class="flex" style="gap:6px">
-            <input id="loc_input" list="loc_list" placeholder="Añadir localidad y Enter">
-            <datalist id="loc_list">${CFG.localidades.map(l=>`<option value="${escapeHtml(l)}">`).join('')}</datalist>
-            <button class="iconbtn" id="loc_clear">Limpiar</button>
-          </div>
+          <input id="loc_input" list="loc_list" placeholder="Añadir localidad y Enter">
+          <datalist id="loc_list">${CFG.localidades.map(l=>`<option value="${escapeHtml(l)}">`).join('')}</datalist>
         </div>
         <div style="grid-column:span 1"><label>Dirección</label><input id="f_dir" value="${escapeHtml(pr.dir||'')}" placeholder="C/ … nº …"></div>
       </div>
@@ -494,14 +478,11 @@ function openModalFor(p){
           </select>
         </div>
         <div><label>Valor objetivo</label><input id="f_objv" value="${pr.objv!=null?String(pr.objv).replace('.',','):''}" placeholder="7,5 o 300"></div>
-        <div class="grid two">
-          <input id="f_ini" placeholder="Inicio MM/AAAA" value="${escapeHtml(pr.ini||'')}">
-          <input id="f_finmes" placeholder="Fin MM/AAAA" value="${escapeHtml(pr.finmes||'')}">
+        <div class="grid two" id="row_alq" style="display:${(pr.objt||'bruta')==='bruta'?'grid':'none'}">
+          <div><label>Alquiler máx. orientativo (€/mes)</label><input id="f_alq" value="${pr.alq!=null?Math.round(pr.alq):''}" disabled></div>
         </div>
       </div>
-      <div class="grid two" id="row_alq" style="display:${(pr.objt||'bruta')==='bruta'?'grid':'none'}">
-        <div><label>Alquiler máx. orientativo (€/mes)</label><input id="f_alq" value="${pr.alq!=null?Math.round(pr.alq):''}" disabled></div>
-      </div>
+      <small class="small">Para Rb% el alquiler se calcula como: <b>((Total − Honorarios) × Rb%) / 12</b>.</small>
     </div>
 
     <!-- NOTAS / REUNION -->
@@ -514,7 +495,7 @@ function openModalFor(p){
         <div><label>Notas</label><input id="f_notas" value="${escapeHtml(m.notas||'')}" placeholder="Ej. confirmada por WhatsApp ✅"></div>
       </div>
       ${p.phase==='BUSQUEDA'?`
-      <div class="grid two">
+      <div class="grid two" style="margin-top:6px">
         <div>
           <label>Buscar evaluaciones</label>
           <input id="b_q_${p.id}" placeholder="Filtrar por texto…">
@@ -533,13 +514,13 @@ function openModalFor(p){
     </div>
   `;
 
-  // Multiselect localidades
+  /* Multiselect localidades (sin botón limpiar; se eliminan con la ✖ de cada chip) */
   const chipsBox=document.getElementById('loc_chips');
   const locInput=document.getElementById('loc_input');
-  const locClear=document.getElementById('loc_clear');
   function renderLocs(){
-    chipsBox.innerHTML=''; pr.locs.forEach(v=>{
-      const el=document.createElement('span'); el.className='chip'; el.innerHTML=`${escapeHtml(v)} <button data-v="${escapeHtml(v)}">×</button>`;
+    chipsBox.innerHTML='';
+    pr.locs.forEach(v=>{
+      const el=document.createElement('span'); el.className='chip'; el.innerHTML=`${escapeHtml(v)} <button data-v="${escapeHtml(v)}" aria-label="Quitar ${escapeHtml(v)}">×</button>`;
       chipsBox.appendChild(el);
     });
     chipsBox.querySelectorAll('button[data-v]').forEach(b=>b.addEventListener('click',()=>{ const v=b.getAttribute('data-v'); pr.locs=pr.locs.filter(x=>x!==v); renderLocs(); }));
@@ -547,7 +528,6 @@ function openModalFor(p){
   function addLoc(v){ v=(v||'').trim(); if(!v) return; if(!pr.locs.includes(v)) pr.locs.push(v); locInput.value=''; renderLocs(); }
   locInput.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===','){ e.preventDefault(); addLoc(locInput.value); }});
   locInput.addEventListener('change',()=>addLoc(locInput.value));
-  locClear.addEventListener('click',()=>{ pr.locs=[]; renderLocs(); });
   if(!pr.locs) pr.locs=[]; renderLocs();
 
   // listeners de cálculo
@@ -556,21 +536,24 @@ function openModalFor(p){
     el.addEventListener('input', recalcDerived);
     el.addEventListener('change', recalcDerived);
   });
-  const iniEl=document.getElementById('f_ini'); if(iniEl) iniEl.addEventListener('blur', autoPeriod);
   recalcDerived();
 
   if(p.phase==='BUSQUEDA'){ mountBusquedaInModal(p); }
 
   openModal();
 }
+
 function recalcDerived(){
   const budget=num(document.getElementById('f_budget').value);
   const itp=CFG.itp_pct, not=CFG.notaria, hon=CFG.honorarios;
+
+  /* Precio máximo de compra e ITP */
   const base=budget-(not+hon);
   const pmax= base>0? base/(1+itp):0;
   const pmaxEl=document.getElementById('f_pmax'); if(pmaxEl) pmaxEl.value = pmax?Math.round(pmax):'';
   const itpEl=document.getElementById('f_itp'); if(itpEl) itpEl.value = pmax?Math.round(pmax*itp):'';
 
+  /* Financiación */
   const finEl=document.getElementById('f_fin'); const pctEl=document.getElementById('f_pct');
   if(finEl && pctEl){
     const fin=finEl.value;
@@ -582,30 +565,20 @@ function recalcDerived(){
     const propEl=document.getElementById('f_prop'); if(propEl) propEl.value = prop?Math.round(prop):'';
   }
 
+  /* Alquiler orientativo (Nueva fórmula): ((Total − Honorarios) × Rb%) / 12 */
   const objtEl=document.getElementById('f_objt'), objvEl=document.getElementById('f_objv'), alqEl=document.getElementById('f_alq');
-  if(objtEl && objvEl){
+  if(objtEl && objvEl && alqEl){
     const objt=objtEl.value; const objv=num(objvEl.value);
     const row=document.getElementById('row_alq');
     if(row){ row.style.display = objt==='bruta' ? 'grid':'none'; }
-    if(alqEl){
-      if(objt==='bruta'){
-        const alq=(objv/100)*(budget/12);
-        alqEl.value = alq?Math.round(alq):'';
-      }else{
-        alqEl.value='';
-      }
+    if(objt==='bruta'){
+      const rb = objv/100;
+      const alq = ((budget - hon) * rb) / 12;
+      alqEl.value = alq?Math.round(alq):'';
+    }else{
+      alqEl.value='';
     }
   }
-}
-function autoPeriod(){
-  const ini=(document.getElementById('f_ini').value||'').trim();
-  const finI=document.getElementById('f_finmes');
-  if(!ini || (finI.value||'').trim()) return;
-  const m=ini.split('/'); if(m.length!==2) return;
-  const mm=parseInt(m[0],10)-1, yyyy=parseInt(m[1],10);
-  if(isNaN(mm)||isNaN(yyyy)) return;
-  const d=new Date(yyyy,mm,1); d.setMonth(d.getMonth()+5);
-  finI.value=String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
 }
 function openModal(){ overlay.classList.add('open'); modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); overlay.setAttribute('aria-hidden','false'); }
 function closeModal(){ overlay.classList.remove('open'); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); overlay.setAttribute('aria-hidden','true'); CURRENT=null; }
@@ -620,7 +593,7 @@ function saveModal(){
   p.email=document.getElementById('f_email').value.trim();
   pr.dni=document.getElementById('f_dni').value.trim();
   pr.dir=document.getElementById('f_dir').value.trim();
-  pr.locs=pr.locs||[]; // ya poblado por los chips
+  pr.locs=pr.locs||[];
   // inversión
   pr.tipo=document.getElementById('f_tipo').value;
   pr.nact=document.getElementById('f_nact').value.trim();
@@ -638,17 +611,12 @@ function saveModal(){
   // objetivos
   pr.objt=document.getElementById('f_objt').value;
   pr.objv=num(document.getElementById('f_objv').value);
-  pr.ini=document.getElementById('f_ini').value.trim();
-  pr.finmes=document.getElementById('f_finmes').value.trim();
   pr.alq=num(document.getElementById('f_alq').value);
   // notas / reunión
   const notas=document.getElementById('f_notas').value.trim();
   let dt=null; if(p.phase==='CONTACTO'){ dt=document.getElementById('f_meet').value; }
   p.meeting={date:dt||p.meeting?.date||'', notas};
-  // avanzar a REUNION si procede
-  if(p.phase==='CONTACTO' && dt){
-    p.phase='REUNION'; p.phase_entered_at=Date.now();
-  }
+  if(p.phase==='CONTACTO' && dt){ p.phase='REUNION'; p.phase_entered_at=Date.now(); }
   LS.setPros(PROS);
   renderAll();
   toast('Ficha guardada ✅','ok'); closeModal();
@@ -743,16 +711,15 @@ document.getElementById('btnCreate').addEventListener('click', ()=>{
 /* ======= EXPORTAR XLS ======= */
 document.getElementById('btnExport').addEventListener('click', exportXLS);
 function exportXLS(){
-  // Excluye descartados de contacto (ya no están en PROS). Incluye archivados KO y éxitos.
   const rows=[
-    ['id','nombre','fase','archivado','motivo_archivo','exito','fecha_creacion','fecha_fase','email','telefono','tipo','objetivo','objetivo_valor','reunion_fecha','localidades','propuestas_enviadas','propuestas_ids']
+    ['id','nombre','fase','archivado','motivo_archivo','exito','fecha_fase','email','telefono','tipo','objetivo','objetivo_valor','reunion_fecha','localidades','propuestas_enviadas','propuestas_ids']
   ];
   for(const p of PROS){
     const pr=p.profile||{};
     const locs=Array.isArray(pr.locs)?pr.locs.join(', '):'';
     rows.push([
       p.id, p.name||'', p.phase||'', p.archived?'sí':'no', p.archived_reason||'', p.success?'sí':'no',
-      p.created_at? new Date(p.created_at).toLocaleDateString(ES):'', p.phase_entered_at? new Date(p.phase_entered_at).toLocaleDateString(ES):'',
+      p.phase_entered_at? new Date(p.phase_entered_at).toLocaleDateString(ES):'',
       p.email||'', p.phone||'', pr.tipo||'', pr.objt||'', pr.objv||'',
       p.meeting&&p.meeting.date? new Date(p.meeting.date).toLocaleString(ES):'',
       locs,
