@@ -6,17 +6,16 @@
   <title>Unihouser — Dashboard CRM</title>
   <style>
     :root{
-      --granate:#B53928;      /* bad / brand deep red */
-      --terracota:#DB824B;    /* warn / accent */
-      --verde:#58736F;        /* ok */
-      --gris:#DDD5D2;         /* light bg */
+      --granate:#B53928;
+      --terracota:#DB824B;
+      --verde:#58736F;
+      --gris:#DDD5D2;
       --texto:#2b2b2b;
       --bg:#faf8f7;
       --card:#ffffff;
       --muted:#7a6f6b;
       --shadow:0 6px 20px rgba(0,0,0,.08);
       --radius:16px;
-      --tiny:10px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -26,111 +25,64 @@
       color:var(--texto);
       background:linear-gradient(180deg,var(--gris) 0%, var(--bg) 18%);
     }
-    header{
-      display:flex;align-items:center;gap:16px;
-      padding:16px 20px;
-    }
-    header .brand{
-      display:flex;align-items:center;gap:12px;
-    }
-    header img{height:36px; width:auto}
-    header h1{font-size:18px; margin:0; font-weight:700; letter-spacing:.3px}
-    .kpis{
-      margin:6px 20px 18px;
-      display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));
-      gap:12px;
-    }
-    .kpi{
-      background:var(--card); border-radius:14px; padding:10px 12px; box-shadow:var(--shadow);
-      display:flex;flex-direction:column; gap:6px; min-height:64px;
-    }
-    .kpi h3{font-size:12px; margin:0; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.6px}
+    header{display:flex;align-items:center;gap:16px;padding:16px 20px;}
+    header .brand{display:flex;align-items:center;gap:12px;}
+    header img{height:36px;width:auto}
+    header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+    .kpis{margin:6px 20px 18px;display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));gap:12px;}
+    .kpi{background:var(--card);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-height:64px;}
+    .kpi h3{font-size:12px;margin:0;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
     .kpi .val{display:flex;align-items:baseline;justify-content:space-between}
     .kpi .val b{font-size:20px}
-    .kpi .pill{font-size:12px; padding:2px 8px; border-radius:999px; background:#f1ece9}
-    .kpi.ok .pill{background:rgba(88,115,111,.12); color:var(--verde)}
-    .kpi.warn .pill{background:rgba(219,130,75,.12); color:var(--terracota)}
-    .kpi.bad .pill{background:rgba(181,57,40,.12); color:var(--granate)}
-    .board{
-      padding:0 20px 40px;
-      display:grid; grid-template-columns:repeat(6,1fr); gap:14px;
-    }
-    .col{
-      background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
-      min-height:60vh; display:flex; flex-direction:column;
-    }
-    .col header{padding:12px 12px 8px; border-bottom:1px solid #eee;}
-    .col header h2{margin:0; font-size:14px; text-transform:uppercase; letter-spacing:.8px; color:#4a3f3b}
-    .col .content{padding:10px; display:flex; flex-direction:column; gap:10px}
-    .new-contact{
-      border:1px dashed #c9beb9; border-radius:12px; padding:10px; display:flex; flex-direction:column; gap:8px; background:#fbf9f8;
-    }
-    .row{display:flex; gap:8px}
+    .kpi .pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#f1ece9}
+    .kpi.ok .pill{background:rgba(88,115,111,.12);color:var(--verde)}
+    .kpi.warn .pill{background:rgba(219,130,75,.12);color:var(--terracota)}
+    .kpi.bad .pill{background:rgba(181,57,40,.12);color:var(--granate)}
+    .board{padding:0 20px 40px;display:grid;grid-template-columns:repeat(6,1fr);gap:14px;}
+    .col{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);min-height:60vh;display:flex;flex-direction:column;}
+    .col header{padding:12px 12px 8px;border-bottom:1px solid #eee;}
+    .col header h2{margin:0;font-size:14px;text-transform:uppercase;letter-spacing:.8px;color:#4a3f3b}
+    .col .content{padding:10px;display:flex;flex-direction:column;gap:10px}
+    .new-contact{border:1px dashed #c9beb9;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;background:#fbf9f8;}
+    .row{display:flex;gap:8px}
     .row input{flex:1}
-    input,select,textarea,button{
-      font:inherit; border:1px solid #d8cfca; border-radius:10px; padding:8px 10px; background:#fff; color:var(--texto);
-      outline:none;
-    }
-    textarea{resize:vertical; min-height:64px}
-    button{
-      cursor:pointer; background:#f6efe9; border-color:#eadfd9;
-    }
-    button.primary{background:var(--verde); color:#fff; border-color:transparent}
-    button.bad{background:var(--granate); color:#fff; border-color:transparent}
-    button.accent{background:var(--terracota); color:#fff; border-color:transparent}
-    .card{
-      border:1px solid #eee3de; border-radius:14px; padding:10px; background:#fff; box-shadow:var(--shadow);
-      display:flex; flex-direction:column; gap:8px;
-    }
-    .card .top{
-      display:flex; align-items:center; justify-content:space-between; gap:8px;
-    }
+    input,select,textarea,button{font:inherit;border:1px solid #d8cfca;border-radius:10px;padding:8px 10px;background:#fff;color:var(--texto);outline:none;}
+    textarea{resize:vertical;min-height:64px}
+    button{cursor:pointer;background:#f6efe9;border-color:#eadfd9}
+    button.primary{background:var(--verde);color:#fff;border-color:transparent}
+    button.bad{background:var(--granate);color:#fff;border-color:transparent}
+    button.accent{background:var(--terracota);color:#fff;border-color:transparent}
+    .card{border:1px solid #eee3de;border-radius:14px;padding:10px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;}
+    .card .top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
     .name{font-weight:700}
-    .days{font-size:12px; color:var(--muted); background:#f3efed; border-radius:999px; padding:3px 8px}
-    .msg{display:flex; flex-direction:column; gap:6px}
-    .actions{display:flex; flex-wrap:wrap; gap:6px}
-    .ghost{opacity:.7}
-    .iconbtn{
-      display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:10px; border:1px solid #eadfd9; background:#fff;
-    }
-    .icon{display:inline-flex; width:16px; height:16px; align-items:center; justify-content:center}
-    .icon svg{width:16px; height:16px; display:block}
+    .days{font-size:12px;color:var(--muted);background:#f3efed;border-radius:999px;padding:3px 8px}
+    .msg{display:flex;flex-direction:column;gap:6px}
+    .actions{display:flex;flex-wrap:wrap;gap:6px}
+    .iconbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;border:1px solid #eadfd9;background:#fff;}
+    .icon{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center}
+    .icon svg{width:16px;height:16px;display:block}
     .icon.eye svg{fill:var(--verde)}
     .icon.trash svg{fill:var(--granate)}
-    /* Drawer */
-    #overlay{
-      position:fixed; inset:0; background:rgba(0,0,0,.25); opacity:0; pointer-events:none; transition:.2s ease; z-index:50;
-    }
-    #drawer{
-      position:fixed; top:0; right:0; width:420px; max-width:95vw; height:100vh; background:#fff; box-shadow: -8px 0 24px rgba(0,0,0,.18);
-      transform:translateX(100%); transition:.28s cubic-bezier(.2,.8,.2,1); z-index:60; display:flex; flex-direction:column;
-    }
+    #overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.2s ease;z-index:50;}
+    #drawer{position:fixed;top:0;right:0;width:420px;max-width:95vw;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,.18);transform:translateX(100%);transition:.28s cubic-bezier(.2,.8,.2,1);z-index:60;display:flex;flex-direction:column;}
     #drawer.open{transform:none}
-    #overlay.open{opacity:1; pointer-events:all}
-    .dr-head{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 14px 10px; border-bottom:1px solid #eee}
+    #overlay.open{opacity:1;pointer-events:all}
+    .dr-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 10px;border-bottom:1px solid #eee}
     .dr-title{font-weight:700}
-    .dr-body{padding:14px; display:flex; flex-direction:column; gap:12px}
-    .divider{height:1px; background:#eee; margin:8px 0}
-    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:8px}
-    .thumbs{
-      display:grid; grid-template-columns:repeat(6,1fr); gap:6px;
-      /* “todo cabe sin scroll en el lateral”: miniaturas pequeñas y autoajuste */
-    }
-    .thumbs img, .thumbs video, .thumbs .pdf{
-      width:100%; aspect-ratio:1/1; object-fit:cover; border:1px solid #e7ded9; border-radius:8px; background:#f7f3f1;
-    }
-    .pdf{display:flex; align-items:center; justify-content:center; font-size:10px; color:#6b5e58}
-    .beta-stack{display:flex; flex-direction:column; gap:8px; max-height:42vh; overflow:auto; border:1px solid #eee; border-radius:12px; padding:8px;}
-    .beta-stack object{width:100%; height:260px; border:1px solid #eee; border-radius:8px;}
-    /* Toasts */
-    .toaster{position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; gap:8px; z-index:100}
-    .toast{
-      background:#fff; border-left:6px solid var(--verde); padding:10px 12px; border-radius:12px; box-shadow:var(--shadow); min-width:260px;
-    }
+    .dr-body{padding:14px;display:flex;flex-direction:column;gap:12px}
+    .divider{height:1px;background:#eee;margin:8px 0}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .thumbs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+    .thumbs img,.thumbs video,.thumbs .pdf{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid #e7ded9;border-radius:8px;background:#f7f3f1;}
+    .pdf{display:flex;align-items:center;justify-content:center;font-size:10px;color:#6b5e58}
+    .beta-stack{display:flex;flex-direction:column;gap:8px;max-height:42vh;overflow:auto;border:1px solid #eee;border-radius:12px;padding:8px;}
+    .beta-stack object{width:100%;height:260px;border:1px solid #eee;border-radius:8px;}
+    .toaster{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100}
+    .toast{background:#fff;border-left:6px solid var(--verde);padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);min-width:260px;}
     .toast.warn{border-left-color:var(--terracota)}
     .toast.bad{border-left-color:var(--granate)}
     .muted{color:var(--muted)}
-    .sr-only{position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden;}
+    .sr-only{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;}
     .small{font-size:12px}
     .tight{margin:0}
   </style>
@@ -138,19 +90,14 @@
 <body>
   <header>
     <div class="brand">
-      <img src="logo-unihouser.svg" alt="Unihouser">
+      <img src="logo-unihouser.svg" alt="Unihouser" onerror="logoFallback(event)">
       <h1>Dashboard CRM</h1>
     </div>
   </header>
 
-  <!-- KPIs -->
-  <section class="kpis" id="kpis">
-    <!-- Se rellenan por JS -->
-  </section>
+  <section class="kpis" id="kpis"></section>
 
-  <!-- Board -->
   <main class="board" id="board">
-    <!-- CONTACTO -->
     <section class="col" data-phase="CONTACTO">
       <header><h2>Contacto</h2></header>
       <div class="content" id="col-CONTACTO">
@@ -168,38 +115,32 @@
       </div>
     </section>
 
-    <!-- REUNION -->
     <section class="col" data-phase="REUNION">
       <header><h2>Reunión</h2></header>
       <div class="content" id="col-REUNION"></div>
     </section>
 
-    <!-- CONTRATO -->
     <section class="col" data-phase="CONTRATO">
       <header><h2>Contrato</h2></header>
       <div class="content" id="col-CONTRATO"></div>
     </section>
 
-    <!-- BUSQUEDA -->
     <section class="col" data-phase="BUSQUEDA">
       <header><h2>Búsqueda</h2></header>
       <div class="content" id="col-BUSQUEDA"></div>
     </section>
 
-    <!-- COMPRAVENTA -->
     <section class="col" data-phase="COMPRAVENTA">
       <header><h2>Compraventa</h2></header>
       <div class="content" id="col-COMPRAVENTA"></div>
     </section>
 
-    <!-- PAPELERA -->
     <section class="col" data-phase="PAPELERA">
       <header><h2>Papelera</h2></header>
       <div class="content" id="col-PAPELERA"></div>
     </section>
   </main>
 
-  <!-- Drawer lateral -->
   <div id="overlay" aria-hidden="true"></div>
   <aside id="drawer" aria-hidden="true" aria-label="Panel lateral">
     <div class="dr-head">
@@ -208,46 +149,20 @@
         <svg viewBox="0 0 24 24"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12l-4.9 4.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.9a1 1 0 0 0 1.41-1.41L13.41 12l4.9-4.89a1 1 0 0 0-.01-1.4z"/></svg>
       </span>Cerrar</button>
     </div>
-    <div class="dr-body" id="drBody">
-      <!-- Se rellena dinámicamente según fase -->
-    </div>
+    <div class="dr-body" id="drBody"></div>
   </aside>
 
-  <!-- Toasts -->
   <div class="toaster" id="toaster" aria-live="polite" aria-atomic="true"></div>
 
   <script>
   'use strict';
 
-  /***** UTILIDADES BÁSICAS *****/
+  /* ======= DEFAULTS & HELPERS ======= */
   const PHASES = ['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA','PAPELERA'];
   const ES = 'es-ES';
   const fmtPct = new Intl.NumberFormat(ES,{style:'percent',minimumFractionDigits:0,maximumFractionDigits:0});
-  function eur(n){ return new Intl.NumberFormat(ES,{style:'currency',currency:'EUR'}).format(n||0); }
-  function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,8); }
-  function daysSince(ts){ if(!ts) return 0; const d = Math.floor((Date.now()-ts)/(1000*60*60*24)); return d<0?0:d; }
-  function nextPhase(ph){ const i = PHASES.indexOf(ph); return i>=0 && i<PHASES.length-2 ? PHASES[i+1] : (ph==='COMPRAVENTA'?'COMPRAVENTA':'PAPELERA'); }
 
-  function toast(msg,type='ok'){
-    const t = document.createElement('div');
-    t.className = 'toast' + (type==='warn'?' warn': type==='bad'?' bad':'');
-    t.textContent = msg;
-    document.getElementById('toaster').appendChild(t);
-    setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),240); }, 2500);
-  }
-
-  /***** LOCALSTORAGE STATE *****/
-  const LS = {
-    getCfg(){
-      const raw = localStorage.getItem('cfg');
-      if(raw){ try{ return JSON.parse(raw); }catch(e){ console.warn('cfg corrupta, reinit'); } }
-      const defaultCfg = {
-        itp_pct: 0.08,
-        notaria: 1200,
-        honorarios: 3630,
-        kpis: {},
-        messages:{
-          initial: `Hola!
+  const DEFAULT_INITIAL_MESSAGE = `Hola!
 
 Gracias por escribirnos y por el interés en lo que hacemos en Unihouser.
 
@@ -272,24 +187,59 @@ Si te encaja, cuéntanos:
 3) Modelo (habitaciones / tradicional / mixto)
 
 Gracias,
-Equipo Unihouser`,
-          initial_subject: 'Inicio — Unihouser',
-        },
-        emailTemplates:{
-          contract:{
-            subject:'Propuesta de Contrato — Unihouser',
-            body:`Hola,
+Equipo Unihouser`;
+
+  const DEFAULT_CFG = {
+    itp_pct: 0.08,
+    notaria: 1200,
+    honorarios: 3630,
+    kpis: {},
+    messages:{
+      initial: DEFAULT_INITIAL_MESSAGE,
+      initial_subject: 'Inicio — Unihouser',
+    },
+    emailTemplates:{
+      contract:{
+        subject:'Propuesta de Contrato — Unihouser',
+        body:`Hola,
 
 Te adjuntamos la plantilla de contrato para revisión. Si te encaja, dínoslo y avanzamos con la firma.
 
 Gracias,
 Equipo Unihouser`
-          }
-        }
-      };
-      localStorage.setItem('cfg', JSON.stringify(defaultCfg));
-      return defaultCfg;
-    },
+      }
+    }
+  };
+
+  function eur(n){ return new Intl.NumberFormat(ES,{style:'currency',currency:'EUR'}).format(n||0); }
+  function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,8); }
+  function daysSince(ts){ if(!ts) return 0; const d = Math.floor((Date.now()-ts)/(1000*60*60*24)); return d<0?0:d; }
+  function nextPhase(ph){ const i = PHASES.indexOf(ph); return i>=0 && i<PHASES.length-2 ? PHASES[i+1] : (ph==='COMPRAVENTA'?'COMPRAVENTA':'PAPELERA'); }
+  function toast(msg,type='ok'){
+    const t = document.createElement('div');
+    t.className = 'toast' + (type==='warn'?' warn': type==='bad'?' bad':'');
+    t.textContent = msg;
+    document.getElementById('toaster').appendChild(t);
+    setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),240); }, 2500);
+  }
+  function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+  function bytes(n){ if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1).replace('.',',')+' KB'; return (n/1048576).toFixed(1).replace('.',',')+' MB'; }
+  function isoLocal(v){ const d=new Date(v); const p=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes()); }
+  function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#039;' }[m])); }
+
+  /* Logo fallback si no existe el archivo físico */
+  function logoFallback(e){
+    e.target.onerror=null;
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='36' viewBox='0 0 120 36'>
+      <rect rx='6' ry='6' width='120' height='36' fill='%23B53928'/>
+      <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='16' fill='white'>Unihouser</text>
+    </svg>`;
+    e.target.src = 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+  }
+
+  /* ======= LOCALSTORAGE ======= */
+  const LS = {
+    getRawCfg(){ const raw = localStorage.getItem('cfg'); if(!raw) return null; try{ return JSON.parse(raw); }catch(_){ return null; } },
     setCfg(cfg){ localStorage.setItem('cfg', JSON.stringify(cfg)); },
     getPros(){ const raw = localStorage.getItem('pros'); if(!raw) return []; try{ return JSON.parse(raw); }catch(_){ return []; } },
     setPros(list){ localStorage.setItem('pros', JSON.stringify(list)); },
@@ -297,26 +247,43 @@ Equipo Unihouser`
     setEvals(list){ localStorage.setItem('evals', JSON.stringify(list)); },
   };
 
-  let CFG = LS.getCfg();
+  function ensureCfgShape(cfgIn){
+    const cfg = cfgIn && typeof cfgIn==='object' ? cfgIn : {};
+    // merge superficial + profundidades necesarias
+    cfg.itp_pct = typeof cfg.itp_pct==='number' ? cfg.itp_pct : DEFAULT_CFG.itp_pct;
+    cfg.notaria = typeof cfg.notaria==='number' ? cfg.notaria : DEFAULT_CFG.notaria;
+    cfg.honorarios = typeof cfg.honorarios==='number' ? cfg.honorarios : DEFAULT_CFG.honorarios;
+    cfg.kpis = cfg.kpis && typeof cfg.kpis==='object' ? cfg.kpis : {};
+    cfg.messages = Object.assign({}, DEFAULT_CFG.messages, cfg.messages||{});
+    cfg.emailTemplates = cfg.emailTemplates && typeof cfg.emailTemplates==='object' ? cfg.emailTemplates : {};
+    cfg.emailTemplates.contract = Object.assign({}, DEFAULT_CFG.emailTemplates.contract, (cfg.emailTemplates&&cfg.emailTemplates.contract)||{});
+    return cfg;
+  }
+
+  function getInitialMessage(){
+    return (CFG.messages && typeof CFG.messages.initial==='string' && CFG.messages.initial.trim())
+      ? CFG.messages.initial
+      : DEFAULT_INITIAL_MESSAGE;
+  }
+  function getInitialSubject(){
+    return (CFG.messages && CFG.messages.initial_subject) ? CFG.messages.initial_subject : 'Unihouser';
+  }
+
+  /* Estado en memoria */
+  let CFG = ensureCfgShape(LS.getRawCfg()) ;
+  LS.setCfg(CFG); // persistimos mergeado para futuras pantallas
   let PROS = LS.getPros();
   let EVALS = LS.getEvals();
 
-  /***** RENDERIZADO *****/
-  function renderAll(){
-    renderKPIs();
-    renderColumns();
-  }
+  /* ======= RENDER ======= */
+  function renderAll(){ renderKPIs(); renderColumns(); }
 
   function renderKPIs(){
-    // KPIs: % OK/KO por fase (según history), éxitos totales
-    const wrap = document.getElementById('kpis');
-    wrap.innerHTML = '';
-    const counts = {};
-    let exitos = 0;
+    const wrap = document.getElementById('kpis'); wrap.innerHTML = '';
+    const counts = {}; let exitos = 0;
     for(const ph of PHASES) counts[ph] = {ok:0,ko:0};
     for(const p of PROS){
       if(p.success) exitos++;
-      // Papelera no computa en métricas
       if(p.phase==='PAPELERA') continue;
       const h = p.history||{};
       for(const ph of Object.keys(h)){
@@ -326,8 +293,7 @@ Equipo Unihouser`
       }
     }
     const makeCard = (title, ok, ko) =>{
-      const tot = ok+ko;
-      const okPct = tot? (ok/tot):0;
+      const tot = ok+ko, okPct = tot? (ok/tot):0;
       const div = document.createElement('div'); div.className='kpi';
       div.innerHTML = `<h3>${title}</h3>
         <div class="val"><b>${fmtPct.format(okPct)}</b><span class="pill">${ok} OK / ${ko} KO</span></div>`;
@@ -345,26 +311,21 @@ Equipo Unihouser`
   }
 
   function renderColumns(){
-    // Limpiar columnas
     for(const ph of PHASES){
       const col = document.getElementById('col-'+ph);
       if(!col) continue;
-      // preserve new-contact box in CONTACTO
       const keep = ph==='CONTACTO' ? [document.getElementById('newContactBox')] : [];
       col.innerHTML = '';
       for(const k of keep){ if(k) col.appendChild(k); }
     }
-    // Ordenar REUNION por fecha creciente
     const copy = PROS.slice();
-    const prosByPhase = {};
-    for(const ph of PHASES){ prosByPhase[ph]=[]; }
+    const prosByPhase = {}; for(const ph of PHASES){ prosByPhase[ph]=[]; }
     for(const p of copy){ prosByPhase[p.phase||'CONTACTO'].push(p); }
     prosByPhase['REUNION'].sort((a,b)=>{
       const ad = a.meeting?.date ? new Date(a.meeting.date).getTime(): Number.MAX_SAFE_INTEGER;
       const bd = b.meeting?.date ? new Date(b.meeting.date).getTime(): Number.MAX_SAFE_INTEGER;
       return ad - bd;
     });
-
     for(const ph of PHASES){
       const list = prosByPhase[ph];
       for(const p of list){
@@ -378,18 +339,19 @@ Equipo Unihouser`
     const el = document.createElement('div');
     el.className='card'; el.dataset.id = p.id;
     const d = daysSince(p.phase_entered_at);
+    const msgVal = (typeof p.message==='string' && p.message.trim()) ? p.message : getInitialMessage();
     el.innerHTML = `
       <div class="top">
         <div class="name">${escapeHtml(p.name||'Sin nombre')}</div>
         <div class="days">${d} ${d===1?'día':'días'}</div>
       </div>
       <div class="msg">
-        <textarea data-role="msg">${escapeHtml(p.message||CFG.messages.initial)}</textarea>
+        <textarea data-role="msg">${escapeHtml(msgVal)}</textarea>
         <div class="actions">
           <button class="iconbtn" data-act="copy"><span class="icon">
             <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v12h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
           </span>Copiar</button>
-          <a class="iconbtn" data-act="email" href="${mailtoHref(p)}"><span class="icon">
+          <a class="iconbtn" data-act="email" href="${mailtoHref(p, msgVal)}"><span class="icon">
             <svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 18V8l8 6 8-6v10H4z"/></svg>
           </span>Email</a>
           <button class="iconbtn" data-act="details"><span class="icon eye">
@@ -402,35 +364,26 @@ Equipo Unihouser`
         </div>
       </div>
     `;
-    // Listeners
     el.querySelector('[data-role="msg"]').addEventListener('input', (e)=>{
-      p.message = e.target.value;
-      persistPros();
+      p.message = e.target.value; persistPros();
     });
     el.querySelector('[data-act="copy"]').addEventListener('click', ()=>{
-      copyToClipboard(p.message||'');
-      toast('Mensaje copiado', 'ok');
+      copyToClipboard((p.message||getInitialMessage())); toast('Mensaje copiado','ok');
     });
     el.querySelector('[data-act="email"]').addEventListener('click', (ev)=>{
-      // update href live according a msg changes
-      ev.currentTarget.setAttribute('href', mailtoHref(p));
+      ev.currentTarget.setAttribute('href', mailtoHref(p, (p.message||getInitialMessage())));
     });
-    const det = el.querySelector('[data-act="details"]');
-    if(det) det.addEventListener('click', ()=> openDrawerFor(p));
-    const adv = el.querySelector('[data-act="advance"]');
-    if(adv) adv.addEventListener('click', ()=> advanceProspect(p));
-    const disc = el.querySelector('[data-act="discard"]');
-    if(disc) disc.addEventListener('click', ()=> discardProspect(p));
-    const rest = el.querySelector('[data-act="restore"]');
-    if(rest) rest.addEventListener('click', ()=> restoreFromBin(p));
-    const del = el.querySelector('[data-act="delete"]');
-    if(del) del.addEventListener('click', ()=> deleteForever(p));
+    const det = el.querySelector('[data-act="details"]'); if(det) det.addEventListener('click', ()=> openDrawerFor(p));
+    const adv = el.querySelector('[data-act="advance"]'); if(adv) adv.addEventListener('click', ()=> advanceProspect(p));
+    const disc = el.querySelector('[data-act="discard"]'); if(disc) disc.addEventListener('click', ()=> discardProspect(p));
+    const rest = el.querySelector('[data-act="restore"]'); if(rest) rest.addEventListener('click', ()=> restoreFromBin(p));
+    const del = el.querySelector('[data-act="delete"]'); if(del) del.addEventListener('click', ()=> deleteForever(p));
     return el;
   }
 
-  function mailtoHref(p){
-    const subj = encodeURIComponent(CFG.messages.initial_subject || 'Unihouser');
-    const body = encodeURIComponent((p.message||'').trim());
+  function mailtoHref(p, bodyText){
+    const subj = encodeURIComponent(getInitialSubject());
+    const body = encodeURIComponent((bodyText||'').trim());
     const to = encodeURIComponent(p.email||'');
     return `mailto:${to}?subject=${subj}&body=${body}`;
   }
@@ -440,39 +393,27 @@ Equipo Unihouser`
     ta.className='sr-only'; ta.value = text;
     document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
   }
-
   function persistPros(){ LS.setPros(PROS); renderKPIs(); }
 
-  /***** MOVIMIENTOS *****/
+  /* ======= MOVIMIENTOS ======= */
   function advanceProspect(p){
     const from = p.phase;
     const to = nextPhase(from);
-    if(to===from){ toast('Ya estás en la última fase.', 'warn'); return; }
-    p.history = p.history||{};
-    p.history[from] = 'OK';
-    p.phase = to;
-    p.phase_entered_at = Date.now();
-    persistPros(); renderColumns(); toast(`Avanzado a ${to}`, 'ok');
+    if(to===from){ toast('Ya estás en la última fase.','warn'); return; }
+    p.history = p.history||{}; p.history[from] = 'OK';
+    p.phase = to; p.phase_entered_at = Date.now();
+    persistPros(); renderColumns(); toast(`Avanzado a ${to}`,'ok');
   }
   function discardProspect(p){
     const from = p.phase;
-    p.history = p.history||{};
-    p.history[from] = 'KO';
-    p.phase = 'PAPELERA';
-    p.phase_entered_at = Date.now();
-    persistPros(); renderColumns(); toast('Movido a Papelera', 'bad');
+    p.history = p.history||{}; p.history[from] = 'KO';
+    p.phase = 'PAPELERA'; p.phase_entered_at = Date.now();
+    persistPros(); renderColumns(); toast('Movido a Papelera','bad');
   }
-  function restoreFromBin(p){
-    p.phase = 'CONTACTO';
-    p.phase_entered_at = Date.now();
-    persistPros(); renderColumns(); toast('Restaurado a Contacto','ok');
-  }
-  function deleteForever(p){
-    PROS = PROS.filter(x=>x.id!==p.id);
-    persistPros(); renderColumns(); toast('Prospecto eliminado','bad');
-  }
+  function restoreFromBin(p){ p.phase = 'CONTACTO'; p.phase_entered_at = Date.now(); persistPros(); renderColumns(); toast('Restaurado a Contacto','ok'); }
+  function deleteForever(p){ PROS = PROS.filter(x=>x.id!==p.id); persistPros(); renderColumns(); toast('Prospecto eliminado','bad'); }
 
-  /***** CREACIÓN CONTACTO *****/
+  /* ======= CREACIÓN CONTACTO ======= */
   document.getElementById('btnCreate').addEventListener('click', ()=>{
     const name = (document.getElementById('nc_name').value||'').trim();
     const email = (document.getElementById('nc_email').value||'').trim();
@@ -484,7 +425,7 @@ Equipo Unihouser`
       phase: 'CONTACTO',
       phase_entered_at: Date.now(),
       history: {},
-      message: (CFG.messages && CFG.messages.initial) ? CFG.messages.initial : '',
+      message: getInitialMessage(),
       meeting: { date:'', canal:'', notas:'', observaciones:'' },
       contract: { template:null },
       busqueda: { propuestas:[], adjuntos:[] },
@@ -492,51 +433,36 @@ Equipo Unihouser`
       success: false
     };
     PROS.push(p); persistPros(); renderColumns();
-    // limpiar
     document.getElementById('nc_name').value='';
     document.getElementById('nc_email').value='';
     document.getElementById('nc_phone').value='';
     toast('Contacto creado','ok');
   });
 
-  /***** DRAWER *****/
+  /* ======= DRAWER ======= */
   const overlay = document.getElementById('overlay');
   const drawer = document.getElementById('drawer');
   const drTitle = document.getElementById('drTitle');
   const drBody = document.getElementById('drBody');
   document.getElementById('btnCloseDrawer').addEventListener('click', closeDrawer);
   overlay.addEventListener('click', closeDrawer);
-
   let CURRENT = null;
 
   function openDrawerFor(p){
     CURRENT = p;
     drTitle.textContent = `${p.name||'Sin nombre'} — ${phaseLabel(p.phase)}`;
     drBody.innerHTML = '';
-    // Render según fase
-    if(p.phase==='REUNION'){
-      renderMeeting(p);
-    } else if(p.phase==='CONTRATO'){
-      renderContract(p);
-    } else if(p.phase==='BUSQUEDA'){
-      renderBusqueda(p);
-    } else if(p.phase==='COMPRAVENTA'){
-      renderCompraventa(p);
-    } else {
-      // genérico: ficha rápida
-      renderQuick(p);
-    }
-    overlay.classList.add('open');
-    drawer.classList.add('open');
-    drawer.setAttribute('aria-hidden','false');
-    overlay.setAttribute('aria-hidden','false');
+    if(p.phase==='REUNION'){ renderMeeting(p); }
+    else if(p.phase==='CONTRATO'){ renderContract(p); }
+    else if(p.phase==='BUSQUEDA'){ renderBusqueda(p); }
+    else if(p.phase==='COMPRAVENTA'){ renderCompraventa(p); }
+    else { renderQuick(p); }
+    overlay.classList.add('open'); drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden','false'); overlay.setAttribute('aria-hidden','false');
   }
   function closeDrawer(){
-    drawer.classList.remove('open');
-    overlay.classList.remove('open');
-    drawer.setAttribute('aria-hidden','true');
-    overlay.setAttribute('aria-hidden','true');
-    // evitar overlays fantasma
+    drawer.classList.remove('open'); overlay.classList.remove('open');
+    drawer.setAttribute('aria-hidden','true'); overlay.setAttribute('aria-hidden','true');
     setTimeout(()=>{ drBody.innerHTML=''; CURRENT=null; }, 220);
   }
   function phaseLabel(ph){
@@ -635,8 +561,8 @@ Equipo Unihouser`
     const subjI = document.getElementById('c_subj');
     const bodyI = document.getElementById('c_body');
     function refreshMailto(){
-      const s = encodeURIComponent(subjI.value);
-      const b = encodeURIComponent(bodyI.value);
+      const s = encodeURIComponent(subjI.value||'Unihouser');
+      const b = encodeURIComponent(bodyI.value||'');
       const to = encodeURIComponent(p.email||'');
       mailA.href = `mailto:${to}?subject=${s}&body=${b}`;
     }
@@ -679,19 +605,15 @@ Equipo Unihouser`
       <div id="b_stack" class="beta-stack" style="display:none;"></div>
       <button class="primary" id="b_save">Guardar búsqueda</button>
     `;
-    // Render selected proposals text
     function refreshSel(){
       const txt = b.propuestas.length ? b.propuestas.map(id=>`• ${escapeHtml(id)}`).join('<br>') : 'Ninguno';
       document.getElementById('b_sel').innerHTML = txt;
     }
     refreshSel();
 
-    // picker
     document.getElementById('b_pick').addEventListener('click', ()=>{
-      // mini picker inline
       const opts = EVALS.map(ev=>({id: ev.id||ev.ev_id||ev.key||'ev_'+Math.random().toString(36).slice(2,6), name: ev.titulo||ev.title||ev.direccion||('Eval '+(ev.id||''))}));
       if(!opts.length){ toast('No hay evaluaciones disponibles.','warn'); return; }
-      // simple prompt-like UI
       const choices = prompt(`Escribe IDs separados por coma (máx 4):\n${opts.map(o=>o.id+' — '+o.name).join('\n')}`, b.propuestas.join(','));
       if(choices===null) return;
       const ids = choices.split(',').map(s=>s.trim()).filter(Boolean).slice(0,4);
@@ -699,7 +621,6 @@ Equipo Unihouser`
       refreshSel(); persistPros(); toast('Propuestas actualizadas','ok');
     });
 
-    // attachments
     const thumbs = document.getElementById('b_thumbs');
     function renderThumbs(){
       thumbs.innerHTML='';
@@ -722,38 +643,27 @@ Equipo Unihouser`
       const files = Array.from(e.target.files||[]);
       for(const f of files){
         const isVideo = /^video\//i.test(f.type);
-        if(isVideo && f.size> (2*1024*1024)){
-          toast(`Vídeo demasiado grande: ${f.name}`,'bad'); continue;
-        }
+        if(isVideo && f.size> (2*1024*1024)){ toast(`Vídeo demasiado grande: ${f.name}`,'bad'); continue; }
         const kind = /^image\//i.test(f.type) ? 'image' : (isVideo ? 'video' : (/pdf/i.test(f.type)||/\.pdf$/i.test(f.name) ? 'pdf' : 'other'));
         const item = { name:f.name, size:f.size, type:f.type, kind, at:Date.now() };
-        // pequeñas previews en memoria
-        if(kind==='image' || kind==='video'){
-          item.preview = URL.createObjectURL(f);
-        }
+        if(kind==='image' || kind==='video'){ item.preview = URL.createObjectURL(f); }
         b.adjuntos.push(item);
       }
-      renderThumbs(); persistPros();
-      e.target.value='';
-      toast('Adjuntos añadidos','ok');
+      renderThumbs(); persistPros(); e.target.value=''; toast('Adjuntos añadidos','ok');
     });
 
-    // beta merge (vista apilada)
     document.getElementById('b_merge').addEventListener('click', ()=>{
       const stack = document.getElementById('b_stack');
       const pdfs = b.adjuntos.filter(x=>x.kind==='pdf');
       if(!pdfs.length){ toast('No hay PDFs para previsualizar.','warn'); stack.style.display='none'; stack.innerHTML=''; return; }
       stack.innerHTML='';
       for(const ppdf of pdfs){
-        // No tenemos contenido; mostramos contenedor vacío con título
         const box = document.createElement('div');
         box.innerHTML = `<div class="small muted">${escapeHtml(ppdf.name)} (${bytes(ppdf.size)})</div>`;
-        const obj = document.createElement('object'); obj.type='application/pdf'; obj.data=''; // placeholder
-        box.appendChild(obj);
-        stack.appendChild(box);
+        const obj = document.createElement('object'); obj.type='application/pdf'; obj.data='';
+        box.appendChild(obj); stack.appendChild(box);
       }
-      stack.style.display='flex';
-      toast('Vista apilada generada (BETA)','ok');
+      stack.style.display='flex'; toast('Vista apilada generada (BETA)','ok');
     });
 
     document.getElementById('b_save').addEventListener('click', ()=>{
@@ -775,41 +685,20 @@ Equipo Unihouser`
     document.getElementById('cv_save').addEventListener('click', ()=>{
       c.financiacion = clamp(parseInt(document.getElementById('cv_fin').value||'0',10),0,90);
       c.notaria = document.getElementById('cv_not').value||'';
-      p.compraventa = c;
-      persistPros(); toast('Compraventa guardada','ok');
+      p.compraventa = c; persistPros(); toast('Compraventa guardada','ok');
     });
     document.getElementById('cv_done').addEventListener('click', ()=>{
       const date = document.getElementById('cv_not').value;
       if(!date){ toast('Pon la fecha de notaría antes de finalizar.','warn'); return; }
       p.compraventa = c; p.success = true;
       p.history = p.history||{}; p.history['COMPRAVENTA']='OK';
-      // salir del tablero activo (lo mantenemos en listado pero podría ocultarse)
-      p.phase = 'COMPRAVENTA'; // mantiene fase final
-      persistPros(); renderAll(); toast('¡Éxito registrado!','ok');
-      closeDrawer();
+      p.phase = 'COMPRAVENTA';
+      persistPros(); renderAll(); toast('¡Éxito registrado!','ok'); closeDrawer();
     });
   }
 
-  /***** HELPERS *****/
-  function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
-  function bytes(n){
-    if(n<1024) return n + ' B';
-    if(n<1024*1024) return (n/1024).toFixed(1).replace('.',',')+' KB';
-    return (n/(1024*1024)).toFixed(1).replace('.',',')+' MB';
-  }
-  function isoLocal(v){
-    // v puede ser ISO; devolvemos formato para input datetime-local (sin Z)
-    const d = new Date(v);
-    const pad = (x)=> String(x).padStart(2,'0');
-    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
-  }
-  function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#039;' }[m])); }
-
-  /***** INIT *****/
-  document.addEventListener('DOMContentLoaded', ()=>{
-    // asegurar cfg cargada; pros/evals ya cargados
-    renderAll();
-  });
+  /* ======= INIT ======= */
+  document.addEventListener('DOMContentLoaded', ()=>{ renderAll(); });
   </script>
 </body>
 </html>
