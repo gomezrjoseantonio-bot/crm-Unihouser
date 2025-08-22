@@ -1,145 +1,373 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Formulario Reunión Unihouser</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-  h1 { text-align: center; color: #ff6600; }
-  .form-section { background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  label { font-weight: bold; display: block; margin-top: 10px; }
-  input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
-  textarea { resize: vertical; }
-  .actions { text-align: center; margin-top: 20px; }
-  button { background: #ff6600; color: white; border: none; padding: 10px 15px; margin: 5px; border-radius: 6px; cursor: pointer; font-size: 14px; }
-  button:hover { background: #e65c00; }
-  .result { background: #eef; padding: 10px; margin-top: 10px; border-radius: 6px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRM Unihouser</title>
+  <style>
+    /* ====== ESTILOS GENERALES ====== */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f6fa;
+      color: #333;
+    }
+    header {
+      background: linear-gradient(90deg, #FF6600, #800000);
+      color: #fff;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    nav a {
+      color: #fff;
+      margin-left: 15px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* ====== CONTENEDOR ====== */
+    .container {
+      display: flex;
+      height: calc(100vh - 60px);
+    }
+
+    /* ====== BARRA LATERAL ====== */
+    .sidebar {
+      width: 280px;
+      background: #fff;
+      border-right: 1px solid #ddd;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #FF6600;
+      padding-bottom: 5px;
+    }
+    .sidebar section {
+      margin-bottom: 25px;
+    }
+    .sidebar button {
+      width: 100%;
+      margin: 5px 0;
+      padding: 8px;
+      border: none;
+      background: #FF6600;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .sidebar button:hover {
+      background: #e05600;
+    }
+
+    /* ====== MAIN ====== */
+    .main {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    /* ====== RESUMEN ====== */
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .summary div {
+      text-align: center;
+    }
+    .summary h3 {
+      margin: 0;
+      color: #800000;
+    }
+
+    /* ====== FUNNEL ====== */
+    .funnel {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 15px;
+    }
+    .phase {
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .phase h3 {
+      font-size: 16px;
+      margin: 0 0 10px 0;
+      border-bottom: 2px solid #FF6600;
+      padding-bottom: 5px;
+    }
+    .phase ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .phase li {
+      background: #f5f5f5;
+      margin: 6px 0;
+      padding: 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .badge {
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 5px;
+      color: white;
+    }
+    .badge.green { background: #28a745; }
+    .badge.red { background: #dc3545; }
+    .badge.orange { background: #ff6600; }
+
+    /* ====== BOTONES ====== */
+    .actions button {
+      margin-left: 5px;
+      padding: 4px 8px;
+      font-size: 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .advance { background: #28a745; color: white; }
+    .discard { background: #dc3545; color: white; }
+    .delete { background: #6c757d; color: white; }
+
+    /* ====== REUNIONES COLOROGRAMA ====== */
+    .soon { background: #d4edda; }
+    .upcoming { background: #fff3cd; }
+    .far { background: #f8d7da; }
+  </style>
 </head>
 <body>
+  <header>
+    <h1>CRM Unihouser</h1>
+    <nav>
+      <a href="#">Evaluar</a>
+      <a href="#">Evaluaciones</a>
+      <a href="#">Dashboard</a>
+      <a href="#">Configuración</a>
+    </nav>
+  </header>
 
-<h1>📝 Reunión con Inversor</h1>
+  <div class="container">
+    <!-- ====== SIDEBAR ====== -->
+    <aside class="sidebar">
+      <section>
+        <h2>Cliente seleccionado</h2>
+        <p><b>Nombre:</b> <span id="clienteNombre">Sergio López</span></p>
+        <p><b>Tel:</b> <span id="clienteTel">+34 600 123 456</span></p>
+        <p><b>Email:</b> <span id="clienteEmail">sergio@correo.com</span></p>
+      </section>
+      <section>
+        <h2>Documentos</h2>
+        <button onclick="alert('Generar contrato PDF')">Contrato PDF</button>
+        <button onclick="alert('Generar acta reunión')">Acta reunión</button>
+        <button onclick="alert('Generar propuestas')">Propuestas</button>
+        <button onclick="alert('Generar arras')">Arras</button>
+      </section>
+      <section>
+        <h2>Observaciones</h2>
+        <textarea style="width:100%; height:100px;" placeholder="Notas de la reunión..."></textarea>
+      </section>
+    </aside>
 
-<form id="reunionForm">
+    <!-- ====== MAIN ====== -->
+    <main class="main">
+      <!-- RESUMEN -->
+      <div class="summary">
+        <div>
+          <h3>Prospectos</h3>
+          <p id="countContacto">2</p>
+        </div>
+        <div>
+          <h3>Reuniones</h3>
+          <p id="countReunion">2</p>
+        </div>
+        <div>
+          <h3>Contratos</h3>
+          <p id="countContrato">1</p>
+        </div>
+        <div>
+          <h3>Búsqueda</h3>
+          <p id="countBusqueda">1</p>
+        </div>
+        <div>
+          <h3>Compraventa</h3>
+          <p id="countCompraventa">1</p>
+        </div>
+        <div>
+          <h3>% Éxito</h3>
+          <p id="porcentajeExito">60%</p>
+        </div>
+      </div>
 
-  <!-- Datos personales -->
-  <div class="form-section">
-    <h2>Datos personales</h2>
-    <label>Nombre y apellidos</label>
-    <input type="text" id="nombre">
-    <label>Email</label>
-    <input type="email" id="email">
-    <label>Teléfono</label>
-    <input type="text" id="telefono">
-    <label>Fecha reunión</label>
-    <input type="date" id="fechaReunion" value="">
-    <label>Observaciones iniciales</label>
-    <textarea id="observaciones"></textarea>
+      <!-- FUNNEL -->
+      <div class="funnel">
+        <!-- CONTACTO -->
+        <div class="phase" id="faseContacto">
+          <h3>Contacto</h3>
+          <ul>
+            <li>
+              Sergio López
+              <div class="actions">
+                <button class="advance" onclick="moverFase(this,'Reunión')">🟢</button>
+                <button class="discard" onclick="descartar(this)">🔴</button>
+                <button class="delete" onclick="eliminar(this)">🗑️</button>
+              </div>
+            </li>
+            <li>
+              Juan Pedro
+              <div class="actions">
+                <button class="advance" onclick="moverFase(this,'Reunión')">🟢</button>
+                <button class="discard" onclick="descartar(this)">🔴</button>
+                <button class="delete" onclick="eliminar(this)">🗑️</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- REUNIÓN -->
+        <div class="phase" id="faseReunion">
+          <h3>Reunión</h3>
+          <ul>
+            <li class="soon">
+              09/09/2025 9:15 — Sergio López
+              <div class="actions">
+                <button class="advance" onclick="moverFase(this,'Contrato')">Enviar contrato</button>
+                <button class="discard" onclick="descartar(this)">No interesado</button>
+              </div>
+            </li>
+            <li class="upcoming">
+              10/09/2025 9:15 — Juan Pedro
+              <div class="actions">
+                <button class="advance" onclick="moverFase(this,'Contrato')">Enviar contrato</button>
+                <button class="discard" onclick="descartar(this)">No interesado</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- CONTRATO -->
+        <div class="phase" id="faseContrato">
+          <h3>Contrato</h3>
+          <ul>
+            <li>
+              Sergio López
+              <div class="actions">
+                <button class="advance" onclick="moverFase(this,'Búsqueda')">Asignar activos</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- BÚSQUEDA -->
+        <div class="phase" id="faseBusqueda">
+          <h3>Búsqueda</h3>
+          <ul>
+            <li>
+              Sergio López — Activos asignados: 3
+              <div class="actions">
+                <button class="advance" onclick="moverFase(this,'Compraventa')">Avanzar</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- COMPRAVENTA -->
+        <div class="phase" id="faseCompraventa">
+          <h3>Compraventa</h3>
+          <ul>
+            <li>
+              Sergio López — Financiación
+              <div class="actions">
+                <button class="advance" onclick="moverFase(this,'Notaría')">Notaría</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- NOTARÍA -->
+        <div class="phase" id="faseNotaria">
+          <h3>Notaría</h3>
+          <ul>
+            <li>
+              Sergio López — Éxito 🎉
+            </li>
+          </ul>
+        </div>
+      </div>
+    </main>
   </div>
 
-  <!-- Presupuesto -->
-  <div class="form-section">
-    <h2>Presupuesto & Financiación</h2>
-    <label>Presupuesto total (€)</label>
-    <input type="number" id="presupuesto" oninput="calcular()">
-    <label>% Financiación</label>
-    <input type="number" id="porcFinanciacion" value="80" oninput="calcular()">
-    <label>Hipoteca estimada (€)</label>
-    <input type="text" id="hipoteca" readonly>
-    <label>Aportación propia (€)</label>
-    <input type="text" id="aportacion" readonly>
-    <label>Precio máx. con gastos (ITP+notaría) (€)</label>
-    <input type="text" id="precioMax" readonly>
-  </div>
+  <script>
+    // === Lógica de CRM ===
+    function moverFase(btn, destino) {
+      const li = btn.closest('li');
+      const nombre = li.innerText.split("—")[0].trim();
+      li.remove();
 
-  <!-- Objetivos -->
-  <div class="form-section">
-    <h2>Objetivos del inversor</h2>
-    <label>Rentabilidad objetivo (%)</label>
-    <input type="number" id="rentabilidad" value="8" oninput="calcular()">
-    <label>Estrategia preferida</label>
-    <select id="estrategia">
-      <option value="habitaciones">Alquiler por habitaciones</option>
-      <option value="tradicional">Alquiler tradicional</option>
-      <option value="mixto">Mixto</option>
-    </select>
-    <label>Zonas preferidas</label>
-    <input type="text" id="zonas">
-    <label>Horizonte inversión (años)</label>
-    <input type="number" id="horizonte">
-    <div class="result">
-      <b>Alquiler mensual necesario (€):</b> <span id="alquilerNecesario">0</span>
-    </div>
-  </div>
+      let destinoUl;
+      switch(destino) {
+        case 'Reunión': destinoUl = document.querySelector('#faseReunion ul'); break;
+        case 'Contrato': destinoUl = document.querySelector('#faseContrato ul'); break;
+        case 'Búsqueda': destinoUl = document.querySelector('#faseBusqueda ul'); break;
+        case 'Compraventa': destinoUl = document.querySelector('#faseCompraventa ul'); break;
+        case 'Notaría': destinoUl = document.querySelector('#faseNotaria ul'); break;
+      }
+      if (destinoUl) {
+        const nuevo = document.createElement('li');
+        nuevo.textContent = nombre + " — movido a " + destino;
+        destinoUl.appendChild(nuevo);
+      }
+      actualizarResumen();
+    }
 
-  <!-- Observaciones reunión -->
-  <div class="form-section">
-    <h2>Observaciones</h2>
-    <textarea id="obsReunion" rows="5"></textarea>
-    <label><input type="checkbox"> Primera inversión</label>
-    <label><input type="checkbox"> Ya ha invertido antes</label>
-    <label><input type="checkbox"> Prefiere rentabilidad estable</label>
-    <label><input type="checkbox"> Busca revalorización</label>
-  </div>
+    function descartar(btn) {
+      const li = btn.closest('li');
+      li.querySelector('.actions').innerHTML = '<span class="badge red">Descartado</span>';
+      actualizarResumen();
+    }
 
-  <!-- Acciones -->
-  <div class="actions">
-    <button type="button" onclick="enviarMail()">📧 Enviar Email</button>
-    <button type="button" onclick="generarActa()">📄 Generar Acta PDF</button>
-    <button type="button" onclick="generarContrato()">📝 Generar Contrato PSI</button>
-    <button type="button" onclick="avanzarFase()">🟢 Avanzar</button>
-    <button type="button" onclick="descartar()">🔴 Descartar</button>
-    <button type="button" onclick="eliminar()">🗑️ Eliminar</button>
-  </div>
+    function eliminar(btn) {
+      btn.closest('li').remove();
+      actualizarResumen();
+    }
 
-</form>
-
-<script>
-function calcular(){
-  let presupuesto = parseFloat(document.getElementById('presupuesto').value) || 0;
-  let porcFin = parseFloat(document.getElementById('porcFinanciacion').value) || 0;
-  let rent = parseFloat(document.getElementById('rentabilidad').value) || 0;
-
-  let hipoteca = presupuesto * (porcFin/100);
-  let aportacion = presupuesto - hipoteca;
-  let precioMax = presupuesto * 1.10; // gastos ~10%
-  let alquilerNecesario = (presupuesto * (rent/100)) / 12;
-
-  document.getElementById('hipoteca').value = hipoteca.toFixed(2);
-  document.getElementById('aportacion').value = aportacion.toFixed(2);
-  document.getElementById('precioMax').value = precioMax.toFixed(2);
-  document.getElementById('alquilerNecesario').innerText = alquilerNecesario.toFixed(2);
-}
-
-function enviarMail(){
-  let nombre = document.getElementById('nombre').value;
-  alert("Se enviará un mail de bienvenida a " + nombre);
-  // Aquí iría la lógica real de envío por API/email server
-}
-
-function generarActa(){
-  alert("Generando Acta en PDF...");
-  // Aquí integramos jsPDF o similar
-}
-
-function generarContrato(){
-  alert("Generando contrato PSI con datos del cliente...");
-  // Aquí integramos plantilla Word/PDF
-}
-
-function avanzarFase(){
-  alert("Cliente avanza a siguiente fase.");
-}
-
-function descartar(){
-  alert("Cliente marcado como DESCARTADO (se guarda en histórico).");
-}
-
-function eliminar(){
-  alert("Cliente ELIMINADO (no cuenta en estadísticas).");
-}
-</script>
-
+    function actualizarResumen() {
+      document.getElementById("countContacto").textContent =
+        document.querySelectorAll("#faseContacto li").length;
+      document.getElementById("countReunion").textContent =
+        document.querySelectorAll("#faseReunion li").length;
+      document.getElementById("countContrato").textContent =
+        document.querySelectorAll("#faseContrato li").length;
+      document.getElementById("countBusqueda").textContent =
+        document.querySelectorAll("#faseBusqueda li").length;
+      document.getElementById("countCompraventa").textContent =
+        document.querySelectorAll("#faseCompraventa li").length;
+    }
+  </script>
 </body>
 </html>
