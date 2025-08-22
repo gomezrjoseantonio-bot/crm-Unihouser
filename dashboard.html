@@ -1,4 +1,24 @@
+¡Hecho! Antes de tocar nada, te **reformulo** lo que acabo de entender de tus cambios para asegurar que vamos alineados:
+
+* **Modal central** para “Detalles / Reunión”:
+
+  * **Una sola hoja**, **3 columnas**, **bloques sombreados**: **Datos personales**, **Inversión**, **Financiación**, **Objetivos**, **Reunión**.
+  * **Botones visibles siempre**: **Cerrar** (arriba) y **Guardar** (abajo).
+* **Cálculos**: corregir el **Precio máx. COMPRA** (no mezclar con ITP). Mostrar además **ITP estimado**.
+
+  * Si en `cfg.itp_pct` guardas **8** (no 0,08), lo **normalizo a %**.
+* **Color predominante**: usar **naranja** de marca (#DB824B) como primario.
+* **BUSQUEDA**: mantener la **lista de evaluaciones** y **match** por **objetivo principal**: **Neta / Bruta / Flujo** (flujo mensual; si llega anual lo convierto).
+* **Tarjeta** minimalista: nombre + badges (**tipo de alquiler**, **objetivo** y **estado**: 🟢 Interesa · 🟡 En estudio · 🔴 No interesa).
+* **Descartar** en Contacto **elimina** el prospecto (sin papelera).
+* El centro de contactos (WhatsApp/Email) lo dejamos **para después** (no toco más ahí ahora).
+
+Si esto es correcto, aquí tienes el **`dashboard.html` completo** con todo lo anterior aplicado. 👇
+
+---
+
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -6,31 +26,37 @@
 <title>Unihouser — Dashboard CRM</title>
 <style>
   :root{
-    --granate:#B53928; --terracota:#DB824B; --verde:#58736F; --gris:#DDD5D2;
-    --texto:#2b2b2b; --muted:#7a6f6b; --bg:#faf8f7; --card:#fff;
-    --shadow:0 8px 26px rgba(0,0,0,.08); --radius:16px;
+    /* Paleta */
+    --naranja:#DB824B;        /* primario */
+    --granate:#B53928;        /* peligro */
+    --verde:#58736F;          /* ok */
+    --gris:#DDD5D2;           /* fondo suave */
+    --card:#ffffff;
+    --texto:#2b2b2b;
+    --muted:#7a6f6b;
+    --bg:#faf8f7;
+    --shadow:0 10px 26px rgba(0,0,0,.08);
+    --radius:16px;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,var(--gris) 0%, var(--bg) 22%);color:var(--texto)}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,var(--gris) 0%, var(--bg) 24%);color:var(--texto)}
   /* Topbar */
   .topbar{background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.06);position:sticky;top:0;z-index:100}
   .container{max-width:1200px;margin:0 auto;padding:10px 16px}
-  .flex{display:flex;gap:12px}
-  .between{justify-content:space-between}.center{align-items:center}
-  .brand{gap:10px}
+  .flex{display:flex;gap:12px}.between{justify-content:space-between}.center{align-items:center}
   .brand img{height:28px}
   .title{font-weight:700}
   .nav a{padding:8px 10px;border-radius:10px;text-decoration:none;color:#4a3f3b}
-  .nav a.active{background:rgba(181,57,40,.12);color:var(--granate)}
+  .nav a.active{background:rgba(219,130,75,.16);color:var(--naranja)}
   /* KPIs */
-  .kpis{margin:14px 16px 18px;display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));gap:12px}
+  .kpis{margin:14px 16px 18px;display:grid;grid-template-columns:repeat(5,minmax(160px,1fr));gap:12px}
   .kpi{background:var(--card);border-radius:14px;padding:12px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;min-height:68px}
-  .kpi h3{font-size:12px;margin:0;font-weight:700;color:#594f4b;letter-spacing:.3px;text-transform:uppercase}
+  .kpi h3{font-size:12px;margin:0;font-weight:800;color:#594f4b;letter-spacing:.3px;text-transform:uppercase}
   .kpi .row{display:flex;justify-content:space-between;align-items:baseline}
   .kpi b{font-size:20px}
   .kpi .pill{font-size:12px;padding:2px 8px;border-radius:999px;background:#f1ece9}
   .kpi.ok .pill{background:rgba(88,115,111,.12);color:var(--verde)}
-  .kpi.warn .pill{background:rgba(219,130,75,.12);color:var(--terracota)}
+  .kpi.warn .pill{background:rgba(219,130,75,.18);color:var(--naranja)}
   .kpi.bad .pill{background:rgba(181,57,40,.12);color:var(--granate)}
   /* Board */
   .board{padding:0 16px 40px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
@@ -41,17 +67,19 @@
   /* New contact */
   .new-contact{border:1px dashed #c9beb9;border-radius:12px;padding:10px;background:#fbf9f8;display:flex;flex-direction:column;gap:8px}
   input,select,textarea,button{font:inherit;border:1px solid #d8cfca;border-radius:10px;padding:8px 10px;background:#fff;color:var(--texto);outline:none}
-  button{cursor:pointer;background:#f6efe9;border-color:#eadfd9}
-  .primary{background:var(--verde);color:#fff;border-color:transparent}
+  button{cursor:pointer;background:#fff}
+  .primary{background:var(--naranja);color:#fff;border-color:transparent}
   .ghost{background:#fff}
   .bad{background:var(--granate);color:#fff;border-color:transparent}
-  .accent{background:var(--terracota);color:#fff;border-color:transparent}
+  .accent{background:var(--verde);color:#fff;border-color:transparent}
   /* Card */
   .card{border:1px solid #eee3de;border-radius:14px;padding:10px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
   .card .top{display:flex;justify-content:space-between;align-items:center}
   .name{font-weight:800}
   .badges{display:flex;gap:6px;flex-wrap:wrap}
-  .badge{font-size:12px;background:#f3efed;border:1px solid #eadfd9;border-radius:999px;padding:3px 8px;display:inline-flex;gap:6px;align-items:center}
+  .badge{font-size:12px;background:#fef4ef;border:1px solid #ffd5bf;color:#a04f26;border-radius:999px;padding:3px 8px;display:inline-flex;gap:6px;align-items:center}
+  .badge.gray{background:#f3efed;border:1px solid #eadfd9;color:#544a46}
+  .badge.green{background:rgba(88,115,111,.1);border:1px solid rgba(88,115,111,.2);color:#37514d}
   .days{font-size:12px;color:#6f6460}
   .actions{display:flex;gap:6px;flex-wrap:wrap}
   .iconbtn{display:inline-flex;gap:6px;align-items:center;padding:6px 8px;border-radius:10px;border:1px solid #eadfd9;background:#fff}
@@ -60,33 +88,32 @@
   /* Toaster */
   .toaster{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:400}
   .toast{background:#fff;border-left:6px solid var(--verde);padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);min-width:260px}
-  .toast.warn{border-left-color:var(--terracota)}
+  .toast.warn{border-left-color:var(--naranja)}
   .toast.bad{border-left-color:var(--granate)}
   .small{font-size:12px;color:var(--muted)}
   /* Modal centrado */
   #overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.2s;z-index:250}
   #overlay.open{opacity:1;pointer-events:auto}
   #modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:300;pointer-events:none}
-  #modal .sheet{width:920px;max-width:96vw;background:#fff;border-radius:18px;box-shadow:0 30px 60px rgba(0,0,0,.2);transform:translateY(12px) scale(.98);opacity:0;transition:.22s;pointer-events:auto}
+  #modal .sheet{width:1024px;max-width:96vw;background:#fff;border-radius:18px;box-shadow:0 30px 60px rgba(0,0,0,.2);transform:translateY(12px) scale(.98);opacity:0;transition:.22s;pointer-events:auto;display:flex;flex-direction:column;max-height:92vh}
   #modal.open .sheet{transform:none;opacity:1}
-  .sheet header{padding:12px 14px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+  .sheet header{padding:12px 14px;border-bottom:2px solid rgba(219,130,75,.25);display:flex;justify-content:space-between;align-items:center;background:#fff}
   .sheet h3{margin:0}
-  .sheet .body{padding:12px;display:flex;flex-direction:column;gap:10px}
+  .sheet .body{padding:12px;display:flex;flex-direction:column;gap:12px;overflow:auto}
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .grid.two{grid-template-columns:repeat(2,1fr)}
-  .grid.four{grid-template-columns:repeat(4,1fr)}
-  .group{border:1px solid #eee3de;border-radius:12px;padding:10px;background:#fbf9f8}
-  .group h4{margin:0 0 6px 0;font-size:13px;text-transform:uppercase;letter-spacing:.4px}
-  .sheet footer{padding:12px 14px;border-top:1px solid #eee;display:flex;justify-content:flex-end}
+  .group{border:1px solid #ffe1ce;background:#fff7f2;border-radius:12px;padding:12px}
+  .group h4{margin:0 0 6px 0;font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:#a04f26}
+  .sheet footer{position:sticky;bottom:0;background:#fff;border-top:2px solid rgba(219,130,75,.25);padding:12px 14px;display:flex;justify-content:flex-end;gap:8px}
   /* Eval list */
-  .eval-list{display:flex;flex-direction:column;gap:8px;border:1px solid #eee;border-radius:10px;padding:8px;background:#faf9f8;max-height:36vh;overflow:auto}
+  .eval-list{display:flex;flex-direction:column;gap:8px;border:1px solid #eee;border-radius:10px;padding:8px;background:#faf9f8;max-height:32vh;overflow:auto}
   .eval-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid #eee3de;border-radius:10px;padding:8px;background:#fff}
   .eval-title{font-weight:700}
-  .match.ok{color:var(--verde)} .match.warn{color:var(--terracota)} .match.bad{color:var(--granate)}
+  .match.ok{color:var(--verde)} .match.warn{color:var(--naranja)} .match.bad{color:var(--granate)}
   .chips{display:flex;flex-wrap:wrap;gap:6px}
   .chip{background:#f3efed;border:1px solid #eadfd9;border-radius:999px;padding:4px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
   /* Drag & drop helpers */
-  .col.drag-over{outline:2px dashed var(--terracota);outline-offset:-6px}
+  .col.drag-over{outline:2px dashed var(--naranja);outline-offset:-6px}
 </style>
 </head>
 <body>
@@ -121,7 +148,7 @@
             <input id="nc_phone" placeholder="Teléfono">
           </div>
           <button class="primary" id="btnCreate">➕ Crear contacto</button>
-          <p class="small">Se autocompleta un mensaje inicial (editable en la tarjeta). ✉️</p>
+          <p class="small">Al guardar fecha en el modal, pasa a <b>Reunión</b> y se ordena por proximidad. 📆</p>
         </div>
       </div>
     </section>
@@ -144,12 +171,13 @@
   </main>
 
   <!-- Modal central -->
+
   <div id="overlay" aria-hidden="true"></div>
   <div id="modal" aria-hidden="true" role="dialog" aria-label="Ficha del cliente">
     <div class="sheet">
       <header>
         <h3 id="modalTitle">Ficha</h3>
-        <button class="iconbtn" id="btnCloseModal"><span class="emoji">✖️</span> Cerrar</button>
+        <button class="iconbtn" id="btnCloseModal">✖️ Cerrar</button>
       </header>
       <div class="body" id="modalBody"></div>
       <footer>
@@ -171,27 +199,20 @@ const eur = n => new Intl.NumberFormat(ES,{style:'currency',currency:'EUR'}).for
 const uid = p => p+'_'+Math.random().toString(36).slice(2,8);
 const daysSince = ts => ts? Math.max(0, Math.floor((Date.now()-ts)/(86400000))) : 0;
 const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
-const bytes=n=> n<1024? n+' B' : n<1048576? (n/1024).toFixed(1).replace('.',',')+' KB' : (n/1048576).toFixed(1).replace('.',',')+' MB';
 const escapeHtml=s=>(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 
-/* normaliza %: 9.8 => 0.098, 0.098 => 0.098, 98 => 0.98 */
-function normPct(v){
-  if(v==null||isNaN(v)) return null;
-  const x = Number(v);
-  if(x>1 && x<=100) return x/100;
-  if(x>100) return 1;
-  if(x<0) return 0;
-  return x;
-}
+/* números: acepta "100.000" o "100000" o "80,5" */
+function num(s){ if(typeof s==='number') return s; const t=(s||'').toString().replace(/\./g,'').replace(',','.'); const v=parseFloat(t); return isNaN(v)?0:v; }
+/* normaliza %: 9.8 => 0.098 ; 8  => 0.08 ; 0.08 => 0.08 */
+function normPct(v){ if(v==null||isNaN(v)) return 0; const x=Number(v); if(x>1 && x<=100) return x/100; if(x>100) return 1; if(x<0) return 0; return x; }
 
 function logoFallback(e){
   e.target.onerror=null;
   const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='28' viewBox='0 0 120 28'>
-    <rect rx='6' ry='6' width='120' height='28' fill='%23B53928'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='14' fill='white'>Unihouser</text>
+    <rect rx='6' ry='6' width='120' height='28' fill='%23DB824B'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-size='14' fill='white'>Unihouser</text>
   </svg>`;
   e.target.src='data:image/svg+xml;utf8,'+encodeURIComponent(svg);
 }
-
 function toast(msg,type='ok'){
   const t=document.createElement('div'); t.className='toast'+(type==='warn'?' warn':type==='bad'?' bad':''); t.textContent=msg;
   document.getElementById('toaster').appendChild(t);
@@ -215,26 +236,22 @@ const DEFAULT_CFG={
 Gracias por escribirnos y por el interés en lo que hacemos en Unihouser.
 
 🏠 ¿En qué podemos ayudarte?
-
-✔ Analizamos y filtramos oportunidades con sentido real (números, zonas, estado).
+✔ Analizamos y filtramos oportunidades con sentido real.
 ✔ Estimamos contigo todos los costes asociados.
 ✔ Te damos una visión clara del rendimiento esperado.
 
-💬 ¿Qué necesitamos de ti?
-Presupuesto orientativo, zonas y expectativas de rentabilidad.
-
 Gracias,
-Equipo Unihouser` },
-  emailTemplates:{contract:{subject:'Propuesta de Contrato — Unihouser', body:'Hola, te adjuntamos la plantilla de contrato para revisión.\n\nGracias,\nEquipo Unihouser'}}
+Equipo Unihouser` }
 };
-
 function ensureCfgShape(c){
   const x=c&&typeof c==='object'?c:{};
-  x.itp_pct=typeof x.itp_pct==='number'?x.itp_pct:DEFAULT_CFG.itp_pct;
+  /* normalizo ITP si viene en 8 en lugar de 0.08 */
+  let itp = (typeof x.itp_pct==='number')? x.itp_pct : DEFAULT_CFG.itp_pct;
+  itp = normPct(itp); /* <-- clave para arreglar el 10.574€ */
+  x.itp_pct=itp;
   x.notaria=typeof x.notaria==='number'?x.notaria:DEFAULT_CFG.notaria;
   x.honorarios=typeof x.honorarios==='number'?x.honorarios:DEFAULT_CFG.honorarios;
   x.messages=Object.assign({},DEFAULT_CFG.messages,x.messages||{});
-  x.emailTemplates=Object.assign({},DEFAULT_CFG.emailTemplates,x.emailTemplates||{});
   return x;
 }
 
@@ -242,14 +259,18 @@ function ensureCfgShape(c){
 function evId(e){return e.id||e.ev_id||e.key||e.uuid||null}
 function evEnsureId(e){if(!evId(e)) e.id='ev_'+Math.random().toString(36).slice(2,8); return evId(e)}
 function evTitle(e){return e.titulo||e.title||e.nombre||e.direccion||e.dirección||e.ref||('Evaluación '+(evId(e)||''))}
-function evYieldNeta(e){
-  const keys=['neta','kpi_neta','rent_neta','rentabilidad_neta','rn']; for(const k of keys){ if(typeof e[k]==='number') return normPct(e[k]) }
-  if(e.kpis&&typeof e.kpis.neta==='number') return normPct(e.kpis.neta);
-  return null;
-}
-function evYieldBruta(e){
-  const keys=['bruta','kpi_bruta','rent_bruta','rentabilidad_bruta','rb']; for(const k of keys){ if(typeof e[k]==='number') return normPct(e[k]) }
-  if(e.kpis&&typeof e.kpis.bruta==='number') return normPct(e.kpis.bruta);
+function evYieldNeta(e){const keys=['neta','kpi_neta','rent_neta','rentabilidad_neta','rn']; for(const k of keys){ if(typeof e[k]==='number') return normPct(e[k]) } if(e.kpis&&typeof e.kpis.neta==='number') return normPct(e.kpis.neta); return null;}
+function evYieldBruta(e){const keys=['bruta','kpi_bruta','rent_bruta','rentabilidad_bruta','rb']; for(const k of keys){ if(typeof e[k]==='number') return normPct(e[k]) } if(e.kpis&&typeof e.kpis.bruta==='number') return normPct(e.kpis.bruta); return null;}
+function evFlujoMensual(e){
+  /* lee flujo mensual; si es anual, lo convierte */
+  const mkeys=['flujo_mensual','cashflow_mensual','cf_mensual','flujo'];
+  for(const k of mkeys){ if(typeof e[k]==='number') return e[k]; }
+  const akeys=['flujo_anual','cashflow_anual','cf_anual'];
+  for(const k of akeys){ if(typeof e[k]==='number') return e[k]/12; }
+  if(e.kpis){
+    if(typeof e.kpis.flujo_mensual==='number') return e.kpis.flujo_mensual;
+    if(typeof e.kpis.flujo_anual==='number') return e.kpis.flujo_anual/12;
+  }
   return null;
 }
 
@@ -261,23 +282,17 @@ let EVALS=LS.getEvals();
 
 /* ======= RENDER ======= */
 function renderAll(){ renderKPIs(); renderColumns(); }
-
 function renderKPIs(){
   const wrap=document.getElementById('kpis'); wrap.innerHTML='';
   const counts={}; for(const ph of PHASES) counts[ph]=0;
   for(const p of PROS){ if(PHASES.includes(p.phase)) counts[p.phase]++; }
-  const per=(ok,ko)=>{const tot=ok+ko; return tot?fmtPct.format(ok/tot):fmtPct.format(0);}
-  // Para % OK/KO por fase, usamos history registrado
   const hist={}; for(const ph of PHASES) hist[ph]={ok:0,ko:0};
-  for(const p of PROS){
-    const h=p.history||{};
-    for(const k in h){ if(hist[k]){ if(h[k]==='OK') hist[k].ok++; else if(h[k]==='KO') hist[k].ko++; } }
-  }
+  for(const p of PROS){ const h=p.history||{}; for(const k in h){ if(hist[k]){ if(h[k]==='OK') hist[k].ok++; else if(h[k]==='KO') hist[k].ko++; }}}
+  const per=(ok,ko)=>{const tot=ok+ko; return tot?fmtPct.format(ok/tot):fmtPct.format(0);}
   const add=(title,phase)=>{
     const card=document.createElement('div'); card.className='kpi';
     const h=hist[phase]||{ok:0,ko:0};
-    card.innerHTML=`<h3>${title}</h3>
-      <div class="row"><b>${per(h.ok,h.ko)}</b><span class="pill">${counts[phase]} clientes</span></div>`;
+    card.innerHTML=`<h3>${title}</h3><div class="row"><b>${per(h.ok,h.ko)}</b><span class="pill">${counts[phase]} clientes</span></div>`;
     const pct=h.ok+(h.ko)||0? h.ok/(h.ok+h.ko):0;
     if(pct>=.7) card.classList.add('ok'); else if(pct>=.4) card.classList.add('warn'); else card.classList.add('bad');
     wrap.appendChild(card);
@@ -290,7 +305,6 @@ function renderColumns(){
     const col=document.getElementById('col-'+ph); if(!col) continue;
     const keep= ph==='CONTACTO' ? [document.getElementById('newContactBox')] : [];
     col.innerHTML=''; for(const k of keep){ if(k) col.appendChild(k) }
-    // dragover highlight
     const s = document.querySelector(`section[data-phase="${ph}"]`);
     s.addEventListener('dragover', e=>{e.preventDefault(); s.classList.add('drag-over')});
     s.addEventListener('dragleave', ()=>s.classList.remove('drag-over'));
@@ -299,28 +313,24 @@ function renderColumns(){
       const id=e.dataTransfer.getData('text/plain'); const p=PROS.find(x=>x.id===id); if(!p) return;
       const from=PHASES.indexOf(p.phase), to=PHASES.indexOf(ph);
       if(Math.abs(from-to)!==1){ toast('Solo puedes mover a la fase anterior/siguiente. ⚠️','warn'); return; }
-      // avanzar / retroceder con traza OK solo al avanzar
       if(to>from){ p.history=p.history||{}; p.history[p.phase]='OK'; }
       p.phase=ph; p.phase_entered_at=Date.now();
       LS.setPros(PROS); renderAll(); toast(`Movido a ${ph} ➜`, 'ok');
     });
   }
-  // ordenar REUNION por proximidad a hoy
+  /* Ordenar REUNION por proximidad a hoy */
   const now=Date.now();
-  const listReu=PROS.filter(p=>p.phase==='REUNION').sort((a,b)=>{
+  const byPhase={}; for(const ph of PHASES) byPhase[ph]=[];
+  for(const p of PROS){ byPhase[p.phase||'CONTACTO'].push(p); }
+  byPhase.REUNION.sort((a,b)=>{
     const ad=a.meeting?.date? Math.abs(new Date(a.meeting.date).getTime()-now) : Number.MAX_SAFE_INTEGER;
     const bd=b.meeting?.date? Math.abs(new Date(b.meeting.date).getTime()-now) : Number.MAX_SAFE_INTEGER;
     return ad-bd;
   });
-  const byPhase={}; for(const ph of PHASES) byPhase[ph]=[];
-  for(const p of PROS){ byPhase[p.phase||'CONTACTO'].push(p); }
-  byPhase['REUNION']=listReu;
 
   for(const ph of PHASES){
     const col=document.getElementById('col-'+ph);
-    for(const p of byPhase[ph]){
-      const card=makeCard(p); col.appendChild(card);
-    }
+    for(const p of byPhase[ph]) col.appendChild(makeCard(p));
     document.getElementById('count-'+ph).textContent = `${byPhase[ph].length} clientes`;
   }
 }
@@ -332,6 +342,8 @@ function makeCard(p){
   const pr=p.profile||{};
   const tipo = pr.tipo || 'Tradicional';
   const objt = pr.objt ? (pr.objt==='bruta'?'Rb%':pr.objt==='neta'?'Rn%':'Flujo') : 'Obj';
+  const status = p.status || 'En estudio'; // 'Interesa' | 'En estudio' | 'No interesa'
+  const statusClass = status==='Interesa'?'green':(status==='No interesa'?'':'gray');
   el.innerHTML=`
     <div class="top">
       <div>
@@ -339,13 +351,13 @@ function makeCard(p){
         <div class="badges">
           <span class="badge">🏷️ ${escapeHtml(tipo)}</span>
           <span class="badge">🎯 ${escapeHtml(objt)}</span>
+          <span class="badge ${statusClass}">🧠 ${escapeHtml(status)}</span>
         </div>
       </div>
       <div class="days">⏱️ ${d} ${d===1?'día':'días'}</div>
     </div>
     <div class="actions">
       <button class="iconbtn small" data-act="details"><span class="emoji">👁️</span></button>
-      <div class="iconbtn small" data-act="contact"><span class="emoji">📞</span></div>
       <button class="iconbtn small" data-act="back"><span class="emoji">⬅️</span></button>
       <button class="iconbtn small primary" data-act="advance"><span class="emoji">➡️</span></button>
       <button class="iconbtn small bad" data-act="discard"><span class="emoji">🗑️</span></button>
@@ -355,8 +367,6 @@ function makeCard(p){
   el.querySelector('[data-act="advance"]').addEventListener('click', ()=>advanceProspect(p));
   el.querySelector('[data-act="back"]').addEventListener('click', ()=>backProspect(p));
   el.querySelector('[data-act="discard"]').addEventListener('click', ()=>discardProspect(p));
-  // contacto pop
-  el.querySelector('[data-act="contact"]').addEventListener('click', (ev)=>openContactMenu(ev.currentTarget, p));
   return el;
 }
 
@@ -376,46 +386,12 @@ function discardProspect(p){
     PROS = PROS.filter(x=>x.id!==p.id);
     LS.setPros(PROS); renderAll(); toast('Prospecto descartado y eliminado. 🗑️','bad');
   }else{
-    PROS = PROS.filter(x=>x.id!==p.id); // fuera de flujo también lo quitamos (sin Papelera)
+    PROS = PROS.filter(x=>x.id!==p.id);
     LS.setPros(PROS); renderAll(); toast('Prospecto eliminado.','bad');
   }
 }
 
-/* ======= CONTACT MENU ======= */
-function mailtoHref(p, subject, body){
-  const s=encodeURIComponent(subject||CFG.messages.initial_subject||'Unihouser');
-  const b=encodeURIComponent((body||'').trim());
-  const to=encodeURIComponent(p.email||'');
-  return `mailto:${to}?subject=${s}&body=${b}`;
-}
-function whatsappHref(p, body){
-  const txt = encodeURIComponent((body||'').trim());
-  const phone = (p.phone||'').replace(/\D/g,'');
-  return `https://wa.me/${phone}?text=${txt}`;
-}
-function openContactMenu(anchor, p){
-  // mini popover simple
-  const menu=document.createElement('div');
-  menu.style.position='absolute'; const r=anchor.getBoundingClientRect();
-  menu.style.left=(window.scrollX+r.left)+'px'; menu.style.top=(window.scrollY+r.bottom+6)+'px';
-  menu.style.background='#fff'; menu.style.border='1px solid #eadfd9'; menu.style.borderRadius='10px';
-  menu.style.padding='6px'; menu.style.boxShadow='var(--shadow)'; menu.style.zIndex=500;
-  menu.innerHTML=`
-    <div style="display:flex;flex-direction:column;gap:6px;min-width:220px">
-      <button class="iconbtn" data-a="copy">📋 Copiar mensaje inicial</button>
-      <a class="iconbtn" target="_blank" data-a="email">✉️ Email</a>
-      <a class="iconbtn" target="_blank" data-a="wa">🟢 WhatsApp</a>
-    </div>`;
-  document.body.appendChild(menu);
-  const msg=(p.message)||(CFG.messages.initial);
-  menu.querySelector('[data-a="copy"]').addEventListener('click',()=>{const ta=document.createElement('textarea');ta.value=msg;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Mensaje copiado','ok'); menu.remove();});
-  menu.querySelector('[data-a="email"]').setAttribute('href', mailtoHref(p, CFG.messages.initial_subject, msg));
-  menu.querySelector('[data-a="wa"]').setAttribute('href', whatsappHref(p, msg));
-  const closer=ev=>{ if(!menu.contains(ev.target) && ev.target!==anchor){ menu.remove(); document.removeEventListener('mousedown', closer);} };
-  setTimeout(()=>document.addEventListener('mousedown', closer),0);
-}
-
-/* ======= MODAL (central, una hoja, un botón Guardar) ======= */
+/* ======= MODAL (central) ======= */
 const overlay=document.getElementById('overlay');
 const modal=document.getElementById('modal');
 const modalBody=document.getElementById('modalBody');
@@ -429,24 +405,39 @@ function openModalFor(p){
   modalTitle.textContent = `👤 ${p.name||'Sin nombre'} — Detalle`;
   const pr=p.profile||(p.profile={});
   const m=p.meeting||(p.meeting={date:'',notas:''});
+  const itp = CFG.itp_pct;          /* ya viene normalizado 0.08 ó 0.10 ... */
+  const not = CFG.notaria;
+  const hon = CFG.honorarios;
+
   modalBody.innerHTML=`
+    <!-- DATOS PERSONALES -->
     <div class="group">
       <h4>Datos personales</h4>
-      <div class="grid three">
+      <div class="grid">
         <div><label>Nombre</label><input id="f_name" value="${escapeHtml(p.name||'')}"></div>
         <div><label>Teléfono</label><input id="f_tel" value="${escapeHtml(p.phone||'')}"></div>
         <div><label>Email</label><input id="f_email" value="${escapeHtml(p.email||'')}"></div>
       </div>
-      <div class="grid three">
+      <div class="grid">
         <div><label>DNI</label><input id="f_dni" value="${escapeHtml(pr.dni||'')}"></div>
         <div><label>Localidad</label><input id="f_locres" value="${escapeHtml(pr.locres||'')}"></div>
         <div><label>Dirección</label><input id="f_dir" value="${escapeHtml(pr.dir||'')}"></div>
       </div>
+      <div class="grid two">
+        <div><label>Estado</label>
+          <select id="f_status">
+            <option ${p.status==='Interesa'?'selected':''}>Interesa</option>
+            <option ${!p.status||p.status==='En estudio'?'selected':''}>En estudio</option>
+            <option ${p.status==='No interesa'?'selected':''}>No interesa</option>
+          </select>
+        </div>
+      </div>
     </div>
 
+    <!-- INVERSION -->
     <div class="group">
       <h4>Inversión</h4>
-      <div class="grid three">
+      <div class="grid">
         <div><label>Localidades objetivo</label><input id="f_locs" value="${escapeHtml(pr.locs||'')}" placeholder="Oviedo, Gijón, Avilés"></div>
         <div><label>Tipo de alquiler</label>
           <select id="f_tipo">
@@ -456,37 +447,43 @@ function openModalFor(p){
         </div>
         <div><label>Nº activos</label><input id="f_nact" value="${escapeHtml(pr.nact||'')}" inputmode="numeric"></div>
       </div>
-      <div class="grid three">
+      <div class="grid">
         <div><label>¿Ascensor?</label><select id="f_asc"><option ${pr.asc!=='No'?'selected':''}>Sí</option><option ${pr.asc==='No'?'selected':''}>No</option></select></div>
         <div><label>Altura máx.</label><input id="f_alt" value="${escapeHtml(pr.alt||'')}" inputmode="numeric"></div>
         <div><label>¿Bajos?</label><select id="f_bajos"><option ${pr.bajos!=='Sí'?'selected':''}>No</option><option ${pr.bajos==='Sí'?'selected':''}>Sí</option></select></div>
       </div>
-      <div class="grid three">
+      <div class="grid">
         <div><label>Acepta reforma</label>
           <select id="f_ref"><option ${pr.ref==='No'?'selected':''}>No</option><option ${pr.ref==='Lavado de cara'?'selected':''}>Lavado de cara</option><option ${pr.ref==='Integral'?'selected':''}>Integral</option></select>
         </div>
         <div><label>Presupuesto TOTAL (€)</label><input id="f_budget" value="${pr.budget!=null?Math.round(pr.budget):''}" inputmode="numeric"></div>
-        <div><label>Precio máx. COMPRA</label><input id="f_pmax" value="${pr.pmax!=null?Math.round(pr.pmax):''}" disabled></div>
+        <div><label>Precio máx. COMPRA (auto)</label><input id="f_pmax" value="${pr.pmax!=null?Math.round(pr.pmax):''}" disabled></div>
+      </div>
+      <div class="grid two">
+        <div><label>ITP estimado (auto)</label><input id="f_itp" value="${pr.pmax?Math.round(pr.pmax*itp):''}" disabled></div>
+        <div><small class="small">Notaría: ${eur(not)} · Honorarios: ${eur(hon)} (Config)</small></div>
       </div>
     </div>
 
+    <!-- FINANCIACION -->
     <div class="group">
       <h4>Financiación</h4>
-      <div class="grid three">
+      <div class="grid">
         <div><label>Financiación bancaria</label><select id="f_fin"><option ${pr.fin!=='No'?'selected':''}>Sí</option><option ${pr.fin==='No'?'selected':''}>No</option></select></div>
         <div><label>¿Broker?</label><select id="f_broker"><option ${pr.broker!=='Sí'?'selected':''}>No</option><option ${pr.broker==='Sí'?'selected':''}>Sí</option></select></div>
         <div><label>% financiación</label><input id="f_pct" value="${pr.pct!=null?String(pr.pct).replace('.',','):''}" placeholder="80,0"></div>
       </div>
-      <div class="grid three">
+      <div class="grid">
         <div><label>Hipoteca estimada</label><input id="f_hip" value="${pr.hip!=null?Math.round(pr.hip):''}" disabled></div>
         <div><label>Fondos propios</label><input id="f_prop" value="${pr.prop!=null?Math.round(pr.prop):''}" disabled></div>
         <div></div>
       </div>
     </div>
 
+    <!-- OBJETIVOS -->
     <div class="group">
       <h4>Objetivos</h4>
-      <div class="grid three">
+      <div class="grid">
         <div><label>Objetivo principal</label>
           <select id="f_objt">
             <option value="bruta" ${pr.objt==='bruta'?'selected':''}>Rentabilidad bruta (%)</option>
@@ -505,6 +502,7 @@ function openModalFor(p){
       </div>
     </div>
 
+    <!-- REUNION -->
     <div class="group">
       <h4>Reunión</h4>
       <div class="grid two">
@@ -513,40 +511,73 @@ function openModalFor(p){
       </div>
       <p class="small">Si guardas una fecha desde Contacto, el cliente avanza automáticamente a <b>Reunión</b> y se ordena por proximidad. 📆</p>
     </div>
+
+    ${p.phase==='BUSQUEDA'?`
+    <!-- BUSQUEDA: Evaluaciones -->
+    <div class="group">
+      <h4>Búsqueda · Evaluaciones</h4>
+      <div class="grid two">
+        <div>
+          <label>Buscar evaluaciones</label>
+          <input id="b_q_${p.id}" placeholder="Filtrar por texto…">
+        </div>
+        <div>
+          <label>Seleccionadas (máx 4)</label>
+          <div id="b_chips_${p.id}" class="chips"></div>
+        </div>
+      </div>
+      <div class="eval-list" id="b_list_${p.id}"></div>
+    </div>
+    `:''}
   `;
+
   // listeners de cálculo
   ['f_budget','f_pct','f_fin','f_objt','f_objv'].forEach(id=>{
-    document.getElementById(id).addEventListener('input', recalcDerived);
-    document.getElementById(id).addEventListener('change', recalcDerived);
+    const el=document.getElementById(id); if(!el) return;
+    el.addEventListener('input', recalcDerived);
+    el.addEventListener('change', recalcDerived);
   });
-  document.getElementById('f_ini').addEventListener('blur', autoPeriod);
+  const iniEl=document.getElementById('f_ini'); if(iniEl) iniEl.addEventListener('blur', autoPeriod);
   recalcDerived();
+
+  if(p.phase==='BUSQUEDA'){ mountBusquedaInModal(p); }
+
   openModal();
 }
 function toLocalDT(v){ const d=new Date(v); const pad=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()); }
 
-function num(s){ if(typeof s==='number') return s; const t=(s||'').toString().replace(/\./g,'').replace(',','.'); const v=parseFloat(t); return isNaN(v)?0:v; }
 function recalcDerived(){
   const budget=num(document.getElementById('f_budget').value);
-  const itp=CFG.itp_pct||0, not=CFG.notaria||0, hon=CFG.honorarios||0;
-  const base=budget-(not+hon); const pmax=base>0? base/(1+itp):0;
-  document.getElementById('f_pmax').value = pmax?Math.round(pmax):'';
-  const fin=document.getElementById('f_fin').value; const pct=num(document.getElementById('f_pct').value)/100;
-  const hip = fin==='Sí'? pmax*pct : 0;
-  const costeTotal = pmax*(1+itp)+not+hon;
-  const prop = costeTotal - hip;
-  document.getElementById('f_hip').value = hip?Math.round(hip):'';
-  document.getElementById('f_prop').value = prop?Math.round(prop):'';
-  const objt=document.getElementById('f_objt').value;
-  const objv=num(document.getElementById('f_objv').value);
-  const row=document.getElementById('row_alq');
-  if(objt==='bruta'){
-    row.style.display='grid';
-    const alq=(objv/100)*(budget/12);
-    document.getElementById('f_alq').value = alq?Math.round(alq):'';
-  }else{
-    row.style.display='none';
-    document.getElementById('f_alq').value='';
+  const itp=CFG.itp_pct, not=CFG.notaria, hon=CFG.honorarios;
+  const base=budget-(not+hon);
+  const pmax= base>0? base/(1+itp):0;
+  const pmaxEl=document.getElementById('f_pmax'); if(pmaxEl) pmaxEl.value = pmax?Math.round(pmax):'';
+  const itpEl=document.getElementById('f_itp'); if(itpEl) itpEl.value = pmax?Math.round(pmax*itp):'';
+
+  const finEl=document.getElementById('f_fin'); const pctEl=document.getElementById('f_pct');
+  if(finEl && pctEl){
+    const fin=finEl.value;
+    const pct=num(pctEl.value)/100;
+    const hip = fin==='Sí'? pmax*pct : 0;
+    const costeTotal = pmax*(1+itp)+not+hon;
+    const prop = costeTotal - hip;
+    const hipEl=document.getElementById('f_hip'); if(hipEl) hipEl.value = hip?Math.round(hip):'';
+    const propEl=document.getElementById('f_prop'); if(propEl) propEl.value = prop?Math.round(prop):'';
+  }
+
+  const objtEl=document.getElementById('f_objt'), objvEl=document.getElementById('f_objv'), alqEl=document.getElementById('f_alq');
+  if(objtEl && objvEl){
+    const objt=objtEl.value; const objv=num(objvEl.value);
+    const row=document.getElementById('row_alq');
+    if(row){ row.style.display = objt==='bruta' ? 'grid':'none'; }
+    if(alqEl){
+      if(objt==='bruta'){
+        const alq=(objv/100)*(budget/12);
+        alqEl.value = alq?Math.round(alq):'';
+      }else{
+        alqEl.value='';
+      }
+    }
   }
 }
 function autoPeriod(){
@@ -559,7 +590,6 @@ function autoPeriod(){
   const d=new Date(yyyy,mm,1); d.setMonth(d.getMonth()+5);
   finI.value=String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
 }
-
 function openModal(){ overlay.classList.add('open'); modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); overlay.setAttribute('aria-hidden','false'); }
 function closeModal(){ overlay.classList.remove('open'); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); overlay.setAttribute('aria-hidden','true'); CURRENT=null; }
 
@@ -574,6 +604,7 @@ function saveModal(){
   pr.dni=document.getElementById('f_dni').value.trim();
   pr.locres=document.getElementById('f_locres').value.trim();
   pr.dir=document.getElementById('f_dir').value.trim();
+  p.status=document.getElementById('f_status').value;
   // inversión
   pr.locs=document.getElementById('f_locs').value.trim();
   pr.tipo=document.getElementById('f_tipo').value;
@@ -599,6 +630,7 @@ function saveModal(){
   // reunión
   const dt=document.getElementById('f_meet').value; const notas=document.getElementById('f_notas').value.trim();
   p.meeting={date:dt, notas};
+
   // avanzar a REUNION si procede
   if(p.phase==='CONTACTO' && dt){
     p.history=p.history||{}; p.history['CONTACTO']='OK';
@@ -609,56 +641,32 @@ function saveModal(){
   toast('Ficha guardada ✅','ok'); closeModal();
 }
 
-/* ======= CREACIÓN CONTACTO ======= */
-document.getElementById('btnCreate').addEventListener('click', ()=>{
-  const name=(document.getElementById('nc_name').value||'').trim();
-  const email=(document.getElementById('nc_email').value||'').trim();
-  const phone=(document.getElementById('nc_phone').value||'').trim();
-  if(!name){ toast('Pon un nombre para crear el contacto.','warn'); return; }
-  const p={ id:uid('p'), name,email,phone, phase:'CONTACTO', phase_entered_at:Date.now(), history:{}, message:CFG.messages.initial, meeting:{date:'',notas:''}, profile:{}, contract:{template:null}, busqueda:{propuestas:[],adjuntos:[]}, compraventa:{financiacion:0,notaria:''}};
-  PROS.push(p); LS.setPros(PROS); renderAll();
-  document.getElementById('nc_name').value=''; document.getElementById('nc_email').value=''; document.getElementById('nc_phone').value='';
-  toast('Contacto creado 🎉','ok');
-});
+/* ======= BUSQUEDA EN MODAL ======= */
+function mountBusquedaInModal(p){
+  const qId=`b_q_${p.id}`, listId=`b_list_${p.id}`, chipsId=`b_chips_${p.id}`;
+  const q = document.getElementById(qId);
+  const list = document.getElementById(listId);
+  const chips = document.getElementById(chipsId);
+  const b = p.busqueda || (p.busqueda={propuestas:[]});
 
-/* ======= BUSQUEDA (match según objetivo) ======= */
-function renderBusquedaUI(p, root){
-  const b = p.busqueda || (p.busqueda={propuestas:[], adjuntos:[]});
-  root.innerHTML = `
-    <div class="grid two">
-      <div>
-        <label>Buscar evaluaciones</label>
-        <input id="b_q_${p.id}" placeholder="Filtrar por texto…">
-      </div>
-      <div>
-        <label>Seleccionadas (máx 4)</label>
-        <div id="b_chips_${p.id}" class="chips"></div>
-      </div>
-    </div>
-    <div class="eval-list" id="b_list_${p.id}"></div>
-    <div class="small">Adjuntar imágenes / vídeos / PDFs (para compilar un envío único).</div>
-    <input type="file" id="b_files_${p.id}" multiple accept="image/*,video/*,application/pdf">
-    <button class="iconbtn" id="b_merge_${p.id}">🧩 Fusionar PDFs (BETA)</button>
-    <a class="iconbtn" target="_blank" id="b_sendmail_${p.id}">✉️ Enviar Email</a>
-    <a class="iconbtn" target="_blank" id="b_sendwa_${p.id}">🟢 Enviar WhatsApp</a>
-  `;
-  const EVS=EVALS.map(ev=>({ _raw:ev, id:(evEnsureId(ev),evId(ev)), title:evTitle(ev), rn:evYieldNeta(ev), rb:evYieldBruta(ev) }));
+  const EVS=EVALS.map(ev=>({ _raw:ev, id:(evEnsureId(ev),evId(ev)), title:evTitle(ev), rn:evYieldNeta(ev), rb:evYieldBruta(ev), flujo:evFlujoMensual(ev) }));
 
-  const q = document.getElementById(`b_q_${p.id}`);
-  const list = document.getElementById(`b_list_${p.id}`);
-  const chips = document.getElementById(`b_chips_${p.id}`);
-  function objMatch(ev){
+  function objMatch(it){
     const pr=p.profile||{}; const kind=pr.objt||'neta'; const val=pr.objv||0;
     if(kind==='neta' || kind==='bruta'){
-      const k = kind==='neta'? ev.rn : ev.rb;
-      if(k==null) return {ok:false, why:'sin dato', cls:'warn', txt:'⚪ s/d'};
+      const k = kind==='neta'? it.rn : it.rb;
+      if(k==null) return {ok:false, txt:'s/d', cls:'warn'};
       const target = normPct(val);
       const ok = (k >= target);
-      return {ok, why: ok?'match':'bajo', cls: ok?'ok':'bad', txt: ( (k*100).toFixed(1).replace('.',',')+'%') };
-    }else{ // flujo: no tenemos dato
-      return {ok:false, why:'flujo no disponible', cls:'warn', txt:'⚪ s/d'};
+      return {ok, txt: ( (k*100).toFixed(1).replace('.',',')+'%'), cls: ok?'ok':'bad' };
+    }else{ // flujo
+      const k = it.flujo;
+      if(k==null) return {ok:false, txt:'s/d', cls:'warn'};
+      const ok = (k >= val);
+      return {ok, txt: eur(k)+'/mes', cls: ok?'ok':'bad' };
     }
   }
+
   function renderChips(){
     chips.innerHTML='';
     for(const id of b.propuestas){
@@ -670,6 +678,7 @@ function renderBusquedaUI(p, root){
       btn.addEventListener('click',()=>{ const id=btn.getAttribute('data-id'); b.propuestas=b.propuestas.filter(x=>x!==id); LS.setPros(PROS); renderChips(); renderList(); toast('Quitado','warn'); });
     });
   }
+
   function renderList(){
     list.innerHTML='';
     const txt=(q.value||'').toLowerCase();
@@ -681,7 +690,7 @@ function renderBusquedaUI(p, root){
       row.innerHTML=`
         <div>
           <div class="eval-title">${escapeHtml(it.title)}</div>
-          <div class="small">🎯 <span class="match ${mt.cls}">${mt.ok?'✅ Match':''} ${mt.txt}</span></div>
+          <div class="small">🎯 <span class="match ${mt.cls}">${mt.ok?'✅ match':'⚠️ bajo objetivo'} — ${mt.txt}</span></div>
         </div>
         <div>
           <button class="${sel?'bad':'primary'}" data-id="${escapeHtml(it.id)}">${sel?'Quitar':'Añadir'}</button>
@@ -695,45 +704,25 @@ function renderBusquedaUI(p, root){
       list.appendChild(row);
     }
   }
-  function buildMessage(){
-    const pr=p.profile||{};
-    const lines=[`Hola ${p.name||''},`, '', `Te compartimos una selección para ${pr.tipo||'alquiler'}:`];
-    for(const id of b.propuestas){
-      const e=EVS.find(x=>x.id===id);
-      if(!e) continue;
-      const mt=objMatch(e);
-      lines.push(`• ${e.title} — ${mt.ok?'✅ match':'⚠️ bajo objetivo'} (${mt.txt})`);
-    }
-    lines.push('', 'Dinos qué te encaja y avanzamos.'); return lines.join('\n');
-  }
-  document.getElementById(`b_sendmail_${p.id}`).addEventListener('click', (ev)=>{ ev.currentTarget.href = mailtoHref(p,'Selección de oportunidades — Unihouser', buildMessage()); });
-  document.getElementById(`b_sendwa_${p.id}`).addEventListener('click', (ev)=>{ ev.currentTarget.href = whatsappHref(p, buildMessage()); });
-
+  if(q){ q.addEventListener('input', renderList); }
   renderChips(); renderList();
 }
 
-/* ======= COLUMN DETAILS RENDERER ======= */
-function openPhaseDetails(p){
-  // reutilizamos modal para ver/editar en fases posteriores (solo lectura ligera + botón Guardar por consistencia)
-  openModalFor(p);
-}
-
-/* ======= RENDER CADA COLUMNA ======= */
-function phaseLabel(ph){switch(ph){case 'CONTACTO':return 'Contacto';case 'REUNION':return 'Reunión';case 'CONTRATO':return 'Contrato';case 'BUSQUEDA':return 'Búsqueda';case 'COMPRAVENTA':return 'Compraventa';default:return ph}}
-
-function renderColumnExtras(){
-  // Inserta UIs especiales dentro de tarjetas si abrimos detalles: usamos modal, así que nada extra aquí.
-}
-
-/* ======= INIT ======= */
-document.addEventListener('DOMContentLoaded', ()=>{
-  renderAll();
-  // Dentro de BUSQUEDA, cuando pulsamos 👁️ abrimos modal, y si queremos UI de propuestas, la pintamos en BUSQUEDA al abrir detalles:
-  // (sobreescribimos openModalFor para fases distintas si quieres; de momento la ficha única cubre todas las fases)
+/* ======= CREACIÓN CONTACTO ======= */
+document.getElementById('btnCreate').addEventListener('click', ()=>{
+  const name=(document.getElementById('nc_name').value||'').trim();
+  const email=(document.getElementById('nc_email').value||'').trim();
+  const phone=(document.getElementById('nc_phone').value||'').trim();
+  if(!name){ toast('Pon un nombre para crear el contacto.','warn'); return; }
+  const p={ id:uid('p'), name,email,phone, phase:'CONTACTO', status:'En estudio', phase_entered_at:Date.now(), history:{}, message:DEFAULT_CFG.messages.initial, meeting:{date:'',notas:''}, profile:{}, busqueda:{propuestas:[]}, compraventa:{financiacion:0,notaria:''}};
+  PROS.push(p); LS.setPros(PROS); renderAll();
+  document.getElementById('nc_name').value=''; document.getElementById('nc_email').value=''; document.getElementById('nc_phone').value='';
+  toast('Contacto creado 🎉','ok');
 });
 
-/* ======= UTIL ======= */
-function openDrawerFor(p){ openPhaseDetails(p); } // compat con código previo
+/* ======= INIT ======= */
+document.addEventListener('DOMContentLoaded', ()=>{ renderAll(); });
 </script>
+
 </body>
 </html>
