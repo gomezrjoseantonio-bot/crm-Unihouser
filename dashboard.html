@@ -64,29 +64,23 @@
     .icon.eye svg{fill:var(--verde)}
     .icon.trash svg{fill:var(--granate)}
     #overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.2s ease;z-index:50;}
-    #drawer{position:fixed;top:0;right:0;width:480px;max-width:95vw;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,.18);transform:translateX(100%);transition:.28s cubic-bezier(.2,.8,.2,1);z-index:60;display:flex;flex-direction:column;}
+    #drawer{position:fixed;top:0;right:0;width:560px;max-width:96vw;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,.18);transform:translateX(100%);transition:.28s cubic-bezier(.2,.8,.2,1);z-index:60;display:flex;flex-direction:column;}
     #drawer.open{transform:none}
     #overlay.open{opacity:1;pointer-events:all}
     .dr-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 10px;border-bottom:1px solid #eee}
     .dr-title{font-weight:700}
-    .dr-body{padding:14px;display:flex;flex-direction:column;gap:12px}
-    .divider{height:1px;background:#eee;margin:8px 0}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-
-    /* Mini layout para ficha de prospecto en drawer */
-    .form-sec{border:1px solid #eee3de;background:#fbf9f8;padding:10px;border-radius:12px}
-    .form-sec h4{margin:0 0 6px 0;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:#4a3f3b}
+    /* Cuerpo sin scroll — usamos tabs para dividir la info */
+    .dr-body{display:flex;flex-direction:column;gap:10px;padding:12px;height:calc(100vh - 66px);}
+    .tabs{display:flex;gap:6px;flex-wrap:wrap}
+    .tabs button{border:1px solid #eadfd9;background:#fbf9f8;border-radius:999px;padding:6px 10px}
+    .tabs button.active{background:var(--granate);color:#fff;border-color:transparent}
+    .tabarea{flex:1;min-height:0;border:1px solid #eee3de;border-radius:12px;background:#fff;padding:10px;display:flex}
+    .tab{display:none;flex:1}
+    .tab.active{display:block}
     .frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .frow.three{grid-template-columns:1fr 1fr 1fr}
     .fcol small.hint{display:block;color:#6f6460;margin-top:4px}
-    .thumbs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
-    .thumbs img,.thumbs video,.thumbs .pdf{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid #e7ded9;border-radius:8px;background:#f7f3f1;}
-    .pdf{display:flex;align-items:center;justify-content:center;font-size:10px;color:#6b5e58}
-    .beta-stack{display:flex;flex-direction:column;gap:8px;max-height:42vh;overflow:auto;border:1px solid #eee;border-radius:12px;padding:8px;}
-    .beta-stack object{width:100%;height:260px;border:1px solid #eee;border-radius:8px;}
-    .chips{display:flex;flex-wrap:wrap;gap:6px}
-    .chip{background:#f3efed;border:1px solid #eadfd9;border-radius:999px;padding:4px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
-    .chip button{background:transparent;border:none;padding:0 2px;cursor:pointer}
+    .pin-actions{display:flex;justify-content:space-between;gap:8px}
     .toaster{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100}
     .toast{background:#fff;border-left:6px solid var(--verde);padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);min-width:260px;}
     .toast.warn{border-left-color:var(--terracota)}
@@ -101,6 +95,14 @@
     .eval-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid #eee3de;border-radius:10px;padding:8px;background:#fff}
     .eval-title{font-weight:600}
     .eval-sub{color:#6f6460;font-size:12px}
+    .chips{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{background:#f3efed;border:1px solid #eadfd9;border-radius:999px;padding:4px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+    .chip button{background:transparent;border:none;padding:0 2px;cursor:pointer}
+    .thumbs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+    .thumbs img,.thumbs video,.thumbs .pdf{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid #e7ded9;border-radius:8px;background:#f7f3f1;}
+    .pdf{display:flex;align-items:center;justify-content:center;font-size:10px;color:#6b5e58}
+    .beta-stack{display:flex;flex-direction:column;gap:8px;max-height:42vh;overflow:auto;border:1px solid #eee;border-radius:12px;padding:8px;}
+    .beta-stack object{width:100%;height:260px;border:1px solid #eee;border-radius:8px;}
   </style>
 </head>
 <body>
@@ -219,6 +221,8 @@ Gracias,
 Equipo Unihouser` } }
   };
 
+  const num = (s)=>{ if(typeof s==='number') return s; const t=(s||'').toString().replace(/\./g,'').replace(',','.'); const v=parseFloat(t); return isNaN(v)?0:v; };
+  const fmtMoney = (v)=>{ if(v==null||isNaN(v)) return ''; return Math.round(v).toString(); };
   function eur(n){ return new Intl.NumberFormat(ES,{style:'currency',currency:'EUR'}).format(n||0); }
   function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,8); }
   function daysSince(ts){ if(!ts) return 0; const d = Math.floor((Date.now()-ts)/(1000*60*60*24)); return d<0?0:d; }
@@ -234,10 +238,7 @@ Equipo Unihouser` } }
   function bytes(n){ if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1).replace('.',',')+' KB'; return (n/1048576).toFixed(1).replace('.',',')+' MB'; }
   function isoLocal(v){ const d=new Date(v); const p=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes()); }
   function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#039;' }[m])); }
-  const num = (s)=>{ if(typeof s==='number') return s; const t=(s||'').toString().replace(/\./g,'').replace(',','.'); const v=parseFloat(t); return isNaN(v)?0:v; };
-  const fmtMoney = (v)=>{ if(v==null||isNaN(v)) return ''; return Math.round(v).toString(); };
 
-  /* Logo fallback si no existe el archivo físico */
   function logoFallback(e){
     e.target.onerror=null;
     const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='36' viewBox='0 0 120 36'>
@@ -309,14 +310,12 @@ Equipo Unihouser` } }
   let PROS = LS.getPros();
   let EVALS = LS.getEvals();
 
-  // asegurar IDs en EVALS
   (function ensureEvalIds(){
     let changed = false;
     for(const ev of EVALS){ if(!evId(ev)){ evEnsureId(ev); changed = true; } }
     if(changed){ LS.setEvals(EVALS); }
   })();
 
-  /* ======= Render ======= */
   function renderAll(){ renderKPIs(); renderColumns(); }
 
   function renderKPIs(){
@@ -370,7 +369,7 @@ Equipo Unihouser` } }
     for(const ph of PHASES){
       const list = prosByPhase[ph];
       for(const p of list){
-        if(p.success) continue; // éxitos fuera del tablero activo
+        if(p.success) continue;
         const card = makeCard(p);
         document.getElementById('col-'+ph).appendChild(card);
       }
@@ -437,7 +436,6 @@ Equipo Unihouser` } }
   }
   function persistPros(){ LS.setPros(PROS); renderKPIs(); }
 
-  /* ======= MOVIMIENTOS ======= */
   function advanceProspect(p){
     const from = p.phase;
     const to = nextPhase(from);
@@ -468,8 +466,8 @@ Equipo Unihouser` } }
       phase_entered_at: Date.now(),
       history: {},
       message: getInitialMessage(),
-      meeting: { date:'', canal:'', notas:'', observaciones:'' },
-      profile: { /* se completa en REUNIÓN */ },
+      meeting: { date:'', notas:'' },         // ← sin “canal”, una sola “Notas”
+      profile: {},
       contract: { template:null },
       busqueda: { propuestas:[], adjuntos:[] },
       compraventa: { financiacion:0, notaria:'' },
@@ -522,140 +520,135 @@ Equipo Unihouser` } }
 
   function renderQuick(p){
     drBody.innerHTML = `
-      <div class="grid2">
+      <div class="frow">
         <div><label>Nombre</label><input value="${escapeHtml(p.name||'')}" id="q_name"/></div>
         <div><label>Teléfono</label><input value="${escapeHtml(p.phone||'')}" id="q_phone"/></div>
       </div>
       <div><label>Email</label><input value="${escapeHtml(p.email||'')}" id="q_email"/></div>
-      <div><label>Notas</label><textarea id="q_notes">${escapeHtml(p.meeting?.notas||'')}</textarea></div>
       <button class="primary" id="q_save">Guardar</button>
     `;
     document.getElementById('q_save').addEventListener('click', ()=>{
       p.name = document.getElementById('q_name').value;
       p.phone = document.getElementById('q_phone').value;
       p.email = document.getElementById('q_email').value;
-      p.meeting = p.meeting||{};
-      p.meeting.notas = document.getElementById('q_notes').value;
       persistPros(); renderColumns(); toast('Guardado','ok');
       drTitle.textContent = `${p.name||'Sin nombre'} — ${phaseLabel(p.phase)}`;
     });
   }
 
-  /* ======= REUNIÓN + FICHA COMPLETA ======= */
+  /* ======= REUNIÓN (sin scroll, orden lógico, tabs) ======= */
   function renderMeeting(p){
-    const m = p.meeting || (p.meeting={date:'', canal:'', notas:'', observaciones:''});
+    const m = p.meeting || (p.meeting={date:'', notas:''});
     const pr = p.profile || (p.profile={});
+
     drBody.innerHTML = `
-      <div class="grid2">
-        <div><label>Fecha y hora</label><input type="datetime-local" id="m_date" value="${m.date? isoLocal(m.date):''}"/></div>
-        <div><label>Canal</label>
-          <select id="m_canal">
-            <option value="">—</option>
-            <option ${m.canal==='Presencial'?'selected':''}>Presencial</option>
-            <option ${m.canal==='Online'?'selected':''}>Online</option>
-            <option ${m.canal==='Teléfono'?'selected':''}>Teléfono</option>
-          </select>
-        </div>
-      </div>
-      <div><label>Notas</label><textarea id="m_notas">${escapeHtml(m.notas||'')}</textarea></div>
-      <div><label>Observaciones</label><textarea id="m_obs">${escapeHtml(m.observaciones||'')}</textarea></div>
-      <button class="primary" id="m_save">Guardar reunión</button>
-
-      <div class="divider"></div>
-
-      <div class="form-sec">
-        <h4>1 · Datos personales</h4>
-        <div class="frow three">
-          <div class="fcol"><label>DNI</label><input id="pf_dni" value="${escapeHtml(pr.dni||'')}" placeholder="00000000X"></div>
-          <div class="fcol"><label>Teléfono</label><input id="pf_tel" value="${escapeHtml(p.phone||pr.tel||'')}"></div>
-          <div class="fcol"><label>Localidad (residencia)</label><input id="pf_locres" value="${escapeHtml(pr.locres||'')}"></div>
-        </div>
-        <div class="frow three">
-          <div class="fcol"><label>Email</label><input id="pf_email" value="${escapeHtml(p.email||pr.email||'')}"></div>
-          <div class="fcol"><label>Dirección</label><input id="pf_dir" value="${escapeHtml(pr.dir||'')}" placeholder="C/ ... nº ..."></div>
-          <div class="fcol"><small class="hint">&nbsp;</small></div>
-        </div>
+      <div class="tabs" role="tablist">
+        <button class="active" data-tab="t1" role="tab" aria-selected="true">Datos</button>
+        <button data-tab="t2" role="tab">Inversión</button>
+        <button data-tab="t3" role="tab">Financiación</button>
+        <button data-tab="t4" role="tab">Objetivos</button>
+        <button data-tab="t5" role="tab">Notas</button>
       </div>
 
-      <div class="form-sec">
-        <h4>2 · Características del activo / inversión</h4>
-        <div class="frow three">
-          <div class="fcol"><label>Localidades objetivo</label><input id="pf_locs" value="${escapeHtml(pr.locs||'')}" placeholder="Oviedo, Gijón, Avilés"></div>
-          <div class="fcol"><label>Tipo de alquiler</label>
-            <select id="pf_tipo">
-              <option ${pr.tipo==='Tradicional'?'selected':''}>Tradicional</option>
-              <option ${pr.tipo==='Habitaciones'?'selected':''}>Habitaciones</option>
-            </select>
+      <div class="tabarea">
+        <div id="t1" class="tab active" role="tabpanel" aria-labelledby="Datos">
+          <div class="frow three">
+            <div class="fcol"><label>Fecha y hora</label><input type="datetime-local" id="m_date" value="${m.date? isoLocal(m.date):''}"></div>
+            <div class="fcol"><label>DNI</label><input id="pf_dni" value="${escapeHtml(pr.dni||'')}" placeholder="00000000X"></div>
+            <div class="fcol"><label>Localidad (residencia)</label><input id="pf_locres" value="${escapeHtml(pr.locres||'')}"></div>
           </div>
-          <div class="fcol"><label>Nº de activos deseados</label><input id="pf_nact" value="${escapeHtml(pr.nact||'')}" inputmode="numeric" placeholder="1"></div>
-        </div>
-        <div class="frow three">
-          <div class="fcol"><label>¿Ascensor?</label><select id="pf_asc"><option ${pr.asc!=='No'?'selected':''}>Sí</option><option ${pr.asc==='No'?'selected':''}>No</option></select></div>
-          <div class="fcol"><label>Altura máxima</label><input id="pf_alt" value="${escapeHtml(pr.alt||'')}" inputmode="numeric" placeholder="3"></div>
-          <div class="fcol"><label>¿Bajos?</label><select id="pf_bajos"><option ${pr.bajos!=='Sí'?'selected':''}>No</option><option ${pr.bajos==='Sí'?'selected':''}>Sí</option></select></div>
-        </div>
-        <div class="frow three">
-          <div class="fcol"><label>Acepta reforma</label>
-            <select id="pf_ref"><option ${pr.ref==='No'?'selected':''}>No</option><option ${pr.ref==='Lavado de cara'?'selected':''}>Lavado de cara</option><option ${pr.ref==='Integral'?'selected':''}>Integral</option></select>
+          <div class="frow three">
+            <div class="fcol"><label>Teléfono</label><input id="pf_tel" value="${escapeHtml(p.phone||pr.tel||'')}"></div>
+            <div class="fcol"><label>Email</label><input id="pf_email" value="${escapeHtml(p.email||pr.email||'')}"></div>
+            <div class="fcol"><label>Dirección</label><input id="pf_dir" value="${escapeHtml(pr.dir||'')}" placeholder="C/ … nº …"></div>
           </div>
-          <div class="fcol"><label>Presupuesto TOTAL (€)</label><input id="pf_budget" value="${pr.budget!=null?fmtMoney(pr.budget):''}" placeholder="150000"></div>
-          <div class="fcol"><label>Precio máx. COMPRA (auto)</label><input id="pf_pmax" value="${pr.pmax!=null?fmtMoney(pr.pmax):''}" disabled><small class="hint">Se calcula con Config (ITP/Notaría/Honorarios).</small></div>
         </div>
-      </div>
 
-      <div class="form-sec">
-        <h4>3 · Financiación</h4>
-        <div class="frow three">
-          <div class="fcol"><label>Financiación bancaria</label><select id="pf_fin"><option ${pr.fin!=='No'?'selected':''}>Sí</option><option ${pr.fin==='No'?'selected':''}>No</option></select></div>
-          <div class="fcol"><label>¿Necesita broker?</label><select id="pf_broker"><option ${pr.broker!=='Sí'?'selected':''}>No</option><option ${pr.broker==='Sí'?'selected':''}>Sí</option></select></div>
-          <div class="fcol"><label>% financiación habitual</label><input id="pf_pct" value="${pr.pct!=null?String(pr.pct).replace('.',','):''}" placeholder="80,0"></div>
+        <div id="t2" class="tab" role="tabpanel" aria-labelledby="Inversión">
+          <div class="frow three">
+            <div class="fcol"><label>Localidades objetivo</label><input id="pf_locs" value="${escapeHtml(pr.locs||'')}" placeholder="Oviedo, Gijón, Avilés"></div>
+            <div class="fcol"><label>Tipo de alquiler</label>
+              <select id="pf_tipo">
+                <option ${pr.tipo==='Tradicional'?'selected':''}>Tradicional</option>
+                <option ${pr.tipo==='Habitaciones'?'selected':''}>Habitaciones</option>
+              </select>
+            </div>
+            <div class="fcol"><label>Nº activos</label><input id="pf_nact" value="${escapeHtml(pr.nact||'')}" inputmode="numeric" placeholder="1"></div>
+          </div>
+          <div class="frow three">
+            <div class="fcol"><label>¿Ascensor?</label><select id="pf_asc"><option ${pr.asc!=='No'?'selected':''}>Sí</option><option ${pr.asc==='No'?'selected':''}>No</option></select></div>
+            <div class="fcol"><label>Altura máx.</label><input id="pf_alt" value="${escapeHtml(pr.alt||'')}" inputmode="numeric" placeholder="3"></div>
+            <div class="fcol"><label>¿Bajos?</label><select id="pf_bajos"><option ${pr.bajos!=='Sí'?'selected':''}>No</option><option ${pr.bajos==='Sí'?'selected':''}>Sí</option></select></div>
+          </div>
+          <div class="frow three">
+            <div class="fcol"><label>Acepta reforma</label>
+              <select id="pf_ref"><option ${pr.ref==='No'?'selected':''}>No</option><option ${pr.ref==='Lavado de cara'?'selected':''}>Lavado de cara</option><option ${pr.ref==='Integral'?'selected':''}>Integral</option></select>
+            </div>
+            <div class="fcol"><label>Presupuesto TOTAL (€)</label><input id="pf_budget" value="${pr.budget!=null?fmtMoney(pr.budget):''}" placeholder="150000"></div>
+            <div class="fcol"><label>Precio máx. COMPRA</label><input id="pf_pmax" value="${pr.pmax!=null?fmtMoney(pr.pmax):''}" disabled><small class="small muted">Usa ITP/Notaría/Honorarios de Config.</small></div>
+          </div>
         </div>
-        <div class="frow three">
-          <div class="fcol"><label>Hipoteca estimada (auto)</label><input id="pf_hip" value="${pr.hip!=null?fmtMoney(pr.hip):''}" disabled></div>
-          <div class="fcol"><label>Fondos propios (auto)</label><input id="pf_prop" value="${pr.prop!=null?fmtMoney(pr.prop):''}" disabled></div>
-          <div class="fcol"><small class="hint">El % se aplica sobre el precio máx. de compra.</small></div>
-        </div>
-      </div>
 
-      <div class="form-sec">
-        <h4>4 · Objetivos</h4>
-        <div class="frow three">
-          <div class="fcol"><label>Objetivo principal</label>
-            <select id="pf_objt">
-              <option value="bruta" ${pr.objt==='bruta'?'selected':''}>Rentabilidad bruta (%)</option>
-              <option value="neta" ${pr.objt==='neta'?'selected':''}>Rentabilidad neta (%)</option>
-              <option value="flujo" ${pr.objt==='flujo'?'selected':''}>Flujo de caja (€/mes)</option>
-            </select>
+        <div id="t3" class="tab" role="tabpanel" aria-labelledby="Financiación">
+          <div class="frow three">
+            <div class="fcol"><label>Financiación bancaria</label><select id="pf_fin"><option ${pr.fin!=='No'?'selected':''}>Sí</option><option ${pr.fin==='No'?'selected':''}>No</option></select></div>
+            <div class="fcol"><label>¿Necesita broker?</label><select id="pf_broker"><option ${pr.broker!=='Sí'?'selected':''}>No</option><option ${pr.broker==='Sí'?'selected':''}>Sí</option></select></div>
+            <div class="fcol"><label>% financiación</label><input id="pf_pct" value="${pr.pct!=null?String(pr.pct).replace('.',','):''}" placeholder="80,0"></div>
           </div>
-          <div class="fcol"><label>Valor objetivo</label><input id="pf_objv" value="${pr.objv!=null?String(pr.objv).replace('.',','):''}" placeholder="7,5 o 300"></div>
-          <div class="fcol"><label>Periodo de búsqueda</label>
-            <div class="frow"><input id="pf_ini" value="${escapeHtml(pr.ini||'')}" placeholder="MM/AAAA"><input id="pf_finmes" value="${escapeHtml(pr.finmes||'')}" placeholder="MM/AAAA"></div>
-            <small class="hint">Si indicas inicio, el fin se autocompleta +5 meses.</small>
+          <div class="frow three">
+            <div class="fcol"><label>Hipoteca estimada</label><input id="pf_hip" value="${pr.hip!=null?fmtMoney(pr.hip):''}" disabled></div>
+            <div class="fcol"><label>Fondos propios</label><input id="pf_prop" value="${pr.prop!=null?fmtMoney(pr.prop):''}" disabled></div>
+            <div class="fcol"><small class="small muted">El % se aplica al P. máx. compra.</small></div>
           </div>
         </div>
-        <div class="frow" id="row_alq">
-          <div class="fcol">
-            <label>Alquiler máx. orientativo (€/mes)</label>
-            <input id="pf_alq" value="${pr.alq!=null?fmtMoney(pr.alq):''}" disabled>
-            <small class="hint">Rb% × (Presupuesto TOTAL / 12).</small>
+
+        <div id="t4" class="tab" role="tabpanel" aria-labelledby="Objetivos">
+          <div class="frow three">
+            <div class="fcol"><label>Objetivo principal</label>
+              <select id="pf_objt">
+                <option value="bruta" ${pr.objt==='bruta'?'selected':''}>Rentabilidad bruta (%)</option>
+                <option value="neta" ${pr.objt==='neta'?'selected':''}>Rentabilidad neta (%)</option>
+                <option value="flujo" ${pr.objt==='flujo'?'selected':''}>Flujo de caja (€/mes)</option>
+              </select>
+            </div>
+            <div class="fcol"><label>Valor objetivo</label><input id="pf_objv" value="${pr.objv!=null?String(pr.objv).replace('.',','):''}" placeholder="7,5 o 300"></div>
+            <div class="fcol"><label>Periodo</label>
+              <div class="frow"><input id="pf_ini" value="${escapeHtml(pr.ini||'')}" placeholder="MM/AAAA"><input id="pf_finmes" value="${escapeHtml(pr.finmes||'')}" placeholder="MM/AAAA"></div>
+            </div>
           </div>
+          <div class="frow" id="row_alq">
+            <div class="fcol">
+              <label>Alquiler máx. orientativo (€/mes)</label>
+              <input id="pf_alq" value="${pr.alq!=null?fmtMoney(pr.alq):''}" disabled>
+              <small class="small muted">Rb% × (Presupuesto TOTAL / 12).</small>
+            </div>
+          </div>
+        </div>
+
+        <div id="t5" class="tab" role="tabpanel" aria-labelledby="Notas">
+          <div><label>Notas (final)</label><textarea id="m_notas" rows="6">${escapeHtml(m.notas||'')}</textarea></div>
         </div>
       </div>
 
-      <div class="divider"></div>
-      <button class="primary" id="pf_saveall">Guardar ficha</button>
+      <div class="pin-actions">
+        <button class="primary" id="pf_saveall">Guardar ficha</button>
+        <button class="iconbtn" id="m_save">Guardar fecha y notas</button>
+      </div>
     `;
 
-    // Handlers reunión
-    document.getElementById('m_save').addEventListener('click', ()=>{
-      m.date = document.getElementById('m_date').value;
-      m.canal = document.getElementById('m_canal').value;
-      m.notas = document.getElementById('m_notas').value;
-      m.observaciones = document.getElementById('m_obs').value;
-      p.meeting = m; persistPros(); renderColumns(); toast('Reunión guardada','ok');
+    // Tabs
+    drBody.querySelectorAll('.tabs button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        drBody.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+        drBody.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        btn.classList.add('active');
+        const id = btn.getAttribute('data-tab');
+        const tab = document.getElementById(id);
+        if(tab) tab.classList.add('active');
+      });
     });
 
-    // Referencias de ficha
+    // Referencias ficha
     const get = (id)=>document.getElementById(id);
     const inputs = {
       dni:get('pf_dni'), tel:get('pf_tel'), locres:get('pf_locres'),
@@ -672,41 +665,25 @@ Equipo Unihouser` } }
 
     function readProfile(){
       return {
-        dni: inputs.dni.value.trim(),
-        tel: inputs.tel.value.trim(),
-        locres: inputs.locres.value.trim(),
-        email: inputs.email.value.trim(),
-        dir: inputs.dir.value.trim(),
-        locs: inputs.locs.value.trim(),
-        tipo: inputs.tipo.value,
-        nact: inputs.nact.value.trim(),
-        asc: inputs.asc.value,
-        alt: inputs.alt.value.trim(),
-        bajos: inputs.bajos.value,
-        ref: inputs.ref.value,
-        budget: num(inputs.budget.value),
-        pmax: num(inputs.pmax.value),
-        fin: inputs.fin.value,
-        broker: inputs.broker.value,
-        pct: num(inputs.pct.value),
-        hip: num(inputs.hip.value),
-        prop: num(inputs.prop.value),
-        objt: inputs.objt.value,
-        objv: num(inputs.objv.value),
-        ini: inputs.ini.value.trim(),
-        finmes: inputs.finmes.value.trim(),
+        dni: inputs.dni.value.trim(), tel: inputs.tel.value.trim(), locres: inputs.locres.value.trim(),
+        email: inputs.email.value.trim(), dir: inputs.dir.value.trim(),
+        locs: inputs.locs.value.trim(), tipo: inputs.tipo.value, nact: inputs.nact.value.trim(),
+        asc: inputs.asc.value, alt: inputs.alt.value.trim(), bajos: inputs.bajos.value, ref: inputs.ref.value,
+        budget: num(inputs.budget.value), pmax: num(inputs.pmax.value),
+        fin: inputs.fin.value, broker: inputs.broker.value, pct: num(inputs.pct.value),
+        hip: num(inputs.hip.value), prop: num(inputs.prop.value),
+        objt: inputs.objt.value, objv: num(inputs.objv.value),
+        ini: inputs.ini.value.trim(), finmes: inputs.finmes.value.trim(),
         alq: num(inputs.alq.value)
       };
     }
 
     function writeProfile(prx){
-      // personales
       inputs.dni.value = prx.dni||'';
       inputs.tel.value = (p.phone||prx.tel||'');
       inputs.locres.value = prx.locres||'';
       inputs.email.value = (p.email||prx.email||'');
       inputs.dir.value = prx.dir||'';
-      // inversión
       inputs.locs.value = prx.locs||'';
       inputs.tipo.value = prx.tipo||'Tradicional';
       inputs.nact.value = prx.nact||'';
@@ -716,21 +693,19 @@ Equipo Unihouser` } }
       inputs.ref.value = prx.ref||'No';
       inputs.budget.value = prx.budget!=null?fmtMoney(prx.budget):'';
       inputs.pmax.value = prx.pmax!=null?fmtMoney(prx.pmax):'';
-      // financiación
       inputs.fin.value = prx.fin==='No'?'No':'Sí';
       inputs.broker.value = prx.broker==='Sí'?'Sí':'No';
       inputs.pct.value = prx.pct!=null?String(prx.pct).replace('.',','):'';
       inputs.hip.value = prx.hip!=null?fmtMoney(prx.hip):'';
       inputs.prop.value = prx.prop!=null?fmtMoney(prx.prop):'';
-      // objetivos
       inputs.objt.value = prx.objt||'bruta';
       inputs.objv.value = prx.objv!=null?String(prx.objv).replace('.',','):'';
       inputs.ini.value = prx.ini||'';
       inputs.finmes.value = prx.finmes||'';
       inputs.alq.value = prx.alq!=null?fmtMoney(prx.alq):'';
-      // visibilidad orientación alquiler
       document.getElementById('row_alq').style.display = inputs.objt.value==='bruta' ? 'grid' : 'none';
     }
+    writeProfile(pr);
 
     function calcDerived(){
       const budget = num(inputs.budget.value);
@@ -744,15 +719,12 @@ Equipo Unihouser` } }
 
       const pct = num(inputs.pct.value)/100;
       let hip = 0, prop = 0;
-      if(inputs.fin.value==='Sí'){
-        hip = pmax * pct;
-      }
+      if(inputs.fin.value==='Sí'){ hip = pmax * pct; }
       const costeTotal = pmax*(1+itp) + notaria + honor;
       prop = costeTotal - hip;
       inputs.hip.value = hip?fmtMoney(hip):'';
       inputs.prop.value = prop?fmtMoney(prop):'';
 
-      // objetivo bruta -> alquiler
       if(inputs.objt.value==='bruta'){
         const rb = num(inputs.objv.value)/100;
         const alq = rb * (budget/12);
@@ -763,44 +735,41 @@ Equipo Unihouser` } }
         document.getElementById('row_alq').style.display = 'none';
       }
     }
-
     function maybeAutofin(){
       const v = (inputs.ini.value||'').trim();
       if(!v || (inputs.finmes.value||'').trim()) return;
-      // v formato MM/AAAA
       const m = v.split('/'); if(m.length!==2) return;
       const mm = parseInt(m[0],10)-1; const yyyy = parseInt(m[1],10);
       if(isNaN(mm)||isNaN(yyyy)) return;
-      const d = new Date(yyyy, mm, 1);
-      d.setMonth(d.getMonth()+5);
-      const mm2 = String(d.getMonth()+1).padStart(2,'0');
-      const yyyy2 = d.getFullYear();
+      const d = new Date(yyyy, mm, 1); d.setMonth(d.getMonth()+5);
+      const mm2 = String(d.getMonth()+1).padStart(2,'0'); const yyyy2 = d.getFullYear();
       inputs.finmes.value = `${mm2}/${yyyy2}`;
     }
 
-    // Listeners
     ['pf_budget','pf_pct','pf_fin','pf_objt','pf_objv'].forEach(id=>{
       document.getElementById(id).addEventListener('input', calcDerived);
       document.getElementById(id).addEventListener('change', calcDerived);
     });
     inputs.ini.addEventListener('blur', maybeAutofin);
-    // guardar todo
+    calcDerived();
+
+    // Guardar ficha y reunión/NOTAS (al final)
     document.getElementById('pf_saveall').addEventListener('click', ()=>{
-      // sync campos básicos también
       p.email = inputs.email.value.trim();
       p.phone = inputs.tel.value.trim();
-      // snapshot
       p.profile = readProfile();
-      calcDerived();
-      // regrabar valores calculados en profile
-      const pr2 = readProfile();
-      p.profile = pr2;
-      persistPros();
+      calcDerived();                       // rehace cálculos y guarda resultados
+      p.profile = readProfile();
       toast('Ficha de prospecto guardada','ok');
+      persistPros();
     });
 
-    // primer cálculo de derivados tras pintar
-    calcDerived();
+    document.getElementById('m_save').addEventListener('click', ()=>{
+      m.date = document.getElementById('m_date').value;
+      m.notas = document.getElementById('m_notas').value;
+      p.meeting = m;
+      persistPros(); renderColumns(); toast('Fecha y notas guardadas','ok');
+    });
   }
 
   function renderContract(p){
@@ -813,12 +782,9 @@ Equipo Unihouser` } }
         <p class="small muted tight">Se guarda referencia (nombre y tamaño) — sin subir contenido.</p>
       </div>
       <div><b>Actual:</b> <span id="c_tpl_info">${escapeHtml(tplInfo)}</span></div>
-      <div class="divider"></div>
-      <div class="grid2">
+      <div class="frow">
         <div><label>Asunto (Config)</label><input id="c_subj" value="${escapeHtml(CFG.emailTemplates.contract.subject)}"/></div>
-        <div><label>—</label><a id="c_mailto" class="iconbtn" target="_blank"><span class="icon">
-          <svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 18V8l8 6 8-6v10H4z"/></svg>
-        </span>Abrir mail</a></div>
+        <div style="display:flex;align-items:end;justify-content:flex-end"><a id="c_mailto" class="iconbtn" target="_blank">Abrir mail</a></div>
       </div>
       <div><label>Cuerpo (Config)</label><textarea id="c_body" rows="6">${escapeHtml(CFG.emailTemplates.contract.body)}</textarea></div>
       <button class="primary" id="c_save">Guardar</button>
@@ -827,9 +793,7 @@ Equipo Unihouser` } }
     f.addEventListener('change', ()=>{
       const file = f.files && f.files[0];
       if(!file) return;
-      if(!/pdf|doc|word/i.test(file.type) && !/\.(pdf|docx?|DOCX?)$/.test(file.name)){
-        toast('Formato no soportado','warn'); return;
-      }
+      if(!/pdf|doc|word/i.test(file.type) && !/\.(pdf|docx?|DOCX?)$/.test(file.name)){ toast('Formato no soportado','warn'); return; }
       p.contract = { template:{ name:file.name, size:file.size, type:file.type, at: Date.now() } };
       document.getElementById('c_tpl_info').textContent = `${file.name} (${bytes(file.size)})`;
       persistPros(); toast('Plantilla referenciada','ok');
@@ -854,12 +818,11 @@ Equipo Unihouser` } }
     });
   }
 
-  /* ======= BÚSQUEDA ======= */
   function renderBusqueda(p){
     const b = p.busqueda || (p.busqueda={propuestas:[], adjuntos:[]});
 
     drBody.innerHTML = `
-      <div class="grid2">
+      <div class="frow">
         <div>
           <label>Buscar evaluaciones</label>
           <input id="b_q" placeholder="Filtrar por texto..." />
@@ -872,17 +835,11 @@ Equipo Unihouser` } }
 
       <div class="eval-list" id="b_list"></div>
 
-      <div class="divider"></div>
-      <div>
-        <label>Adjuntar imágenes / vídeos / PDFs</label>
-        <input type="file" id="b_files" multiple accept="image/*,video/*,application/pdf" />
-        <p class="small muted tight">Vídeos > 2 MB → error (toast) y se descartan.</p>
-      </div>
+      <div class="small muted">Adjuntar imágenes / vídeos / PDFs</div>
+      <input type="file" id="b_files" multiple accept="image/*,video/*,application/pdf" />
+      <p class="small muted tight">Vídeos > 2 MB → error (toast) y se descartan.</p>
       <div class="thumbs" id="b_thumbs"></div>
-      <div class="divider"></div>
-      <button class="iconbtn" id="b_merge"><span class="icon">
-        <svg viewBox="0 0 24 24"><path d="M7 2h10v2H7V2zm-2 4h14v2H5V6zm-2 4h18v2H3v-2zm2 4h14v2H5v-2zm2 4h10v2H7v-2z"/></svg>
-      </span>Fusionar PDFs (BETA)</button>
+      <button class="iconbtn" id="b_merge">Fusionar PDFs (BETA)</button>
       <div id="b_stack" class="beta-stack" style="display:none;"></div>
       <button class="primary" id="b_save">Guardar búsqueda</button>
     `;
@@ -957,7 +914,6 @@ Equipo Unihouser` } }
 
     renderChips(); renderList();
 
-    // Adjuntos
     const thumbs = document.getElementById('b_thumbs');
     function renderThumbs(){
       thumbs.innerHTML='';
@@ -1014,11 +970,10 @@ Equipo Unihouser` } }
   function renderCompraventa(p){
     const c = p.compraventa || (p.compraventa={financiacion:0,notaria:''});
     drBody.innerHTML = `
-      <div class="grid2">
+      <div class="frow">
         <div><label>Financiación (días 0–90)</label><input type="number" min="0" max="90" id="cv_fin" value="${Number(c.financiacion)||0}" /></div>
         <div><label>Notaría (fecha)</label><input type="date" id="cv_not" value="${c.notaria||''}" /></div>
       </div>
-      <div class="divider"></div>
       <button class="primary" id="cv_save">Guardar</button>
       <button class="accent" id="cv_done">Finalizar notaría</button>
     `;
@@ -1037,7 +992,6 @@ Equipo Unihouser` } }
     });
   }
 
-  /* ======= INIT ======= */
   document.addEventListener('DOMContentLoaded', ()=>{ renderAll(); });
   </script>
 </body>
