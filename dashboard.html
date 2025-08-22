@@ -77,6 +77,9 @@
     .pdf{display:flex;align-items:center;justify-content:center;font-size:10px;color:#6b5e58}
     .beta-stack{display:flex;flex-direction:column;gap:8px;max-height:42vh;overflow:auto;border:1px solid #eee;border-radius:12px;padding:8px;}
     .beta-stack object{width:100%;height:260px;border:1px solid #eee;border-radius:8px;}
+    .chips{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{background:#f3efed;border:1px solid #eadfd9;border-radius:999px;padding:4px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+    .chip button{background:transparent;border:none;padding:0 2px;cursor:pointer}
     .toaster{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100}
     .toast{background:#fff;border-left:6px solid var(--verde);padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);min-width:260px;}
     .toast.warn{border-left-color:var(--terracota)}
@@ -85,6 +88,11 @@
     .sr-only{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;}
     .small{font-size:12px}
     .tight{margin:0}
+    /* Lista visual de evaluaciones */
+    .eval-list{display:flex;flex-direction:column;gap:8px;max-height:32vh;overflow:auto;border:1px solid #eee;border-radius:10px;padding:8px;background:#faf9f8}
+    .eval-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid #eee3de;border-radius:10px;padding:8px;background:#fff}
+    .eval-title{font-weight:600}
+    .eval-sub{color:#6f6460;font-size:12px}
   </style>
 </head>
 <body>
@@ -194,21 +202,13 @@ Equipo Unihouser`;
     notaria: 1200,
     honorarios: 3630,
     kpis: {},
-    messages:{
-      initial: DEFAULT_INITIAL_MESSAGE,
-      initial_subject: 'Inicio — Unihouser',
-    },
-    emailTemplates:{
-      contract:{
-        subject:'Propuesta de Contrato — Unihouser',
-        body:`Hola,
+    messages:{ initial: DEFAULT_INITIAL_MESSAGE, initial_subject: 'Inicio — Unihouser' },
+    emailTemplates:{ contract:{ subject:'Propuesta de Contrato — Unihouser', body:`Hola,
 
 Te adjuntamos la plantilla de contrato para revisión. Si te encaja, dínoslo y avanzamos con la firma.
 
 Gracias,
-Equipo Unihouser`
-      }
-    }
+Equipo Unihouser` } }
   };
 
   function eur(n){ return new Intl.NumberFormat(ES,{style:'currency',currency:'EUR'}).format(n||0); }
@@ -249,7 +249,6 @@ Equipo Unihouser`
 
   function ensureCfgShape(cfgIn){
     const cfg = cfgIn && typeof cfgIn==='object' ? cfgIn : {};
-    // merge superficial + profundidades necesarias
     cfg.itp_pct = typeof cfg.itp_pct==='number' ? cfg.itp_pct : DEFAULT_CFG.itp_pct;
     cfg.notaria = typeof cfg.notaria==='number' ? cfg.notaria : DEFAULT_CFG.notaria;
     cfg.honorarios = typeof cfg.honorarios==='number' ? cfg.honorarios : DEFAULT_CFG.honorarios;
@@ -269,13 +268,45 @@ Equipo Unihouser`
     return (CFG.messages && CFG.messages.initial_subject) ? CFG.messages.initial_subject : 'Unihouser';
   }
 
-  /* Estado en memoria */
-  let CFG = ensureCfgShape(LS.getRawCfg()) ;
-  LS.setCfg(CFG); // persistimos mergeado para futuras pantallas
+  /* ======= EVALS helpers (tolerantes) ======= */
+  function evId(ev){ return ev.id || ev.ev_id || ev.key || ev.uuid; }
+  function evEnsureId(ev){ if(!evId(ev)){ ev.id = 'ev_'+Math.random().toString(36).slice(2,8); } return evId(ev); }
+  function evTitle(ev){
+    return ev.titulo || ev.title || ev.nombre || ev.direccion || ev.dirección || ev.ref || ('Evaluación '+(evId(ev)||''));
+  }
+  function evPrice(ev){
+    const keys = ['precio','precio_compra','p_compra','price','pmax','precioMax'];
+    for(const k of keys){ if(typeof ev[k]==='number') return ev[k]; }
+    if(ev.costes && typeof ev.costes.compra==='number') return ev.costes.compra;
+    return null;
+  }
+  function evYieldBruta(ev){
+    const keys = ['bruta','kpi_bruta','rent_bruta','rentabilidad_bruta','rb'];
+    for(const k of keys){ if(typeof ev[k]==='number') return ev[k]; }
+    if(ev.kpis && typeof ev.kpis.bruta==='number') return ev.kpis.bruta;
+    return null;
+  }
+  function evYieldNeta(ev){
+    const keys = ['neta','kpi_neta','rent_neta','rentabilidad_neta','rn'];
+    for(const k of keys){ if(typeof ev[k]==='number') return ev[k]; }
+    if(ev.kpis && typeof ev.kpis.neta==='number') return ev.kpis.neta;
+    return null;
+  }
+
+  /* ======= Estado ======= */
+  let CFG = ensureCfgShape(LS.getRawCfg());
+  LS.setCfg(CFG);
   let PROS = LS.getPros();
   let EVALS = LS.getEvals();
 
-  /* ======= RENDER ======= */
+  // Asegurar IDs estables en EVALS
+  (function ensureEvalIds(){
+    let changed = false;
+    for(const ev of EVALS){ if(!evId(ev)){ evEnsureId(ev); changed = true; } }
+    if(changed){ LS.setEvals(EVALS); }
+  })();
+
+  /* ======= Render ======= */
   function renderAll(){ renderKPIs(); renderColumns(); }
 
   function renderKPIs(){
@@ -321,6 +352,7 @@ Equipo Unihouser`
     const copy = PROS.slice();
     const prosByPhase = {}; for(const ph of PHASES){ prosByPhase[ph]=[]; }
     for(const p of copy){ prosByPhase[p.phase||'CONTACTO'].push(p); }
+    // Orden Reunión por fecha creciente
     prosByPhase['REUNION'].sort((a,b)=>{
       const ad = a.meeting?.date ? new Date(a.meeting.date).getTime(): Number.MAX_SAFE_INTEGER;
       const bd = b.meeting?.date ? new Date(b.meeting.date).getTime(): Number.MAX_SAFE_INTEGER;
@@ -329,6 +361,8 @@ Equipo Unihouser`
     for(const ph of PHASES){
       const list = prosByPhase[ph];
       for(const p of list){
+        // Ocultar del tablero los que ya son éxito (se quedan en histórico y KPIs)
+        if(p.success) continue;
         const card = makeCard(p);
         document.getElementById('col-'+ph).appendChild(card);
       }
@@ -579,18 +613,21 @@ Equipo Unihouser`
 
   function renderBusqueda(p){
     const b = p.busqueda || (p.busqueda={propuestas:[], adjuntos:[]});
-    const evalCount = EVALS.length;
-    const selTxt = b.propuestas.length ? `${b.propuestas.length} / 4 seleccionados` : 'Ninguno';
+
     drBody.innerHTML = `
       <div class="grid2">
-        <div><label>Propuestas (hasta 4)</label>
-          <button class="iconbtn" id="b_pick"><span class="icon eye">
-            <svg viewBox="0 0 24 24"><path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/></svg>
-          </span>Elegir</button>
-          <div class="small muted">Disponibles: ${evalCount}</div>
+        <div>
+          <label>Buscar evaluaciones</label>
+          <input id="b_q" placeholder="Filtrar por texto..." />
         </div>
-        <div><label>Seleccionados</label><div id="b_sel" class="small">${escapeHtml(selTxt)}</div></div>
+        <div>
+          <label>Seleccionados (máx 4)</label>
+          <div id="b_chips" class="chips"></div>
+        </div>
       </div>
+
+      <div class="eval-list" id="b_list"></div>
+
       <div class="divider"></div>
       <div>
         <label>Adjuntar imágenes / vídeos / PDFs</label>
@@ -605,26 +642,96 @@ Equipo Unihouser`
       <div id="b_stack" class="beta-stack" style="display:none;"></div>
       <button class="primary" id="b_save">Guardar búsqueda</button>
     `;
-    function refreshSel(){
-      const txt = b.propuestas.length ? b.propuestas.map(id=>`• ${escapeHtml(id)}`).join('<br>') : 'Ninguno';
-      document.getElementById('b_sel').innerHTML = txt;
-    }
-    refreshSel();
 
-    document.getElementById('b_pick').addEventListener('click', ()=>{
-      const opts = EVALS.map(ev=>({id: ev.id||ev.ev_id||ev.key||'ev_'+Math.random().toString(36).slice(2,6), name: ev.titulo||ev.title||ev.direccion||('Eval '+(ev.id||''))}));
-      if(!opts.length){ toast('No hay evaluaciones disponibles.','warn'); return; }
-      const choices = prompt(`Escribe IDs separados por coma (máx 4):\n${opts.map(o=>o.id+' — '+o.name).join('\n')}`, b.propuestas.join(','));
-      if(choices===null) return;
-      const ids = choices.split(',').map(s=>s.trim()).filter(Boolean).slice(0,4);
-      b.propuestas = [...new Set(ids)].slice(0,4);
-      refreshSel(); persistPros(); toast('Propuestas actualizadas','ok');
+    // Build a normalized array for the list (with ensured IDs)
+    const EVS = EVALS.map(ev=>{
+      evEnsureId(ev);
+      return {
+        _raw: ev,
+        id: evId(ev),
+        title: evTitle(ev),
+        price: evPrice(ev),
+        rb: evYieldBruta(ev),
+        rn: evYieldNeta(ev)
+      };
     });
 
+    // Renders
+    const chips = document.getElementById('b_chips');
+    function renderChips(){
+      chips.innerHTML = '';
+      for(const id of b.propuestas){
+        const ev = EVS.find(x=>x.id===id);
+        const lab = ev ? ev.title : id;
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.innerHTML = `${escapeHtml(lab)} <button aria-label="Quitar" data-id="${escapeHtml(id)}">×</button>`;
+        chips.appendChild(chip);
+      }
+      // remove handlers
+      chips.querySelectorAll('button[data-id]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = btn.getAttribute('data-id');
+          b.propuestas = b.propuestas.filter(x=>x!==id);
+          persistPros(); renderChips(); renderList();
+          toast('Propuesta quitada','warn');
+        });
+      });
+    }
+
+    const list = document.getElementById('b_list');
+    const q = document.getElementById('b_q');
+
+    function renderList(){
+      const txt = (q.value||'').toLowerCase();
+      const maxed = b.propuestas.length>=4;
+      const filtered = EVS.filter(x=>{
+        const h = (x.title||'').toLowerCase();
+        return !txt || h.includes(txt);
+      });
+      list.innerHTML = '';
+      for(const it of filtered){
+        const sel = b.propuestas.includes(it.id);
+        const price = (typeof it.price==='number') ? ' · '+eur(it.price) : '';
+        const rb = (typeof it.rb==='number') ? ` · Bruta ${(it.rb*100).toFixed(1).replace('.',',')}%` : '';
+        const rn = (typeof it.rn==='number') ? ` · Neta ${(it.rn*100).toFixed(1).replace('.',',')}%` : '';
+        const div = document.createElement('div');
+        div.className = 'eval-item';
+        div.innerHTML = `
+          <div>
+            <div class="eval-title">${escapeHtml(it.title)}</div>
+            <div class="eval-sub small muted">ID: ${escapeHtml(it.id)}${price}${rb}${rn}</div>
+          </div>
+          <div>
+            <button class="${sel?'bad':'primary'}" data-id="${escapeHtml(it.id)}">${sel?'Quitar':'Añadir'}</button>
+          </div>
+        `;
+        const btn = div.querySelector('button');
+        btn.addEventListener('click', ()=>{
+          const id = it.id;
+          if(b.propuestas.includes(id)){
+            b.propuestas = b.propuestas.filter(x=>x!==id);
+            toast('Propuesta quitada','warn');
+          }else{
+            if(b.propuestas.length>=4){ toast('Límite 4 propuestas','bad'); return; }
+            b.propuestas.push(id);
+            toast('Propuesta añadida','ok');
+          }
+          persistPros(); renderChips(); renderList();
+        });
+        // Deshabilitar "Añadir" si ya hay 4 y esta no está seleccionada
+        if(maxed && !sel){ btn.disabled = true; }
+        list.appendChild(div);
+      }
+    }
+
+    renderChips(); renderList();
+
+    // Attachments
     const thumbs = document.getElementById('b_thumbs');
     function renderThumbs(){
       thumbs.innerHTML='';
-      for(const a of b.adjuntos){
+      for(const a of (b.adjuntos||[])){
         if(a.kind==='image'){
           const img = document.createElement('img'); img.alt=a.name; if(a.preview){ img.src = a.preview; }
           thumbs.appendChild(img);
@@ -641,6 +748,7 @@ Equipo Unihouser`
 
     document.getElementById('b_files').addEventListener('change', (e)=>{
       const files = Array.from(e.target.files||[]);
+      b.adjuntos = b.adjuntos||[];
       for(const f of files){
         const isVideo = /^video\//i.test(f.type);
         if(isVideo && f.size> (2*1024*1024)){ toast(`Vídeo demasiado grande: ${f.name}`,'bad'); continue; }
@@ -654,13 +762,13 @@ Equipo Unihouser`
 
     document.getElementById('b_merge').addEventListener('click', ()=>{
       const stack = document.getElementById('b_stack');
-      const pdfs = b.adjuntos.filter(x=>x.kind==='pdf');
+      const pdfs = (b.adjuntos||[]).filter(x=>x.kind==='pdf');
       if(!pdfs.length){ toast('No hay PDFs para previsualizar.','warn'); stack.style.display='none'; stack.innerHTML=''; return; }
       stack.innerHTML='';
       for(const ppdf of pdfs){
         const box = document.createElement('div');
         box.innerHTML = `<div class="small muted">${escapeHtml(ppdf.name)} (${bytes(ppdf.size)})</div>`;
-        const obj = document.createElement('object'); obj.type='application/pdf'; obj.data='';
+        const obj = document.createElement('object'); obj.type='application/pdf'; obj.data=''; // placeholder
         box.appendChild(obj); stack.appendChild(box);
       }
       stack.style.display='flex'; toast('Vista apilada generada (BETA)','ok');
@@ -669,6 +777,9 @@ Equipo Unihouser`
     document.getElementById('b_save').addEventListener('click', ()=>{
       p.busqueda = b; persistPros(); toast('Búsqueda guardada','ok');
     });
+
+    // Filtro texto
+    document.getElementById('b_q').addEventListener('input', renderList);
   }
 
   function renderCompraventa(p){
@@ -690,7 +801,7 @@ Equipo Unihouser`
     document.getElementById('cv_done').addEventListener('click', ()=>{
       const date = document.getElementById('cv_not').value;
       if(!date){ toast('Pon la fecha de notaría antes de finalizar.','warn'); return; }
-      p.compraventa = c; p.success = true;
+      p.compraventa = c; p.success = true; // éxito registrado
       p.history = p.history||{}; p.history['COMPRAVENTA']='OK';
       p.phase = 'COMPRAVENTA';
       persistPros(); renderAll(); toast('¡Éxito registrado!','ok'); closeDrawer();
