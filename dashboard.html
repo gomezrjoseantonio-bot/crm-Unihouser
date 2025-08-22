@@ -1,185 +1,591 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRM Unihouser - Dashboard</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unihouser — Dashboard CRM</title>
   <style>
-    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f9; color: #333; }
-    .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background: #ff6600; color: #fff; padding-top: 20px; }
-    .sidebar h2 { text-align: center; margin-bottom: 30px; }
-    .sidebar a { display: block; padding: 12px 20px; color: #fff; text-decoration: none; transition: background 0.3s; }
-    .sidebar a:hover { background: #e65500; }
-    .main { margin-left: 240px; padding: 20px; }
-    .section { display: none; }
-    .active { display: block; }
-    h1 { color: #ff6600; margin-bottom: 15px; }
-    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
-    th, td { padding: 12px; border-bottom: 1px solid #eee; }
-    th { background: #fafafa; text-align: left; }
-    tr:hover { background: #f1f1f1; }
-    .btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-right: 5px;}
-    .btn-success { background: #28a745; color: #fff; }
-    .btn-danger { background: #dc3545; color: #fff; }
-    .btn-warning { background: #ffc107; color: #333; }
-    .btn-primary { background: #007bff; color: #fff; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; font-weight: bold; margin-bottom: 5px; }
-    input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    .card { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    /* =====================
+       RESET Y ESTILOS BASE
+    ======================*/
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    ul {
+      list-style: none;
+    }
+
+    /* =====================
+       LAYOUT GENERAL
+    ======================*/
+    .wrapper {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+    .sidebar {
+      width: 240px;
+      background: #ff6600;
+      color: #fff;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-align: center;
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .sidebar-menu {
+      flex: 1;
+      padding: 20px 0;
+    }
+    .sidebar-menu li {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .sidebar-menu li:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .topbar {
+      background: #fff;
+      padding: 15px 20px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar .search {
+      flex: 1;
+      margin-left: 20px;
+    }
+
+    .topbar input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .main {
+      flex: 1;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+
+    /* =====================
+       TARJETAS ESTADÍSTICAS
+    ======================*/
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .card h3 {
+      font-size: 1rem;
+      color: #888;
+      margin-bottom: 10px;
+    }
+    .card p {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* =====================
+       TABLAS
+    ======================*/
+    .table-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    th {
+      background: #fafafa;
+      font-weight: 600;
+    }
+    tr:hover td {
+      background: #f5f5f5;
+    }
+
+    /* =====================
+       BOTONES
+    ======================*/
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .btn-primary {
+      background: #ff6600;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #e65500;
+    }
+    .btn-secondary {
+      background: #ddd;
+      color: #333;
+    }
+    .btn-secondary:hover {
+      background: #ccc;
+    }
+
+    /* =====================
+       MODALES
+    ======================*/
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .modal-header h2 {
+      font-size: 1.2rem;
+    }
+    .close {
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h2>Unihouser CRM</h2>
-    <a href="#" onclick="showSection('contacto')">Contacto</a>
-    <a href="#" onclick="showSection('reunion')">Reunión</a>
-    <a href="#" onclick="showSection('contrato')">Contrato</a>
-    <a href="#" onclick="showSection('busqueda')">Búsqueda</a>
-    <a href="#" onclick="showSection('compraventa')">Compraventa</a>
-  </div>
+  <div class="wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">Unihouser CRM</div>
+      <ul class="sidebar-menu">
+        <li data-section="dashboard">Dashboard</li>
+        <li data-section="clientes">Clientes</li>
+        <li data-section="propiedades">Propiedades</li>
+        <li data-section="inversores">Inversores</li>
+        <li data-section="tareas">Tareas</li>
+        <li data-section="config">Configuración</li>
+      </ul>
+    </aside>
 
-  <div class="main">
-    <!-- CONTACTO -->
-    <div id="contacto" class="section active">
-      <h1>Contacto</h1>
-      <div class="card">
-        <h3>Nuevo Prospecto</h3>
-        <form id="contactForm">
-          <div class="form-group"><label>Nombre</label><input type="text" id="nombre" required></div>
-          <div class="form-group"><label>Email</label><input type="email" id="email" required></div>
-          <div class="form-group"><label>Teléfono</label><input type="text" id="telefono"></div>
-          <div class="form-group"><label>Presupuesto (€)</label><input type="number" id="presupuesto"></div>
-          <div class="form-group"><label>Zonas de interés</label><input type="text" id="zonas"></div>
-          <div class="form-group"><label>Expectativa de rentabilidad</label>
-            <select id="rentabilidad"><option>Por habitaciones</option><option>Tradicional</option><option>Mixto</option></select>
-          </div>
-          <button type="submit" class="btn btn-primary">Guardar prospecto</button>
-        </form>
+    <!-- Content -->
+    <div class="content">
+      <div class="topbar">
+        <h1 id="section-title">Dashboard</h1>
+        <div class="search">
+          <input type="text" placeholder="Buscar..." />
+        </div>
+        <button class="btn btn-primary" id="btnAdd">+ Nuevo</button>
       </div>
-      <table id="contactTable">
-        <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Estado</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
 
-    <!-- REUNIÓN -->
-    <div id="reunion" class="section">
-      <h1>Reunión</h1>
-      <table id="reunionTable">
-        <thead><tr><th>Cliente</th><th>Fecha</th><th>Acciones</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
+      <div class="main" id="main-content">
+        <!-- Contenido dinámico cargará aquí -->
+        <div class="cards">
+          <div class="card">
+            <h3>Total Clientes</h3>
+            <p id="totalClientes">124</p>
+          </div>
+          <div class="card">
+            <h3>Total Propiedades</h3>
+            <p id="totalPropiedades">56</p>
+          </div>
+          <div class="card">
+            <h3>Total Inversores</h3>
+            <p id="totalInversores">12</p>
+          </div>
+          <div class="card">
+            <h3>Tareas Pendientes</h3>
+            <p id="totalTareas">8</p>
+          </div>
+        </div>
 
-    <!-- CONTRATO -->
-    <div id="contrato" class="section">
-      <h1>Contrato</h1>
-      <table id="contratoTable">
-        <thead><tr><th>Cliente</th><th>Documento</th><th>Acciones</th></tr></thead>
-        <tbody></tbody>
-      </table>
+        <div class="table-container">
+          <h2>Últimos Clientes</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Fecha Alta</th>
+              </tr>
+            </thead>
+            <tbody id="tablaClientes">
+              <tr>
+                <td>María López</td>
+                <td>maria@example.com</td>
+                <td>600123456</td>
+                <td>2025-07-01</td>
+              </tr>
+              <tr>
+                <td>Carlos Pérez</td>
+                <td>carlos@example.com</td>
+                <td>600654321</td>
+                <td>2025-07-05</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-
-    <!-- BÚSQUEDA -->
-    <div id="busqueda" class="section">
-      <h1>Búsqueda</h1>
-      <table id="busquedaTable">
-        <thead><tr><th>Cliente</th><th>Activos presentados</th><th>Acciones</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- COMPRAVENTA -->
-    <div id="compraventa" class="section">
-      <h1>Compraventa</h1>
-      <table id="compraventaTable">
-        <thead><tr><th>Cliente</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody></tbody>
-      </table>
+  </div>
+  <!-- Modal Genérico -->
+  <div id="modalForm" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Nuevo Registro</h2>
+        <span class="close" id="closeModal">&times;</span>
+      </div>
+      <form id="formRegistro">
+        <div style="margin-bottom:15px;">
+          <label>Nombre:</label><br/>
+          <input type="text" id="nombre" required style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;"/>
+        </div>
+        <div style="margin-bottom:15px;">
+          <label>Email:</label><br/>
+          <input type="email" id="email" required style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;"/>
+        </div>
+        <div style="margin-bottom:15px;">
+          <label>Teléfono:</label><br/>
+          <input type="tel" id="telefono" required style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;"/>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" class="btn btn-secondary" id="cancelModal">Cancelar</button>
+      </form>
     </div>
   </div>
 
   <script>
-    function showSection(id) {
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
+    // =====================
+    // GESTIÓN DE SECCIONES
+    // =====================
+    const menuItems = document.querySelectorAll('.sidebar-menu li');
+    const mainContent = document.getElementById('main-content');
+    const sectionTitle = document.getElementById('section-title');
 
-    function loadData() {
-      const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
-      renderTables(clientes);
-    }
-
-    function renderTables(clientes) {
-      // Contactos
-      const contactBody = document.querySelector("#contactTable tbody");
-      contactBody.innerHTML = "";
-      clientes.forEach(c => {
-        contactBody.innerHTML += `<tr><td>${c.nombre}</td><td>${c.email}</td><td>${c.telefono}</td><td>${c.estado}</td></tr>`;
+    menuItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const section = item.getAttribute('data-section');
+        sectionTitle.textContent = capitalize(section);
+        loadSection(section);
       });
-
-      // Reuniones
-      const reunionBody = document.querySelector("#reunionTable tbody");
-      reunionBody.innerHTML = "";
-      clientes.forEach(c => {
-        reunionBody.innerHTML += `<tr><td>${c.nombre}</td><td>${c.reunion || "Pendiente"}</td>
-          <td><button class="btn btn-success" onclick="setEstado('${c.email}','Contrato')">Enviar contrato</button>
-              <button class="btn btn-danger" onclick="setEstado('${c.email}','Descartado')">Descartar</button></td></tr>`;
-      });
-
-      // Contratos
-      const contratoBody = document.querySelector("#contratoTable tbody");
-      contratoBody.innerHTML = "";
-      clientes.filter(c=>c.estado==="Contrato").forEach(c => {
-        contratoBody.innerHTML += `<tr><td>${c.nombre}</td><td>Contrato_${c.nombre}.pdf</td>
-          <td><button class="btn btn-warning">Ver PDF</button></td></tr>`;
-      });
-
-      // Búsqueda
-      const busquedaBody = document.querySelector("#busquedaTable tbody");
-      busquedaBody.innerHTML = "";
-      clientes.filter(c=>c.estado==="Contrato").forEach(c => {
-        busquedaBody.innerHTML += `<tr><td>${c.nombre}</td><td>0 activos</td>
-          <td><button class="btn btn-success" onclick="setEstado('${c.email}','Compraventa')">Aceptar</button>
-              <button class="btn btn-danger">Rechazar</button></td></tr>`;
-      });
-
-      // Compraventa
-      const compraBody = document.querySelector("#compraventaTable tbody");
-      compraBody.innerHTML = "";
-      clientes.filter(c=>c.estado==="Compraventa").forEach(c => {
-        compraBody.innerHTML += `<tr><td>${c.nombre}</td><td>Financiación pendiente</td>
-          <td><button class="btn btn-success">Marcar como Notaría</button></td></tr>`;
-      });
-    }
-
-    function setEstado(email, nuevoEstado) {
-      let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
-      clientes = clientes.map(c => c.email === email ? {...c, estado: nuevoEstado} : c);
-      localStorage.setItem("clientes", JSON.stringify(clientes));
-      renderTables(clientes);
-    }
-
-    document.getElementById("contactForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const cliente = {
-        nombre: document.getElementById("nombre").value,
-        email: document.getElementById("email").value,
-        telefono: document.getElementById("telefono").value,
-        presupuesto: document.getElementById("presupuesto").value,
-        zonas: document.getElementById("zonas").value,
-        rentabilidad: document.getElementById("rentabilidad").value,
-        estado: "Contacto"
-      };
-      const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
-      clientes.push(cliente);
-      localStorage.setItem("clientes", JSON.stringify(clientes));
-      loadData();
-      this.reset();
     });
 
-    loadData();
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function loadSection(section) {
+      if (section === "dashboard") {
+        mainContent.innerHTML = `
+          <div class="cards">
+            <div class="card">
+              <h3>Total Clientes</h3>
+              <p id="totalClientes">124</p>
+            </div>
+            <div class="card">
+              <h3>Total Propiedades</h3>
+              <p id="totalPropiedades">56</p>
+            </div>
+            <div class="card">
+              <h3>Total Inversores</h3>
+              <p id="totalInversores">12</p>
+            </div>
+            <div class="card">
+              <h3>Tareas Pendientes</h3>
+              <p id="totalTareas">8</p>
+            </div>
+          </div>
+          <div class="table-container">
+            <h2>Últimos Clientes</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Teléfono</th>
+                  <th>Fecha Alta</th>
+                </tr>
+              </thead>
+              <tbody id="tablaClientes">
+                <tr>
+                  <td>María López</td>
+                  <td>maria@example.com</td>
+                  <td>600123456</td>
+                  <td>2025-07-01</td>
+                </tr>
+                <tr>
+                  <td>Carlos Pérez</td>
+                  <td>carlos@example.com</td>
+                  <td>600654321</td>
+                  <td>2025-07-05</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      else if (section === "clientes") {
+        mainContent.innerHTML = `
+          <div class="table-container">
+            <h2>Gestión de Clientes</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Teléfono</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaClientesFull">
+                <tr>
+                  <td>María López</td>
+                  <td>maria@example.com</td>
+                  <td>600123456</td>
+                  <td>
+                    <button class="btn btn-secondary">Editar</button>
+                    <button class="btn btn-primary">Ver</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Carlos Pérez</td>
+                  <td>carlos@example.com</td>
+                  <td>600654321</td>
+                  <td>
+                    <button class="btn btn-secondary">Editar</button>
+                    <button class="btn btn-primary">Ver</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      else if (section === "propiedades") {
+        mainContent.innerHTML = `
+          <div class="table-container">
+            <h2>Gestión de Propiedades</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Dirección</th>
+                  <th>Ciudad</th>
+                  <th>Precio</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>C/ Mayor 12</td>
+                  <td>Oviedo</td>
+                  <td>120.000 €</td>
+                  <td>Disponible</td>
+                </tr>
+                <tr>
+                  <td>Av. Galicia 45</td>
+                  <td>Gijón</td>
+                  <td>95.000 €</td>
+                  <td>Ocupado</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      else if (section === "inversores") {
+        mainContent.innerHTML = `
+          <div class="table-container">
+            <h2>Gestión de Inversores</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Capital</th>
+                  <th>Rentabilidad</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Lucía Martínez</td>
+                  <td>200.000 €</td>
+                  <td>10 %</td>
+                  <td>Activo</td>
+                </tr>
+                <tr>
+                  <td>Javier Fernández</td>
+                  <td>150.000 €</td>
+                  <td>8 %</td>
+                  <td>Activo</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      else if (section === "tareas") {
+        mainContent.innerHTML = `
+          <div class="table-container">
+            <h2>Tareas Pendientes</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Tarea</th>
+                  <th>Responsable</th>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Llamar a propietario C/ Mayor 12</td>
+                  <td>Jose Antonio</td>
+                  <td>2025-08-20</td>
+                  <td>Pendiente</td>
+                </tr>
+                <tr>
+                  <td>Revisión contrato inversor</td>
+                  <td>Alicia</td>
+                  <td>2025-08-22</td>
+                  <td>En curso</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      else if (section === "config") {
+        mainContent.innerHTML = `
+          <div class="table-container">
+            <h2>Configuración</h2>
+            <p>Aquí irían las opciones de configuración del CRM.</p>
+          </div>
+        `;
+      }
+    }
+
+    // =====================
+    // MODAL NUEVO REGISTRO
+    // =====================
+    const modal = document.getElementById("modalForm");
+    const btnAdd = document.getElementById("btnAdd");
+    const closeModal = document.getElementById("closeModal");
+    const cancelModal = document.getElementById("cancelModal");
+
+    btnAdd.addEventListener("click", () => {
+      modal.style.display = "flex";
+    });
+
+    closeModal.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    cancelModal.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+    // =====================
+    // GESTIÓN DE FORMULARIO
+    // =====================
+    const formRegistro = document.getElementById("formRegistro");
+
+    formRegistro.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById("nombre").value;
+      const email = document.getElementById("email").value;
+      const telefono = document.getElementById("telefono").value;
+
+      // Ejemplo simple: añadir a la tabla de clientes en Dashboard
+      const tabla = document.getElementById("tablaClientes");
+      if (tabla) {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${nombre}</td>
+          <td>${email}</td>
+          <td>${telefono}</td>
+          <td>${new Date().toISOString().slice(0,10)}</td>
+        `;
+        tabla.appendChild(fila);
+      }
+
+      modal.style.display = "none";
+      formRegistro.reset();
+    });
+
+    // =====================
+    // FUNCIONES EXTRA
+    // =====================
+    function initDashboard() {
+      // Aquí se podrían cargar datos desde API o backend
+      console.log("Dashboard Unihouser inicializado");
+    }
+    initDashboard();
   </script>
 </body>
 </html>
