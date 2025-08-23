@@ -10,15 +10,18 @@
   :root{--naranja:#c7530c;--granate:#B53928;--verde:#58736F;--gris:#DDD5D2;--card:#fff;--texto:#2b2b2b;--shadow:0 8px 22px rgba(0,0,0,.07);--radius:16px}
   *{box-sizing:border-box} html,body{height:100%}
   body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:var(--texto);background:#f6f3f1}
-  /* Topbar (compacta) */
+
+  /* Topbar (más compacta) */
   .topbar{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #ece4e0}
-  .container{max-width:1200px;margin:0 auto;padding:8px 16px}
+  .container{max-width:1200px;margin:0 auto;padding:6px 16px}
   .flex{display:flex;gap:10px}.between{justify-content:space-between}.center{align-items:center}
   .brand{gap:8px}
+  .brand img{height:22px}
   .nav{display:flex;gap:6px}
-  .nav a{padding:6px 10px;border-radius:8px;text-decoration:none;color:#4a3f3b;font-size:13px}
+  .nav a{padding:4px 8px;border-radius:8px;text-decoration:none;color:#4a3f3b;font-size:12px}
   .nav a.active{background:rgba(199,83,12,.14);color:var(--naranja)}
-  .title{font-weight:700;font-size:14px}
+  .title{font-weight:700;font-size:13px}
+
   /* Inputs */
   label{font-size:12px;color:#4d4542}
   input,select,textarea,button{font-size:12px;border:1px solid #d8cfca;border-radius:8px;padding:4px 8px;background:#fff;color:#2b2b2b;height:26px;line-height:1.2;outline:none}
@@ -27,9 +30,10 @@
   .primary{background:var(--naranja);color:#fff;border-color:transparent}
   .bad{background:var(--granate);color:#fff;border-color:transparent}
   .ok{background:var(--verde);color:#fff;border-color:transparent}
+
   /* KPIs */
-  .board-title{margin:12px 16px 6px;font-size:16px;font-weight:800;color:#4a3f3b}
-  .kpis{margin:6px 16px 14px;display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));gap:10px}
+  .board-title{margin:10px 16px 6px;font-size:16px;font-weight:800;color:#4a3f3b}
+  .kpis{margin:6px 16px 12px;display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));gap:10px}
   .kpi{background:var(--card);border-radius:12px;padding:8px 10px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px}
   .kpi h3{margin:0;font-size:11px;font-weight:800;letter-spacing:.2px;text-transform:uppercase;color:#584c47}
   .kpi .row{display:flex;justify-content:space-between;align-items:baseline}
@@ -39,6 +43,7 @@
   .kpi.ok .pill{background:rgba(88,115,111,.12);color:var(--verde)}
   .kpi.warn .pill{background:rgba(199,83,12,.18);color:var(--naranja)}
   .kpi.bad .pill{background:rgba(181,57,40,.12);color:var(--granate)}
+
   /* Board */
   .board{padding:0 16px 28px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
   .col{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);min-height:58vh;display:flex;flex-direction:column}
@@ -46,6 +51,7 @@
   .col header h2{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.5px}
   .content{padding:10px;display:flex;flex-direction:column;gap:10px}
   .new-contact{border:1px dashed #c9beb9;border-radius:10px;padding:8px;background:#fbf9f8;display:flex;flex-direction:column;gap:8px}
+
   /* Card */
   .card{border:1px solid #eee3de;border-radius:12px;padding:8px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
   .top{display:flex;justify-content:space-between;align-items:center}
@@ -62,10 +68,12 @@
   .circle.ok{background:rgba(88,115,111,.12);color:#2e4743;border-color:rgba(88,115,111,.25)}
   .circle.ko{background:rgba(181,57,40,.12);color:#7f2b20;border-color:rgba(181,57,40,.25)}
   .houses{display:flex;gap:4px}.house{width:12px;height:12px;border-radius:3px;background:#e8e1dc;border:1px solid #d8cfca}.house.on{background:var(--naranja);border-color:#a64708}
+
   /* Toasts */
   .toaster{position:fixed;top:14px;right:14px;display:flex;flex-direction:column;gap:8px;z-index:400}
   .toast{background:#fff;border-left:6px solid var(--verde);padding:8px 10px;border-radius:10px;box-shadow:var(--shadow);min-width:220px}
   .toast.warn{border-left-color:var(--naranja)} .toast.bad{border-left-color:var(--granate)}
+
   /* Modal */
   #overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.2s;z-index:250}
   #overlay.open{opacity:1;pointer-events:auto}
@@ -87,14 +95,17 @@
   .eval-list{display:flex;flex-direction:column;gap:6px;max-height:32vh;overflow:auto;border:1px dashed #eadfd9;border-radius:10px;padding:6px;background:#fff}
   .eval-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px;border:1px solid #f0e6e1;border-radius:10px;background:#fff}
   .col.drag-over{outline:2px dashed var(--naranja);outline-offset:-6px}
-  @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}} @media(max-width:680px){.grid{grid-template-columns:1fr}}
+
+  @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header class="topbar">
   <div class="container flex between center">
     <div class="brand flex center">
-      <img src="logo-unihouser.svg" alt="Unihouser" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;110&quot; height=&quot;26&quot; viewBox=&quot;0 0 110 26&quot;><rect rx=&quot;6&quot; ry=&quot;6&quot; width=&quot;110&quot; height=&quot;26&quot; fill=&quot;%23c7530c&quot;/><text x=&quot;50%&quot; y=&quot;53%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; font-family=&quot;Arial,Helvetica,sans-serif&quot; font-size=&quot;13&quot; fill=&quot;white&quot;>Unihouser</text></svg>')">
+      <img src="logo-unihouser.svg" alt="Unihouser"
+           onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;110&quot; height=&quot;22&quot; viewBox=&quot;0 0 110 22&quot;><rect rx=&quot;6&quot; ry=&quot;6&quot; width=&quot;110&quot; height=&quot;22&quot; fill=&quot;%23c7530c&quot;/><text x=&quot;50%&quot; y=&quot;53%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; font-family=&quot;Arial,Helvetica,sans-serif&quot; font-size=&quot;12&quot; fill=&quot;white&quot;>Unihouser</text></svg>')">
       <div class="title">Unihouser — CRM & BuyBox</div>
     </div>
     <nav class="nav">
@@ -176,7 +187,7 @@ var CFG=(function(c){var d={itp_pct:0.08,notaria:1200,honorarios:3630,localidade
 })(LS.get('cfg',null)); LS.set('cfg',CFG);
 var PROS=LS.get('pros',[]), EVALS=LS.get('evals',[]);
 
-/* ===== Toast (throttle) ===== */
+/* ===== Toast ===== */
 var toast=(function(){var t=0;return function(msg,type){var now=Date.now();if(now-t<700)return;t=now;var d=document.createElement('div');d.className='toast'+(type==='warn'?' warn':type==='bad'?' bad':'');d.textContent=msg;document.getElementById('toaster').appendChild(d);setTimeout(function(){d.style.opacity='0';setTimeout(function(){d.remove()},220)},2400);};})();
 
 /* ===== Icons ===== */
@@ -236,7 +247,7 @@ function makeCard(p){
 
 /* ===== Delegación global (robusta) ===== */
 document.addEventListener('click',function(ev){
-  var btn = ev.target.closest && ev.target.closest('[data-act]');
+  var btn = ev.target.closest ? ev.target.closest('[data-act]') : null;
   if(!btn) return;
   ev.preventDefault(); ev.stopPropagation();
   var p=PROS.find(function(x){return x.id===btn.dataset.id}); if(!p) return;
@@ -255,6 +266,10 @@ function field(lbl,ctrl,cls){var d=E('div',cls?{class:cls}:{}); d.appendChild(E(
 function sel(a,val,id){var s=E('select',id?{id:id}:{}); a.forEach(function(v){var o=E('option',{text:v}); if(v===val)o.setAttribute('selected',''); s.appendChild(o)}); return s;}
 function openModal(){overlay.classList.add('open'); modal.classList.add('open'); var f=modal.querySelector('input,select,textarea,button'); if(f)f.focus();}
 function closeModal(){overlay.classList.remove('open'); modal.classList.remove('open'); CURRENT=null; if(LAST_BTN && document.body.contains(LAST_BTN)) LAST_BTN.focus();}
+overlay.addEventListener('click',closeModal);              /* NUEVO: cerrar al pulsar fuera */
+document.addEventListener('keydown',function(e){          /* NUEVO: cerrar con ESC */
+  if(e.key==='Escape' && overlay.classList.contains('open')) closeModal();
+});
 
 /* ---- binders ---- */
 function moneyBind(el,maxDigits){if(!el)return; el.dataset.maxdigits=String(maxDigits||6); el.addEventListener('focus',function(){var v=this.value?this.value.toString().replace(/\./g,'').replace(/\s+/g,''):''; this.value=v;}); el.addEventListener('input',function(){var digits=this.value.replace(/\D/g,'').slice(0,parseInt(this.dataset.maxdigits,10)); this.value=digits;}); el.addEventListener('blur',function(){if(!this.value)return; var n=parseInt(this.value,10)||0; this.value=fmtInt(n);});}
