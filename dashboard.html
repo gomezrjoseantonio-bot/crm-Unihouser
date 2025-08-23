@@ -6,8 +6,7 @@
 <title>Unihouser — Dashboard CRM</title>
 <style>
 :root{
-  --brand:#c7530c;            /* Naranja vivo principal */
-  --brand-weak:#e7a77a;
+  --brand:#c7530c;          /* NARANJA vivo */
   --ok:#58736F;
   --bad:#B53928;
   --amber:#DB824B;
@@ -21,144 +20,84 @@
   --shadow:0 4px 24px rgba(0,0,0,.06);
   --radius:14px;
   --radius-sm:10px;
-  --radius-xs:8px;
-  --gap:14px;
   --font: system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
 }
-html,body{height:100%;}
-body{
-  margin:0; background:var(--bg); color:var(--ink); font-family:var(--font);
-  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-}
+html,body{height:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); -webkit-font-smoothing:antialiased}
 
-/* Topbar compacta */
-.topbar{
-  background:var(--card); box-shadow:var(--shadow); position:sticky; top:0; z-index:10;
-}
-.top-inner{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px 18px;}
-.brand{display:flex; align-items:center; gap:10px;}
-.brand .logo{
-  width:30px; height:30px; border-radius:8px; background:var(--brand); display:grid; place-items:center; color:#fff; font-weight:700;
-}
-.brand .title{font-weight:700; letter-spacing:.2px; font-size:14px; color:var(--ink-2);}
-.nav a{
-  color:var(--ink-2); text-decoration:none; padding:6px 10px; border-radius:8px; font-size:13px;
-}
-.nav a.active{background:var(--brand); color:#fff;}
-.nav a:hover{background:var(--muted);}
+.topbar{position:sticky; top:0; z-index:10; background:#fff; box-shadow:var(--shadow)}
+.top-inner{display:flex; align-items:center; justify-content:space-between; padding:10px 16px; gap:12px}
+.brand{display:flex; align-items:center; gap:10px}
+.brand .logo{width:30px; height:30px; border-radius:8px; background:var(--brand); color:#fff; display:grid; place-items:center; font-weight:700}
+.brand .title{font-size:14px; font-weight:700; letter-spacing:.2px; color:var(--ink-2)}
+.nav a{color:var(--ink-2); text-decoration:none; padding:6px 10px; border-radius:8px; font-size:13px}
+.nav a.active{background:var(--brand); color:#fff}
+.nav a:hover{background:var(--muted)}
 
-/* Contenido */
-.container{max-width:1200px; margin:18px auto; padding:0 14px;}
-.kpis{display:grid; grid-template-columns:repeat(6, 1fr); gap:12px; margin-bottom:14px;}
-.kpi{
-  background:var(--card); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 12px;
-  box-shadow:var(--shadow); display:flex; align-items:center; justify-content:space-between; gap:6px;
-  font-size:12px;
-}
-.kpi b{font-size:13px;}
-.kpi .right{display:flex; align-items:center; gap:8px; opacity:.9;}
-.kpi .pill{padding:3px 8px; border-radius:999px; background:var(--chip); font-weight:600; font-size:12px}
-.kpi .ok{color:var(--ok);} .kpi .ko{color:var(--bad);}
+.container{max-width:1200px; margin:18px auto; padding:0 14px}
+.kpis{display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:14px}
+.kpi{background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 12px; box-shadow:var(--shadow); display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:12px}
+.kpi b{font-size:13px}
+.kpi .pill{background:var(--chip); border-radius:999px; padding:3px 8px; font-weight:600}
+.kpi .ok{color:var(--ok)} .kpi .ko{color:var(--bad)}
 
-/* Board */
-.board{display:grid; grid-template-columns:repeat(5, 1fr); gap:14px;}
-.col{
-  background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:12px; min-height:540px;
-  display:flex; flex-direction:column; gap:10px; box-shadow:var(--shadow);
-}
-.col h3{margin:0 0 6px; font-size:14px; display:flex; align-items:center; justify-content:space-between; color:var(--ink-2);}
-.col h3 .count{font-weight:600; color:#777; font-size:12px}
+.board{display:grid; grid-template-columns:repeat(5,1fr); gap:14px}
+.col{background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; min-height:540px; box-shadow:var(--shadow)}
+.col h3{margin:0 0 6px; font-size:14px; color:var(--ink-2); display:flex; align-items:center; justify-content:space-between}
+.col .count{font-size:12px; color:#777; font-weight:600}
 
-.card{
-  background:var(--card); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 10px 8px;
-  box-shadow:var(--shadow); display:grid; grid-template-columns:1fr auto; gap:8px; cursor:grab;
-}
-.card header{grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:8px;}
-.card .name{font-weight:800; font-size:14px; letter-spacing:.2px;}
-.card .age{font-size:12px; color:#888; display:flex; align-items:center; gap:4px;}
-.badges{display:flex; gap:6px; flex-wrap:wrap;}
-.badge{
-  background:var(--chip); border:1px solid var(--line); padding:4px 8px; border-radius:999px; font-size:12px; color:#555;
-  display:inline-flex; align-items:center; gap:6px;
-}
-.badge .dot{width:8px; height:8px; border-radius:50%;}
-.actions{display:flex; gap:8px;}
-.btn-icon{
-  width:30px; height:30px; border-radius:999px; display:grid; place-items:center; border:1px solid var(--line); background:#fff;
-}
-.btn-icon svg{width:16px; height:16px; stroke:#555; fill:none; stroke-width:2;}
-.btn-icon.ok{border-color:var(--ok);} .btn-icon.ok svg{stroke:var(--ok);}
-.btn-icon.ko{border-color:var(--bad);} .btn-icon.ko svg{stroke:var(--bad);}
-.btn-icon.view{border-color:var(--brand);} .btn-icon.view svg{stroke:var(--brand);}
-.btn-icon:hover{background:#f9f6f4}
-
-/* Toasts */
-.toast{
-  position:fixed; right:16px; bottom:16px; background:#fff; border:1px solid var(--line); box-shadow:var(--shadow);
-  padding:10px 14px; border-radius:12px; font-size:13px; display:none;
-}
-.toast.ok{border-color:var(--ok);} .toast.warn{border-color:var(--amber);} .toast.bad{border-color:var(--bad);}
-.toast.show{display:block;}
-
-/* Modal central sin scroll (contenido recortado con límites) */
-.modal-back{position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:50;}
-.modal{width:980px; max-width:95vw; background:#fff; border-radius:16px; box-shadow:var(--shadow); border:1px solid var(--line);}
-.modal header{padding:12px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between;}
-.modal header h4{margin:0; font-size:16px;}
-.modal header .close{width:30px; height:30px; border-radius:999px; border:1px solid var(--brand); color:var(--brand); background:#fff; display:grid; place-items:center; font-weight:700; cursor:pointer;}
-.modal .body{padding:12px 16px; display:grid; gap:12px;}
-/* Rejilla 3x3 por bloque con límites para no forzar scroll */
-.block{border:1px dashed var(--line); border-radius:12px; padding:10px;}
-.block h5{margin:0 0 8px; font-size:12px; letter-spacing:.3px; color:#666;}
-.grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;}
-.field{display:flex; flex-direction:column; gap:6px;}
-.field label{font-size:12px; color:#555;}
-.field input[type=text],
-.field input[type=email],
-.field input[type=tel],
-.field input[type=number],
-.field input[type=datetime-local],
-.field select, .chips-input{
-  border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:12px; outline:none; background:#fff; min-height:34px;
-}
-.field small{color:#888; font-size:11px;}
-.field .row2{grid-column:span 2;}
-.field .row3{grid-column:span 3;}
-/* Chips */
-.chips{display:flex; gap:6px; flex-wrap:wrap}
-.chip{
-  background:var(--chip); border:1px solid var(--line); border-radius:999px; padding:3px 8px; font-size:12px; display:inline-flex; gap:6px; align-items:center;
-}
-.chip .x{cursor:pointer; color:#999;}
-.modal footer{padding:10px 16px; border-top:1px solid var(--line); display:flex; justify-content:flex-end;}
-.modal .save{
-  background:var(--brand); color:#fff; border:none; padding:9px 14px; border-radius:10px; cursor:pointer; font-weight:700;
-}
-
-/* Draggable */
+.card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; box-shadow:var(--shadow); display:grid; grid-template-columns:1fr auto; gap:8px; cursor:grab}
+.card header{grid-column:1/-1; display:flex; align-items:center; justify-content:space-between}
+.card .name{font-weight:800; font-size:14px}
+.card .age{font-size:12px; color:#888}
+.badges{display:flex; gap:6px; flex-wrap:wrap}
+.badge{background:var(--chip); border:1px solid var(--line); border-radius:999px; padding:4px 8px; font-size:12px; color:#555; display:inline-flex; align-items:center; gap:6px}
+.badge .dot{width:8px; height:8px; border-radius:50%}
+.actions{display:flex; gap:8px}
+.btn-icon{width:30px; height:30px; border-radius:999px; border:1px solid var(--line); background:#fff; display:grid; place-items:center}
+.btn-icon svg{width:16px; height:16px; stroke:#555; fill:none; stroke-width:2}
+.btn-icon.view{border-color:var(--brand)} .btn-icon.view svg{stroke:var(--brand)}
+.btn-icon.ok{border-color:var(--ok)} .btn-icon.ok svg{stroke:var(--ok)}
+.btn-icon.ko{border-color:var(--bad)} .btn-icon.ko svg{stroke:var(--bad)}
 .card.dragging{opacity:.5}
 .col.drop{outline:2px dashed var(--brand); outline-offset:-6px}
 
-/* Badges de match */
-.match{display:flex; align-items:center; gap:6px;}
-.match .sem{width:10px; height:10px; border-radius:50%;}
-.sem.red{background:var(--bad);} .sem.amber{background:var(--amber);} .sem.green{background:var(--ok);} .sem.gray{background:#ccc;}
+.toast{position:fixed; right:16px; bottom:16px; background:#fff; border:1px solid var(--line); box-shadow:var(--shadow); padding:10px 14px; border-radius:12px; font-size:13px; display:none}
+.toast.ok{border-color:var(--ok)} .toast.warn{border-color:var(--amber)} .toast.bad{border-color:var(--bad)}
+.toast.show{display:block}
+
+.modal-back{position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:50}
+.modal{width:980px; max-width:95vw; background:#fff; border-radius:16px; box-shadow:var(--shadow); border:1px solid var(--line)}
+.modal header{padding:12px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between}
+.modal header h4{margin:0; font-size:16px}
+.modal header .close{width:30px; height:30px; border-radius:999px; border:1px solid var(--brand); color:var(--brand); background:#fff; display:grid; place-items:center; font-weight:700; cursor:pointer}
+.modal .body{padding:12px 16px; display:grid; gap:12px}
+.block{border:1px dashed var(--line); border-radius:12px; padding:10px}
+.block h5{margin:0 0 8px; font-size:12px; color:#666}
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.field{display:flex; flex-direction:column; gap:6px}
+.field label{font-size:12px; color:#555}
+.field input[type=text], .field input[type=email], .field input[type=tel], .field input[type=number], .field input[type=datetime-local], .field select, .chips-input{border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:12px; min-height:34px}
+.field small{color:#888; font-size:11px}
+.row2{grid-column:span 2} .row3{grid-column:span 3}
+.chips{display:flex; gap:6px; flex-wrap:wrap}
+.chip{background:var(--chip); border:1px solid var(--line); border-radius:999px; padding:3px 8px; font-size:12px; display:inline-flex; gap:6px; align-items:center}
+.chip .x{cursor:pointer; color:#999}
+.modal footer{padding:10px 16px; border-top:1px solid var(--line); display:flex; justify-content:flex-end}
+.modal .save{background:var(--brand); color:#fff; border:none; padding:9px 14px; border-radius:10px; cursor:pointer; font-weight:700}
+
+.match{display:flex; align-items:center; gap:6px}
+.match .sem{width:10px; height:10px; border-radius:50%}
+.sem.red{background:var(--bad)} .sem.amber{background:var(--amber)} .sem.green{background:var(--ok)} .sem.gray{background:#ccc}
 
 .footer{margin:28px 0 18px; text-align:center; color:#888; font-size:12px}
-@media (max-width:980px){
-  .board{grid-template-columns:1fr}
-  .kpis{grid-template-columns:1fr 1fr}
-  .col{min-height:unset}
-}
+@media (max-width:980px){.board{grid-template-columns:1fr} .kpis{grid-template-columns:1fr 1fr} .col{min-height:unset}}
 </style>
 </head>
 <body>
   <div class="topbar">
     <div class="top-inner">
-      <div class="brand">
-        <div class="logo">U</div>
-        <div class="title">Unihouser — CRM & BuyBox</div>
-      </div>
+      <div class="brand"><div class="logo">U</div><div class="title">Unihouser — CRM & BuyBox</div></div>
       <nav class="nav">
         <a href="evaluar.html">Evaluar</a>
         <a href="evaluaciones.html">Evaluaciones</a>
@@ -181,12 +120,8 @@ body{
         <h4 id="mh">Ficha</h4>
         <button class="close" id="mclose" title="Cerrar">×</button>
       </header>
-      <div class="body" id="mbody">
-        <!-- se inyecta por JS -->
-      </div>
-      <footer>
-        <button class="save" id="msave">Guardar</button>
-      </footer>
+      <div class="body" id="mbody"></div>
+      <footer><button class="save" id="msave">Guardar</button></footer>
     </div>
   </div>
 
@@ -194,371 +129,257 @@ body{
   <div class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
 
 <script>
-/* ====================== UTIL ====================== */
-const LS={
-  get:(k,fb)=>{try{const v=localStorage.getItem(k); return v?JSON.parse(v):fb}catch(e){return fb}},
-  set:(k,v)=>{localStorage.setItem(k, JSON.stringify(v))}
-};
-const fmtEUR=(n)=> new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Math.round(Number(n||0)));
-const fmtPct=(n)=> new Intl.NumberFormat('es-ES',{maximumFractionDigits:1}).format(Number(n||0))+' %';
-const num=(v)=>{ if(typeof v==='number') return v;
-  if(!v && v!==0) return 0;
-  const s=String(v).replace(/\./g,'').replace(',','.').replace(/[^\d.-]/g,'');
-  const n=parseFloat(s); return isNaN(n)?0:n;
-};
-const normPct=(v)=> (v<=1? v : v/100); // admite 0.08 o 8
+/* === Utils === */
+const LS={get:(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch(_){return fb}}, set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+const fmtEUR=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Math.round(Number(n||0)));
+const fmtPct=n=>new Intl.NumberFormat('es-ES',{maximumFractionDigits:1}).format(Number(n||0))+' %';
+const num=v=>{if(typeof v==='number')return v; if(v===0)return 0; const s=String(v||'').replace(/\./g,'').replace(',','.').replace(/[^\d.-]/g,''); const n=parseFloat(s); return isNaN(n)?0:n;};
+const normPct=v=> (v<=1?v:v/100);
+function toast(msg,cls='ok',ms=1600){const t=document.getElementById('toast');t.className='toast '+cls;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
+const h=s=>String(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 
-function toast(msg, cls='ok', ms=1600){
-  const t=document.getElementById('toast');
-  t.className='toast '+cls; t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), ms);
-}
-
-/* ====================== CFG (compat) ====================== */
+/* === CFG compat === */
 var CFG=(function(raw){
-  var c = raw && typeof raw==='object' ? JSON.parse(JSON.stringify(raw)) : {};
-  // compat sinónimos
-  if (typeof c.notaria_eur === 'number') c.notaria = c.notaria_eur;
-  if (typeof c.psi_fee_eur === 'number') c.honorarios = c.psi_fee_eur;
-  // defaults
-  var dObj = {
-    tradicional:{bruta_pct:10, neta_pct:6, flujo_mes_eur:0},
-    habitaciones:{bruta_pct:12, neta_pct:7, flujo_mes_eur:0}
-  };
-  c.itp_pct = normPct(typeof c.itp_pct==='number'? c.itp_pct : 0.08);
-  c.notaria = typeof c.notaria==='number' ? c.notaria : 1200;
-  c.honorarios = typeof c.honorarios==='number' ? c.honorarios : 3630;
-  c.objetivos = (c.objetivos && (c.objetivos.tradicional||c.objetivos.habitaciones)) ? c.objetivos : dObj;
-  c.match = (c.match && c.match.thresholds) ? c.match : {thresholds:{green:1.00, amber:0.95}, warnings_only_when_green:true};
-  // default incluir honorarios si hay incluir_psi_por_defecto
-  const inc = (typeof c.incluir_psi_por_defecto === 'boolean') ? c.incluir_psi_por_defecto : false;
-  c.bruta = c.bruta || {}; if(typeof c.bruta.include_honorarios_default !== 'boolean') c.bruta.include_honorarios_default = inc;
-  c.neta  = c.neta  || {}; if(typeof c.neta.include_honorarios_default  !== 'boolean') c.neta.include_honorarios_default  = inc;
-  // localidades
-  c.localidades = Array.isArray(c.localidades)&&c.localidades.length ? c.localidades :
-                  ['Oviedo','Gijón','Avilés','Mieres','Pola de Siero','Langreo','Gozón'];
+  var c= raw&&typeof raw==='object' ? JSON.parse(JSON.stringify(raw)) : {};
+  if(typeof c.notaria_eur==='number') c.notaria=c.notaria_eur;
+  if(typeof c.psi_fee_eur==='number') c.honorarios=c.psi_fee_eur;
+  c.itp_pct = normPct(typeof c.itp_pct==='number'?c.itp_pct:0.08);
+  c.notaria = typeof c.notaria==='number'? c.notaria:1200;
+  c.honorarios = typeof c.honorarios==='number'? c.honorarios:3630;
+  c.localidades = Array.isArray(c.localidades)&&c.localidades.length? c.localidades : ['Oviedo','Gijón','Avilés','Mieres','Pola de Siero','Langreo','Gozón'];
+  c.objetivos = c.objetivos || {tradicional:{bruta_pct:10,neta_pct:6,flujo_mes_eur:0}, habitaciones:{bruta_pct:12,neta_pct:7,flujo_mes_eur:0}};
+  c.match = c.match&&c.match.thresholds? c.match : {thresholds:{green:1,amber:0.95}, warnings_only_when_green:true};
+  const inc = typeof c.incluir_psi_por_defecto==='boolean' ? c.incluir_psi_por_defecto : false;
+  c.bruta = c.bruta || {}; if(typeof c.bruta.include_honorarios_default!=='boolean') c.bruta.include_honorarios_default=inc;
+  c.neta  = c.neta  || {}; if(typeof c.neta.include_honorarios_default!=='boolean')  c.neta.include_honorarios_default=inc;
   return c;
 })(LS.get('cfg',{}));
 LS.set('cfg',CFG);
 
-/* ====================== DATA ====================== */
-let PROS = (LS.get('pros',[]) || []).filter(p=>!p.archived); // activos en tablero
-let EVALS= LS.get('evals',[]) || [];
+/* === Data === */
+function allPros(){return LS.get('pros',[])||[]}
+function savePros(list){LS.set('pros',list)}
+let PROS = allPros().filter(p=>!p.archived);
+let EVALS = LS.get('evals',[])||[];
 
-/* ====================== MATCH ====================== */
+/* === KPIs de evaluaciones === */
 function getEvalKPIs(ev){
   const k={};
-  // intentar leer KPIs ya calculados (muchos nombres posibles)
   k.bruta = num(ev.bruta_pct ?? ev.kpi_bruta ?? ev.bruta);
-  k.neta  = num(ev.neta_pct ?? ev.kpi_neta  ?? ev.neta);
-  // flujo mensual prioritario; si hay anual, convertir
-  const fm = num(ev.flujo_mensual ?? ev.flujo_mes ?? ev.flujo_m ?? ev.flujo);
-  const fa = num(ev.flujo_anual ?? ev.flujo_a ?? ev.flujoAnual);
+  k.neta  = num(ev.neta_pct  ?? ev.kpi_neta  ?? ev.neta);
+  const fm=num(ev.flujo_mensual ?? ev.flujo_mes ?? ev.flujo_m ?? ev.flujo);
+  const fa=num(ev.flujo_anual ?? ev.flujo_a ?? ev.flujoAnual);
   k.flujo_m = fm || (fa? fa/12 : 0);
 
-  // si no hay KPIs, intentar calcular
   if(!k.bruta || !k.neta || !k.flujo_m){
     const precio = num(ev.precio_compra ?? ev.precio ?? ev.p_venta);
-    const ing_m = num(ev.ingresos_mensuales ?? ev.alquiler_mensual ?? ev.renta_mensual);
-    const ing_a = num(ev.ingresos_anuales ?? (ing_m*12));
-    const gas_m = num(ev.gastos_mensuales ?? ev.costes_mensuales ?? ev.gastos_fijos);
-    const gas_a = num(ev.gastos_anuales ?? (gas_m*12));
+    const ing_m  = num(ev.ingresos_mensuales ?? ev.alquiler_mensual ?? ev.renta_mensual);
+    const ing_a  = num(ev.ingresos_anuales ?? (ing_m*12));
+    const gas_m  = num(ev.gastos_mensuales ?? ev.costes_mensuales ?? ev.gastos_fijos);
+    const gas_a  = num(ev.gastos_anuales ?? (gas_m*12));
     const ITP = precio * CFG.itp_pct;
     const TI_noHon = precio + ITP + CFG.notaria;
     const TI_conHon= TI_noHon + CFG.honorarios;
-
-    if(!k.bruta && ing_a && TI_noHon) k.bruta = (ing_a / TI_noHon) * 100;
-    if(!k.neta  && (ing_a||gas_a) && TI_noHon) k.neta = ((ing_a - gas_a) / TI_noHon) * 100;
-    if(!k.flujo_m) k.flujo_m = (ing_m || 0) - (gas_m || 0);
-
-    // guardar nombres auxiliares por si los mostramos
-    k._ti_nohon = TI_noHon; k._ti_conhon = TI_conHon; k._ing_a = ing_a; k._gas_a = gas_a;
+    if(!k.bruta && ing_a && TI_noHon) k.bruta = (ing_a/TI_noHon)*100;
+    if(!k.neta  && (ing_a||gas_a) && TI_noHon) k.neta = ((ing_a-gas_a)/TI_noHon)*100;
+    if(!k.flujo_m) k.flujo_m = (ing_m||0)-(gas_m||0);
+    k._ti_nohon=TI_noHon; k._ti_conhon=TI_conHon;
   }
   return k;
 }
 
-function computeMatchFor(p, ev){
+/* === MATCH === */
+function computeMatchFor(p,ev){
   const pr=p.profile||{}; const objt=(pr.objt||'neta').toLowerCase();
-  const tipoKey = (pr.tipo||'Tradicional').toLowerCase()==='habitaciones' ? 'habitaciones' : 'tradicional';
-
-  // Objetivo: si 0, usar cfg.objetivos por tipo
-  let goal = num(pr.objv);
+  const tipoKey=(pr.tipo||'Tradicional').toLowerCase()==='habitaciones'?'habitaciones':'tradicional';
+  let goal=num(pr.objv);
   if(!goal){
-    if(objt==='bruta') goal = num(CFG.objetivos?.[tipoKey]?.bruta_pct);
-    else if(objt==='neta') goal = num(CFG.objetivos?.[tipoKey]?.neta_pct);
-    else goal = num(CFG.objetivos?.[tipoKey]?.flujo_mes_eur);
+    if(objt==='bruta') goal=num(CFG.objetivos?.[tipoKey]?.bruta_pct);
+    else if(objt==='neta') goal=num(CFG.objetivos?.[tipoKey]?.neta_pct);
+    else goal=num(CFG.objetivos?.[tipoKey]?.flujo_mes_eur);
+  }
+  const k=getEvalKPIs(ev);
+  if( (objt==='bruta' && !k.bruta) || (objt==='neta' && !k.neta) || (objt==='flujo' && !k.flujo_m) ){
+    return {color:'gray',ratio:0,goal,kpi:0,unit:(objt==='flujo'?'€/mes':'%')};
   }
 
-  // KPIs del activo
-  const k = getEvalKPIs(ev);
-
-  // Si no hay datos útiles, devolver gris
-  if( (objt==='bruta' && !k.bruta) ||
-      (objt==='neta'  && !k.neta)  ||
-      (objt!=='bruta' && objt!=='neta' && !k.flujo_m) ){
-    return {color:'gray', ratio:0, goal, kpi:0, unit:(objt==='flujo'?'€/mes':'%')};
-  }
-
-  // Bruta/Neta con opción de incluir honorarios por cliente o por defecto
-  let includeH = false;
-  if(objt==='bruta'){
-    includeH = (typeof pr.bruta_incluye_honorarios==='boolean') ? pr.bruta_incluye_honorarios : !!CFG.bruta.include_honorarios_default;
-  }else if(objt==='neta'){
-    includeH = (typeof pr.neta_incluye_honorarios==='boolean') ? pr.neta_incluye_honorarios : !!CFG.neta.include_honorarios_default;
-  }
+  let includeH=false;
+  if(objt==='bruta') includeH = typeof pr.bruta_incluye_honorarios==='boolean'? pr.bruta_incluye_honorarios : !!CFG.bruta.include_honorarios_default;
+  if(objt==='neta')  includeH = typeof pr.neta_incluye_honorarios==='boolean' ? pr.neta_incluye_honorarios  : !!CFG.neta.include_honorarios_default;
 
   let kpi, unit='%';
   if(objt==='bruta'){
-    if(k.bruta){ // si viene ya calculada, la usamos tal cual (se entiende sin honorarios por defecto)
-      kpi = k.bruta;
-    }else{
-      // fallback ya calculado arriba si no existía
-      kpi = k.bruta;
-    }
-    // ajustar si el cliente quiere incluir honorarios: aproximamos el efecto
+    kpi=k.bruta;
     if(includeH && kpi){
-      // kpi_sinHon = ing / TI_noHon => ing = kpi * TI_noHon
-      // kpi_conHon = ing / (TI_noHon+hon)
-      // => kpi_conHon = kpi_sinHon * (TI_noHon / (TI_noHon+hon))
-      const TI_noHon = k._ti_nohon || 0; const TI_conHon = k._ti_conhon || (TI_noHon+CFG.honorarios);
-      if(TI_noHon && TI_conHon) kpi = kpi * (TI_noHon / TI_conHon);
+      const TI_noHon=k._ti_nohon||0, TI_conHon=k._ti_conhon||(TI_noHon+CFG.honorarios);
+      if(TI_noHon && TI_conHon) kpi = kpi * (TI_noHon/TI_conHon);
     }
   }else if(objt==='neta'){
-    kpi = k.neta;
+    kpi=k.neta;
     if(includeH && kpi){
-      const TI_noHon = k._ti_nohon || 0; const TI_conHon = k._ti_conhon || (TI_noHon+CFG.honorarios);
-      if(TI_noHon && TI_conHon) kpi = kpi * (TI_noHon / TI_conHon);
+      const TI_noHon=k._ti_nohon||0, TI_conHon=k._ti_conhon||(TI_noHon+CFG.honorarios);
+      if(TI_noHon && TI_conHon) kpi = kpi * (TI_noHon/TI_conHon);
     }
-  }else{
-    kpi = k.flujo_m; unit='€/mes';
-  }
+  }else{ kpi=k.flujo_m; unit='€/mes'; }
 
-  const g=(CFG.match?.thresholds?.green ?? 1), a=(CFG.match?.thresholds?.amber ?? 0.95);
-  const ratio = goal>0 ? (kpi / goal) : 0;
+  const g=(CFG.match?.thresholds?.green ?? 1), a=(CFG.match?.thresholds?.amber ?? .95);
+  const ratio = goal>0 ? (kpi/goal) : 0;
   const color = goal<=0 ? 'gray' : (ratio>=g ? 'green' : ratio>=a ? 'amber' : 'red');
-  return {color, ratio, goal, kpi, unit};
+  return {color,ratio,goal,kpi,unit};
 }
 
-/* ====================== UI RENDER ====================== */
+/* === UI === */
 const PHASES=['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA'];
-
-function daysInPhase(p){
-  const ts=p.phase_entered_at? Number(p.phase_entered_at) : Date.now();
-  return Math.max(0, Math.floor((Date.now()-ts)/(1000*60*60*24)));
-}
+function daysInPhase(p){const ts=p.phase_entered_at?Number(p.phase_entered_at):Date.now();return Math.max(0,Math.floor((Date.now()-ts)/(1000*60*60*24)))}
 
 function headerKPIs(){
   const wrap=document.getElementById('kpis'); wrap.innerHTML='';
-  // Por fase: totales y % OK (historial)
   PHASES.concat('EXITOS').forEach(ph=>{
-    let items = PROS.filter(p=>p.phase===ph);
-    if(ph==='EXITOS'){ items = (LS.get('pros',[])||[]).filter(p=>p.archived && p.archived_reason==='SUCCESS'); }
-    const ok = items.filter(p=>p.history && p.history[ph]==='OK').length;
-    const ko = items.filter(p=>p.history && p.history[ph]==='KO').length;
-    const pct = (ok+ko)>0 ? Math.round(ok/(ok+ko)*100) : 100;
-    const box=document.createElement('div'); box.className='kpi';
-    box.innerHTML = `<b>${ph}</b><div class="right">
-      <span class="pill">${pct}% OK</span>
-      <span class="ok">OK: ${ok}</span>
-      <span class="ko">KO: ${ko}</span>
-    </div>`;
-    wrap.appendChild(box);
+    let items = ph==='EXITOS' ? allPros().filter(x=>x.archived&&x.archived_reason==='SUCCESS') : PROS.filter(x=>x.phase===ph);
+    const ok = items.filter(p=>p.history&&p.history[ph]==='OK').length;
+    const ko = items.filter(p=>p.history&&p.history[ph]==='KO').length;
+    const pct=(ok+ko)>0?Math.round(ok/(ok+ko)*100):100;
+    const div=document.createElement('div'); div.className='kpi';
+    div.innerHTML='<b>'+h(ph)+'</b><div class="right"><span class="pill">'+pct+'% OK</span><span class="ok">OK: '+ok+'</span><span class="ko">KO: '+ko+'</span></div>';
+    wrap.appendChild(div);
   });
+}
+
+function makeCard(p){
+  const el=document.createElement('div'); el.className='card'; el.draggable=true; el.dataset.id=p.id;
+  const age=daysInPhase(p); const pr=p.profile||{}; const tipo=pr.tipo||'Tradicional';
+  const objt=(pr.objt||'neta').toLowerCase(); const objtxt=objt==='bruta'?'Rb%':(objt==='neta'?'Rn%':'Flujo');
+  el.innerHTML=
+    '<header><div class="name">'+h(p.name||'—')+'</div><div class="age">⏱ '+age+' días</div></header>'+
+    '<div class="badges"><span class="badge"><span class="dot" style="background:#bbb"></span>'+h(tipo)+'</span><span class="badge">🎯 '+objtxt+'</span></div>'+
+    '<div class="actions">'+
+      '<button class="btn-icon view" data-act="view" title="Ver / editar"><svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>'+
+      '<button class="btn-icon ok" data-act="ok" title="Interesa (avanzar)"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></button>'+
+      '<button class="btn-icon ko" data-act="ko" title="No interesa (descartar)"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'+
+    '</div>';
+  return el;
 }
 
 function renderBoard(){
   const board=document.getElementById('board'); board.innerHTML='';
   PHASES.forEach(ph=>{
     const col=document.createElement('div'); col.className='col'; col.dataset.phase=ph;
-    const items = PROS.filter(p=>p.phase===ph);
-    const h=document.createElement('h3'); h.innerHTML=<span>${ph}</span> <span class="count">${items.length} clientes</span>;
-    col.appendChild(h);
-
-    // Zona droppable
-    items.forEach(p=> col.appendChild(makeCard(p)));
+    const items=PROS.filter(p=>p.phase===ph);
+    const h3=document.createElement('h3'); h3.innerHTML='<span>'+h(ph)+'</span><span class="count">'+items.length+' clientes</span>';
+    col.appendChild(h3);
+    items.forEach(p=>col.appendChild(makeCard(p)));
     board.appendChild(col);
   });
 }
 
-function makeCard(p){
-  const el=document.createElement('div'); el.className='card'; el.draggable=true; el.dataset.id=p.id;
-  const age=daysInPhase(p);
-  const pr=p.profile||{}; const tipo=pr.tipo||'Tradicional';
-  const objt=(pr.objt||'neta').toLowerCase();
-  const objtxt= objt==='bruta'?'Rb%':(objt==='neta'?'Rn%':'Flujo');
-  const name=p.name||'—';
-
-  // Semáforo de match si hay propuesta enlazada? (aquí mostramos objetivo)
-  const header = `
-    <header>
-      <div class="name">${name}</div>
-      <div class="age">⏱ ${age} días</div>
-    </header>`;
-  const badges = `
-    <div class="badges">
-      <span class="badge"><span class="dot" style="background:#bbb"></span>${tipo}</span>
-      <span class="badge">🎯 ${objtxt}</span>
-    </div>`;
-  const actions = `
-    <div class="actions">
-      <button class="btn-icon view" data-act="view" title="Ver / editar">
-        <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/></svg>
-      </button>
-      <button class="btn-icon ok" data-act="ok" title="Interesa (avanzar)">
-        <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
-      </button>
-      <button class="btn-icon ko" data-act="ko" title="No interesa (descartar)">
-        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>`;
-  el.innerHTML = header+badges+actions;
-  return el;
-}
-
-/* ====================== MODAL ====================== */
-const MB=document.getElementById('mb');
-const MH=document.getElementById('mh');
-const MBODY=document.getElementById('mbody');
+/* === Modal === */
+const MB=document.getElementById('mb'), MH=document.getElementById('mh'), MBODY=document.getElementById('mbody');
 let MODAL_ID=null;
 
 function openModal(p){
-  MODAL_ID=p.id; MH.textContent=${p.name||'Ficha'} — Detalle;
+  MODAL_ID=p.id; MH.textContent=(p.name||'Ficha')+' — Detalle';
   const pr=p.profile||{}, meeting=p.meeting||{};
-  const tipoSel = (pr.tipo||'Tradicional');
-  const objtSel = (pr.objt||'neta');
-  const incB = (typeof pr.bruta_incluye_honorarios==='boolean') ? pr.bruta_incluye_honorarios : !!CFG.bruta.include_honorarios_default;
+  const tipoSel=pr.tipo||'Tradicional', objtSel=pr.objt||'neta';
+  const incB = typeof pr.bruta_incluye_honorarios==='boolean'? pr.bruta_incluye_honorarios : !!CFG.bruta.include_honorarios_default;
+  const locs=Array.isArray(pr.locs)?pr.locs:(pr.locs? String(pr.locs).split(',').map(s=>s.trim()).filter(Boolean):[]);
 
-  // chips de localidades (cadena o array)
-  const locs = Array.isArray(pr.locs) ? pr.locs : (pr.locs? String(pr.locs).split(',').map(s=>s.trim()).filter(Boolean) : []);
+  const parts=[];
+  parts.push(
+    '<div class="block"><h5>DATOS PERSONALES</h5><div class="grid">'+
+      '<div class="field"><label>Nombre y apellidos</label><input id="f_name" type="text" maxlength="30" value="'+h(p.name||'')+'"/></div>'+
+      '<div class="field"><label>Teléfono</label><input id="f_phone" type="tel" maxlength="9" value="'+h(p.phone||'')+'"/></div>'+
+      '<div class="field"><label>Email</label><input id="f_email" type="email" maxlength="35" value="'+h(p.email||'')+'"/></div>'+
+      '<div class="field"><label>DNI/NIE</label><input id="f_dni" type="text" maxlength="10" value="'+h(pr.dni||'')+'"/></div>'+
+      '<div class="field row2"><label>Dirección</label><input id="f_dir" type="text" maxlength="120" value="'+h(pr.dir||'')+'"/></div>'+
+      '<div class="field"><label>Localidad (residencia)</label><input id="f_locres" type="text" maxlength="10" value="'+h(pr.locres||'')+'"/></div>'+
+    '</div></div>'
+  );
 
-  MBODY.innerHTML = `
-  <div class="block">
-    <h5>DATOS PERSONALES</h5>
-    <div class="grid">
-      <div class="field"><label>Nombre y apellidos</label><input id="f_name" type="text" maxlength="30" value="${p.name||''}"/></div>
-      <div class="field"><label>Teléfono</label><input id="f_phone" type="tel" maxlength="9" value="${p.phone||''}"/></div>
-      <div class="field"><label>Email</label><input id="f_email" type="email" maxlength="35" value="${p.email||''}"/></div>
+  parts.push(
+    '<div class="block"><h5>INVERSIÓN</h5><div class="grid">'+
+      '<div class="field row3"><label>Localidades (inversión) — máx 6</label>'+
+        '<div class="chips" id="chips_locs">'+ (locs.map(l=>'<span class="chip">'+h(l)+' <span class="x" data-del="'+h(l)+'">×</span></span>').join('')) +'</div>'+
+        '<input class="chips-input" id="add_loc" placeholder="Añadir localidad y Enter" maxlength="10"/>'+
+      '</div>'+
+      '<div class="field"><label>Tipo de alquiler</label><select id="f_tipo">'+
+        '<option '+(tipoSel==='Tradicional'?'selected':'')+'>Tradicional</option>'+
+        '<option '+(tipoSel==='Habitaciones'?'selected':'')+'>Habitaciones</option>'+
+      '</select></div>'+
+      '<div class="field"><label>Acepta reforma</label><select id="f_ref">'+
+        '<option '+(pr.ref==='No'?'selected':'')+'>No</option>'+
+        '<option '+(pr.ref==='Lavado de cara'?'selected':'')+'>Lavado de cara</option>'+
+        '<option '+(pr.ref==='Integral'?'selected':'')+'>Integral</option>'+
+      '</select></div>'+
+      '<div class="field"><label>¿Ascensor?</label><select id="f_asc"><option '+(pr.asc==='Sí'?'selected':'')+'>Sí</option><option '+(pr.asc==='No'?'selected':'')+'>No</option></select></div>'+
+      '<div class="field"><label>Altura máx. (planta)</label><input id="f_alt" type="number" inputmode="numeric" maxlength="1" value="'+h(pr.alt||'')+'"/></div>'+
+      '<div class="field"><label>¿Bajos?</label><select id="f_bajos"><option '+(pr.bajos==='Sí'?'selected':'')+'>Sí</option><option '+(pr.bajos==='No'?'selected':'')+'>No</option></select></div>'+
+      '<div class="field"><label>Presupuesto TOTAL (€)</label><input id="f_budget" type="text" value="'+(pr.budget? pr.budget.toLocaleString('es-ES') : '')+'"/></div>'+
+      '<div class="field"><label>Precio máx. COMPRA (auto)</label><input id="f_pmax" type="text" disabled value="'+(pr.pmax? pr.pmax.toLocaleString('es-ES') : '')+'"/></div>'+
+      '<div class="field"><label>ITP estimado (auto)</label><input id="f_itp" type="text" disabled value="'+(pr.itp? pr.itp.toLocaleString('es-ES') : '')+'"/></div>'+
+    '</div></div>'
+  );
 
-      <div class="field"><label>DNI/NIE</label><input id="f_dni" type="text" maxlength="10" value="${pr.dni||''}"/></div>
-      <div class="field row2"><label>Dirección</label><input id="f_dir" type="text" maxlength="120" value="${pr.dir||''}"/></div>
-      <div class="field"><label>Localidad (residencia)</label><input id="f_locres" type="text" maxlength="10" value="${pr.locres||''}"/></div>
-    </div>
-  </div>
+  parts.push(
+    '<div class="block"><h5>FINANCIACIÓN</h5><div class="grid">'+
+      '<div class="field"><label>Financiación bancaria</label><select id="f_fin"><option '+(pr.fin==='Sí'?'selected':'')+'>Sí</option><option '+(pr.fin==='No'?'selected':'')+'>No</option></select></div>'+
+      '<div class="field"><label>¿Necesita broker?</label><select id="f_broker"><option '+(pr.broker==='Sí'?'selected':'')+'>Sí</option><option '+(pr.broker==='No'?'selected':'')+'>No</option></select></div>'+
+      '<div class="field"><label>% financiación</label><input id="f_pct" type="text" maxlength="4" value="'+h(pr.pct||'')+'"/></div>'+
+      '<div class="field"><label>Hipoteca</label><input id="f_hip" type="text" disabled value="'+(pr.hip? pr.hip.toLocaleString('es-ES') : '')+'"/></div>'+
+      '<div class="field"><label>Fondos propios</label><input id="f_prop" type="text" disabled value="'+(pr.prop? pr.prop.toLocaleString('es-ES') : '')+'"/></div>'+
+    '</div></div>'
+  );
 
-  <div class="block">
-    <h5>INVERSIÓN</h5>
-    <div class="grid">
-      <div class="field row3">
-        <label>Localidades (inversión) — máx 6</label>
-        <div class="chips" id="chips_locs">${locs.map(l=><span class="chip">${l} <span class="x" data-del="${l}">×</span></span>).join('')}</div>
-        <input class="chips-input" id="add_loc" placeholder="Añadir localidad y Enter" maxlength="10"/>
-      </div>
+  parts.push(
+    '<div class="block"><h5>OBJETIVO</h5><div class="grid">'+
+      '<div class="field"><label>Objetivo principal</label><select id="f_objt">'+
+        '<option value="bruta" '+(objtSel==='bruta'?'selected':'')+'>Rentabilidad bruta (%)</option>'+
+        '<option value="neta" '+(objtSel==='neta'?'selected':'')+'>Rentabilidad neta (%)</option>'+
+        '<option value="flujo" '+(objtSel==='flujo'?'selected':'')+'>Flujo (€/mes)</option>'+
+      '</select></div>'+
+      '<div class="field"><label>Valor objetivo</label><input id="f_objv" type="text" maxlength="4" value="'+h(pr.objv||'')+'"/></div>'+
+      '<div class="field"><label>Alquiler orientativo (€/mes)</label><input id="f_alq" type="text" disabled value="'+(pr.alq? pr.alq.toLocaleString('es-ES') : '')+'"/></div>'+
+      '<div class="field row3"><label><input type="checkbox" id="f_inc_hon" '+(incB?'checked':'')+'> Incluir honorarios en Bruta (solo este cliente)</label><small>Bruta estándar SIN honorarios. Marca sólo si el cliente exige incluirlos.</small></div>'+
+    '</div></div>'
+  );
 
-      <div class="field"><label>Tipo de alquiler</label>
-        <select id="f_tipo">
-          <option ${tipoSel==='Tradicional'?'selected':''}>Tradicional</option>
-          <option ${tipoSel==='Habitaciones'?'selected':''}>Habitaciones</option>
-        </select>
-      </div>
-      <div class="field"><label>Acepta reforma</label>
-        <select id="f_ref">
-          <option ${pr.ref==='No'?'selected':''}>No</option>
-          <option ${pr.ref==='Lavado de cara'?'selected':''}>Lavado de cara</option>
-          <option ${pr.ref==='Integral'?'selected':''}>Integral</option>
-        </select>
-      </div>
+  parts.push(
+    '<div class="block"><h5>NOTAS</h5><div class="grid">'+
+      '<div class="field row3"><textarea id="f_notas" rows="2" maxlength="300" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:8px; font-size:12px; resize:none; overflow:hidden;">'+h(meeting.notas||'')+'</textarea></div>'+
+    '</div></div>'
+  );
 
-      <div class="field"><label>¿Ascensor?</label>
-        <select id="f_asc"><option ${pr.asc==='Sí'?'selected':''}>Sí</option><option ${pr.asc==='No'?'selected':''}>No</option></select>
-      </div>
-      <div class="field"><label>Altura máx. (planta)</label><input id="f_alt" type="number" inputmode="numeric" maxlength="1" value="${pr.alt||''}"/></div>
-      <div class="field"><label>¿Bajos?</label>
-        <select id="f_bajos"><option ${pr.bajos==='Sí'?'selected':''}>Sí</option><option ${pr.bajos==='No'?'selected':''}>No</option></select>
-      </div>
+  MBODY.innerHTML = parts.join('');
 
-      <div class="field"><label>Presupuesto TOTAL (€)</label><input id="f_budget" type="text" value="${pr.budget? pr.budget.toLocaleString('es-ES') : ''}"/></div>
-      <div class="field"><label>Precio máx. COMPRA (auto)</label><input id="f_pmax" type="text" disabled value="${pr.pmax? pr.pmax.toLocaleString('es-ES'):''}"/></div>
-      <div class="field"><label>ITP estimado (auto)</label><input id="f_itp" type="text" disabled value="${pr.itp? pr.itp.toLocaleString('es-ES'):''}"/></div>
-    </div>
-  </div>
-
-  <div class="block">
-    <h5>FINANCIACIÓN</h5>
-    <div class="grid">
-      <div class="field"><label>Financiación bancaria</label><select id="f_fin"><option ${pr.fin==='Sí'?'selected':''}>Sí</option><option ${pr.fin==='No'?'selected':''}>No</option></select></div>
-      <div class="field"><label>¿Necesita broker?</label><select id="f_broker"><option ${pr.broker==='Sí'?'selected':''}>Sí</option><option ${pr.broker==='No'?'selected':''}>No</option></select></div>
-      <div class="field"><label>% financiación</label><input id="f_pct" type="text" maxlength="4" value="${pr.pct||''}"/></div>
-      <div class="field"><label>Hipoteca</label><input id="f_hip" type="text" disabled value="${pr.hip? pr.hip.toLocaleString('es-ES'):''}"/></div>
-      <div class="field"><label>Fondos propios</label><input id="f_prop" type="text" disabled value="${pr.prop? pr.prop.toLocaleString('es-ES'):''}"/></div>
-    </div>
-  </div>
-
-  <div class="block">
-    <h5>OBJETIVO</h5>
-    <div class="grid">
-      <div class="field"><label>Objetivo principal</label>
-        <select id="f_objt">
-          <option value="bruta" ${objtSel==='bruta'?'selected':''}>Rentabilidad bruta (%)</option>
-          <option value="neta"  ${objtSel==='neta'?'selected':''}>Rentabilidad neta (%)</option>
-          <option value="flujo" ${objtSel==='flujo'?'selected':''}>Flujo (€/mes)</option>
-        </select>
-      </div>
-      <div class="field"><label>Valor objetivo</label><input id="f_objv" type="text" maxlength="4" value="${pr.objv||''}"/></div>
-      <div class="field"><label>Alquiler orientativo (€/mes)</label><input id="f_alq" type="text" disabled value="${pr.alq? pr.alq.toLocaleString('es-ES'):''}"/></div>
-
-      <div class="field row3">
-        <label><input type="checkbox" id="f_inc_hon" ${incB?'checked':''}/> Incluir honorarios en Bruta (solo este cliente)</label>
-        <small>Bruta estándar SIN honorarios (como definimos). Marca solo si el cliente exige incluirlos.</small>
-      </div>
-    </div>
-  </div>
-
-  <div class="block">
-    <h5>NOTAS</h5>
-    <div class="grid">
-      <div class="field row3">
-        <textarea id="f_notas" rows="2" maxlength="300" style="width:100%; border:1px solid var(--line); border-radius:10px; padding:8px; font-size:12px; resize:none; overflow:hidden;">${(meeting.notas||'')}</textarea>
-      </div>
-    </div>
-  </div>
-  `;
-
-  // Eventos chips
+  // chips
   MBODY.querySelector('#chips_locs').addEventListener('click', e=>{
-    const del=e.target.closest('[data-del]'); if(!del) return;
-    del.parentElement.remove();
+    const del=e.target.closest('[data-del]'); if(!del)return; del.parentElement.remove();
   });
   const addInput=MBODY.querySelector('#add_loc');
   addInput.addEventListener('keydown', e=>{
-    if(e.key==='Enter'){
-      e.preventDefault();
-      const v=(addInput.value||'').trim(); if(!v) return;
+    if(e.key==='Enter'){ e.preventDefault(); const v=(addInput.value||'').trim(); if(!v)return;
       const cont=MBODY.querySelector('#chips_locs');
-      if(cont.querySelectorAll('.chip').length>=6){ toast('Máximo 6 localidades', 'warn'); return;}
-      const span=document.createElement('span'); span.className='chip'; span.innerHTML=${v} <span class="x" data-del="${v}">×</span>;
-      cont.appendChild(span); addInput.value='';
+      if(cont.querySelectorAll('.chip').length>=6){toast('Máximo 6 localidades','warn');return;}
+      const s=document.createElement('span'); s.className='chip'; s.innerHTML=h(v)+' <span class="x" data-del="'+h(v)+'">×</span>'; cont.appendChild(s); addInput.value='';
     }
   });
 
-  // Cálculos rápidos
-  const $ = sel => MBODY.querySelector(sel);
+  // cálculos
+  const $=sel=>MBODY.querySelector(sel);
   function recalc(){
-    const budget = num($('#f_budget').value);
-    const itp = Math.round((budget/(1+CFG.itp_pct+0)) * CFG.itp_pct); // aprox inversa si llega total
-    const pmax = Math.max(0, budget - itp - CFG.notaria - CFG.honorarios);
-    $('#f_itp').value = itp? itp.toLocaleString('es-ES') : '';
-    $('#f_pmax').value= pmax? pmax.toLocaleString('es-ES') : '';
-    // alquiler orientativo (solo si objetivo bruta)
-    const objt=$('#f_objt').value;
-    const objv=num($('#f_objv').value);
-    if(objt==='bruta' && budget>0 && objv>0){
-      const incluirHon = $('#f_inc_hon').checked;
-      const base = incluirHon? (budget) : (budget - CFG.honorarios);
-      const alq = Math.round( (objv/100) * base / 12 );
-      $('#f_alq').value = alq.toLocaleString('es-ES');
-    }else{
-      $('#f_alq').value='';
+    const total=num($('#f_budget').value);
+    if(total>0){
+      const pmax=Math.max(0, Math.round((total - CFG.notaria - CFG.honorarios) / (1+CFG.itp_pct)));
+      const itp=Math.round(pmax*CFG.itp_pct);
+      $('#f_pmax').value = pmax? pmax.toLocaleString('es-ES'):''; 
+      $('#f_itp').value  = itp? itp.toLocaleString('es-ES'):'';
     }
+    const objt=$('#f_objt').value, objv=num($('#f_objv').value);
+    if(objt==='bruta' && total>0 && objv>0){
+      const incluirHon=$('#f_inc_hon').checked;
+      const base=incluirHon? total : (total - CFG.honorarios);
+      const alq=Math.round((objv/100)*base/12);
+      $('#f_alq').value=alq? alq.toLocaleString('es-ES'):'';
+    }else{$('#f_alq').value='';}
   }
   $('#f_budget').addEventListener('blur', recalc);
   $('#f_objt').addEventListener('change', recalc);
@@ -567,140 +388,71 @@ function openModal(p){
 
   MB.style.display='flex';
 }
-function closeModal(){ MB.style.display='none'; MODAL_ID=null; }
+function closeModal(){MB.style.display='none'; MODAL_ID=null;}
 
-/* Guardar modal (persistencia robusta punto 1) */
 function saveModal(){
   if(!MODAL_ID) return;
-  const idx = PROS.findIndex(x=>x.id===MODAL_ID);
-  if(idx<0) return;
-  const p = PROS[idx];
-  const pr = p.profile || (p.profile={});
-  const $ = sel => MBODY.querySelector(sel);
-
-  // Datos básicos
-  p.name = $('#f_name').value.trim();
-  p.phone= $('#f_phone').value.trim();
-  p.email= $('#f_email').value.trim();
-
-  pr.dni   = $('#f_dni').value.trim();
-  pr.dir   = $('#f_dir').value.trim();
-  pr.locres= $('#f_locres').value.trim();
-
-  // Localidades chips
-  pr.locs = Array.from(MBODY.querySelectorAll('#chips_locs .chip')).map(ch=>ch.firstChild.textContent.trim());
-
-  pr.tipo = $('#f_tipo').value;
-  pr.ref  = $('#f_ref').value;
-  pr.asc  = $('#f_asc').value;
-  pr.alt  = $('#f_alt').value;
-  pr.bajos= $('#f_bajos').value;
-
-  pr.budget = num($('#f_budget').value);
-  pr.pmax   = num($('#f_pmax').value);
-  pr.itp    = num($('#f_itp').value);
-
-  pr.fin    = $('#f_fin').value;
-  pr.broker = $('#f_broker').value;
-  pr.pct    = $('#f_pct').value;
-  pr.hip    = num($('#f_hip').value);
-  pr.prop   = num($('#f_prop').value);
-
-  // Objetivo: ¡guardar SIEMPRE en objt/objv!
-  pr.objt   = $('#f_objt').value;
-  pr.objv   = num($('#f_objv').value);
-
-  // Flags de incluir honorarios
-  pr.bruta_incluye_honorarios = !!$('#f_inc_hon').checked;
-
-  // Notas
-  p.meeting = p.meeting || {};
-  p.meeting.notas = $('#f_notas').value.slice(0,300);
-
-  PROS[idx]=p; LS.set('pros', PROS.concat((LS.get('pros',[]).filter(x=>x.archived)))); // mantener archivados fuera del tablero
-  toast('Ficha guardada', 'ok');
-  closeModal();
-  headerKPIs(); renderBoard(); // refresco inmediato (punto 5)
+  let all=allPros(); const i=all.findIndex(x=>x.id===MODAL_ID); if(i<0) return;
+  const p=all[i]; const pr=p.profile||(p.profile={}); const $=sel=>MBODY.querySelector(sel);
+  p.name=$('#f_name').value.trim(); p.phone=$('#f_phone').value.trim(); p.email=$('#f_email').value.trim();
+  pr.dni=$('#f_dni').value.trim(); pr.dir=$('#f_dir').value.trim(); pr.locres=$('#f_locres').value.trim();
+  pr.locs=Array.from(MBODY.querySelectorAll('#chips_locs .chip')).map(ch=>ch.firstChild.textContent.trim());
+  pr.tipo=$('#f_tipo').value; pr.ref=$('#f_ref').value; pr.asc=$('#f_asc').value; pr.alt=$('#f_alt').value; pr.bajos=$('#f_bajos').value;
+  pr.budget=num($('#f_budget').value); pr.pmax=num($('#f_pmax').value); pr.itp=num($('#f_itp').value);
+  pr.fin=$('#f_fin').value; pr.broker=$('#f_broker').value; pr.pct=$('#f_pct').value; pr.hip=num($('#f_hip').value); pr.prop=num($('#f_prop').value);
+  pr.objt=$('#f_objt').value; pr.objv=num($('#f_objv').value);
+  pr.bruta_incluye_honorarios=!!$('#f_inc_hon').checked;
+  p.meeting=p.meeting||{}; p.meeting.notas=$('#f_notas').value.slice(0,300);
+  all[i]=p; savePros(all); PROS=all.filter(x=>!x.archived);
+  toast('Ficha guardada','ok'); closeModal(); headerKPIs(); renderBoard();
 }
 
-/* ====================== EVENTOS (delegación) ====================== */
-document.addEventListener('click', (e)=>{
-  // acciones tarjeta
-  const btn=e.target.closest('.btn-icon');
-  if(btn){
-    const id = btn.closest('.card')?.dataset.id;
-    if(!id) return;
-    const p = PROS.find(x=>x.id===id); if(!p) return;
-    const act=btn.dataset.act;
+/* === Eventos principales === */
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.btn-icon'); if(btn){
+    const id=btn.closest('.card')?.dataset.id; if(!id)return;
+    let all=allPros(); const idx=all.findIndex(x=>x.id===id); if(idx<0)return;
+    const p=all[idx]; const act=btn.dataset.act;
     if(act==='view'){ openModal(p); return; }
     if(act==='ok'){
-      const ph=p.phase; const i=PHASES.indexOf(ph);
-      p.history = p.history||{}; p.history[ph]='OK';
+      const ph=p.phase; const i=PHASES.indexOf(ph); p.history=p.history||{}; p.history[ph]='OK';
       if(i<PHASES.length-1){ p.phase=PHASES[i+1]; p.phase_entered_at=Date.now(); }
-      LS.set('pros', PROS.concat((LS.get('pros',[]).filter(x=>x.archived))));
-      toast('Avanzado', 'ok'); headerKPIs(); renderBoard(); return;
+      all[idx]=p; savePros(all); PROS=all.filter(x=>!x.archived); toast('Avanzado','ok'); headerKPIs(); renderBoard(); return;
     }
     if(act==='ko'){
-      const ph=p.phase;
-      p.history = p.history||{}; p.history[ph]='KO';
-      // En contacto se elimina sin rastro; en otras fases se archiva
-      if(ph==='CONTACTO'){
-        PROS=PROS.filter(x=>x.id!==p.id);
-        const all=LS.get('pros',[]).filter(x=>x.id!==p.id || x.archived);
-        LS.set('pros', all.filter(x=>!x.archived).concat(all.filter(x=>x.archived)));
-      }else{
-        p.archived=true; p.archived_reason='KO'; PROS=PROS.filter(x=>x.id!==p.id);
-        const all=LS.get('pros',[]).filter(x=>x.id!==p.id);
-        all.push(p); LS.set('pros', all);
-      }
-      toast('Descartado', 'bad'); headerKPIs(); renderBoard(); return;
+      const ph=p.phase; p.history=p.history||{}; p.history[ph]='KO';
+      if(ph==='CONTACTO'){ all=all.filter(x=>x.id!==p.id); }
+      else{ p.archived=true; p.archived_reason='KO'; all[idx]=p; }
+      savePros(all); PROS=all.filter(x=>!x.archived); toast('Descartado','bad'); headerKPIs(); renderBoard(); return;
     }
   }
-
-  if(e.target.id==='mclose'){ closeModal(); }
-  if(e.target.id==='msave'){ saveModal(); }
+  if(e.target.id==='mclose') closeModal();
+  if(e.target.id==='msave')  saveModal();
 });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && MB.style.display==='flex') closeModal(); });
 
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && MB.style.display==='flex') closeModal(); });
-
-/* Drag & drop robusto */
+/* Drag & drop estable */
 let dragId=null;
-document.addEventListener('dragstart', e=>{
-  const card=e.target.closest('.card'); if(!card) return;
-  dragId=card.dataset.id; card.classList.add('dragging');
-});
-document.addEventListener('dragend', e=>{
-  const card=e.target.closest('.card'); if(card) card.classList.remove('dragging');
-  document.querySelectorAll('.col.drop').forEach(c=>c.classList.remove('drop'));
-});
-document.addEventListener('dragover', e=>{
-  const col=e.target.closest('.col'); if(!col) return;
-  e.preventDefault(); col.classList.add('drop');
-});
-document.addEventListener('dragleave', e=>{
-  const col=e.target.closest('.col'); if(col) col.classList.remove('drop');
-});
-document.addEventListener('drop', e=>{
-  const col=e.target.closest('.col'); if(!col || !dragId) return;
-  const p=PROS.find(x=>x.id===dragId); if(!p) return;
-  const from=PHASES.indexOf(p.phase), to=PHASES.indexOf(col.dataset.phase);
-  if(from!==to){
-    p.phase=PHASES[to]; p.phase_entered_at=Date.now();
-    LS.set('pros', PROS.concat((LS.get('pros',[]).filter(x=>x.archived))));
-    headerKPIs(); renderBoard(); toast('Movido', 'ok');
-  }
+document.addEventListener('dragstart',e=>{const c=e.target.closest('.card'); if(!c)return; dragId=c.dataset.id; c.classList.add('dragging');});
+document.addEventListener('dragend',e=>{const c=e.target.closest('.card'); if(c)c.classList.remove('dragging'); document.querySelectorAll('.col.drop').forEach(x=>x.classList.remove('drop'));});
+document.addEventListener('dragover',e=>{const col=e.target.closest('.col'); if(!col)return; e.preventDefault(); col.classList.add('drop');});
+document.addEventListener('dragleave',e=>{const col=e.target.closest('.col'); if(col) col.classList.remove('drop');});
+document.addEventListener('drop',e=>{
+  const col=e.target.closest('.col'); if(!col||!dragId) return;
+  let all=allPros(); const i=all.findIndex(x=>x.id===dragId); if(i<0)return;
+  const p=all[i]; const to=col.dataset.phase;
+  if(p.phase!==to){ p.phase=to; p.phase_entered_at=Date.now(); all[i]=p; savePros(all); PROS=all.filter(x=>!x.archived); headerKPIs(); renderBoard(); toast('Movido','ok'); }
 });
 
-/* ====================== INIT ====================== */
-function bootstrapEmpty(){
+/* Init */
+(function bootstrap(){
   if(!PROS.length){
     PROS=[{id:'p_demo1',name:'Cliente demo',email:'',phone:'',phase:'CONTACTO',phase_entered_at:Date.now(),
       profile:{tipo:'Tradicional',objt:'neta',objv:6}, history:{}}];
-    LS.set('pros', PROS);
+    savePros(PROS);
   }
-}
-bootstrapEmpty();
-headerKPIs(); renderBoard();
+  headerKPIs(); renderBoard();
+})();
 </script>
 </body>
 </html>
