@@ -6,92 +6,78 @@
 <title>Unihouser — Dashboard CRM</title>
 <style>
 :root{
-  --brand:#c7530c;
-  --ok:#58736F;
-  --bad:#B53928;
-  --amber:#DB824B;
-  --muted:#DDD5D2;
-  --line:#e7e1de;
-  --bg:#faf7f6;
-  --ink:#1c1f23;
-  --ink2:#444b52;
-  --chip:#f2eeec;
-  --shadow:0 4px 24px rgba(0,0,0,.06);
-  --r:14px; --rsm:10px;
-  --ff:system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+  --brand:#c7530c; --ok:#58736F; --bad:#B53928; --amber:#DB824B;
+  --line:#e7e1de; --bg:#faf7f6; --ink:#1c1f23; --ink2:#444b52; --chip:#f2eeec;
+  --shadow:0 4px 24px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif;
+  --fs:12px; --r:12px;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);-webkit-font-smoothing:antialiased}
-
-.topbar{position:sticky;top:0;z-index:10;background:#fff;box-shadow:var(--shadow);border-bottom:1px solid var(--line)}
-.top-inner{max-width:1200px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:10px}
-.logo{width:28px;height:28px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800}
+*{box-sizing:border-box} html,body{height:100%} body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff)}
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:26px;height:26px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800}
 .title{font-size:14px;font-weight:700;color:var(--ink2)}
 .nav a{font-size:13px;color:var(--ink2);text-decoration:none;padding:6px 10px;border-radius:8px}
 .nav a.active{background:var(--brand);color:#fff}
-.nav a:hover{background:var(--muted)}
-
-.container{max-width:1200px;margin:18px auto;padding:0 14px}
-.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:14px}
-.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.nav a:hover{background:#f3efe9}
+/* Layout */
+.container{max-width:1200px;margin:14px auto;padding:0 14px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;font-size:12px}
 .kpi b{font-size:13px}
-.kpi .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-weight:700}
+.kpi .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-weight:700}
 .kpi .ok{color:var(--ok)} .kpi .ko{color:var(--bad)}
-
-.board{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
-.col{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;min-height:560px;box-shadow:var(--shadow)}
+.board{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.col{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;min-height:540px;box-shadow:var(--shadow)}
 .col h3{margin:0 0 8px;font-size:14px;color:var(--ink2);display:flex;align-items:center;justify-content:space-between}
 .count{font-size:12px;color:#777;font-weight:700}
-
-.create{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:10px;display:grid;gap:8px}
-.create .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.create input{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;min-height:34px}
-.create .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer}
-
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:var(--shadow);display:grid;gap:8px;cursor:grab}
+/* Crear contacto */
+.create{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:10px;display:grid;gap:6px}
+.create .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.create input{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;min-height:32px}
+.create .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:8px 10px;font-weight:700;cursor:pointer}
+/* Card */
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow);display:grid;gap:6px;cursor:grab}
 .card header{display:flex;align-items:center;justify-content:space-between}
 .name{font-weight:800;font-size:14px;line-height:1.1}
 .age{font-size:12px;color:#888}
 .badges{display:flex;gap:6px;flex-wrap:wrap}
-.badge{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
-.actions{display:flex;gap:8px}
-.btn-icon{width:30px;height:30px;border-radius:999px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer}
+.badge{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+.actions{display:flex;gap:6px}
+.btn-icon{width:28px;height:28px;border-radius:999px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer}
 .btn-icon svg{width:16px;height:16px;stroke:#555;fill:none;stroke-width:2}
 .btn-icon.view{border-color:var(--brand)} .btn-icon.view svg{stroke:var(--brand)}
 .btn-icon.ok{border-color:var(--ok)} .btn-icon.ok svg{stroke:var(--ok)}
 .btn-icon.ko{border-color:var(--bad)} .btn-icon.ko svg{stroke:var(--bad)}
-.card.dragging{opacity:.5}
-.col.drop{outline:2px dashed var(--brand);outline-offset:-6px}
-
-.toast{position:fixed;right:16px;bottom:16px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);padding:10px 14px;border-radius:12px;font-size:13px;display:none}
+.card.dragging{opacity:.5} .col.drop{outline:2px dashed var(--brand);outline-offset:-6px}
+/* Toast */
+.toast{position:fixed;right:16px;bottom:16px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);padding:8px 12px;border-radius:12px;font-size:13px;display:none}
 .toast.ok{border-color:var(--ok)} .toast.bad{border-color:var(--bad)} .toast.warn{border-color:var(--amber)}
 .toast.show{display:block}
-
+/* Modal */
 .modal-back{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:50}
-.modal{width:980px;max-width:95vw;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
-.modal header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.modal{width:980px;max-width:95vw;max-height:92vh;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.modal header{padding:8px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
 .modal h4{margin:0;font-size:16px}
-.modal .close{width:30px;height:30px;border-radius:999px;border:1px solid var(--brand);background:#fff;color:var(--brand);display:grid;place-items:center;font-weight:800;cursor:pointer}
-.modal .body{padding:12px 16px;display:grid;gap:12px}
-.block{border:1px dashed var(--line);border-radius:12px;padding:10px}
-.block h5{margin:0 0 8px;font-size:12px;color:#666}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.field{display:flex;flex-direction:column;gap:6px}
+.modal .close{width:28px;height:28px;border-radius:999px;border:1px solid var(--brand);background:#fff;color:var(--brand);display:grid;place-items:center;font-weight:800;cursor:pointer}
+.modal .body{padding:10px 12px;display:grid;gap:10px;flex:1 1 auto;overflow:hidden}
+.block{border:1px dashed var(--line);border-radius:12px;padding:8px}
+.block h5{margin:0 0 6px;font-size:12px;color:#666}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.field{display:flex;flex-direction:column;gap:4px}
 .field label{font-size:12px;color:#555}
-.input, .chips-input, .field select, .field input, .field textarea{
-  border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;min-height:34px
+.field input,.field select,.field textarea,.chips-input{
+  border:1px solid var(--line);border-radius:10px;padding:7px 9px;font-size:12px;min-height:30px
 }
 .field textarea{resize:none;overflow:hidden}
 .row2{grid-column:span 2} .row3{grid-column:span 3}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-size:12px;display:inline-flex;gap:6px;align-items:center}
+.chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px;display:inline-flex;gap:6px;align-items:center}
 .chip .x{cursor:pointer;color:#999}
-.modal footer{padding:10px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
-.save{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer}
-
-.footer{margin:28px 0 18px;text-align:center;color:#888;font-size:12px}
+.modal footer{padding:8px 12px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;flex:0 0 auto;background:#fff}
+.save{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}
+.footer{margin:24px 0 16px;text-align:center;color:#888;font-size:12px}
 @media (max-width:980px){.board{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.col{min-height:unset}}
 </style>
 </head>
@@ -130,54 +116,48 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);-webki
   <div class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
 
 <script>
-/* ========== Utils ========== */
-const LS={get:(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch(_){return fb}}, set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
-const fmtEUR=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Math.round(Number(n||0)));
+/* ========= Utils ========= */
+const LS={get:(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch(_){return fb}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+const fmtEUR=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Math.round(+n||0));
 const num=v=>{if(typeof v==='number')return v;const s=String(v||'').replace(/\./g,'').replace(',','.').replace(/[^\d.-]/g,'');const n=parseFloat(s);return isNaN(n)?0:n;};
 const h=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-function toast(msg,cls='ok',ms=1400){const t=document.getElementById('toast');t.className='toast '+cls;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
 
-/* === CFG compat === */
-var CFG=(function(raw){
-  var c=raw&&typeof raw==='object'?JSON.parse(JSON.stringify(raw)):{};
+/* ========= Config compat ========= */
+var CFG=(function(c){
+  c=c&&typeof c==='object'?JSON.parse(JSON.stringify(c)):{};
   if(typeof c.notaria_eur==='number')c.notaria=c.notaria_eur;
   if(typeof c.psi_fee_eur==='number')c.honorarios=c.psi_fee_eur;
-  if(typeof c.itp_pct==='number' && c.itp_pct>1) c.itp_pct=c.itp_pct/100;
-  if(typeof c.itp_pct!=='number') c.itp_pct=.08;
-  c.notaria = typeof c.notaria==='number'?c.notaria:1200;
-  c.honorarios = typeof c.honorarios==='number'?c.honorarios:3630;
-  c.localidades = Array.isArray(c.localidades)&&c.localidades.length?c.localidades:['Oviedo','Gijón','Avilés','Mieres','Pola de Siero','Langreo','Gozón'];
+  if(typeof c.itp_pct==='number'&&c.itp_pct>1)c.itp_pct=c.itp_pct/100;
+  c.itp_pct=(typeof c.itp_pct==='number')?c.itp_pct:.08;
+  c.notaria=(typeof c.notaria==='number')?c.notaria:1200;
+  c.honorarios=(typeof c.honorarios==='number')?c.honorarios:3630;
+  c.localidades=Array.isArray(c.localidades)&&c.localidades.length?c.localidades:['Oviedo','Gijón','Avilés','Mieres','Pola de Siero','Langreo','Gozón'];
   return c;
 })(LS.get('cfg',{}));
 LS.set('cfg',CFG);
 
-/* ========== Data ========== */
+/* ========= Data ========= */
 function allPros(){return LS.get('pros',[])||[]}
-function savePros(list){LS.set('pros',list)}
+function savePros(a){LS.set('pros',a)}
 let PROS=allPros().filter(p=>!p.archived);
 
-/* ========== KPI Header ========== */
+/* ========= KPIs ========= */
 const PHASES=['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA'];
 function headerKPIs(){
   const wrap=document.getElementById('kpis'); wrap.innerHTML='';
   PHASES.concat('EXITOS').forEach(ph=>{
-    const items = ph==='EXITOS'? allPros().filter(x=>x.archived&&x.archived_reason==='SUCCESS') : PROS.filter(x=>x.phase===ph);
-    const ok = items.filter(p=>p.history&&p.history[ph]==='OK').length;
-    const ko = items.filter(p=>p.history&&p.history[ph]==='KO').length;
-    const box=document.createElement('div'); box.className='kpi';
-    if(ok+ko===0){
-      box.innerHTML='<b>'+h(ph)+'</b><span class="pill">Total '+items.length+'</span>';
-    }else{
-      const pct=Math.round(ok/(ok+ko)*100);
-      box.innerHTML='<b>'+h(ph)+'</b><div><span class="pill">'+pct+'% OK</span> <span class="ok">OK: '+ok+'</span> <span class="ko">KO: '+ko+'</span></div>';
-    }
-    wrap.appendChild(box);
+    const items=ph==='EXITOS'? allPros().filter(x=>x.archived&&x.archived_reason==='SUCCESS') : PROS.filter(x=>x.phase===ph);
+    const ok=items.filter(p=>p.history&&p.history[ph]==='OK').length;
+    const ko=items.filter(p=>p.history&&p.history[ph]==='KO').length;
+    const div=document.createElement('div'); div.className='kpi';
+    if(ok+ko===0){ div.innerHTML='<b>'+h(ph)+'</b><span class="pill">Total '+items.length+'</span>'; }
+    else{ const pct=Math.round(ok/(ok+ko)*100); div.innerHTML='<b>'+h(ph)+'</b><div><span class="pill">'+pct+'% OK</span> <span class="ok">OK: '+ok+'</span> <span class="ko">KO: '+ko+'</span></div>'; }
+    wrap.appendChild(div);
   });
 }
 
-/* ========== Render Board ========== */
-function daysInPhase(p){const t=p.phase_entered_at?Number(p.phase_entered_at):Date.now();return Math.max(0,Math.floor((Date.now()-t)/(1000*60*60*24)))}
-
+/* ========= Board ========= */
+function daysInPhase(p){const t=p.phase_entered_at?+p.phase_entered_at:Date.now();return Math.max(0,Math.floor((Date.now()-t)/86400000))}
 function makeCreateCard(){
   const c=document.createElement('div'); c.className='create';
   c.innerHTML='<div class="row"><input id="new_name" placeholder="Nombre y apellidos" maxlength="30"/><input id="new_phone" placeholder="Teléfono" maxlength="9"/></div>'+
@@ -186,13 +166,10 @@ function makeCreateCard(){
               '<small style="color:#777">Pon fecha en el modal para pasar a <b>Reunión</b>.</small>';
   return c;
 }
-
 function makeCard(p){
   const el=document.createElement('div'); el.className='card'; el.draggable=true; el.dataset.id=p.id;
-  const pr=p.profile||{}, age=daysInPhase(p);
-  const objt=(pr.objt||'neta').toLowerCase(); const objtxt=objt==='bruta'?'Rb%':(objt==='neta'?'Rn%':'Flujo');
-  el.innerHTML=
-    '<header><div class="name">'+h(p.name||'—')+'</div><div class="age">⏱ '+age+' días</div></header>'+
+  const pr=p.profile||{}, age=daysInPhase(p), objt=(pr.objt||'neta').toLowerCase(), objtxt=objt==='bruta'?'Rb%':(objt==='neta'?'Rn%':'Flujo');
+  el.innerHTML='<header><div class="name">'+h(p.name||'—')+'</div><div class="age">⏱ '+age+' días</div></header>'+
     '<div class="badges"><span class="badge">🏷 '+h(pr.tipo||'Tradicional')+'</span><span class="badge">🎯 '+objtxt+'</span></div>'+
     '<div class="actions">'+
       '<button class="btn-icon view" data-act="view" title="Ver / editar"><svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>'+
@@ -201,7 +178,6 @@ function makeCard(p){
     '</div>';
   return el;
 }
-
 function renderBoard(){
   const board=document.getElementById('board'); board.innerHTML='';
   PHASES.forEach(ph=>{
@@ -209,100 +185,84 @@ function renderBoard(){
     const items=PROS.filter(p=>p.phase===ph);
     const h3=document.createElement('h3'); h3.innerHTML='<span>'+h(ph)+'</span><span class="count">'+items.length+' clientes</span>';
     col.appendChild(h3);
-    if(ph==='CONTACTO'){ col.appendChild(makeCreateCard()); }
+    if(ph==='CONTACTO') col.appendChild(makeCreateCard());
     items.forEach(p=>col.appendChild(makeCard(p)));
     board.appendChild(col);
   });
 }
 
-/* ========== Modal ========== */
-const MB=document.getElementById('mb'), MH=document.getElementById('mh'), MBODY=document.getElementById('mbody');
-let MODAL_ID=null;
-
+/* ========= Modal ========= */
+const MB=document.getElementById('mb'), MH=document.getElementById('mh'), MBODY=document.getElementById('mbody'); let MODAL_ID=null;
 function openModal(p){
   MODAL_ID=p.id; MH.textContent=(p.name||'Ficha')+' — Detalle';
   const pr=p.profile||{}, meet=p.meeting||{};
   const locs=Array.isArray(pr.locs)?pr.locs:(pr.locs?String(pr.locs).split(',').map(s=>s.trim()).filter(Boolean):[]);
-
   var html='';
   /* Datos personales */
-  html += '<div class="block"><h5>DATOS PERSONALES</h5><div class="grid">';
-  html += '<div class="field"><label>Nombre y apellidos</label><input id="f_name" type="text" maxlength="30" value="'+h(p.name||'')+'"/></div>';
-  html += '<div class="field"><label>Teléfono</label><input id="f_phone" type="tel" maxlength="9" value="'+h(p.phone||'')+'"/></div>';
-  html += '<div class="field"><label>Email</label><input id="f_email" type="email" maxlength="35" value="'+h(p.email||'')+'"/></div>';
-  html += '<div class="field"><label>DNI/NIE</label><input id="f_dni" type="text" maxlength="10" value="'+h(pr.dni||'')+'"/></div>';
-  html += '<div class="field row2"><label>Dirección</label><input id="f_dir" type="text" maxlength="120" value="'+h(pr.dir||'')+'"/></div>';
-  html += '<div class="field"><label>Localidad (residencia)</label><input id="f_locres" type="text" maxlength="10" value="'+h(pr.locres||'')+'"/></div>';
-  html += '</div></div>';
-
+  html+='<div class="block"><h5>DATOS PERSONALES</h5><div class="grid">';
+  html+='<div class="field"><label>Nombre y apellidos</label><input id="f_name" maxlength="30" value="'+h(p.name||'')+'"/></div>';
+  html+='<div class="field"><label>Teléfono</label><input id="f_phone" maxlength="9" value="'+h(p.phone||'')+'"/></div>';
+  html+='<div class="field"><label>Email</label><input id="f_email" type="email" maxlength="35" value="'+h(p.email||'')+'"/></div>';
+  html+='<div class="field"><label>DNI/NIE</label><input id="f_dni" maxlength="10" value="'+h(pr.dni||'')+'"/></div>';
+  html+='<div class="field row2"><label>Dirección</label><input id="f_dir" maxlength="120" value="'+h(pr.dir||'')+'"/></div>';
+  html+='<div class="field"><label>Localidad (residencia)</label><input id="f_locres" maxlength="10" value="'+h(pr.locres||'')+'"/></div>';
+  html+='</div></div>';
   /* Inversión */
-  html += '<div class="block"><h5>INVERSIÓN</h5><div class="grid">';
-  html += '<div class="field row3"><label>Localidades (inversión) — máx 6</label>';
-  html += '<div class="chips" id="chips_locs">';
-  for(var i=0;i<locs.length;i++){ html += '<span class="chip">'+h(locs[i])+' <span class="x" data-del="'+h(locs[i])+'">×</span></span>'; }
-  html += '</div><input class="chips-input" id="add_loc" placeholder="Añadir localidad y Enter" maxlength="10"/></div>';
-  html += '<div class="field"><label>Tipo de alquiler</label><select id="f_tipo"><option'+((pr.tipo||'Tradicional')==='Tradicional'?' selected':'')+'>Tradicional</option><option'+((pr.tipo||'Tradicional')==='Habitaciones'?' selected':'')+'>Habitaciones</option></select></div>';
-  html += '<div class="field"><label>Acepta reforma</label><select id="f_ref"><option'+((pr.ref||'No')==='No'?' selected':'')+'>No</option><option'+((pr.ref||'No')==='Lavado de cara'?' selected':'')+'>Lavado de cara</option><option'+((pr.ref||'No')==='Integral'?' selected':'')+'>Integral</option></select></div>';
-  html += '<div class="field"><label>¿Ascensor?</label><select id="f_asc"><option'+((pr.asc||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.asc||'No')==='No'?' selected':'')+'>No</option></select></div>';
-  html += '<div class="field"><label>Altura máx. (planta)</label><input id="f_alt" type="number" inputmode="numeric" maxlength="1" value="'+h(pr.alt||'')+'"/></div>';
-  html += '<div class="field"><label>¿Bajos?</label><select id="f_bajos"><option'+((pr.bajos||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.bajos||'No')==='No'?' selected':'')+'>No</option></select></div>';
-  html += '<div class="field"><label>Presupuesto TOTAL (€)</label><input id="f_budget" type="text" value="'+(pr.budget?pr.budget.toLocaleString('es-ES'):'')+'"/></div>';
-  html += '<div class="field"><label>Precio máx. COMPRA (auto)</label><input id="f_pmax" type="text" disabled value="'+(pr.pmax?pr.pmax.toLocaleString('es-ES'):'')+'"/></div>';
-  html += '<div class="field"><label>ITP estimado (auto)</label><input id="f_itp" type="text" disabled value="'+(pr.itp?pr.itp.toLocaleString('es-ES'):'')+'"/></div>';
-  html += '</div></div>';
-
+  html+='<div class="block"><h5>INVERSIÓN</h5><div class="grid">';
+  html+='<div class="field row3"><label>Localidades (inversión) — máx 6</label><div class="chips" id="chips_locs">';
+  for(var i=0;i<locs.length;i++){ html+='<span class="chip">'+h(locs[i])+' <span class="x" data-del="'+h(locs[i])+'">×</span></span>'; }
+  html+='</div><input class="chips-input" id="add_loc" placeholder="Añadir localidad y Enter" maxlength="10"/></div>';
+  html+='<div class="field"><label>Tipo de alquiler</label><select id="f_tipo"><option'+((pr.tipo||'Tradicional')==='Tradicional'?' selected':'')+'>Tradicional</option><option'+((pr.tipo||'Tradicional')==='Habitaciones'?' selected':'')+'>Habitaciones</option></select></div>';
+  html+='<div class="field"><label>Acepta reforma</label><select id="f_ref"><option'+((pr.ref||'No')==='No'?' selected':'')+'>No</option><option'+((pr.ref||'No')==='Lavado de cara'?' selected':'')+'>Lavado de cara</option><option'+((pr.ref||'No')==='Integral'?' selected':'')+'>Integral</option></select></div>';
+  html+='<div class="field"><label>¿Ascensor?</label><select id="f_asc"><option'+((pr.asc||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.asc||'No')==='No'?' selected':'')+'>No</option></select></div>';
+  html+='<div class="field"><label>Altura máx. (planta)</label><input id="f_alt" inputmode="numeric" maxlength="1" value="'+h(pr.alt||'')+'"/></div>';
+  html+='<div class="field"><label>¿Bajos?</label><select id="f_bajos"><option'+((pr.bajos||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.bajos||'No')==='No'?' selected':'')+'>No</option></select></div>';
+  html+='<div class="field"><label>Presupuesto TOTAL (€)</label><input id="f_budget" value="'+(pr.budget?pr.budget.toLocaleString('es-ES'):'')+'"/></div>';
+  html+='<div class="field"><label>Precio máx. COMPRA (auto)</label><input id="f_pmax" disabled value="'+(pr.pmax?pr.pmax.toLocaleString('es-ES'):'')+'"/></div>';
+  html+='<div class="field"><label>ITP estimado (auto)</label><input id="f_itp" disabled value="'+(pr.itp?pr.itp.toLocaleString('es-ES'):'')+'"/></div>';
+  html+='</div></div>';
   /* Financiación */
-  html += '<div class="block"><h5>FINANCIACIÓN</h5><div class="grid">';
-  html += '<div class="field"><label>Financiación bancaria</label><select id="f_fin"><option'+((pr.fin||'Sí')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.fin||'Sí')==='No'?' selected':'')+'>No</option></select></div>';
-  html += '<div class="field"><label>¿Necesita broker?</label><select id="f_broker"><option'+((pr.broker||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.broker||'No')==='No'?' selected':'')+'>No</option></select></div>';
-  html += '<div class="field"><label>% financiación</label><input id="f_pct" type="text" maxlength="4" value="'+h(pr.pct||'')+'"/></div>';
-  html += '<div class="field"><label>Hipoteca</label><input id="f_hip" type="text" disabled value="'+(pr.hip?pr.hip.toLocaleString('es-ES'):'')+'"/></div>';
-  html += '<div class="field"><label>Fondos propios</label><input id="f_prop" type="text" disabled value="'+(pr.prop?pr.prop.toLocaleString('es-ES'):'')+'"/></div>';
-  html += '</div></div>';
-
+  html+='<div class="block"><h5>FINANCIACIÓN</h5><div class="grid">';
+  html+='<div class="field"><label>Financiación bancaria</label><select id="f_fin"><option'+((pr.fin||'Sí')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.fin||'Sí')==='No'?' selected':'')+'>No</option></select></div>';
+  html+='<div class="field"><label>¿Necesita broker?</label><select id="f_broker"><option'+((pr.broker||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.broker||'No')==='No'?' selected':'')+'>No</option></select></div>';
+  html+='<div class="field"><label>% financiación</label><input id="f_pct" maxlength="4" value="'+h(pr.pct||'')+'"/></div>';
+  html+='<div class="field"><label>Hipoteca</label><input id="f_hip" disabled value="'+(pr.hip?pr.hip.toLocaleString('es-ES'):'')+'"/></div>';
+  html+='<div class="field"><label>Fondos propios</label><input id="f_prop" disabled value="'+(pr.prop?pr.prop.toLocaleString('es-ES'):'')+'"/></div>';
+  html+='</div></div>';
   /* Objetivo */
   var objt=(pr.objt||'neta').toLowerCase();
-  html += '<div class="block"><h5>OBJETIVO</h5><div class="grid">';
-  html += '<div class="field"><label>Objetivo principal</label><select id="f_objt"><option value="bruta"'+(objt==='bruta'?' selected':'')+'>Rentabilidad bruta (%)</option><option value="neta"'+(objt==='neta'?' selected':'')+'>Rentabilidad neta (%)</option><option value="flujo"'+(objt==='flujo'?' selected':'')+'>Flujo (€/mes)</option></select></div>';
-  html += '<div class="field"><label>Valor objetivo</label><input id="f_objv" type="text" maxlength="4" value="'+h(pr.objv||'')+'"/></div>';
-  html += '<div class="field"><label>Alquiler orientativo (€/mes)</label><input id="f_alq" type="text" disabled value="'+(pr.alq?pr.alq.toLocaleString('es-ES'):'')+'"/></div>';
-  var inc = typeof pr.bruta_incluye_honorarios==='boolean'?pr.bruta_incluye_honorarios:false;
-  html += '<div class="field row3"><label><input type="checkbox" id="f_inc_hon"'+(inc?' checked':'')+'> Incluir honorarios en Bruta (solo este cliente)</label></div>';
-  html += '</div></div>';
-
+  html+='<div class="block"><h5>OBJETIVO</h5><div class="grid">';
+  html+='<div class="field"><label>Objetivo principal</label><select id="f_objt"><option value="bruta"'+(objt==='bruta'?' selected':'')+'>Rentabilidad bruta (%)</option><option value="neta"'+(objt==='neta'?' selected':'')+'>Rentabilidad neta (%)</option><option value="flujo"'+(objt==='flujo'?' selected':'')+'>Flujo (€/mes)</option></select></div>';
+  html+='<div class="field"><label>Valor objetivo</label><input id="f_objv" maxlength="4" value="'+h(pr.objv||'')+'"/></div>';
+  html+='<div class="field"><label>Alquiler orientativo (€/mes)</label><input id="f_alq" disabled value="'+(pr.alq?pr.alq.toLocaleString('es-ES'):'')+'"/></div>';
+  var inc=typeof pr.bruta_incluye_honorarios==='boolean'?pr.bruta_incluye_honorarios:false;
+  html+='<div class="field row3"><label><input type="checkbox" id="f_inc_hon"'+(inc?' checked':'')+'> Incluir honorarios en Bruta (solo este cliente)</label></div>';
+  html+='</div></div>';
   /* Reunión / Notas */
-  html += '<div class="block"><h5>NOTAS</h5><div class="grid">';
+  html+='<div class="block"><h5>NOTAS</h5><div class="grid">';
   if(p.phase==='CONTACTO'){
-    html += '<div class="field"><label>Fecha y hora (para pasar a Reunión)</label><input id="f_meet" type="datetime-local" value="'+h(meet.date||'')+'"/></div>';
-    html += '<div class="field row2"></div>';
+    html+='<div class="field"><label>Fecha y hora (para pasar a Reunión)</label><input id="f_meet" type="datetime-local" value="'+h(meet.date||'')+'"/></div><div class="field row2"></div>';
   }
-  html += '<div class="field row3"><textarea id="f_notas" rows="2" maxlength="300">'+h(meet.notas||'')+'</textarea></div>';
-  html += '</div></div>';
+  html+='<div class="field row3"><label>Notas (máx 300)</label><textarea id="f_notas" rows="2" maxlength="300">'+h(meet.notas||'')+'</textarea></div>';
+  html+='</div></div>';
 
   MBODY.innerHTML=html;
-
-  // chips add/remove
+  // chips
   MBODY.querySelector('#chips_locs').addEventListener('click',function(e){
-    var del=e.target.getAttribute('data-del'); if(!del)return;
-    var span=e.target.parentElement; span.parentElement.removeChild(span);
+    var del=e.target.getAttribute('data-del'); if(!del)return; var span=e.target.parentElement; span.parentElement.removeChild(span);
   });
   var add=MBODY.querySelector('#add_loc');
   add.addEventListener('keydown',function(e){
-    if(e.key==='Enter'){
-      e.preventDefault();
-      var v=(add.value||'').trim(); if(!v) return;
-      var cont=MBODY.querySelector('#chips_locs');
-      if(cont.querySelectorAll('.chip').length>=6){toast('Máximo 6 localidades','warn');return;}
-      var s=document.createElement('span'); s.className='chip'; s.innerHTML=h(v)+' <span class="x" data-del="'+h(v)+'">×</span>'; cont.appendChild(s);
-      add.value='';
+    if(e.key==='Enter'){e.preventDefault();var v=(add.value||'').trim(); if(!v)return;
+      var cont=MBODY.querySelector('#chips_locs'); if(cont.querySelectorAll('.chip').length>=6){toast('Máximo 6 localidades','warn');return;}
+      var s=document.createElement('span'); s.className='chip'; s.innerHTML=h(v)+' <span class="x" data-del="'+h(v)+'">×</span>'; cont.appendChild(s); add.value='';
     }
   });
-
-  // cálculos rápidos
+  // cálculos
   function recalc(){
     var total=num(MBODY.querySelector('#f_budget').value);
     if(total>0){
-      var pmax=Math.max(0, Math.round((total - CFG.notaria - CFG.honorarios)/(1+CFG.itp_pct)));
+      var pmax=Math.max(0, Math.round((total-CFG.notaria-CFG.honorarios)/(1+CFG.itp_pct)));
       var itp=Math.round(pmax*CFG.itp_pct);
       MBODY.querySelector('#f_pmax').value=pmax?pmax.toLocaleString('es-ES'):'';
       MBODY.querySelector('#f_itp').value=itp?itp.toLocaleString('es-ES'):'';
@@ -323,79 +283,65 @@ function openModal(p){
 
   MB.style.display='flex';
 }
-function closeModal(){MB.style.display='none'; MODAL_ID=null;}
+function closeModal(){document.getElementById('mb').style.display='none'; MODAL_ID=null;}
 function saveModal(){
-  if(!MODAL_ID) return;
-  var list=allPros(); var i=list.findIndex(function(x){return x.id===MODAL_ID}); if(i<0) return;
-  var p=list[i]; var pr=p.profile||(p.profile={}); var q=function(sel){return MBODY.querySelector(sel)};
+  if(!MODAL_ID)return;
+  var list=allPros(); var i=list.findIndex(x=>x.id===MODAL_ID); if(i<0)return;
+  var p=list[i], pr=p.profile||(p.profile={}), q=s=>MBODY.querySelector(s);
   p.name=q('#f_name').value.trim(); p.phone=q('#f_phone').value.trim(); p.email=q('#f_email').value.trim();
   pr.dni=q('#f_dni').value.trim(); pr.dir=q('#f_dir').value.trim(); pr.locres=q('#f_locres').value.trim();
-  pr.locs=[].map.call(MBODY.querySelectorAll('#chips_locs .chip'),function(ch){return ch.firstChild.textContent.trim()});
+  pr.locs=[].map.call(MBODY.querySelectorAll('#chips_locs .chip'),ch=>ch.firstChild.textContent.trim());
   pr.tipo=q('#f_tipo').value; pr.ref=q('#f_ref').value; pr.asc=q('#f_asc').value; pr.alt=q('#f_alt').value; pr.bajos=q('#f_bajos').value;
   pr.budget=num(q('#f_budget').value); pr.pmax=num(q('#f_pmax').value); pr.itp=num(q('#f_itp').value);
   pr.fin=q('#f_fin').value; pr.broker=q('#f_broker').value; pr.pct=q('#f_pct').value; pr.hip=num(q('#f_hip').value); pr.prop=num(q('#f_prop').value);
-  pr.objt=q('#f_objt').value; pr.objv=num(q('#f_objv').value);
-  pr.bruta_incluye_honorarios=!!q('#f_inc_hon').checked;
+  pr.objt=q('#f_objt').value; pr.objv=num(q('#f_objv').value); pr.bruta_incluye_honorarios=!!q('#f_inc_hon').checked;
   p.meeting=p.meeting||{}; p.meeting.notas=q('#f_notas').value.slice(0,300);
   if(p.phase==='CONTACTO'){
-    var dt=q('#f_meet').value;
-    if(dt){ p.meeting.date=dt; p.phase='REUNION'; p.phase_entered_at=Date.now(); p.history=p.history||{}; p.history.CONTACTO='OK'; }
+    var dt=q('#f_meet').value; if(dt){ p.meeting.date=dt; p.phase='REUNION'; p.phase_entered_at=Date.now(); p.history=p.history||{}; p.history.CONTACTO='OK'; }
   }
-  list[i]=p; savePros(list); PROS=list.filter(function(x){return !x.archived});
+  list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived);
   toast('Guardado','ok'); closeModal(); headerKPIs(); renderBoard();
 }
 
-/* ========== Eventos globales ========== */
+/* ========= Eventos ========= */
 document.addEventListener('click',function(e){
   if(e.target.id==='mclose') { closeModal(); return; }
   if(e.target.id==='msave') { saveModal(); return; }
-
   if(e.target.id==='btn_create'){
-    var name=document.getElementById('new_name').value.trim();
-    var phone=document.getElementById('new_phone').value.trim();
-    var email=document.getElementById('new_email').value.trim();
-    if(!name || !phone){ toast('Nombre y teléfono son obligatorios','warn'); return; }
-    var list=allPros();
-    var p={id:'p_'+Math.random().toString(36).slice(2,8), name:name, phone:phone, email:email,
-      phase:'CONTACTO', phase_entered_at:Date.now(), history:{}, profile:{tipo:'Tradicional',objt:'neta',objv:6}};
-    list.push(p); savePros(list); PROS=list.filter(function(x){return !x.archived});
-    toast('Contacto creado','ok'); headerKPIs(); renderBoard(); return;
+    const name=document.getElementById('new_name').value.trim();
+    const phone=document.getElementById('new_phone').value.trim();
+    const email=document.getElementById('new_email').value.trim();
+    if(!name||!phone){toast('Nombre y teléfono son obligatorios','warn');return;}
+    const list=allPros();
+    const p={id:'p_'+Math.random().toString(36).slice(2,8),name,phone,email,phase:'CONTACTO',phase_entered_at:Date.now(),history:{},profile:{tipo:'Tradicional',objt:'neta',objv:6}};
+    list.push(p); savePros(list); PROS=list.filter(x=>!x.archived); toast('Contacto creado','ok'); headerKPIs(); renderBoard(); return;
   }
-
-  var btn=e.target.closest('.btn-icon'); if(btn){
-    var id=btn.closest('.card').dataset.id;
-    var list=allPros(); var i=list.findIndex(function(x){return x.id===id}); if(i<0) return;
-    var p=list[i]; var act=btn.dataset.act;
+  const btn=e.target.closest('.btn-icon'); if(btn){
+    const id=btn.closest('.card').dataset.id;
+    let list=allPros(); const i=list.findIndex(x=>x.id===id); if(i<0)return;
+    const p=list[i], act=btn.dataset.act;
     if(act==='view'){ openModal(p); return; }
-    if(act==='ok'){
-      var ph=p.phase; var idx=PHASES.indexOf(ph);
-      p.history=p.history||{}; p.history[ph]='OK';
+    if(act==='ok'){ const ph=p.phase, idx=PHASES.indexOf(ph); p.history=p.history||{}; p.history[ph]='OK';
       if(idx<PHASES.length-1){ p.phase=PHASES[idx+1]; p.phase_entered_at=Date.now(); }
-      list[i]=p; savePros(list); PROS=list.filter(function(x){return !x.archived}); toast('Avanzado','ok'); headerKPIs(); renderBoard(); return;
-    }
-    if(act==='ko'){
-      var ph2=p.phase; p.history=p.history||{}; p.history[ph2]='KO';
-      if(ph2==='CONTACTO'){ list=list.filter(function(x){return x.id!==p.id}); }
-      else{ p.archived=true; p.archived_reason='KO'; list[i]=p; }
-      savePros(list); PROS=list.filter(function(x){return !x.archived}); toast('Descartado','bad'); headerKPIs(); renderBoard(); return;
-    }
+      list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived); toast('Avanzado','ok'); headerKPIs(); renderBoard(); return; }
+    if(act==='ko'){ const ph2=p.phase; p.history=p.history||{}; p.history[ph2]='KO';
+      if(ph2==='CONTACTO'){ list=list.filter(x=>x.id!==p.id); } else { p.archived=true; p.archived_reason='KO'; list[i]=p; }
+      savePros(list); PROS=list.filter(x=>!x.archived); toast('Descartado','bad'); headerKPIs(); renderBoard(); return; }
   }
 });
-document.addEventListener('keydown',function(e){ if(e.key==='Escape' && MB.style.display==='flex') closeModal(); });
-
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && document.getElementById('mb').style.display==='flex') closeModal(); });
 /* Drag & drop */
 let dragId=null;
-document.addEventListener('dragstart',function(e){var c=e.target.closest('.card'); if(!c)return; dragId=c.dataset.id; c.classList.add('dragging');});
-document.addEventListener('dragend',function(e){var c=e.target.closest('.card'); if(c)c.classList.remove('dragging'); document.querySelectorAll('.col.drop').forEach(function(x){x.classList.remove('drop')});});
-document.addEventListener('dragover',function(e){var col=e.target.closest('.col'); if(!col)return; e.preventDefault(); col.classList.add('drop');});
-document.addEventListener('dragleave',function(e){var col=e.target.closest('.col'); if(col) col.classList.remove('drop');});
-document.addEventListener('drop',function(e){
-  var col=e.target.closest('.col'); if(!col||!dragId) return;
-  var list=allPros(); var i=list.findIndex(function(x){return x.id===dragId}); if(i<0) return;
-  var p=list[i]; var to=col.dataset.phase;
-  if(p.phase!==to){ p.phase=to; p.phase_entered_at=Date.now(); list[i]=p; savePros(list); PROS=list.filter(function(x){return !x.archived}); headerKPIs(); renderBoard(); toast('Movido','ok'); }
+document.addEventListener('dragstart',e=>{const c=e.target.closest('.card'); if(!c)return; dragId=c.dataset.id; c.classList.add('dragging');});
+document.addEventListener('dragend',e=>{const c=e.target.closest('.card'); if(c)c.classList.remove('dragging'); document.querySelectorAll('.col.drop').forEach(x=>x.classList.remove('drop'));});
+document.addEventListener('dragover',e=>{const col=e.target.closest('.col'); if(!col)return; e.preventDefault(); col.classList.add('drop');});
+document.addEventListener('dragleave',e=>{const col=e.target.closest('.col'); if(col) col.classList.remove('drop');});
+document.addEventListener('drop',e=>{
+  const col=e.target.closest('.col'); if(!col||!dragId)return;
+  const list=allPros(); const i=list.findIndex(x=>x.id===dragId); if(i<0)return;
+  const p=list[i]; const to=col.dataset.phase;
+  if(p.phase!==to){ p.phase=to; p.phase_entered_at=Date.now(); list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived); headerKPIs(); renderBoard(); toast('Movido','ok'); }
 });
-
 /* Init */
 (function(){
   if(!PROS.length){
