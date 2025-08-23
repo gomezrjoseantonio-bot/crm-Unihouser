@@ -33,7 +33,7 @@
   /* Controles (misma letra que label) */
   label{font-size:12px;color:#4d4542}
   input,select,textarea,button{
-    font-size:12px; border:1px solid #d8cfca;border-radius:8px;padding:4px 8px;background:#fff;color:#2b2b2b;
+    font-size:12px;border:1px solid #d8cfca;border-radius:8px;padding:4px 8px;background:#fff;color:#2b2b2b;
     height:26px;line-height:1.2;outline:none
   }
   textarea{height:auto}
@@ -380,135 +380,106 @@ let CURRENT=null,lastOpener=null;
 function openModal(){ overlay.classList.add('open'); modal.classList.add('open'); const f=modal.querySelector('input,select,button,textarea'); if(f) f.focus(); }
 function closeModal(){ overlay.classList.remove('open'); modal.classList.remove('open'); CURRENT=null; if(lastOpener && document.body.contains(lastOpener)) lastOpener.focus(); }
 
-<script>
 function openModalFor(p){
   CURRENT=p; lastOpener=document.activeElement;
+  modalTitle.textContent='👤 '+(p.name||'Sin nombre')+' — Detalle';
   const pr=p.profile||(p.profile={});
   const m =p.meeting||(p.meeting={date:'',notas:''});
   if(typeof pr.locs==='string') pr.locs=pr.locs.split(',').map(s=>s.trim()).filter(Boolean);
   if(!Array.isArray(pr.locs)) pr.locs=[];
   const itp=CFG.itp_pct,not=CFG.notaria,hon=CFG.honorarios;
-  modalTitle.textContent='👤 '+(p.name||'Sin nombre')+' — Detalle';
 
-  const html = `
-  <div class="group">
-    <h4>Datos personales</h4>
-    <div class="grid">
-      <div><label>Nombre</label><input id="f_name" value="${escapeHtml(p.name||'')}"></div>
-      <div><label>Teléfono</label><input id="f_tel" value="${escapeHtml(p.phone||'')}"></div>
-      <div><label>Email</label><input id="f_email" value="${escapeHtml(p.email||'')}"></div>
-      <div><label>DNI</label><input id="f_dni" value="${escapeHtml(pr.dni||'')}"></div>
-      <div class="span-2"><label>Dirección</label><input id="f_dir" value="${escapeHtml(pr.dir||'')}"></div>
-    </div>
-  </div>
+  const locOptions=(CFG.localidades||[]).map(function(l){return '<option value="'+escapeHtml(l)+'">'}).join('');
+  const fechaBloque=(p.phase==='CONTACTO')
+    ? '<div><label>Fecha y hora</label><input type="datetime-local" id="f_meet" value="'+(m.date?toLocalDT(m.date):'')+'"></div>'
+    : '<div></div>';
 
-  <div class="group">
-    <h4>Inversión</h4>
-    <div class="grid">
-      <div>
-        <label>Localidades (multi)</label>
-        <div class="chips" id="loc_chips"></div>
-        <input id="loc_input" list="loc_list" placeholder="Añadir localidad y Enter">
-        <datalist id="loc_list">${CFG.localidades.map(l=><option value="${escapeHtml(l)}">).join('')}</datalist>
-      </div>
-      <div><label>Tipo de alquiler</label>
-        <select id="f_tipo">
-          <option ${pr.tipo==='Tradicional'?'selected':''}>Tradicional</option>
-          <option ${pr.tipo==='Habitaciones'?'selected':''}>Habitaciones</option>
-        </select>
-      </div>
-      <div><label>Acepta reforma</label>
-        <select id="f_ref">
-          <option ${pr.ref==='No'?'selected':''}>No</option>
-          <option ${pr.ref==='Lavado de cara'?'selected':''}>Lavado de cara</option>
-          <option ${pr.ref==='Integral'?'selected':''}>Integral</option>
-        </select>
-      </div>
-      <div><label>¿Ascensor?</label>
-        <select id="f_asc"><option ${pr.asc!=='No'?'selected':''}>Sí</option><option ${pr.asc==='No'?'selected':''}>No</option></select>
-      </div>
-      <div><label>Altura máx.</label><input id="f_alt" value="${escapeHtml(pr.alt||'')}" inputmode="numeric"></div>
-      <div><label>¿Bajos?</label>
-        <select id="f_bajos"><option ${pr.bajos!=='Sí'?'selected':''}>No</option><option ${pr.bajos==='Sí'?'selected':''}>Sí</option></select>
-      </div>
-      <div><label>Presupuesto TOTAL (€)</label><input id="f_budget" value="${pr.budget!=null?Math.round(pr.budget):''}" inputmode="numeric"></div>
-      <div><label>Precio máx. COMPRA (auto)</label><input id="f_pmax" value="${pr.pmax!=null?Math.round(pr.pmax):''}" disabled></div>
-      <div><label>ITP estimado (auto)</label><input id="f_itp" value="${pr.pmax?Math.round(pr.pmax*itp):''}" disabled></div>
-    </div>
-    <small class="small">Notaría: ${eur(not)} · Honorarios: ${eur(hon)} (Config)</small>
-  </div>
+  modalBody.innerHTML =
+    '<div class="group">'+
+      '<h4>Datos personales</h4>'+
+      '<div class="grid">'+
+        '<div><label>Nombre</label><input id="f_name" value="'+escapeHtml(p.name||'')+'"></div>'+
+        '<div><label>Teléfono</label><input id="f_tel" value="'+escapeHtml(p.phone||'')+'"></div>'+
+        '<div><label>Email</label><input id="f_email" value="'+escapeHtml(p.email||'')+'"></div>'+
+        '<div><label>DNI</label><input id="f_dni" value="'+escapeHtml(pr.dni||'')+'"></div>'+
+        '<div class="span-2"><label>Dirección</label><input id="f_dir" value="'+escapeHtml(pr.dir||'')+'" placeholder="C/ … nº …"></div>'+
+      '</div>'+
+    '</div>'+
 
-  <div class="group">
-    <h4>Financiación</h4>
-    <div class="grid">
-      <div><label>Financiación bancaria</label>
-        <select id="f_fin"><option ${pr.fin!=='No'?'selected':''}>Sí</option><option ${pr.fin==='No'?'selected':''}>No</option></select>
-      </div>
-      <div><label>% financiación</label><input id="f_pct" value="${pr.pct!=null?String(pr.pct).replace('.',','):''}" placeholder="80,0"></div>
-      <div><label>Hipoteca (auto)</label><input id="f_hip" value="${pr.hip!=null?Math.round(pr.hip):''}" disabled></div>
-      <div><label>Fondos propios</label><input id="f_prop" value="${pr.prop!=null?Math.round(pr.prop):''}" disabled></div>
-      <div></div><div></div>
-    </div>
-  </div>
+    '<div class="group">'+
+      '<h4>Inversión</h4>'+
+      '<div class="grid">'+
+        '<div>'+
+          '<label>Localidades (multi)</label>'+
+          '<div class="chips" id="loc_chips"></div>'+
+          '<input id="loc_input" list="loc_list" placeholder="Añadir localidad y Enter">'+
+          '<datalist id="loc_list">'+locOptions+'</datalist>'+
+        '</div>'+
+        '<div><label>Tipo de alquiler</label><select id="f_tipo"><option '+(pr.tipo==='Tradicional'?'selected':'')+'>Tradicional</option><option '+(pr.tipo==='Habitaciones'?'selected':'')+'>Habitaciones</option></select></div>'+
+        '<div><label>Acepta reforma</label><select id="f_ref"><option '+(pr.ref==='No'?'selected':'')+'>No</option><option '+(pr.ref==='Lavado de cara'?'selected':'')+'>Lavado de cara</option><option '+(pr.ref==='Integral'?'selected':'')+'>Integral</option></select></div>'+
+        '<div><label>¿Ascensor?</label><select id="f_asc"><option '+(pr.asc!=='No'?'selected':'')+'>Sí</option><option '+(pr.asc==='No'?'selected':'')+'>No</option></select></div>'+
+        '<div><label>Altura máx.</label><input id="f_alt" value="'+escapeHtml(pr.alt||'')+'" inputmode="numeric"></div>'+
+        '<div><label>¿Bajos?</label><select id="f_bajos"><option '+(pr.bajos!=='Sí'?'selected':'')+'>No</option><option '+(pr.bajos==='Sí'?'selected':'')+'>Sí</option></select></div>'+
+        '<div><label>Presupuesto TOTAL (€)</label><input id="f_budget" value="'+(pr.budget!=null?Math.round(pr.budget):'')+'" inputmode="numeric"></div>'+
+        '<div><label>Precio máx. COMPRA (auto)</label><input id="f_pmax" value="'+(pr.pmax!=null?Math.round(pr.pmax):'')+'" disabled></div>'+
+        '<div><label>ITP estimado (auto)</label><input id="f_itp" value="'+(pr.pmax?Math.round(pr.pmax*itp):'')+'" disabled></div>'+
+      '</div>'+
+      '<small class="small">Notaría: '+eur(not)+' · Honorarios: '+eur(hon)+' (Config)</small>'+
+    '</div>'+
 
-  <div class="group">
-    <h4>Objetivo</h4>
-    <div class="grid">
-      <div><label>Objetivo principal</label>
-        <select id="f_objt">
-          <option value="bruta" ${pr.objt==='bruta'?'selected':''}>Rentabilidad bruta (%)</option>
-          <option value="neta" ${pr.objt==='neta'?'selected':''}>Rentabilidad neta (%)</option>
-          <option value="flujo" ${pr.objt==='flujo'?'selected':''}>Flujo de caja (€/mes)</option>
-        </select>
-      </div>
-      <div><label>Valor objetivo</label><input id="f_objv" value="${pr.objv!=null?String(pr.objv).replace('.',','):''}" placeholder="7,5 o 300"></div>
-      <div id="row_alq"><label>Alquiler orientativo (€/mes)</label><input id="f_alq" value="${pr.alq!=null?Math.round(pr.alq):''}" disabled></div>
-    </div>
-    <small class="small">Fórmula Rb%: <b>((Total − Honorarios) × Rb%) / 12</b>.</small>
-  </div>
+    '<div class="group">'+
+      '<h4>Financiación</h4>'+
+      '<div class="grid">'+
+        '<div><label>Financiación bancaria</label><select id="f_fin"><option '+(pr.fin!=='No'?'selected':'')+'>Sí</option><option '+(pr.fin==='No'?'selected':'')+'>No</option></select></div>'+
+        '<div><label>% financiación</label><input id="f_pct" value="'+(pr.pct!=null?String(pr.pct).replace('.',','):'')+'" placeholder="80,0"></div>'+
+        '<div><label>Hipoteca (auto)</label><input id="f_hip" value="'+(pr.hip!=null?Math.round(pr.hip):'')+'" disabled></div>'+
+        '<div><label>Fondos propios</label><input id="f_prop" value="'+(pr.prop!=null?Math.round(pr.prop):'')+'" disabled></div>'+
+        '<div></div><div></div>'+
+      '</div>'+
+    '</div>'+
 
-  <div class="group">
-    <h4>${p.phase==='CONTACTO'?'Reunión':'Notas'}</h4>
-    <div class="grid">
-      ${p.phase==='CONTACTO'
-        ? <div><label>Fecha y hora</label><input type="datetime-local" id="f_meet" value="${m.date?toLocalDT(m.date):''}"></div>
-        : <div></div>}
-      <div class="${p.phase==='CONTACTO'?'span-2':'span-3'}"><label>Notas</label><textarea id="f_notas" style="min-height:86px">${escapeHtml(m.notas||'')}</textarea></div>
-    </div>
-    ${p.phase==='BUSQUEDA'
-      ? `<div class="grid two" style="margin-top:6px">
-           <div><label>Buscar evaluaciones</label><input id="b_q_${p.id}" placeholder="Filtrar por texto…"></div>
-           <div><label>Selección (máx 4)</label><div id="b_chips_${p.id}" class="chips"></div></div>
-         </div>
-         <div class="eval-list" id="b_list_${p.id}"></div>
-         <div class="flex" style="gap:6px;margin-top:6px"><button class="iconbtn" id="b_send_${p.id}">📤 Enviar documentación</button></div>`
-      : <p class="small">La selección de activos se gestiona en <b>Búsqueda</b>.</p>}
-  </div>`;
-  modalBody.innerHTML = html;
+    '<div class="group">'+
+      '<h4>Objetivo</h4>'+
+      '<div class="grid">'+
+        '<div><label>Objetivo principal</label><select id="f_objt"><option value="bruta" '+(pr.objt==='bruta'?'selected':'')+'>Rentabilidad bruta (%)</option><option value="neta" '+(pr.objt==='neta'?'selected':'')+'>Rentabilidad neta (%)</option><option value="flujo" '+(pr.objt==='flujo'?'selected':'')+'>Flujo de caja (€/mes)</option></select></div>'+
+        '<div><label>Valor objetivo</label><input id="f_objv" value="'+(pr.objv!=null?String(pr.objv).replace('.',','):'')+'" placeholder="7,5 o 300"></div>'+
+        '<div id="row_alq"><label>Alquiler orientativo (€/mes)</label><input id="f_alq" value="'+(pr.alq!=null?Math.round(pr.alq):'')+'" disabled></div>'+
+      '</div>'+
+      '<small class="small">Fórmula Rb%: <b>((Total − Honorarios) × Rb%) / 12</b>.</small>'+
+    '</div>'+
 
-  // chips Localidades
-  const chipsBox=document.getElementById('loc_chips');
-  const locInput=document.getElementById('loc_input');
+    '<div class="group">'+
+      '<h4>'+(p.phase==='CONTACTO'?'Reunión':'Notas')+'</h4>'+
+      '<div class="grid">'+
+        fechaBloque+
+        '<div class="'+(p.phase==='CONTACTO'?'span-2':'span-3')+'"><label>Notas</label><textarea id="f_notas" style="min-height:86px">'+escapeHtml(m.notas||'')+'</textarea></div>'+
+      '</div>'+
+      (p.phase==='BUSQUEDA'
+        ? '<div class="grid two" style="margin-top:6px"><div><label>Buscar evaluaciones</label><input id="b_q_'+p.id+'" placeholder="Filtrar por texto…"></div><div><label>Selección (máx 4)</label><div id="b_chips_'+p.id+'" class="chips"></div></div></div><div class="eval-list" id="b_list_'+p.id+'"></div><div class="flex" style="gap:6px;margin-top:6px"><button class="iconbtn" id="b_send_'+p.id+'">📤 Enviar documentación</button></div>'
+        : '<p class="small">La selección de activos se gestiona en <b>Búsqueda</b>.</p>')+
+    '</div>';
+
+  // Chips Localidades
+  var chipsBox=document.getElementById('loc_chips'), locInput=document.getElementById('loc_input');
   function renderLocs(){
     chipsBox.innerHTML='';
-    pr.locs.forEach(v=>{
-      const el=document.createElement('span');
-      el.className='chip';
-      el.innerHTML=${escapeHtml(v)} <button data-v="${escapeHtml(v)}">×</button>;
+    pr.locs.forEach(function(v){
+      var el=document.createElement('span'); el.className='chip';
+      el.innerHTML=escapeHtml(v)+' <button data-v="'+escapeHtml(v)+'">×</button>';
       chipsBox.appendChild(el);
     });
-    chipsBox.querySelectorAll('button[data-v]').forEach(b=>{
-      b.addEventListener('click',()=>{ pr.locs=pr.locs.filter(x=>x!==b.getAttribute('data-v')); renderLocs(); });
+    chipsBox.querySelectorAll('button[data-v]').forEach(function(b){
+      b.addEventListener('click',function(){ pr.locs=pr.locs.filter(function(x){return x!==b.getAttribute('data-v')}); renderLocs(); })
     });
   }
-  function addLoc(v){v=(v||'').trim(); if(!v) return; if(!pr.locs.includes(v)) pr.locs.push(v); locInput.value=''; renderLocs();}
-  locInput.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===','){ e.preventDefault(); addLoc(locInput.value);} });
-  locInput.addEventListener('change',()=>addLoc(locInput.value));
+  function addLoc(v){ v=(v||'').trim(); if(!v) return; if(!pr.locs.includes(v)) pr.locs.push(v); locInput.value=''; renderLocs(); }
+  locInput.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===','){ e.preventDefault(); addLoc(locInput.value);} });
+  locInput.addEventListener('change',function(){ addLoc(locInput.value); });
   renderLocs();
 
   // derivados
-  ['f_budget','f_pct','f_fin','f_objt','f_objv'].forEach(id=>{
-    const el=document.getElementById(id); if(!el) return;
+  ['f_budget','f_pct','f_fin','f_objt','f_objv'].forEach(function(id){
+    var el=document.getElementById(id); if(!el) return;
     el.addEventListener('input',recalcDerived);
     el.addEventListener('change',recalcDerived);
   });
@@ -574,11 +545,47 @@ function mountBusquedaInModal(p){
   var q=document.getElementById('b_q_'+p.id),list=document.getElementById('b_list_'+p.id),chips=document.getElementById('b_chips_'+p.id),btnSend=document.getElementById('b_send_'+p.id);
   var b=p.busqueda||(p.busqueda={propuestas:[],sent_count:0});
   var EVS=EVALS.map(function(ev){return {_raw:ev,id:(evEnsureId(ev),evId(ev)),title:evTitle(ev)}});
-  function renderChips(){chips.innerHTML='';for(var i=0;i<b.propuestas.length;i++){var id=b.propuestas[i];var e=EVS.find(function(x){return x.id===id});var label=e?e.title:id;var span=document.createElement('span');span.className='chip';span.innerHTML=escapeHtml(label)+' <button data-id="'+escapeHtml(id)+'">×</button>';chips.appendChild(span)};var bs=chips.querySelectorAll('button[data-id]');for(var j=0;j<bs.length;j++){bs[j].addEventListener('click',function(){var id=this.getAttribute('data-id');b.propuestas=b.propuestas.filter(function(x){return x!==id});LS.setPros(PROS);renderChips();renderList();toast('Quitado','warn')})}}
-  function renderList(){list.innerHTML='';var txt=(q.value||'').toLowerCase();var filtered=EVS.filter(function(x){return !txt||(x.title||'').toLowerCase().includes(txt)});for(var k=0;k<filtered.length;k++){(function(it){var sel=b.propuestas.indexOf(it.id)>=0;var row=document.createElement('div');row.className='eval-item';row.innerHTML='<div><div class="eval-title">'+escapeHtml(it.title)+'</div></div><div><button class="'+(sel?'bad':'primary')+'" data-id="'+escapeHtml(it.id)+'">'+(sel?'Quitar':'Añadir')+'</button></div>';row.querySelector('button').addEventListener('click',function(){var id=it.id;if(sel){b.propuestas=b.propuestas.filter(function(x){return x!==id});toast('Quitado','warn')}else{if(b.propuestas.length>=4){toast('Máximo 4 propuestas','bad');return}b.propuestas.push(id);toast('Añadido','ok')}LS.setPros(PROS);renderChips();renderList()});list.appendChild(row)})(filtered[k])}}
+  function renderChips(){
+    chips.innerHTML='';
+    b.propuestas.forEach(function(id){
+      var e=EVS.find(function(x){return x.id===id}); var label=e?e.title:id;
+      var span=document.createElement('span'); span.className='chip';
+      span.innerHTML=escapeHtml(label)+' <button data-id="'+escapeHtml(id)+'">×</button>';
+      chips.appendChild(span);
+    });
+    chips.querySelectorAll('button[data-id]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var id=btn.getAttribute('data-id'); b.propuestas=b.propuestas.filter(function(x){return x!==id});
+        LS.setPros(PROS); renderChips(); renderList(); toast('Quitado','warn');
+      });
+    });
+  }
+  function renderList(){
+    list.innerHTML='';
+    var txt=(q.value||'').toLowerCase();
+    EVS.filter(function(x){return !txt||(x.title||'').toLowerCase().includes(txt)}).forEach(function(it){
+      var sel=b.propuestas.indexOf(it.id)>=0;
+      var row=document.createElement('div'); row.className='eval-item';
+      row.innerHTML='<div><div class="eval-title">'+escapeHtml(it.title)+'</div></div>'+
+                    '<div><button class="'+(sel?'bad':'primary')+'" data-id="'+escapeHtml(it.id)+'">'+(sel?'Quitar':'Añadir')+'</button></div>';
+      row.querySelector('button').addEventListener('click',function(){
+        var id=it.id;
+        if(sel){ b.propuestas=b.propuestas.filter(function(x){return x!==id}); toast('Quitado','warn'); }
+        else{ if(b.propuestas.length>=4){ toast('Máximo 4 propuestas','bad'); return;}
+              b.propuestas.push(id); toast('Añadido','ok'); }
+        LS.setPros(PROS); renderChips(); renderList();
+      });
+      list.appendChild(row);
+    });
+  }
   if(q) q.addEventListener('input',renderList);
-  btnSend.addEventListener('click',function(){b.sent_count=Math.min(4,b.propuestas.length);b.last_sent_ids=b.propuestas.slice(0,4);b.last_sent_at=new Date().toISOString();LS.setPros(PROS);renderAll();toast('📤 Documentación registrada como enviada.','ok')});
-  renderChips();renderList();
+  btnSend.addEventListener('click',function(){
+    b.sent_count=Math.min(4,b.propuestas.length);
+    b.last_sent_ids=b.propuestas.slice(0,4);
+    b.last_sent_at=new Date().toISOString();
+    LS.setPros(PROS); renderAll(); toast('📤 Documentación registrada como enviada.','ok');
+  });
+  renderChips(); renderList();
 }
 
 /* ===== Crear contacto ===== */
