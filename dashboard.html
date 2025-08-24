@@ -6,7 +6,7 @@
 <title>Unihouser — Dashboard CRM</title>
 <style>
 :root{
-  --brand:#c7530c;          /* naranja vivo pedido */
+  --brand:#c7530c;          /* naranja vivo */
   --accent:#DB824B;         /* terracota */
   --ok:#58736F;
   --bad:#B53928;
@@ -17,13 +17,13 @@
   --ink2:#535b63;
   --shadow:0 4px 22px rgba(0,0,0,.06);
   --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif;
-  --fz:12px;                /* tipografía pequeña y homogénea */
+  --fz:12px;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
 
-/* Topbar (proporción similar al resto de páginas) */
+/* Topbar */
 .topbar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
 .top-inner{max-width:1200px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:8px}
@@ -36,25 +36,25 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 /* Layout */
 .container{max-width:1200px;margin:14px auto;padding:0 14px}
 
-/* KPIs superiores (claros: título + nº + OK/KO pequeño) */
+/* KPIs */
 .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px}
 .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;box-shadow:var(--shadow);display:grid;gap:6px}
 .kpi .row{display:flex;align-items:center;justify-content:space-between}
 .kpi .big{font-weight:800;font-size:16px}
 
-/* Kanban */
+/* Board */
 .board{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
 .col{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;min-height:560px;box-shadow:var(--shadow)}
 .col h3{margin:0 0 8px;color:var(--ink2);display:flex;align-items:center;justify-content:space-between}
 .count{font-weight:700;color:#666}
 
-/* Crear contacto (en CONTACTO) */
+/* Crear contacto */
 .create{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:10px;display:grid;gap:6px}
 .create .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .create input{border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:32px}
 .create .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:8px 10px;font-weight:700;cursor:pointer}
 
-/* Tarjeta cliente */
+/* Tarjeta */
 .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow);display:grid;gap:6px;cursor:grab}
 .card header{display:flex;align-items:center;justify-content:space-between}
 .name{font-weight:800;font-size:14px}
@@ -72,12 +72,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .houses i.on{background:var(--brand);border-color:var(--brand)}
 .card.dragging{opacity:.5} .col.drop{outline:2px dashed var(--brand);outline-offset:-6px}
 
-/* Toasts */
+/* Toast */
 .toast{position:fixed;right:16px;bottom:16px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);padding:8px 12px;border-radius:12px;display:none}
 .toast.ok{border-color:var(--ok)} .toast.bad{border-color:var(--bad)} .toast.warn{border-color:var(--accent)}
 .toast.show{display:block}
 
-/* Modal centrado, sin scroll general (solo una lista interna si hace falta) */
+/* Modal */
 .modal-back{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:50}
 .modal{width:980px;max-width:95vw;max-height:92vh;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
 .modal header{padding:8px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
@@ -137,7 +137,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
   <div class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
 
 <script>
-/* ===== Utilidades ===== */
+/* ===== Utils ===== */
 const LS={get:(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch(_){return fb}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
 const fmtEUR=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Math.round(+n||0));
 const toThousands=v=>(Math.round(+v||0)).toLocaleString('es-ES');
@@ -145,7 +145,7 @@ function num(v){ if(typeof v==='number')return v; const s=String(v||'').replace(
 const h=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 function toast(msg,cls='ok',ms=1400){const t=document.getElementById('toast');t.className='toast '+cls;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
 
-/* ===== Config (compat) ===== */
+/* ===== Config (compat + ampliación) ===== */
 var CFG=(function(c){
   c=c&&typeof c==='object'?JSON.parse(JSON.stringify(c)):{};
   if(typeof c.notaria_eur==='number')c.notaria=c.notaria_eur;
@@ -156,6 +156,15 @@ var CFG=(function(c){
   c.honorarios=(typeof c.honorarios==='number')?c.honorarios:3630;
   c.localidades=Array.isArray(c.localidades)&&c.localidades.length?c.localidades:['Oviedo','Gijón','Avilés','Mieres','Pola de Siero','Langreo','Gozón'];
   c.match=c.match||{thresholds:{green:1,amber:0.95},warnings_only_when_green:true};
+  c.bruta=c.bruta||{include_honorarios_default:false};
+  c.neta=c.neta||{include_honorarios_default:false};
+  /* nuevo bloque presupuesto */
+  const pres=(c.presupuesto||{});
+  if(typeof c.incluir_psi_por_defecto==='boolean' && pres.honorarios_incluidos_default==null){
+    pres.honorarios_incluidos_default=c.incluir_psi_por_defecto;
+  }
+  if(pres.honorarios_incluidos_default==null) pres.honorarios_incluidos_default=true;
+  c.presupuesto=pres;
   return c;
 })(LS.get('cfg',{}));
 LS.set('cfg',CFG);
@@ -182,6 +191,10 @@ function headerKPIs(){
 
 /* ===== Tablero ===== */
 function daysInPhase(p){const t=p.phase_entered_at?+p.phase_entered_at:Date.now();return Math.max(0,Math.floor((Date.now()-t)/86400000))}
+function shortDate(dt){
+  if(!dt) return '';
+  try{ const d=new Date(dt); const dd=('0'+d.getDate()).slice(0-2); const mm=('0'+(d.getMonth()+1)).slice(0-2); const hh=('0'+d.getHours()).slice(0-2); const mi=('0'+d.getMinutes()).slice(0-2); return dd+'/'+mm+' '+hh+':'+mi; }catch(_){ return ''; }
+}
 function makeCreate(){
   const c=document.createElement('div'); c.className='create';
   c.innerHTML='<div class="row"><input id="new_name" placeholder="Nombre y apellidos" maxlength="30"/><input id="new_phone" placeholder="Teléfono" maxlength="9"/></div>'+
@@ -197,8 +210,9 @@ function houseDots(p){
 function makeCard(p){
   const el=document.createElement('div'); el.className='card'; el.draggable=true; el.dataset.id=p.id;
   const pr=p.profile||{}, age=daysInPhase(p), objt=(pr.objt||'neta').toLowerCase(), objtxt=(objt==='bruta'?'Rb%':(objt==='neta'?'Rn%':'Flujo'));
+  const meetLabel=(p.phase==='REUNION' && p.meeting && p.meeting.date)?'<span class="badge">⏰ '+h(shortDate(p.meeting.date))+'</span>':'';
   const header='<header><div class="name">'+h(p.name||'—')+'</div><div class="age">⏱ '+age+' días</div></header>';
-  const badges='<div class="badges"><span class="badge">🏷 '+h(pr.tipo||'Tradicional')+'</span><span class="badge">🎯 '+objtxt+'</span></div>';
+  const badges='<div class="badges"><span class="badge">🏷 '+h(pr.tipo||'Tradicional')+'</span><span class="badge">🎯 '+objtxt+'</span>'+meetLabel+'</div>';
   let acts='<div class="actions">'+
       '<button class="btn-icon view" data-act="view" title="Ver / editar"><svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>'+
       '<button class="btn-icon ok" data-act="ok" title="Interesa (avanzar)"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></button>'+
@@ -225,30 +239,45 @@ function renderBoard(){
 const MB=document.getElementById('mb'), MH=document.getElementById('mh'), MBODY=document.getElementById('mbody'); let MODAL_ID=null;
 
 function moneyifyInput(el){ el.addEventListener('blur',()=>{ el.value = el.value? toThousands(num(el.value)) : ''; }); }
+
 function recalcFinancials(){
   const total=num(MBODY.querySelector('#f_budget').value);
+  const budIncl = MBODY.querySelector('#f_bud_incl').checked; /* NUEVO interruptor */
   let pmax=0, itp=0;
   if(total>0){
-    pmax=Math.max(0, Math.round((total - CFG.notaria - CFG.honorarios)/(1+CFG.itp_pct)));  /* (Total − Notaría − Honorarios) / (1+ITP) */
+    if(budIncl){ /* honorarios DENTRO del presupuesto */
+      pmax=Math.max(0, Math.round((total - CFG.notaria - CFG.honorarios)/(1+CFG.itp_pct)));
+    }else{ /* honorarios FUERA del presupuesto */
+      pmax=Math.max(0, Math.round((total - CFG.notaria)/(1+CFG.itp_pct)));
+    }
     itp=Math.round(pmax*CFG.itp_pct);
     MBODY.querySelector('#f_pmax').value = pmax?toThousands(pmax):'';
     MBODY.querySelector('#f_itp').value = itp?toThousands(itp):'';
     MBODY.querySelector('#f_notaria').value = toThousands(CFG.notaria);
     MBODY.querySelector('#f_honor').value = toThousands(CFG.honorarios);
+  }else{
+    MBODY.querySelector('#f_pmax').value='';
+    MBODY.querySelector('#f_itp').value='';
   }
+
   const fin=MBODY.querySelector('#f_fin').value==='Sí';
   const pct=num(MBODY.querySelector('#f_pct').value);
   let hip=0, prop=0;
   if(fin && pmax>0 && pct>0){ hip=Math.round(pmax*(pct/100)); prop=Math.max(0, total-hip); }
-  else{ prop=Math.max(0,total); }
+  else{ hip=0; prop=Math.max(0,total); }
   MBODY.querySelector('#f_hip').value=hip?toThousands(hip):'';
   MBODY.querySelector('#f_prop').value=prop?toThousands(prop):'';
 
+  /* Fondos totales (solo si honorarios van aparte) */
+  const fTot = budIncl ? prop : (prop + CFG.honorarios);
+  MBODY.querySelector('#f_fondos_total').value = fTot?toThousands(fTot):'';
+
+  /* Alquiler orientativo si objetivo=bruta */
   const objt=MBODY.querySelector('#f_objt').value;
   const objv=num(MBODY.querySelector('#f_objv').value);
   if(objt==='bruta' && total>0 && objv>0){
     const incluir=MBODY.querySelector('#f_inc_hon').checked;
-    const base=incluir?total:(total-CFG.honorarios); /* bruta excluyendo honorarios por defecto */
+    const base=incluir?total:(total-CFG.honorarios);
     const alq=Math.max(0,Math.round((objv/100)*base/12));
     MBODY.querySelector('#f_alq').value=alq?toThousands(alq):'';
   }else{
@@ -260,9 +289,10 @@ function openModal(p){
   MODAL_ID=p.id; MH.textContent=(p.name||'Ficha')+' — Detalle';
   const pr=p.profile||{}, meet=p.meeting||{}, busc=p.busqueda||{propuestas:[]};
   const locs=Array.isArray(pr.locs)?pr.locs:(pr.locs?String(pr.locs).split(',').map(s=>s.trim()).filter(Boolean):[]);
+  const budIncl = (typeof pr.budget_incl_honorarios==='boolean') ? pr.budget_incl_honorarios : !!CFG.presupuesto.honorarios_incluidos_default;
   let html='';
 
-  /* DATOS PERSONALES (2 filas) */
+  /* 1) DATOS PERSONALES (2 filas) */
   html+='<div class="block"><h5>DATOS PERSONALES</h5><div class="grid">';
   html+='<div class="field"><label>Nombre y apellidos</label><input id="f_name" maxlength="30" value="'+h(p.name||'')+'"/></div>';
   html+='<div class="field"><label>Teléfono</label><input id="f_phone" maxlength="9" value="'+h(p.phone||'')+'"/></div>';
@@ -272,24 +302,7 @@ function openModal(p){
   html+='<div class="field"><label>Localidad (residencia)</label><input id="f_locres" maxlength="10" value="'+h(pr.locres||'')+'"/></div>';
   html+='</div></div>';
 
-  /* OBJETIVO y NOTAS (arriba, sin depender de scroll) */
-  const objt=(pr.objt||'neta').toLowerCase();
-  html+='<div class="block"><h5>OBJETIVO</h5><div class="grid">';
-  html+='<div class="field"><label>Objetivo principal</label><select id="f_objt"><option value="bruta"'+(objt==='bruta'?' selected':'')+'>Rentabilidad bruta (%)</option><option value="neta"'+(objt==='neta'?' selected':'')+'>Rentabilidad neta (%)</option><option value="flujo"'+(objt==='flujo'?' selected':'')+'>Flujo (€/mes)</option></select></div>';
-  html+='<div class="field"><label>Valor objetivo</label><input id="f_objv" maxlength="4" value="'+h(pr.objv||'')+'"/></div>';
-  html+='<div class="field"><label>Alquiler orientativo (€/mes)</label><input id="f_alq" disabled value="'+(pr.alq?toThousands(pr.alq):'')+'"/></div>';
-  const inc=typeof pr.bruta_incluye_honorarios==='boolean'?pr.bruta_incluye_honorarios:false;
-  html+='<div class="field row3"><label><input type="checkbox" id="f_inc_hon"'+(inc?' checked':'')+'> Incluir honorarios en Bruta (solo este cliente)</label></div>';
-  html+='</div></div>';
-
-  html+='<div class="block"><h5>REUNIÓN / NOTAS</h5><div class="grid">';
-  if(p.phase==='CONTACTO'){
-    html+='<div class="field"><label>Fecha y hora (para pasar a Reunión)</label><input id="f_meet" type="datetime-local" value="'+h(meet.date||'')+'"/></div><div class="field row2"></div>';
-  }
-  html+='<div class="field row3"><label>Notas (máx 300)</label><textarea id="f_notas" rows="2" maxlength="300">'+h(meet.notas||'')+'</textarea></div>';
-  html+='</div></div>';
-
-  /* INVERSIÓN */
+  /* 2) INVERSIÓN */
   html+='<div class="block"><h5>INVERSIÓN</h5><div class="grid">';
   html+='<div class="field row3"><label>Localidades (inversión) — máx 6</label><div class="chips" id="chips_locs">';
   for(let i=0;i<locs.length;i++){ html+='<span class="chip"><span class="t">'+h(locs[i])+'</span> <span class="x" data-del="'+h(locs[i])+'">×</span></span>'; }
@@ -305,37 +318,46 @@ function openModal(p){
   html+='<div class="field"><label>ITP estimado (auto)</label><input id="f_itp" disabled value="'+(pr.itp?toThousands(pr.itp):'')+'"/></div>';
   html+='<div class="field"><label>Notaría (Config)</label><input id="f_notaria" disabled value="'+toThousands(CFG.notaria)+'"/></div>';
   html+='<div class="field"><label>Honorarios (Config)</label><input id="f_honor" disabled value="'+toThousands(CFG.honorarios)+'"/></div>';
-  html+='<div class="field"></div>';
+  html+='<div class="field"><label><input type="checkbox" id="f_bud_incl"'+(budIncl?' checked':'')+'> Honorarios incluidos en el presupuesto</label></div>';
   html+='</div></div>';
 
-  /* FINANCIACIÓN */
+  /* 3) FINANCIACIÓN */
   html+='<div class="block"><h5>FINANCIACIÓN</h5><div class="grid">';
   html+='<div class="field"><label>Financiación bancaria</label><select id="f_fin"><option'+((pr.fin||'Sí')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.fin||'Sí')==='No'?' selected':'')+'>No</option></select></div>';
   html+='<div class="field"><label>¿Necesita broker?</label><select id="f_broker"><option'+((pr.broker||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.broker||'No')==='No'?' selected':'')+'>No</option></select></div>';
   html+='<div class="field"><label>% financiación</label><input id="f_pct" maxlength="4" value="'+h(pr.pct||'80')+'"/></div>';
   html+='<div class="field"><label>Hipoteca</label><input id="f_hip" disabled value="'+(pr.hip?toThousands(pr.hip):'')+'"/></div>';
   html+='<div class="field"><label>Fondos propios</label><input id="f_prop" disabled value="'+(pr.prop?toThousands(pr.prop):'')+'"/></div>';
-  html+='<div class="field"></div>';
+  html+='<div class="field"><label>Fondos totales (si honorarios van aparte)</label><input id="f_fondos_total" disabled value=""/></div>';
   html+='</div></div>';
 
-  /* BUSQUEDA — Asignar activos */
+  /* 4) OBJETIVO */
+  const objt=(pr.objt||'neta').toLowerCase();
+  html+='<div class="block"><h5>OBJETIVO</h5><div class="grid">';
+  html+='<div class="field"><label>Objetivo principal</label><select id="f_objt"><option value="bruta"'+(objt==='bruta'?' selected':'')+'>Rentabilidad bruta (%)</option><option value="neta"'+(objt==='neta'?' selected':'')+'>Rentabilidad neta (%)</option><option value="flujo"'+(objt==='flujo'?' selected':'')+'>Flujo (€/mes)</option></select></div>';
+  html+='<div class="field"><label>Valor objetivo</label><input id="f_objv" maxlength="4" value="'+h(pr.objv||'')+'"/></div>';
+  html+='<div class="field"><label>Alquiler orientativo (€/mes)</label><input id="f_alq" disabled value="'+(pr.alq?toThousands(pr.alq):'')+'"/></div>';
+  const inc=typeof pr.bruta_incluye_honorarios==='boolean'?pr.bruta_incluye_honorarios:!!CFG.bruta.include_honorarios_default;
+  html+='<div class="field row3"><label><input type="checkbox" id="f_inc_hon"'+(inc?' checked':'')+'> Incluir honorarios en Bruta (solo este cliente)</label></div>';
+  html+='</div></div>';
+
+  /* 5) NOTAS / REUNIÓN */
+  html+='<div class="block"><h5>REUNIÓN / NOTAS</h5><div class="grid">';
+  if(p.phase==='CONTACTO'){
+    html+='<div class="field"><label>Fecha y hora (para pasar a Reunión)</label><input id="f_meet" type="datetime-local" value="'+h(meet.date||'')+'"/></div><div class="field row2"></div>';
+  }
+  html+='<div class="field row3"><label>Notas (máx 300)</label><textarea id="f_notas" rows="2" maxlength="300">'+h(meet.notas||'')+'</textarea></div>';
+  html+='</div></div>';
+
+  /* BUSQUEDA — Propuestas (solo en esa fase) */
   if(p.phase==='BUSQUEDA'){
     html+='<div class="block"><h5>BUSQUEDA — Asignación de activos</h5><div class="grid">';
     html+='<div class="field row3"><div id="f_sel_evals" class="chips">';
     const prop = Array.isArray(busc.propuestas)?busc.propuestas:[];
     for(let j=0;j<prop.length;j++){ const ev=EVALS.find(e=>e.id===prop[j]); const tt=ev?(ev.titulo||ev.dir||ev.calle||ev.id):prop[j]; html+='<span class="chip" data-ev="'+h(prop[j])+'"><span class="t">'+h(tt)+'</span> <span class="x" data-un="'+h(prop[j])+'">×</span></span>'; }
     html+='</div></div>';
-    html+='<div class="field row3"><button id="f_btn_assign" class="save">Asignar activos (BETA)</button> <small style="color:#777">Máx 4 (solo vista rápida, sin scroll global).</small></div>';
+    html+='<div class="field row3"><button id="f_btn_assign" class="save">Asignar activos (BETA)</button> <small style="color:#777">Máx 4.</small></div>';
     html+='</div></div>';
-  }
-
-  /* COMPRAVENTA */
-  if(p.phase==='COMPRAVENTA'){
-    html+='<div class="block"><h5>COMPRAVENTA</h5><div class="grid">';
-    html+='<div class="field"><label>Financiación (0–90 días)</label><input id="f_cv_fin" maxlength="3" value="'+h((p.compraventa&&p.compraventa.financiacion)||'')+'"/></div>';
-    html+='<div class="field"><label>Notaría (fecha)</label><input id="f_cv_not" type="date" value="'+h((p.compraventa&&p.compraventa.notaria)||'')+'"/></div>';
-    html+='<div class="field"></div></div><small style="color:#777">Pulsa ✅ en esta fase para contar <b>Éxito</b> y retirar del tablero.</small>';
-    html+='</div>';
   }
 
   MBODY.innerHTML=html;
@@ -354,10 +376,10 @@ function openModal(p){
 
   /* money blur y cálculos */
   ['#f_budget','#f_pct'].forEach(sel=>{const el=MBODY.querySelector(sel); if(el) moneyifyInput(el);});
-  ['#f_budget','#f_pct','#f_objt','#f_objv','#f_fin','#f_inc_hon'].forEach(sel=>{const el=MBODY.querySelector(sel); if(el) el.addEventListener('input',recalcFinancials);});
+  ['#f_budget','#f_pct','#f_objt','#f_objv','#f_fin','#f_inc_hon','#f_bud_incl'].forEach(sel=>{const el=MBODY.querySelector(sel); if(el) el.addEventListener('input',recalcFinancials);});
   recalcFinancials();
 
-  /* asignación activos */
+  /* asignación activos (prompt sin scroll global) */
   if(p.phase==='BUSQUEDA'){
     const selWrap=MBODY.querySelector('#f_sel_evals');
     MBODY.querySelector('#f_btn_assign').addEventListener('click',()=>{
@@ -394,6 +416,7 @@ function saveModal(){
   pr.objt=q('#f_objt').value; pr.objv=num(q('#f_objv').value);
   pr.bruta_incluye_honorarios=!!q('#f_inc_hon').checked;
   pr.alq=num(q('#f_alq').value);
+  pr.budget_incl_honorarios=!!q('#f_bud_incl').checked;
 
   p.meeting=p.meeting||{}; p.meeting.notas=q('#f_notas').value.slice(0,300);
   if(p.phase==='CONTACTO'){
@@ -403,16 +426,11 @@ function saveModal(){
     const chips=MBODY.querySelectorAll('#f_sel_evals .chip');
     p.busqueda=p.busqueda||{propuestas:[]}; p.busqueda.propuestas=[...chips].map(ch=>ch.getAttribute('data-ev')||ch.querySelector('.t').textContent);
   }
-  if(p.phase==='COMPRAVENTA'){
-    p.compraventa=p.compraventa||{};
-    p.compraventa.financiacion=(q('#f_cv_fin')&&q('#f_cv_fin').value)||'';
-    p.compraventa.notaria=(q('#f_cv_not')&&q('#f_cv_not').value)||'';
-  }
   list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived);
   toast('Guardado','ok'); closeModal(); headerKPIs(); renderBoard();
 }
 
-/* ===== Eventos globales (delegación para que no “mueran”) ===== */
+/* ===== Eventos globales (delegación) ===== */
 document.addEventListener('click',e=>{
   if(e.target.id==='mclose') { closeModal(); return; }
   if(e.target.id==='msave') { saveModal(); return; }
@@ -447,7 +465,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && MB.style.display==='flex') closeModal(); });
 
-/* Drag & drop fases */
+/* Drag & drop */
 let dragId=null;
 document.addEventListener('dragstart',e=>{const c=e.target.closest('.card'); if(!c)return; dragId=c.dataset.id; c.classList.add('dragging');});
 document.addEventListener('dragend',e=>{const c=e.target.closest('.card'); if(c)c.classList.remove('dragging'); document.querySelectorAll('.col.drop').forEach(x=>x.classList.remove('drop'));});
@@ -460,7 +478,7 @@ document.addEventListener('drop',e=>{
   if(p.phase!==to){ p.phase=to; p.phase_entered_at=Date.now(); list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived); headerKPIs(); renderBoard(); toast('Movido','ok'); }
 });
 
-/* Export CSV simple (para Excel) */
+/* Export CSV */
 document.getElementById('btn-xls').addEventListener('click',function(){
   const all=allPros(); const rows=[];
   rows.push(['id','nombre','email','tel','fase','ok_contacto','ok_reunion','ok_contrato','ok_busqueda','ok_compraventa','archivado','motivo','propuestas'].join(';'));
@@ -474,10 +492,10 @@ document.getElementById('btn-xls').addEventListener('click',function(){
   toast('CSV exportado','ok');
 });
 
-/* Init (demo mínimo si no hay nada) */
+/* Init */
 (function(){
   if(!PROS.length){
-    PROS=[{id:'p_demo',name:'Cliente demo',phone:'',email:'',phase:'CONTACTO',phase_entered_at:Date.now(),profile:{tipo:'Tradicional',objt:'neta',objv:6},history:{}}];
+    PROS=[{id:'p_demo',name:'Cliente demo',phone:'',email:'',phase:'CONTACTO',phase_entered_at:Date.now(),profile:{tipo:'Tradicional',objt:'neta',objv:6, budget_incl_honorarios:CFG.presupuesto.honorarios_incluidos_default},history:{}}];
     savePros(PROS);
   }
   headerKPIs(); renderBoard();
