@@ -6,10 +6,10 @@
 <title>Unihouser — Dashboard CRM</title>
 <style>
 :root{
-  --brand:#c7530c;   /* naranja vivo principal */
+  --brand:#c7530c;          /* naranja vivo */
   --accent:#DB824B;
-  --ok:#58736F;
-  --bad:#B53928;
+  --ok:#2e7d32;             /* verde ok */
+  --bad:#c0392b;            /* rojo ko */
   --line:#E7E1DE;
   --chip:#F3EEE9;
   --bg:#FAF8F7;
@@ -23,7 +23,7 @@
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
 
-/* Topbar */
+/* Topbar (compacta) */
 .topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
 .top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:8px}
@@ -36,11 +36,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 /* Layout */
 .container{max-width:1200px;margin:12px auto;padding:0 14px}
 
-/* KPIs */
+/* KPIs (solo contadores claros) */
 .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:10px}
-.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow);display:grid;gap:4px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow)}
 .kpi .row{display:flex;align-items:center;justify-content:space-between}
 .kpi .big{font-weight:800;font-size:15px}
+.kpi small{color:#7b7f83}
 
 /* Board */
 .board{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
@@ -48,7 +49,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .col h3{margin:0 0 6px;color:var(--ink2);display:flex;align-items:center;justify-content:space-between;font-size:13px}
 .count{font-weight:700;color:#666}
 
-/* Crear contacto */
+/* Crear contacto (col CONTACTO) */
 .create{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:8px;display:grid;gap:6px}
 .create .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .create input{border:1px solid var(--line);border-radius:10px;padding:7px 9px;min-height:30px}
@@ -109,8 +110,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .eval-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-bottom:1px dashed var(--line);padding:6px 2px;font-size:12px}
 .eval-item:last-child{border-bottom:none}
 .eval-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
-.dot.green{background:var(--brand)} .dot.amber{background:var(--accent)} .dot.red{background:var(--bad)}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.green{background:#2ecc71} .dot.amber{background:#f1c40f} .dot.red{background:#e74c3c}
 .tag{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:1px 6px;margin-left:0;font-size:11px}
 .warns{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 .kpiRight{display:flex;align-items:center;gap:8px}
@@ -145,14 +146,14 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
     <div class="modal" role="dialog" aria-label="Ficha del cliente" aria-modal="true">
       <header>
         <h4 id="mh">Ficha</h4>
-        <button class="close" id="mclose" title="Cerrar">×</button>
+      <button class="close" id="mclose" title="Cerrar">×</button>
       </header>
       <div class="body" id="mbody"></div>
       <footer><button class="save" id="msave">Guardar</button></footer>
     </div>
   </div>
 
-  <!-- Modal ASIGNACIÓN (sin leyendas/placeholder de colores) -->
+  <!-- Modal ASIGNACIÓN -->
   <div class="modal-back" id="ab">
     <div class="modal small" role="dialog" aria-label="Asignar activos" aria-modal="true">
       <header>
@@ -160,9 +161,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
         <button class="close" id="aclose" title="Cerrar">×</button>
       </header>
       <div class="body" id="abody"></div>
-      <footer>
-        <button class="save" id="asave">Guardar</button>
-      </footer>
+      <footer><button class="save" id="asave">Guardar</button></footer>
     </div>
   </div>
 
@@ -170,7 +169,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
   <div class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
 
 <script>
-/* ===== Utils ===== */
+/* ========== Utils ========== */
 const LS={get:(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch(_){return fb}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
 const fmtEUR=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Math.round(+n||0));
 const toThousands=v=>(Math.round(+v||0)).toLocaleString('es-ES');
@@ -178,7 +177,7 @@ function num(v){ if(typeof v==='number')return v; const s=String(v||'').replace(
 const h=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 function toast(msg,cls='ok',ms=1500){const t=document.getElementById('toast');t.className='toast '+cls;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
 
-/* ===== Config (normaliza cfg) ===== */
+/* ========== Config normalizada ========== */
 var CFG=(function(c){
   c=c&&typeof c==='object'?JSON.parse(JSON.stringify(c)):{};
   if(typeof c.notaria_eur==='number')c.notaria=c.notaria_eur;
@@ -202,13 +201,13 @@ var CFG=(function(c){
 })(LS.get('cfg',{}));
 LS.set('cfg',CFG);
 
-/* ===== Datos ===== */
+/* ========== Datos ========== */
 function allPros(){return LS.get('pros',[])||[]}
 function savePros(a){LS.set('pros',a)}
 let PROS=allPros().filter(p=>!p.archived);
 const EVALS=LS.get('evals',[]);
 
-/* ===== KPIs ===== */
+/* ========== KPIs (solo nº de clientes y OK/KO por fase) ========== */
 const PHASES=['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA'];
 function headerKPIs(){
   const wrap=document.getElementById('kpis'); wrap.innerHTML='';
@@ -223,7 +222,7 @@ function headerKPIs(){
   });
 }
 
-/* ===== Tarjetas ===== */
+/* ========== Tarjetas y board ========== */
 function daysInPhase(p){const t=p.phase_entered_at?+p.phase_entered_at:Date.now();return Math.max(0,Math.floor((Date.now()-t)/86400000))}
 function shortDate(dt){ if(!dt) return ''; try{ const d=new Date(dt); const dd=('0'+d.getDate()).slice(-2); const mm=('0'+(d.getMonth()+1)).slice(-2); const hh=('0'+d.getHours()).slice(-2); const mi=('0'+d.getMinutes()).slice(-2); return dd+'/'+mm+' '+hh+':'+mi; }catch(_){ return ''; } }
 function makeCreate(){
@@ -272,9 +271,8 @@ function renderBoard(){
   });
 }
 
-/* ===== Modal FICHA (reunión) ===== */
+/* ========== Modal FICHA (reunión) ========== */
 const MB=document.getElementById('mb'), MH=document.getElementById('mh'), MBODY=document.getElementById('mbody'); let MODAL_ID=null;
-
 function moneyifyInput(el){ el.addEventListener('blur',()=>{ el.value = el.value? toThousands(num(el.value)) : ''; }); }
 
 function recalcFinancials(){
@@ -304,6 +302,7 @@ function recalcFinancials(){
   const objv=num(MBODY.querySelector('#f_objv').value);
   if(objt==='bruta' && total>0 && objv>0){
     const incluir=MBODY.querySelector('#f_inc_hon').checked;
+    /* Rb% sobre TOTAL excluyendo honorarios (por defecto) */
     const base=incluir?total:(total-CFG.honorarios);
     const alq=Math.max(0,Math.round((objv/100)*base/12));
     MBODY.querySelector('#f_alq').value=alq?toThousands(alq):'';
@@ -319,7 +318,7 @@ function openModal(p){
   const budIncl = (typeof pr.budget_incl_honorarios==='boolean') ? pr.budget_incl_honorarios : !!CFG.presupuesto.honorarios_incluidos_default;
 
   let html='';
-  /* DATOS PERSONALES */
+  /* DATOS PERSONALES – 2 filas */
   html+='<div class="block"><h5>DATOS PERSONALES</h5><div class="grid">';
   html+='<div class="field"><label>Nombre y apellidos</label><input id="f_name" maxlength="30" value="'+h(p.name||'')+'"/></div>';
   html+='<div class="field"><label>Teléfono</label><input id="f_phone" maxlength="9" value="'+h(p.phone||'')+'"/></div>';
@@ -329,7 +328,7 @@ function openModal(p){
   html+='<div class="field"><label>Localidad</label><input id="f_locres" maxlength="10" value="'+h(pr.locres||'')+'"/></div>';
   html+='</div></div>';
 
-  /* INVERSIÓN (3 filas) */
+  /* INVERSIÓN – 3 filas, compacta */
   html+='<div class="block"><h5>INVERSIÓN</h5><div class="grid">';
   html+='<div class="field row2"><label>Localidades (máx 6)</label><div class="chips limit2" id="chips_locs">';
   for(let i=0;i<locs.length;i++){ html+='<span class="chip"><span class="t">'+h(locs[i])+'</span> <span class="x" data-del="'+h(locs[i])+'">×</span></span>'; }
@@ -363,7 +362,7 @@ function openModal(p){
   html+='<div class="field row3"><label><input type="checkbox" id="f_inc_hon"'+(inc?' checked':'')+'> Incluir honorarios en Bruta</label></div>';
   html+='</div></div>';
 
-  /* REUNIÓN / NOTAS */
+  /* REUNIÓN / NOTAS (sin scroll interno, 3×2) */
   html+='<div class="block"><h5>REUNIÓN / NOTAS</h5><div class="grid">';
   if(p.phase==='CONTACTO'){
     html+='<div class="field"><label>Fecha y hora</label><input id="f_meet" type="datetime-local" value="'+h(meet.date||'')+'"/></div><div class="field row2"></div>';
@@ -394,7 +393,6 @@ function openModal(p){
   MB.style.display='flex';
 }
 function closeModal(){MB.style.display='none'; MODAL_ID=null;}
-
 function saveModal(){
   if(!MODAL_ID) return;
   let list=allPros(); const i=list.findIndex(x=>x.id===MODAL_ID); if(i<0) return;
@@ -418,7 +416,7 @@ function saveModal(){
   toast('Guardado','ok'); closeModal(); headerKPIs(); renderBoard();
 }
 
-/* ===== Matching helpers ===== */
+/* ========== Matching helpers ========== */
 function adaptEval(ev){
   const n=x=>num(x);
   const o={};
@@ -440,7 +438,8 @@ function adaptEval(ev){
   o.ascensor=(ev.ascensor===true||ev.ascensor==='Sí'||ev.ascensor==='si');
   o.bajos=(ev.bajos===true||ev.planta===0||ev.es_bajo===true);
   o.altura=parseInt(ev.altura!=null?ev.altura:(ev.planta!=null?ev.planta:''),10)||0;
-  o.reforma=(ev.reforma||ev.reforma_tipo||'No'); if(!['No','Lavado de cara','Integral'].includes(o.reforma)) o.reforma='No';
+  let ref=(ev.reforma||ev.reforma_tipo||'No'); if(!['No','Lavado de cara','Integral'].includes(ref)) ref='No';
+  o.reforma=ref;
   o.hab=parseInt(ev.habitaciones||ev.habs||ev.dormitorios||ev.num_habitaciones||0,10)||0;
   return o;
 }
@@ -454,26 +453,40 @@ function clientObjective(p){
   }
   return {objt,objv};
 }
-function scoreEvalForPros(evRaw,p){
-  const ev=adaptEval(evRaw);
-  const pr=p.profile||{};
-  const {objt,objv}=clientObjective(p);
-  /* coste base según flags por cliente */
-  const incBruta = !!pr.bruta_incluye_honorarios;
-  const incNeta  = (typeof pr.neta_incluye_honorarios==='boolean') ? pr.neta_incluye_honorarios : !!CFG.neta.include_honorarios_default;
-  const base_cost_bruta = ev.precio + Math.round(ev.precio*CFG.itp_pct) + CFG.notaria + (incBruta?CFG.honorarios:0);
-  const base_cost_neta  = ev.precio + Math.round(ev.precio*CFG.itp_pct) + CFG.notaria + (incNeta?CFG.honorarios:0);
-  const rb = ev.ing_a>0 ? (ev.ing_a / base_cost_bruta * 100) : 0;
-  const rn = ev.ing_a>0 ? ((ev.ing_a - ev.gas_a) / base_cost_neta * 100) : 0;
-  const fl = ev.flujo_m;
+function scoreEvalForPros(evRaw, p){
+  const ev = adaptEval(evRaw);
+  const pr = p.profile || {};
+  const {objt, objv} = clientObjective(p);
 
-  let kpi=0;
-  if(objt==='bruta') kpi=rb;
-  else if(objt==='neta') kpi=rn;
-  else kpi=fl;
+  const incBruta = !!pr.bruta_incluye_honorarios || !!pr.budget_incl_honorarios;
+  const incNeta  = (typeof pr.neta_incluye_honorarios==='boolean') ? pr.neta_incluye_honorarios
+                   : !!CFG.neta.include_honorarios_default || !!pr.budget_incl_honorarios;
 
-  const ratio = objt==='flujo' ? (kpi/(objv||1)) : (kpi/((objv||1)));
-  return {ev,rb,rn,fl,ratio,kpi,objt,objv};
+  const itp     = Math.round((CFG.itp_pct ?? 0.08) * (ev.precio || 0));
+  const notaria = CFG.notaria || 1200;
+  const honor   = CFG.honorarios || 0;
+
+  const baseBruta = (ev.precio||0) + itp + notaria + (incBruta ? honor : 0);
+  const baseNeta  = (ev.precio||0) + itp + notaria + (incNeta  ? honor : 0);
+
+  const rb = (typeof ev.kpi_bruta === 'number')
+    ? ev.kpi_bruta
+    : (baseBruta>0 ? ( (ev.ing_a||0) / baseBruta ) * 100 : 0);
+
+  const rn = (typeof ev.kpi_neta === 'number')
+    ? ev.kpi_neta
+    : (baseNeta>0 ? ( ((ev.ing_a||0)-(ev.gas_a||0)) / baseNeta ) * 100 : 0);
+
+  const fl = (typeof ev.flujo_m === 'number') ? ev.flujo_m : ((ev.ing_m||0)-(ev.gas_m||0));
+
+  let kpi;
+  if (objt==='bruta') kpi = rb;
+  else if (objt==='neta') kpi = rn;
+  else kpi = fl;
+
+  const target = Number(objv||0);
+  const ratio  = target>0 ? (kpi/target) : 0;
+  return { ev, rb, rn, fl, kpi, objt, objv:target, ratio };
 }
 function colorForRatio(r){
   const th=CFG.match?.thresholds||{green:1,amber:0.95};
@@ -495,112 +508,115 @@ function warningsFor(ev,p){
   return warns;
 }
 
-/* ===== Modal ASIGNACIÓN ===== */
+/* ========== Modal ASIGNACIÓN ========== */
 const AB=document.getElementById('ab'), ABODY=document.getElementById('abody'); let ASSIGN_ID=null;
 
 function renderAssignList(p){
-  const busc=(p.busqueda||{}); const selected=new Set(Array.isArray(busc.propuestas)?busc.propuestas:[]);
-  let html='';
-  /* Seleccionadas */
-  html+='<div class="block"><h5>Seleccionadas</h5><div class="sel-chips" id="selchips">';
-  selected.forEach(id=>{
-    const raw=EVALS.find(e=>e.id===id)||{titulo:id}; const ev=adaptEval(raw);
-    html+='<span class="chip" data-ev="'+h(id)+'"><span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span></span>';
-  });
-  html+='</div></div>';
+  const guardadas = (p.busqueda && Array.isArray(p.busqueda.propuestas)) ? p.busqueda.propuestas : [];
+  const guardadasSet = new Set(guardadas.map(x => (typeof x==='string'? x : x.ev_id)));
 
-  /* Lista (sin leyendas de colores) */
-  html+='<div class="block"><h5 style="margin:0">Evaluaciones disponibles</h5><div class="eval-list" id="evlist">';
+  let html = '';
+  html += '<div class="block"><h5>Seleccionadas</h5><div class="sel-chips" id="selchips">';
+  guardadasSet.forEach(id=>{
+    const raw = EVALS.find(e=>e.id===id) || {titulo:id};
+    const ev  = adaptEval(raw);
+    html += <span class="chip" data-ev="${h(id)}"><span class="t">${h(ev.titulo||id)}</span> <span class="x" data-un="${h(id)}">×</span></span>;
+  });
+  html += '</div></div>';
+
+  html += '<div class="block"><h5 style="margin:0">Evaluaciones disponibles</h5><div class="eval-list" id="evlist">';
   if(!EVALS.length){
-    html+='<div class="eval-item"><span>No hay evaluaciones en el sistema</span></div>';
+    html += '<div class="eval-item"><span>No hay evaluaciones en el sistema</span></div>';
   }else{
-    const scored=EVALS.map(ev=>scoreEvalForPros(ev, p)).sort((a,b)=>b.ratio-a.ratio);
+    const scored = EVALS.map(ev => scoreEvalForPros(ev, p)).sort((a,b)=>b.ratio-a.ratio);
     scored.forEach(s=>{
-      const ev=adaptEval(s.ev);
-      const color=colorForRatio(s.ratio);
+      const ev    = adaptEval(s.ev);
+      const color = colorForRatio(s.ratio);
       const warns = (color==='green' && CFG.match.warnings_only_when_green) ? warningsFor(ev,p) : [];
-      const checked = (p.busqueda&&Array.isArray(p.busqueda.propuestas) && p.busqueda.propuestas.includes(ev.id)) ? 'checked' : '';
+      const checked = guardadasSet.has(ev.id) ? 'checked' : ''; // solo las ya guardadas
       const semillas = [
         (ev.ascensor?'🛗 Sí':'🛗 No'),
         ('Pl: '+(ev.altura||0)),
         ('🛏 '+(ev.hab||'-')),
         ('🔧 '+ev.reforma)
-      ].map(t=>'<span class="tag">'+h(t)+'</span>').join('');
-      html+='<label class="eval-item">' +
-              '<div>' +
-                '<div class="eval-title"><span class="dot '+color+'"></span><span>'+h(ev.titulo)+'</span>'+semillas+'</div>' +
-                (warns.length?('<div class="warns">'+warns.map(w=>'<span class="tag">'+h(w)+'</span>').join('')+'</div>'):'') +
-              '</div>' +
-              '<div class="kpiRight">' +
-                '<span class="tag">'+h(fmtEUR(ev.precio||0))+'</span>' +
-                '<input type="checkbox" data-ev="'+h(ev.id)+'" '+checked+'>' +
-              '</div>' +
-            '</label>';
+      ].map(t=><span class="tag">${h(t)}</span>).join('');
+      html += `
+        <label class="eval-item">
+          <div>
+            <div class="eval-title"><span class="dot ${color}"></span><span>${h(ev.titulo)}</span>${semillas}</div>
+            ${warns.length?('<div class="warns">'+warns.map(w=><span class="tag">${h(w)}</span>).join('')+'</div>'):''}
+          </div>
+          <div class="kpiRight">
+            <span class="tag">${h(fmtEUR(ev.precio||0))}</span>
+            <input type="checkbox" data-ev="${h(ev.id)}" ${checked}>
+          </div>
+        </label>`;
     });
   }
-  html+='</div></div>';
+  html += '</div></div>';
 
-  ABODY.innerHTML=html;
+  ABODY.innerHTML = html;
 
-  /* Handlers sin acumulación */
-  ABODY.onclick = function(e){
-    const un=e.target.getAttribute && e.target.getAttribute('data-un');
-    if(un){
-      const chip=e.target.closest('.chip'); if(chip) chip.remove();
-      const chk=ABODY.querySelector('input[type="checkbox"][data-ev="'+CSS.escape(un)+'"]');
-      if(chk) chk.checked=false;
-    }
+  // Quitar chip -> desmarcar
+  ABODY.onclick = e=>{
+    const id = e.target.getAttribute && e.target.getAttribute('data-un');
+    if(!id) return;
+    const chip = e.target.closest('.chip'); if(chip) chip.remove();
+    const chk = ABODY.querySelector(input[type="checkbox"][data-ev="${CSS.escape(id)}"]);
+    if(chk) chk.checked = false;
   };
-  ABODY.onchange = function(e){
-    const el=e.target;
-    if(el.tagName==='INPUT' && el.type==='checkbox'){
-      const id=el.getAttribute('data-ev'); if(!id) return;
-      const wrap=ABODY.querySelector('#selchips');
-      const exists=wrap.querySelector('.chip[data-ev="'+CSS.escape(id)+'"]');
-      const chips=wrap.querySelectorAll('.chip');
-      if(el.checked){
-        if(chips.length>=4){ el.checked=false; toast('Máximo 4 activos','warn'); return; }
-        if(!exists){
-          const raw=EVALS.find(x=>x.id===id)||{titulo:id};
-          const ev=adaptEval(raw);
-          const chip=document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
-          chip.innerHTML='<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
-          wrap.appendChild(chip);
-        }
-      }else{
-        if(exists) exists.remove();
+  // Marcar check -> añadir chip (máx 4)
+  ABODY.onchange = e=>{
+    const el = e.target;
+    if(el.tagName!=='INPUT' || el.type!=='checkbox') return;
+    const id = el.getAttribute('data-ev');
+    const wrap = ABODY.querySelector('#selchips');
+    const exists = wrap.querySelector(.chip[data-ev="${CSS.escape(id)}"]);
+    const chips  = wrap.querySelectorAll('.chip');
+    if(el.checked){
+      if(chips.length>=4){ el.checked=false; toast('Máximo 4 activos','warn'); return; }
+      if(!exists){
+        const raw = EVALS.find(x=>x.id===id) || {titulo:id};
+        const ev  = adaptEval(raw);
+        const chip = document.createElement('span'); chip.className='chip'; chip.dataset.ev=id;
+        chip.innerHTML = <span class="t">${h(ev.titulo||id)}</span> <span class="x" data-un="${h(id)}">×</span>;
+        wrap.appendChild(chip);
       }
+    }else{
+      if(exists) exists.remove();
     }
   };
 }
 
+// Preselección automática SOLO si no hay guardadas
 function autoMatchPreselect(p){
-  if(!EVALS.length) return;
-  const ranked=EVALS.map(ev=>scoreEvalForPros(ev,p)).sort((a,b)=>b.ratio-a.ratio);
-  const th=CFG.match?.thresholds||{green:1,amber:0.95};
-  let chosen=[];
+  const ya = (p.busqueda && Array.isArray(p.busqueda.propuestas) && p.busqueda.propuestas.length>0);
+  if(ya || !EVALS.length) return;
+
+  const ranked = EVALS.map(ev=>scoreEvalForPros(ev,p)).sort((a,b)=>b.ratio-a.ratio);
+  const th = CFG.match?.thresholds || {green:1,amber:0.95};
+  let chosen = [];
   for(const r of ranked){
     if(chosen.length>=4) break;
-    if(r.ratio>=(th.amber??0.95)) chosen.push(r.ev.id||r.ev.ev_id||r.ev);
+    if(r.ratio >= (th.amber??0.95)) chosen.push(r.ev.id || r.ev.ev_id);
   }
   if(!chosen.length){
-    chosen = ranked.slice(0,Math.min(2,ranked.length)).map(r=>r.ev.id||r.ev.ev_id||r.ev);
+    chosen = ranked.slice(0, Math.min(2, ranked.length)).map(r=>r.ev.id || r.ev.ev_id);
   }
-  const evlist=ABODY.querySelector('#evlist');
-  const selwrap=ABODY.querySelector('#selchips');
-  if(!evlist || !selwrap) return;
-
-  selwrap.innerHTML='';
+  const evlist = ABODY.querySelector('#evlist');
+  const sel    = ABODY.querySelector('#selchips');
+  if(!evlist || !sel) return;
+  sel.innerHTML='';
   [...evlist.querySelectorAll('input[type="checkbox"]')].forEach(chk=>{
-    const id=chk.getAttribute('data-ev');
-    const pick=chosen.includes(id);
-    chk.checked=pick;
+    const id = chk.getAttribute('data-ev');
+    const pick = chosen.includes(id);
+    chk.checked = pick;
     if(pick){
-      const raw=EVALS.find(x=>x.id===id)||{titulo:id};
-      const ev=adaptEval(raw);
-      const chip=document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
-      chip.innerHTML='<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
-      selwrap.appendChild(chip);
+      const raw = EVALS.find(x=>x.id===id) || {titulo:id};
+      const ev  = adaptEval(raw);
+      const chip = document.createElement('span'); chip.className='chip'; chip.dataset.ev=id;
+      chip.innerHTML = <span class="t">${h(ev.titulo||id)}</span> <span class="x" data-un="${h(id)}">×</span>;
+      sel.appendChild(chip);
     }
   });
 }
@@ -608,11 +624,10 @@ function autoMatchPreselect(p){
 function openAssignModal(p){
   ASSIGN_ID=p.id;
   renderAssignList(p);
-  autoMatchPreselect(p);   // ← Matching automático SIN botón, y SIN leyendas de color
+  autoMatchPreselect(p);        // sugerencias sólo si no había guardadas
   AB.style.display='flex';
 }
 function closeAssignModal(){ AB.style.display='none'; ASSIGN_ID=null; ABODY.onclick=null; ABODY.onchange=null; }
-
 function saveAssignModal(){
   if(!ASSIGN_ID) return;
   let list=allPros(); const i=list.findIndex(x=>x.id===ASSIGN_ID); if(i<0) return;
@@ -623,7 +638,7 @@ function saveAssignModal(){
   toast('Propuestas actualizadas','ok'); closeAssignModal(); headerKPIs(); renderBoard();
 }
 
-/* ===== Eventos globales ===== */
+/* ========== Eventos globales ========== */
 document.addEventListener('click',e=>{
   /* FICHA */
   if(e.target.id==='mclose'){ closeModal(); return; }
@@ -644,7 +659,7 @@ document.addEventListener('click',e=>{
     list.push(p); savePros(list); PROS=list.filter(x=>!x.archived); toast('Contacto creado','ok'); headerKPIs(); renderBoard(); return;
   }
 
-  /* Botones de tarjeta */
+  /* Botones de tarjeta (delegación robusta) */
   const btn=e.target.closest('.btn-icon'); if(btn){
     const id=btn.closest('.card').dataset.id;
     let list=allPros(); const i=list.findIndex(x=>x.id===id); if(i<0)return;
@@ -706,7 +721,7 @@ document.getElementById('btn-xls').addEventListener('click',function(){
   toast('CSV exportado','ok');
 });
 
-/* Init */
+/* Init demo si está vacío */
 (function(){
   if(!PROS.length){
     PROS=[{id:'p_demo',name:'Cliente demo',phone:'',email:'',phase:'CONTACTO',phase_entered_at:Date.now(),profile:{tipo:'Tradicional',objt:'neta',objv:6,budget_incl_honorarios:CFG.presupuesto.honorarios_incluidos_default},history:{}}];
