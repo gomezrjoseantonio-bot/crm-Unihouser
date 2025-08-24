@@ -93,8 +93,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .field textarea{resize:none}
 .row2{grid-column:span 2} .row3{grid-column:span 3}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips.limit2{max-height:44px;overflow:hidden} /* 2 líneas visibles, sin scroll */
 .chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;display:inline-flex;gap:6px;align-items:center}
 .chip .x{cursor:pointer;color:#999}
+.chips-input{width:240px}
 .modal footer{padding:8px 12px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;background:#fff}
 .save{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}
 
@@ -158,7 +160,6 @@ var CFG=(function(c){
   c.match=c.match||{thresholds:{green:1,amber:0.95},warnings_only_when_green:true};
   c.bruta=c.bruta||{include_honorarios_default:false};
   c.neta=c.neta||{include_honorarios_default:false};
-  /* nuevo bloque presupuesto */
   const pres=(c.presupuesto||{});
   if(typeof c.incluir_psi_por_defecto==='boolean' && pres.honorarios_incluidos_default==null){
     pres.honorarios_incluidos_default=c.incluir_psi_por_defecto;
@@ -193,7 +194,7 @@ function headerKPIs(){
 function daysInPhase(p){const t=p.phase_entered_at?+p.phase_entered_at:Date.now();return Math.max(0,Math.floor((Date.now()-t)/86400000))}
 function shortDate(dt){
   if(!dt) return '';
-  try{ const d=new Date(dt); const dd=('0'+d.getDate()).slice(0-2); const mm=('0'+(d.getMonth()+1)).slice(0-2); const hh=('0'+d.getHours()).slice(0-2); const mi=('0'+d.getMinutes()).slice(0-2); return dd+'/'+mm+' '+hh+':'+mi; }catch(_){ return ''; }
+  try{ const d=new Date(dt); const dd=('0'+d.getDate()).slice(-2); const mm=('0'+(d.getMonth()+1)).slice(-2); const hh=('0'+d.getHours()).slice(-2); const mi=('0'+d.getMinutes()).slice(-2); return dd+'/'+mm+' '+hh+':'+mi; }catch(_){ return ''; }
 }
 function makeCreate(){
   const c=document.createElement('div'); c.className='create';
@@ -242,14 +243,11 @@ function moneyifyInput(el){ el.addEventListener('blur',()=>{ el.value = el.value
 
 function recalcFinancials(){
   const total=num(MBODY.querySelector('#f_budget').value);
-  const budIncl = MBODY.querySelector('#f_bud_incl').checked; /* NUEVO interruptor */
+  const budIncl = MBODY.querySelector('#f_bud_incl').checked; /* HON. dentro del presupuesto */
   let pmax=0, itp=0;
   if(total>0){
-    if(budIncl){ /* honorarios DENTRO del presupuesto */
-      pmax=Math.max(0, Math.round((total - CFG.notaria - CFG.honorarios)/(1+CFG.itp_pct)));
-    }else{ /* honorarios FUERA del presupuesto */
-      pmax=Math.max(0, Math.round((total - CFG.notaria)/(1+CFG.itp_pct)));
-    }
+    if(budIncl){ pmax=Math.max(0, Math.round((total - CFG.notaria - CFG.honorarios)/(1+CFG.itp_pct))); }
+    else{ pmax=Math.max(0, Math.round((total - CFG.notaria)/(1+CFG.itp_pct))); }
     itp=Math.round(pmax*CFG.itp_pct);
     MBODY.querySelector('#f_pmax').value = pmax?toThousands(pmax):'';
     MBODY.querySelector('#f_itp').value = itp?toThousands(itp):'';
@@ -268,7 +266,7 @@ function recalcFinancials(){
   MBODY.querySelector('#f_hip').value=hip?toThousands(hip):'';
   MBODY.querySelector('#f_prop').value=prop?toThousands(prop):'';
 
-  /* Fondos totales (solo si honorarios van aparte) */
+  /* Fondos totales (si honorarios van aparte) */
   const fTot = budIncl ? prop : (prop + CFG.honorarios);
   MBODY.querySelector('#f_fondos_total').value = fTot?toThousands(fTot):'';
 
@@ -292,33 +290,33 @@ function openModal(p){
   const budIncl = (typeof pr.budget_incl_honorarios==='boolean') ? pr.budget_incl_honorarios : !!CFG.presupuesto.honorarios_incluidos_default;
   let html='';
 
-  /* 1) DATOS PERSONALES (2 filas) */
+  /* 1) DATOS PERSONALES — 2 filas exactas */
   html+='<div class="block"><h5>DATOS PERSONALES</h5><div class="grid">';
   html+='<div class="field"><label>Nombre y apellidos</label><input id="f_name" maxlength="30" value="'+h(p.name||'')+'"/></div>';
   html+='<div class="field"><label>Teléfono</label><input id="f_phone" maxlength="9" value="'+h(p.phone||'')+'"/></div>';
   html+='<div class="field"><label>Email</label><input id="f_email" type="email" maxlength="35" value="'+h(p.email||'')+'"/></div>';
   html+='<div class="field"><label>DNI/NIE</label><input id="f_dni" maxlength="10" value="'+h(pr.dni||'')+'"/></div>';
-  html+='<div class="field row2"><label>Dirección</label><input id="f_dir" maxlength="120" value="'+h(pr.dir||'')+'"/></div>';
-  html+='<div class="field"><label>Localidad (residencia)</label><input id="f_locres" maxlength="10" value="'+h(pr.locres||'')+'"/></div>';
+  html+='<div class="field"><label>Dirección</label><input id="f_dir" maxlength="120" value="'+h(pr.dir||'')+'"/></div>';
+  html+='<div class="field"><label>Localidad</label><input id="f_locres" maxlength="10" value="'+h(pr.locres||'')+'"/></div>';
   html+='</div></div>';
 
-  /* 2) INVERSIÓN */
+  /* 2) INVERSIÓN — compacto */
   html+='<div class="block"><h5>INVERSIÓN</h5><div class="grid">';
-  html+='<div class="field row3"><label>Localidades (inversión) — máx 6</label><div class="chips" id="chips_locs">';
+  html+='<div class="field row2"><label>Localidades (inversión) — máx 6</label><div class="chips limit2" id="chips_locs">';
   for(let i=0;i<locs.length;i++){ html+='<span class="chip"><span class="t">'+h(locs[i])+'</span> <span class="x" data-del="'+h(locs[i])+'">×</span></span>'; }
-  html+='</div><input class="chips-input" id="add_loc" placeholder="Añadir localidad y Enter" maxlength="10"/></div>';
+  html+='</div><input class="chips-input" id="add_loc" placeholder="Añadir y Enter" maxlength="10"/></div>';
   html+='<div class="field"><label>Tipo de alquiler</label><select id="f_tipo"><option'+((pr.tipo||'Tradicional')==='Tradicional'?' selected':'')+'>Tradicional</option><option'+((pr.tipo||'Tradicional')==='Habitaciones'?' selected':'')+'>Habitaciones</option></select></div>';
-  html+='<div class="field"><label>Altura máx. (planta)</label><input id="f_alt" inputmode="numeric" maxlength="1" value="'+h(pr.alt||'')+'"/></div>';
+  html+='<div class="field"><label>Acepta reforma</label><select id="f_ref"><option'+((pr.ref||'No')==='No'?' selected':'')+'>No</option><option'+((pr.ref||'No')==='Lavado de cara'?' selected':'')+'>Lavado de cara</option><option'+((pr.ref||'No')==='Integral'?' selected':'')+'>Integral</option></select></div>';
   html+='<div class="field"><label>¿Ascensor?</label><select id="f_asc"><option'+((pr.asc||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.asc||'No')==='No'?' selected':'')+'>No</option></select></div>';
   html+='<div class="field"><label>¿Bajos?</label><select id="f_bajos"><option'+((pr.bajos||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.bajos||'No')==='No'?' selected':'')+'>No</option></select></div>';
-  html+='<div class="field"><label>Acepta reforma</label><select id="f_ref"><option'+((pr.ref||'No')==='No'?' selected':'')+'>No</option><option'+((pr.ref||'No')==='Lavado de cara'?' selected':'')+'>Lavado de cara</option><option'+((pr.ref||'No')==='Integral'?' selected':'')+'>Integral</option></select></div>';
-  html+='<div class="field"></div>';
+  html+='<div class="field"><label>Altura máx. (planta)</label><input id="f_alt" inputmode="numeric" maxlength="1" value="'+h(pr.alt||'')+'"/></div>';
   html+='<div class="field"><label>Presupuesto TOTAL (€)</label><input id="f_budget" value="'+(pr.budget?toThousands(pr.budget):'')+'"/></div>';
   html+='<div class="field"><label>Precio máx. COMPRA (auto)</label><input id="f_pmax" disabled value="'+(pr.pmax?toThousands(pr.pmax):'')+'"/></div>';
   html+='<div class="field"><label>ITP estimado (auto)</label><input id="f_itp" disabled value="'+(pr.itp?toThousands(pr.itp):'')+'"/></div>';
-  html+='<div class="field"><label>Notaría (Config)</label><input id="f_notaria" disabled value="'+toThousands(CFG.notaria)+'"/></div>';
-  html+='<div class="field"><label>Honorarios (Config)</label><input id="f_honor" disabled value="'+toThousands(CFG.honorarios)+'"/></div>';
-  html+='<div class="field"><label><input type="checkbox" id="f_bud_incl"'+(budIncl?' checked':'')+'> Honorarios incluidos en el presupuesto</label></div>';
+  html+='<div class="field"><label>Notaría (cfg)</label><input id="f_notaria" disabled value="'+toThousands(CFG.notaria)+'"/></div>';
+  /* Honorarios + switch juntos en la misma celda para no ganar altura */
+  html+='<div class="field"><label>Honorarios (cfg)</label><input id="f_honor" disabled value="'+toThousands(CFG.honorarios)+'"/><small><label><input type="checkbox" id="f_bud_incl"'+(budIncl?' checked':'')+'> Honorarios incluidos en el presupuesto</label></small></div>';
+  html+='<div class="field"></div>';
   html+='</div></div>';
 
   /* 3) FINANCIACIÓN */
@@ -328,10 +326,10 @@ function openModal(p){
   html+='<div class="field"><label>% financiación</label><input id="f_pct" maxlength="4" value="'+h(pr.pct||'80')+'"/></div>';
   html+='<div class="field"><label>Hipoteca</label><input id="f_hip" disabled value="'+(pr.hip?toThousands(pr.hip):'')+'"/></div>';
   html+='<div class="field"><label>Fondos propios</label><input id="f_prop" disabled value="'+(pr.prop?toThousands(pr.prop):'')+'"/></div>';
-  html+='<div class="field"><label>Fondos totales (si honorarios van aparte)</label><input id="f_fondos_total" disabled value=""/></div>';
+  html+='<div class="field"><label>Fondos totales (si honorarios aparte)</label><input id="f_fondos_total" disabled value=""/></div>';
   html+='</div></div>';
 
-  /* 4) OBJETIVO */
+  /* 4) OBJETIVO — SIEMPRE VISIBLE */
   const objt=(pr.objt||'neta').toLowerCase();
   html+='<div class="block"><h5>OBJETIVO</h5><div class="grid">';
   html+='<div class="field"><label>Objetivo principal</label><select id="f_objt"><option value="bruta"'+(objt==='bruta'?' selected':'')+'>Rentabilidad bruta (%)</option><option value="neta"'+(objt==='neta'?' selected':'')+'>Rentabilidad neta (%)</option><option value="flujo"'+(objt==='flujo'?' selected':'')+'>Flujo (€/mes)</option></select></div>';
@@ -341,15 +339,18 @@ function openModal(p){
   html+='<div class="field row3"><label><input type="checkbox" id="f_inc_hon"'+(inc?' checked':'')+'> Incluir honorarios en Bruta (solo este cliente)</label></div>';
   html+='</div></div>';
 
-  /* 5) NOTAS / REUNIÓN */
+  /* 5) NOTAS / REUNIÓN — horario siempre visible */
   html+='<div class="block"><h5>REUNIÓN / NOTAS</h5><div class="grid">';
   if(p.phase==='CONTACTO'){
     html+='<div class="field"><label>Fecha y hora (para pasar a Reunión)</label><input id="f_meet" type="datetime-local" value="'+h(meet.date||'')+'"/></div><div class="field row2"></div>';
+  }else{
+    const fv = meet.date? shortDate(meet.date) : '';
+    html+='<div class="field"><label>Fecha y hora</label><input id="f_meet_ro" value="'+h(fv)+'" disabled/></div><div class="field row2"></div>';
   }
   html+='<div class="field row3"><label>Notas (máx 300)</label><textarea id="f_notas" rows="2" maxlength="300">'+h(meet.notas||'')+'</textarea></div>';
   html+='</div></div>';
 
-  /* BUSQUEDA — Propuestas (solo en esa fase) */
+  /* BUSQUEDA — Propuestas (siempre cuando está en la fase) */
   if(p.phase==='BUSQUEDA'){
     html+='<div class="block"><h5>BUSQUEDA — Asignación de activos</h5><div class="grid">';
     html+='<div class="field row3"><div id="f_sel_evals" class="chips">';
@@ -362,7 +363,7 @@ function openModal(p){
 
   MBODY.innerHTML=html;
 
-  /* chips localidades */
+  /* chips localidades (máx 6) */
   MBODY.querySelector('#chips_locs').addEventListener('click',e=>{
     const del=e.target.getAttribute('data-del'); if(!del)return; const span=e.target.parentElement; span.parentElement.removeChild(span);
   });
@@ -379,7 +380,7 @@ function openModal(p){
   ['#f_budget','#f_pct','#f_objt','#f_objv','#f_fin','#f_inc_hon','#f_bud_incl'].forEach(sel=>{const el=MBODY.querySelector(sel); if(el) el.addEventListener('input',recalcFinancials);});
   recalcFinancials();
 
-  /* asignación activos (prompt sin scroll global) */
+  /* asignación activos (si no hay evals, aviso, pero UI siempre visible) */
   if(p.phase==='BUSQUEDA'){
     const selWrap=MBODY.querySelector('#f_sel_evals');
     MBODY.querySelector('#f_btn_assign').addEventListener('click',()=>{
@@ -422,6 +423,9 @@ function saveModal(){
   if(p.phase==='CONTACTO'){
     const dt=q('#f_meet').value; if(dt){ p.meeting.date=dt; p.phase='REUNION'; p.phase_entered_at=Date.now(); p.history=p.history||{}; p.history.CONTACTO='OK'; }
   }
+  if(p.phase!=='CONTACTO' && !p.meeting.date){ /* si ya estaba en reunión o más allá y no tenía fecha, no perdemos el campo */
+    const ro = MBODY.querySelector('#f_meet_ro'); if(ro && ro.value) { /* no hacer nada: es read-only renderizado */ }
+  }
   if(p.phase==='BUSQUEDA'){
     const chips=MBODY.querySelectorAll('#f_sel_evals .chip');
     p.busqueda=p.busqueda||{propuestas:[]}; p.busqueda.propuestas=[...chips].map(ch=>ch.getAttribute('data-ev')||ch.querySelector('.t').textContent);
@@ -440,7 +444,7 @@ document.addEventListener('click',e=>{
     const email=document.getElementById('new_email').value.trim();
     if(!name||!phone){toast('Nombre y teléfono son obligatorios','warn');return;}
     let list=allPros();
-    const p={id:'p_'+Math.random().toString(36).slice(2,8),name,phone,email,phase:'CONTACTO',phase_entered_at:Date.now(),history:{},profile:{tipo:'Tradicional',objt:'neta',objv:6}};
+    const p={id:'p_'+Math.random().toString(36).slice(2,8),name,phone,email,phase:'CONTACTO',phase_entered_at:Date.now(),history:{},profile:{tipo:'Tradicional',objt:'neta',objv:6, budget_incl_honorarios:CFG.presupuesto.honorarios_incluidos_default}};
     list.push(p); savePros(list); PROS=list.filter(x=>!x.archived); toast('Contacto creado','ok'); headerKPIs(); renderBoard(); return;
   }
   const btn=e.target.closest('.btn-icon'); if(btn){
@@ -495,7 +499,7 @@ document.getElementById('btn-xls').addEventListener('click',function(){
 /* Init */
 (function(){
   if(!PROS.length){
-    PROS=[{id:'p_demo',name:'Cliente demo',phone:'',email:'',phase:'CONTACTO',phase_entered_at:Date.now(),profile:{tipo:'Tradicional',objt:'neta',objv:6, budget_incl_honorarios:CFG.presupuesto.honorarios_incluidos_default},history:{}}];
+    PROS=[{id:'p_demo',name:'Cliente demo',phone:'',email:'',phase:'CONTACTO',phase_entered_at:Date.now(),profile:{tipo:'Tradicional',objt:'neta',objv:6,budget_incl_honorarios:CFG.presupuesto.honorarios_incluidos_default},history:{}}];
     savePros(PROS);
   }
   headerKPIs(); renderBoard();
