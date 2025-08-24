@@ -6,8 +6,8 @@
 <title>Unihouser — Dashboard CRM</title>
 <style>
 :root{
-  --brand:#c7530c;          /* naranja vivo */
-  --accent:#DB824B;         /* terracota */
+  --brand:#c7530c;
+  --accent:#DB824B;
   --ok:#58736F;
   --bad:#B53928;
   --line:#E7E1DE;
@@ -93,7 +93,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .field textarea{resize:none}
 .row2{grid-column:span 2} .row3{grid-column:span 3}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chips.limit2{max-height:44px;overflow:hidden} /* 2 líneas visibles, sin scroll */
+.chips.limit2{max-height:44px;overflow:hidden} /* 2 líneas visibles */
 .chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;display:inline-flex;gap:6px;align-items:center}
 .chip .x{cursor:pointer;color:#999}
 .chips-input{width:240px}
@@ -314,7 +314,7 @@ function openModal(p){
   html+='<div class="field"><label>Precio máx. COMPRA (auto)</label><input id="f_pmax" disabled value="'+(pr.pmax?toThousands(pr.pmax):'')+'"/></div>';
   html+='<div class="field"><label>ITP estimado (auto)</label><input id="f_itp" disabled value="'+(pr.itp?toThousands(pr.itp):'')+'"/></div>';
   html+='<div class="field"><label>Notaría (cfg)</label><input id="f_notaria" disabled value="'+toThousands(CFG.notaria)+'"/></div>';
-  /* Honorarios + switch juntos en la misma celda para no ganar altura */
+  /* Honorarios + switch juntos para no añadir altura */
   html+='<div class="field"><label>Honorarios (cfg)</label><input id="f_honor" disabled value="'+toThousands(CFG.honorarios)+'"/><small><label><input type="checkbox" id="f_bud_incl"'+(budIncl?' checked':'')+'> Honorarios incluidos en el presupuesto</label></small></div>';
   html+='<div class="field"></div>';
   html+='</div></div>';
@@ -339,7 +339,7 @@ function openModal(p){
   html+='<div class="field row3"><label><input type="checkbox" id="f_inc_hon"'+(inc?' checked':'')+'> Incluir honorarios en Bruta (solo este cliente)</label></div>';
   html+='</div></div>';
 
-  /* 5) NOTAS / REUNIÓN — horario siempre visible */
+  /* 5) REUNIÓN / NOTAS — horario siempre visible */
   html+='<div class="block"><h5>REUNIÓN / NOTAS</h5><div class="grid">';
   if(p.phase==='CONTACTO'){
     html+='<div class="field"><label>Fecha y hora (para pasar a Reunión)</label><input id="f_meet" type="datetime-local" value="'+h(meet.date||'')+'"/></div><div class="field row2"></div>';
@@ -350,7 +350,7 @@ function openModal(p){
   html+='<div class="field row3"><label>Notas (máx 300)</label><textarea id="f_notas" rows="2" maxlength="300">'+h(meet.notas||'')+'</textarea></div>';
   html+='</div></div>';
 
-  /* BUSQUEDA — Propuestas (siempre cuando está en la fase) */
+  /* BUSQUEDA — Propuestas (visible en esa fase) */
   if(p.phase==='BUSQUEDA'){
     html+='<div class="block"><h5>BUSQUEDA — Asignación de activos</h5><div class="grid">';
     html+='<div class="field row3"><div id="f_sel_evals" class="chips">';
@@ -380,7 +380,7 @@ function openModal(p){
   ['#f_budget','#f_pct','#f_objt','#f_objv','#f_fin','#f_inc_hon','#f_bud_incl'].forEach(sel=>{const el=MBODY.querySelector(sel); if(el) el.addEventListener('input',recalcFinancials);});
   recalcFinancials();
 
-  /* asignación activos (si no hay evals, aviso, pero UI siempre visible) */
+  /* asignación activos (con aviso si no hay evals) */
   if(p.phase==='BUSQUEDA'){
     const selWrap=MBODY.querySelector('#f_sel_evals');
     MBODY.querySelector('#f_btn_assign').addEventListener('click',()=>{
@@ -423,9 +423,6 @@ function saveModal(){
   if(p.phase==='CONTACTO'){
     const dt=q('#f_meet').value; if(dt){ p.meeting.date=dt; p.phase='REUNION'; p.phase_entered_at=Date.now(); p.history=p.history||{}; p.history.CONTACTO='OK'; }
   }
-  if(p.phase!=='CONTACTO' && !p.meeting.date){ /* si ya estaba en reunión o más allá y no tenía fecha, no perdemos el campo */
-    const ro = MBODY.querySelector('#f_meet_ro'); if(ro && ro.value) { /* no hacer nada: es read-only renderizado */ }
-  }
   if(p.phase==='BUSQUEDA'){
     const chips=MBODY.querySelectorAll('#f_sel_evals .chip');
     p.busqueda=p.busqueda||{propuestas:[]}; p.busqueda.propuestas=[...chips].map(ch=>ch.getAttribute('data-ev')||ch.querySelector('.t').textContent);
@@ -444,7 +441,7 @@ document.addEventListener('click',e=>{
     const email=document.getElementById('new_email').value.trim();
     if(!name||!phone){toast('Nombre y teléfono son obligatorios','warn');return;}
     let list=allPros();
-    const p={id:'p_'+Math.random().toString(36).slice(2,8),name,phone,email,phase:'CONTACTO',phase_entered_at:Date.now(),history:{},profile:{tipo:'Tradicional',objt:'neta',objv:6, budget_incl_honorarios:CFG.presupuesto.honorarios_incluidos_default}};
+    const p={id:'p_'+Math.random().toString(36).slice(2,8),name,phone,email,phase:'CONTACTO',phase_entered_at:Date.now(),history:{},profile:{tipo:'Tradicional',objt:'neta',objv:6,budget_incl_honorarios:CFG.presupuesto.honorarios_incluidos_default}};
     list.push(p); savePros(list); PROS=list.filter(x=>!x.archived); toast('Contacto creado','ok'); headerKPIs(); renderBoard(); return;
   }
   const btn=e.target.closest('.btn-icon'); if(btn){
