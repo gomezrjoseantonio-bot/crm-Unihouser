@@ -114,10 +114,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .tag{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:1px 6px;margin-left:0;font-size:11px}
 .warns{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 .kpiRight{display:flex;align-items:center;gap:8px}
-.kpiVal{font-weight:800}
 .sel-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .sel-chips .chip .x{color:#999;cursor:pointer}
-.actions-inline{display:flex;gap:8px;align-items:center;justify-content:space-between}
 
 .footer{margin:16px 0 14px;text-align:center;color:#888;font-size:11px}
 @media (max-width:980px){.board{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.col{min-height:unset}}
@@ -154,7 +152,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
     </div>
   </div>
 
-  <!-- Modal ASIGNACIÓN -->
+  <!-- Modal ASIGNACIÓN (sin leyendas/placeholder de colores) -->
   <div class="modal-back" id="ab">
     <div class="modal small" role="dialog" aria-label="Asignar activos" aria-modal="true">
       <header>
@@ -163,7 +161,6 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
       </header>
       <div class="body" id="abody"></div>
       <footer>
-        <button class="save" id="btn-calc-match" style="margin-right:auto;background:var(--ok)">Calcular match</button>
         <button class="save" id="asave">Guardar</button>
       </footer>
     </div>
@@ -191,6 +188,7 @@ var CFG=(function(c){
   c.notaria=(typeof c.notaria==='number')?c.notaria:1200;
   c.honorarios=(typeof c.honorarios==='number')?c.honorarios:3630;
   c.localidades=Array.isArray(c.localidades)&&c.localidades.length?c.localidades:['Oviedo','Gijón','Avilés','Mieres','Pola de Siero','Langreo','Gozón'];
+  c.objetivos=c.objetivos||{tradicional:{bruta_pct:10,neta_pct:6,flujo_mes_eur:0},habitaciones:{bruta_pct:12,neta_pct:7,flujo_mes_eur:0}};
   c.match=c.match||{thresholds:{green:1,amber:0.95},warnings_only_when_green:true};
   c.bruta=c.bruta||{include_honorarios_default:false};
   c.neta=c.neta||{include_honorarios_default:false};
@@ -380,21 +378,13 @@ function openModal(p){
 
   /* chips localidades */
   const chipsWrap=MBODY.querySelector('#chips_locs');
-  if(chipsWrap){
-    chipsWrap.onclick = (e)=>{ const del=e.target.getAttribute('data-del'); if(!del)return; e.target.parentElement.remove(); };
-  }
+  if(chipsWrap){ chipsWrap.onclick=(e)=>{ const del=e.target.getAttribute('data-del'); if(!del)return; e.target.parentElement.remove(); }; }
   const add=MBODY.querySelector('#add_loc');
-  if(add){
-    add.onkeydown=(e)=>{
-      if(e.key==='Enter'){e.preventDefault();
-        const v=(add.value||'').trim(); if(!v)return;
-        const cont=MBODY.querySelector('#chips_locs');
-        if(cont.querySelectorAll('.chip').length>=6){toast('Máximo 6 localidades','warn');return;}
-        const s=document.createElement('span'); s.className='chip'; s.innerHTML='<span class="t">'+h(v)+'</span> <span class="x" data-del="'+h(v)+'">×</span>';
-        cont.appendChild(s); add.value='';
-      }
-    };
-  }
+  if(add){ add.onkeydown=(e)=>{ if(e.key==='Enter'){e.preventDefault(); const v=(add.value||'').trim(); if(!v)return;
+      const cont=MBODY.querySelector('#chips_locs');
+      if(cont.querySelectorAll('.chip').length>=6){toast('Máximo 6 localidades','warn');return;}
+      const s=document.createElement('span'); s.className='chip'; s.innerHTML='<span class="t">'+h(v)+'</span> <span class="x" data-del="'+h(v)+'">×</span>';
+      cont.appendChild(s); add.value=''; } }; }
 
   /* money blur y cálculos */
   ['#f_budget','#f_pct'].forEach(sel=>{const el=MBODY.querySelector(sel); if(el) moneyifyInput(el);});
@@ -454,11 +444,20 @@ function adaptEval(ev){
   o.hab=parseInt(ev.habitaciones||ev.habs||ev.dormitorios||ev.num_habitaciones||0,10)||0;
   return o;
 }
+function clientObjective(p){
+  const pr=p.profile||{}; const objt=(pr.objt||'neta').toLowerCase();
+  let objv=num(pr.objv||0);
+  if(!objv || objv<=0){
+    const tipo=(pr.tipo||'Tradicional').toLowerCase();
+    const def = (tipo==='habitaciones'? CFG.objetivos.habitaciones : CFG.objetivos.tradicional);
+    objv = (objt==='bruta') ? def.bruta_pct : (objt==='neta') ? def.neta_pct : def.flujo_mes_eur;
+  }
+  return {objt,objv};
+}
 function scoreEvalForPros(evRaw,p){
   const ev=adaptEval(evRaw);
   const pr=p.profile||{};
-  const objt=(pr.objt||'neta').toLowerCase();
-  const objv=num(pr.objv||0);
+  const {objt,objv}=clientObjective(p);
   /* coste base según flags por cliente */
   const incBruta = !!pr.bruta_incluye_honorarios;
   const incNeta  = (typeof pr.neta_incluye_honorarios==='boolean') ? pr.neta_incluye_honorarios : !!CFG.neta.include_honorarios_default;
@@ -485,18 +484,12 @@ function colorForRatio(r){
 function warningsFor(ev,p){
   const pr=p.profile||{};
   const warns=[];
-  /* localidad */
   const locs=(Array.isArray(pr.locs)?pr.locs:[]).map(x=>String(x).toLowerCase());
   if(locs.length && !locs.includes(String(ev.localidad||'').toLowerCase())) warns.push('📍 localidad');
-  /* tipo */
   if(pr.tipo && ev.tipo && pr.tipo!==ev.tipo) warns.push('🏷 tipo');
-  /* ascensor */
   if(pr.asc==='Sí' && !ev.ascensor) warns.push('🛗 ascensor');
-  /* altura */
   if(pr.alt && ev.altura>num(pr.alt)) warns.push('⬆ planta');
-  /* bajos */
   if(pr.bajos==='No' && ev.bajos) warns.push('⬇ bajos');
-  /* reforma (tolerancias) */
   const rank={'No':0,'Lavado de cara':1,'Integral':2};
   if(rank[ev.reforma]>rank[pr.ref||'No']) warns.push('🔧 reforma');
   return warns;
@@ -504,30 +497,27 @@ function warningsFor(ev,p){
 
 /* ===== Modal ASIGNACIÓN ===== */
 const AB=document.getElementById('ab'), ABODY=document.getElementById('abody'); let ASSIGN_ID=null;
+
 function renderAssignList(p){
-  /* cabecera chips seleccionadas + acciones */
   const busc=(p.busqueda||{}); const selected=new Set(Array.isArray(busc.propuestas)?busc.propuestas:[]);
   let html='';
+  /* Seleccionadas */
   html+='<div class="block"><h5>Seleccionadas</h5><div class="sel-chips" id="selchips">';
   selected.forEach(id=>{
-    const raw=EVALS.find(e=>e.id===id)||{titulo:id};
-    const ev=adaptEval(raw);
-    const title=h(ev.titulo||id);
-    html+='<span class="chip" data-ev="'+h(id)+'"><span class="t">'+title+'</span> <span class="x" data-un="'+h(id)+'">×</span></span>';
+    const raw=EVALS.find(e=>e.id===id)||{titulo:id}; const ev=adaptEval(raw);
+    html+='<span class="chip" data-ev="'+h(id)+'"><span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span></span>';
   });
   html+='</div></div>';
 
-  html+='<div class="block"><div class="actions-inline"><h5 style="margin:0">Evaluaciones disponibles</h5><small style="color:#777">● verde ≥ '+(CFG.match.thresholds.green??1)+'× · ámbar ≥ '+(CFG.match.thresholds.amber??0.95)+'×</small></div><div class="eval-list" id="evlist">';
+  /* Lista (sin leyendas de colores) */
+  html+='<div class="block"><h5 style="margin:0">Evaluaciones disponibles</h5><div class="eval-list" id="evlist">';
   if(!EVALS.length){
     html+='<div class="eval-item"><span>No hay evaluaciones en el sistema</span></div>';
   }else{
-    /* calcular score y pintar fila con semillas */
     const scored=EVALS.map(ev=>scoreEvalForPros(ev, p)).sort((a,b)=>b.ratio-a.ratio);
     scored.forEach(s=>{
       const ev=adaptEval(s.ev);
       const color=colorForRatio(s.ratio);
-      const kpiTxt = (s.objt==='flujo') ? (fmtEUR(s.kpi).replace('€','')+' €/mes') : (s.kpi.toFixed(1)+'%');
-      const ratioTxt = (s.ratio).toFixed(2)+'×';
       const warns = (color==='green' && CFG.match.warnings_only_when_green) ? warningsFor(ev,p) : [];
       const checked = (p.busqueda&&Array.isArray(p.busqueda.propuestas) && p.busqueda.propuestas.includes(ev.id)) ? 'checked' : '';
       const semillas = [
@@ -542,8 +532,7 @@ function renderAssignList(p){
                 (warns.length?('<div class="warns">'+warns.map(w=>'<span class="tag">'+h(w)+'</span>').join('')+'</div>'):'') +
               '</div>' +
               '<div class="kpiRight">' +
-                '<span class="kpiVal">'+h(kpiTxt)+'</span>' +
-                '<span class="tag">'+h(ratioTxt)+'</span>' +
+                '<span class="tag">'+h(fmtEUR(ev.precio||0))+'</span>' +
                 '<input type="checkbox" data-ev="'+h(ev.id)+'" '+checked+'>' +
               '</div>' +
             '</label>';
@@ -553,14 +542,13 @@ function renderAssignList(p){
 
   ABODY.innerHTML=html;
 
-  /* Handlers SIN acumulación (se sobrescriben cada vez) */
+  /* Handlers sin acumulación */
   ABODY.onclick = function(e){
     const un=e.target.getAttribute && e.target.getAttribute('data-un');
-    if(un){ /* quitar chip -> desmarcar checkbox asociado */
+    if(un){
       const chip=e.target.closest('.chip'); if(chip) chip.remove();
       const chk=ABODY.querySelector('input[type="checkbox"][data-ev="'+CSS.escape(un)+'"]');
       if(chk) chk.checked=false;
-      return;
     }
   };
   ABODY.onchange = function(e){
@@ -586,9 +574,41 @@ function renderAssignList(p){
   };
 }
 
+function autoMatchPreselect(p){
+  if(!EVALS.length) return;
+  const ranked=EVALS.map(ev=>scoreEvalForPros(ev,p)).sort((a,b)=>b.ratio-a.ratio);
+  const th=CFG.match?.thresholds||{green:1,amber:0.95};
+  let chosen=[];
+  for(const r of ranked){
+    if(chosen.length>=4) break;
+    if(r.ratio>=(th.amber??0.95)) chosen.push(r.ev.id||r.ev.ev_id||r.ev);
+  }
+  if(!chosen.length){
+    chosen = ranked.slice(0,Math.min(2,ranked.length)).map(r=>r.ev.id||r.ev.ev_id||r.ev);
+  }
+  const evlist=ABODY.querySelector('#evlist');
+  const selwrap=ABODY.querySelector('#selchips');
+  if(!evlist || !selwrap) return;
+
+  selwrap.innerHTML='';
+  [...evlist.querySelectorAll('input[type="checkbox"]')].forEach(chk=>{
+    const id=chk.getAttribute('data-ev');
+    const pick=chosen.includes(id);
+    chk.checked=pick;
+    if(pick){
+      const raw=EVALS.find(x=>x.id===id)||{titulo:id};
+      const ev=adaptEval(raw);
+      const chip=document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
+      chip.innerHTML='<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
+      selwrap.appendChild(chip);
+    }
+  });
+}
+
 function openAssignModal(p){
   ASSIGN_ID=p.id;
   renderAssignList(p);
+  autoMatchPreselect(p);   // ← Matching automático SIN botón, y SIN leyendas de color
   AB.style.display='flex';
 }
 function closeAssignModal(){ AB.style.display='none'; ASSIGN_ID=null; ABODY.onclick=null; ABODY.onchange=null; }
@@ -602,43 +622,6 @@ function saveAssignModal(){
   list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived);
   toast('Propuestas actualizadas','ok'); closeAssignModal(); headerKPIs(); renderBoard();
 }
-
-/* Calcular match (auto) dentro del modal de asignación) */
-document.getElementById('ab').addEventListener('click',function(e){
-  if(e.target && e.target.id==='btn-calc-match'){
-    if(!ASSIGN_ID){ toast('Abre un cliente en BÚSQUEDA primero','warn'); return; }
-    let p = allPros().find(x=>x.id===ASSIGN_ID); if(!p){ toast('Cliente no encontrado','bad'); return; }
-    if(!EVALS.length){ toast('No hay evaluaciones para hacer matching','warn'); return; }
-    const ranked=EVALS.map(ev=>scoreEvalForPros(ev,p)).sort((a,b)=>b.ratio-a.ratio);
-    const th=CFG.match?.thresholds||{green:1,amber:0.95};
-    const chosen=[];
-    for(const r of ranked){
-      if(chosen.length>=4) break;
-      if(r.ratio>=(th.amber??0.95) || chosen.length<4){ chosen.push(r.ev.id||r.ev.ev_id||r.ev); }
-    }
-    /* Si no hay ninguna ≥ ámbar, al menos 2 mejores */
-    if(!ranked.some(r=>r.ratio>=(th.amber??0.95))){
-      chosen.length=0;
-      ranked.slice(0,Math.min(2,ranked.length)).forEach(r=>chosen.push(r.ev.id||r.ev.ev_id||r.ev));
-    }
-    const evlist=ABODY.querySelector('#evlist');
-    const selwrap=ABODY.querySelector('#selchips');
-    selwrap.innerHTML='';
-    [...evlist.querySelectorAll('input[type="checkbox"]')].forEach(chk=>{
-      const id=chk.getAttribute('data-ev');
-      const pick=chosen.includes(id);
-      chk.checked=pick;
-      if(pick){
-        const raw=EVALS.find(x=>x.id===id)||{titulo:id};
-        const ev=adaptEval(raw);
-        const chip=document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
-        chip.innerHTML='<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
-        selwrap.appendChild(chip);
-      }
-    });
-    toast('Matching aplicado','ok');
-  }
-});
 
 /* ===== Eventos globales ===== */
 document.addEventListener('click',e=>{
