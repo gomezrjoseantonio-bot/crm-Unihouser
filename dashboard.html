@@ -174,7 +174,7 @@ const LS={get:(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v
 const fmtEUR=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Math.round(+n||0));
 const toThousands=v=>(Math.round(+v||0)).toLocaleString('es-ES');
 function num(v){ if(typeof v==='number')return v; const s=String(v||'').replace(/\./g,'').replace(',','.').replace(/[^\d.-]/g,''); const n=parseFloat(s); return isNaN(n)?0:n; }
-const h=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const h=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
 function toast(msg,cls='ok',ms=1500){const t=document.getElementById('toast');t.className='toast '+cls;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
 
 /* ========== Config normalizada ========== */
@@ -302,7 +302,6 @@ function recalcFinancials(){
   const objv=num(MBODY.querySelector('#f_objv').value);
   if(objt==='bruta' && total>0 && objv>0){
     const incluir=MBODY.querySelector('#f_inc_hon').checked;
-    /* Rb% sobre TOTAL excluyendo honorarios (por defecto) */
     const base=incluir?total:(total-CFG.honorarios);
     const alq=Math.max(0,Math.round((objv/100)*base/12));
     MBODY.querySelector('#f_alq').value=alq?toThousands(alq):'';
@@ -516,14 +515,16 @@ function renderAssignList(p){
   const guardadasSet = new Set(guardadas.map(x => (typeof x==='string'? x : x.ev_id)));
 
   let html = '';
+  /* Seleccionadas */
   html += '<div class="block"><h5>Seleccionadas</h5><div class="sel-chips" id="selchips">';
   guardadasSet.forEach(id=>{
     const raw = EVALS.find(e=>e.id===id) || {titulo:id};
     const ev  = adaptEval(raw);
-    html += <span class="chip" data-ev="${h(id)}"><span class="t">${h(ev.titulo||id)}</span> <span class="x" data-un="${h(id)}">×</span></span>;
+    html += '<span class="chip" data-ev="'+h(id)+'"><span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span></span>';
   });
   html += '</div></div>';
 
+  /* Lista */
   html += '<div class="block"><h5 style="margin:0">Evaluaciones disponibles</h5><div class="eval-list" id="evlist">';
   if(!EVALS.length){
     html += '<div class="eval-item"><span>No hay evaluaciones en el sistema</span></div>';
@@ -539,18 +540,17 @@ function renderAssignList(p){
         ('Pl: '+(ev.altura||0)),
         ('🛏 '+(ev.hab||'-')),
         ('🔧 '+ev.reforma)
-      ].map(t=><span class="tag">${h(t)}</span>).join('');
-      html += `
-        <label class="eval-item">
-          <div>
-            <div class="eval-title"><span class="dot ${color}"></span><span>${h(ev.titulo)}</span>${semillas}</div>
-            ${warns.length?('<div class="warns">'+warns.map(w=><span class="tag">${h(w)}</span>).join('')+'</div>'):''}
-          </div>
-          <div class="kpiRight">
-            <span class="tag">${h(fmtEUR(ev.precio||0))}</span>
-            <input type="checkbox" data-ev="${h(ev.id)}" ${checked}>
-          </div>
-        </label>`;
+      ].map(t=>'<span class="tag">'+h(t)+'</span>').join('');
+      html += '<label class="eval-item">'+
+                '<div>'+
+                  '<div class="eval-title"><span class="dot '+color+'"></span><span>'+h(ev.titulo)+'</span>'+semillas+'</div>'+
+                  (warns.length?('<div class="warns">'+warns.map(w=>'<span class="tag">'+h(w)+'</span>').join('')+'</div>'):'')+
+                '</div>'+
+                '<div class="kpiRight">'+
+                  '<span class="tag">'+h(fmtEUR(ev.precio||0))+'</span>'+
+                  '<input type="checkbox" data-ev="'+h(ev.id)+'" '+checked+'>'+
+                '</div>'+
+              '</label>';
     });
   }
   html += '</div></div>';
@@ -562,7 +562,7 @@ function renderAssignList(p){
     const id = e.target.getAttribute && e.target.getAttribute('data-un');
     if(!id) return;
     const chip = e.target.closest('.chip'); if(chip) chip.remove();
-    const chk = ABODY.querySelector(input[type="checkbox"][data-ev="${CSS.escape(id)}"]);
+    const chk = ABODY.querySelector('input[type="checkbox"][data-ev="'+CSS.escape(id)+'"]');
     if(chk) chk.checked = false;
   };
   // Marcar check -> añadir chip (máx 4)
@@ -571,15 +571,15 @@ function renderAssignList(p){
     if(el.tagName!=='INPUT' || el.type!=='checkbox') return;
     const id = el.getAttribute('data-ev');
     const wrap = ABODY.querySelector('#selchips');
-    const exists = wrap.querySelector(.chip[data-ev="${CSS.escape(id)}"]);
+    const exists = wrap.querySelector('.chip[data-ev="'+CSS.escape(id)+'"]');
     const chips  = wrap.querySelectorAll('.chip');
     if(el.checked){
       if(chips.length>=4){ el.checked=false; toast('Máximo 4 activos','warn'); return; }
       if(!exists){
         const raw = EVALS.find(x=>x.id===id) || {titulo:id};
         const ev  = adaptEval(raw);
-        const chip = document.createElement('span'); chip.className='chip'; chip.dataset.ev=id;
-        chip.innerHTML = <span class="t">${h(ev.titulo||id)}</span> <span class="x" data-un="${h(id)}">×</span>;
+        const chip = document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
+        chip.innerHTML = '<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
         wrap.appendChild(chip);
       }
     }else{
@@ -614,8 +614,8 @@ function autoMatchPreselect(p){
     if(pick){
       const raw = EVALS.find(x=>x.id===id) || {titulo:id};
       const ev  = adaptEval(raw);
-      const chip = document.createElement('span'); chip.className='chip'; chip.dataset.ev=id;
-      chip.innerHTML = <span class="t">${h(ev.titulo||id)}</span> <span class="x" data-un="${h(id)}">×</span>;
+      const chip = document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
+      chip.innerHTML = '<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
       sel.appendChild(chip);
     }
   });
