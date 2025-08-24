@@ -17,14 +17,14 @@
   --ink2:#535b63;
   --shadow:0 4px 22px rgba(0,0,0,.06);
   --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif;
-  --fz:12px;         /* tipografía pequeña para encajar sin scroll */
+  --fz:12px;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
 
 /* Topbar */
-.topbar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
 .top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:8px}
 .logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
@@ -68,39 +68,49 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .btn-icon.ok{border-color:var(--ok)} .btn-icon.ok svg{stroke:var(--ok)}
 .btn-icon.ko{border-color:var(--bad)} .btn-icon.ko svg{stroke:var(--bad)}
 .btn-icon.del{border-color:#999} .btn-icon.del svg{stroke:#999}
+.btn-icon.assign{border-color:var(--brand)} .btn-icon.assign svg{stroke:var(--brand)}
 .houses{display:flex;gap:4px;margin-left:auto}
 .houses i{width:9px;height:9px;border-radius:2px;border:1px solid var(--line);background:#eee;display:inline-block}
 .houses i.on{background:var(--brand);border-color:var(--brand)}
 .card.dragging{opacity:.5} .col.drop{outline:2px dashed var(--brand);outline-offset:-6px}
 
-/* Toast (arriba a la derecha) */
+/* Toast (arriba dcha) */
 .toast{position:fixed;top:12px;right:12px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);padding:8px 10px;border-radius:12px;display:none;z-index:100}
 .toast.ok{border-color:var(--ok)} .toast.bad{border-color:var(--bad)} .toast.warn{border-color:var(--accent)}
 .toast.show{display:block}
 
-/* Modal (sin scroll interno) */
-.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:50}
-.modal{width:980px;max-width:95vw;/max-height:92vh;/background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
-.modal header{padding:6px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+/* ===== Modales ===== */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.38);display:none;align-items:center;justify-content:center;z-index:50}
+.modal{width:980px;max-width:95vw;max-height:88vh;background:#fff;border:2px solid #fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
+.modal header{padding:8px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:#fff}
 .modal h4{margin:0;font-size:14px}
-.modal .close{width:26px;height:26px;border-radius:999px;border:1px solid var(--brand);background:#fff;color:var(--brand);display:grid;place-items:center;font-weight:800;cursor:pointer}
-.modal .body{padding:8px 10px;display:grid;gap:6px;flex:1 1 auto;overflow:hidden}
-.block{border:1px dashed var(--line);border-radius:12px;padding:6px}
+.modal .close{width:28px;height:28px;border-radius:999px;border:2px solid var(--brand);background:#fff;color:var(--brand);display:grid;place-items:center;font-weight:800;cursor:pointer}
+.modal .body{padding:8px 10px;display:grid;gap:6px;flex:1 1 auto;overflow:auto;background:#fff}
+.block{border:1px dashed var(--line);border-radius:12px;padding:6px;background:#fff}
 .block h5{margin:0 0 4px;color:#666;font-weight:700;font-size:11px;letter-spacing:.2px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px} /* financiación en una sola fila */
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .field{display:flex;flex-direction:column;gap:2px}
 .field label{color:#555;font-size:11px}
-.field input,.field select,.field textarea,.chips-input{border:1px solid var(--line);border-radius:10px;padding:5px 7px;min-height:24px;font-size:12px}
+.field input,.field select,.field textarea,.chips-input{border:1px solid var(--line);border-radius:10px;padding:5px 7px;min-height:24px;font-size:12px;background:#fff;color:var(--ink)}
 .field textarea{resize:none}
 .row2{grid-column:span 2} .row3{grid-column:span 3}
 .chips{display:flex;gap:6px;flex-wrap:wrap;line-height:18px}
-.chips.limit2{max-height:40px;overflow:hidden} /* 2 líneas visibles para chips */
+.chips.limit2{max-height:40px;overflow:hidden}
 .chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;display:inline-flex;gap:6px;align-items:center}
 .chip .x{cursor:pointer;color:#999}
 .chips-input{width:220px}
-.modal footer{padding:6px 10px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;background:#fff}
+.modal footer{padding:8px 10px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;background:#fff}
 .save{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:7px 11px;font-weight:800;cursor:pointer;font-size:12px}
+
+/* Modal de asignación */
+.modal.small{width:720px}
+.eval-list{border:1px solid var(--line);border-radius:10px;max-height:46vh;overflow:auto;padding:6px}
+.eval-item{display:flex;align-items:center;justify-content:space-between;border-bottom:1px dashed var(--line);padding:6px 2px;font-size:12px}
+.eval-item:last-child{border-bottom:none}
+.tag{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:1px 6px;margin-left:6px;font-size:11px}
+.sel-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.sel-chips .chip .x{color:#999;cursor:pointer}
 
 .footer{margin:16px 0 14px;text-align:center;color:#888;font-size:11px}
 @media (max-width:980px){.board{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.col{min-height:unset}}
@@ -125,7 +135,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
     <div id="board" class="board"></div>
   </div>
 
-  <!-- Modal -->
+  <!-- Modal FICHA -->
   <div class="modal-back" id="mb">
     <div class="modal" role="dialog" aria-label="Ficha del cliente" aria-modal="true">
       <header>
@@ -134,6 +144,20 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
       </header>
       <div class="body" id="mbody"></div>
       <footer><button class="save" id="msave">Guardar</button></footer>
+    </div>
+  </div>
+
+  <!-- Modal ASIGNACIÓN (fuera de la ficha) -->
+  <div class="modal-back" id="ab">
+    <div class="modal small" role="dialog" aria-label="Asignar activos" aria-modal="true">
+      <header>
+        <h4 id="ah">Asignar activos (máx 4)</h4>
+        <button class="close" id="aclose" title="Cerrar">×</button>
+      </header>
+      <div class="body" id="abody">
+        <!-- aquí se renderiza lista y chips -->
+      </div>
+      <footer><button class="save" id="asave">Guardar</button></footer>
     </div>
   </div>
 
@@ -193,7 +217,7 @@ function headerKPIs(){
   });
 }
 
-/* ===== Tablero y tarjetas ===== */
+/* ===== Tarjetas ===== */
 function daysInPhase(p){const t=p.phase_entered_at?+p.phase_entered_at:Date.now();return Math.max(0,Math.floor((Date.now()-t)/86400000))}
 function shortDate(dt){
   if(!dt) return '';
@@ -219,6 +243,9 @@ function makeCard(p){
   const badges='<div class="badges"><span class="badge">🏷 '+h(pr.tipo||'Tradicional')+'</span><span class="badge">🎯 '+objtxt+'</span>'+meetLabel+'</div>';
   let acts='<div class="actions">';
   acts+='<button class="btn-icon view" data-act="view" title="Ver / editar"><svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>';
+  if(p.phase==='BUSQUEDA'){
+    acts+='<button class="btn-icon assign" data-act="assign" title="Asignar activos (máx 4)"><svg viewBox="0 0 24 24"><path d="M4 17l6-6 4 4 6-6"/><path d="M3 7h7v7"/></svg></button>';
+  }
   acts+='<button class="btn-icon ok" data-act="ok" title="Interesa (avanzar)"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></button>';
   acts+='<button class="btn-icon ko" data-act="ko" title="No interesa (descartar)"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
   if(p.phase==='CONTACTO'){
@@ -242,14 +269,14 @@ function renderBoard(){
   });
 }
 
-/* ===== MODAL ===== */
+/* ===== Modal FICHA ===== */
 const MB=document.getElementById('mb'), MH=document.getElementById('mh'), MBODY=document.getElementById('mbody'); let MODAL_ID=null;
 
 function moneyifyInput(el){ el.addEventListener('blur',()=>{ el.value = el.value? toThousands(num(el.value)) : ''; }); }
 
 function recalcFinancials(){
   const total=num(MBODY.querySelector('#f_budget').value);
-  const budIncl = MBODY.querySelector('#f_bud_incl').checked; /* HON. dentro del presupuesto */
+  const budIncl = MBODY.querySelector('#f_bud_incl').checked;
   let pmax=0, itp=0;
   if(total>0){
     if(budIncl){ pmax=Math.max(0, Math.round((total - CFG.notaria - CFG.honorarios)/(1+CFG.itp_pct))); }
@@ -285,14 +312,13 @@ function recalcFinancials(){
 
 function openModal(p){
   MODAL_ID=p.id; MH.textContent=(p.name||'Ficha')+' — Detalle';
-  const pr=p.profile||{}, meet=p.meeting||{}, busc=p.busqueda||{propuestas:[]};
+  const pr=p.profile||{}, meet=p.meeting||{};
   const locs=Array.isArray(pr.locs)?pr.locs:(pr.locs?String(pr.locs).split(',').map(s=>s.trim()).filter(Boolean):[]);
   const budIncl = (typeof pr.budget_incl_honorarios==='boolean') ? pr.budget_incl_honorarios : !!CFG.presupuesto.honorarios_incluidos_default;
 
-  /* ==== HTML del modal (compacto, sin scroll) ==== */
   let html='';
 
-  /* DATOS PERSONALES — EXACTO 2 FILAS */
+  /* DATOS PERSONALES (2 filas) */
   html+='<div class="block"><h5>DATOS PERSONALES</h5><div class="grid">';
   html+='<div class="field"><label>Nombre y apellidos</label><input id="f_name" maxlength="30" value="'+h(p.name||'')+'"/></div>';
   html+='<div class="field"><label>Teléfono</label><input id="f_phone" maxlength="9" value="'+h(p.phone||'')+'"/></div>';
@@ -302,74 +328,57 @@ function openModal(p){
   html+='<div class="field"><label>Localidad</label><input id="f_locres" maxlength="10" value="'+h(pr.locres||'')+'"/></div>';
   html+='</div></div>';
 
-  /* INVERSIÓN */
+  /* INVERSIÓN — EXACTAMENTE 3 FILAS */
   html+='<div class="block"><h5>INVERSIÓN</h5><div class="grid">';
-  html+='<div class="field row2"><label>Localidades (inversión) — máx 6</label><div class="chips limit2" id="chips_locs">';
+  /* Fila 1 */
+  html+='<div class="field row2"><label>Localidades (máx 6)</label><div class="chips limit2" id="chips_locs">';
   for(let i=0;i<locs.length;i++){ html+='<span class="chip"><span class="t">'+h(locs[i])+'</span> <span class="x" data-del="'+h(locs[i])+'">×</span></span>'; }
   html+='</div><input class="chips-input" id="add_loc" list="cfg_locs" placeholder="Añadir y Enter" maxlength="10"/></div>';
   html+='<datalist id="cfg_locs">'+(CFG.localidades.map(l=>'<option value="'+h(l)+'"></option>').join(''))+'</datalist>';
-  html+='<div class="field"><label>Tipo de alquiler</label><select id="f_tipo"><option'+((pr.tipo||'Tradicional')==='Tradicional'?' selected':'')+'>Tradicional</option><option'+((pr.tipo||'Tradicional')==='Habitaciones'?' selected':'')+'>Habitaciones</option></select></div>';
-  html+='<div class="field"><label>Acepta reforma</label><select id="f_ref"><option'+((pr.ref||'No')==='No'?' selected':'')+'>No</option><option'+((pr.ref||'No')==='Lavado de cara'?' selected':'')+'>Lavado de cara</option><option'+((pr.ref||'No')==='Integral'?' selected':'')+'>Integral</option></select></div>';
-  html+='<div class="field"><label>¿Ascensor?</label><select id="f_asc"><option'+((pr.asc||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.asc||'No')==='No'?' selected':'')+'>No</option></select></div>';
+  html+='<div class="field"><label>Tipo</label><select id="f_tipo"><option'+((pr.tipo||'Tradicional')==='Tradicional'?' selected':'')+'>Tradicional</option><option'+((pr.tipo||'Tradicional')==='Habitaciones'?' selected':'')+'>Habitaciones</option></select></div>';
+  /* Fila 2 */
+  html+='<div class="field"><label>Reforma</label><select id="f_ref"><option'+((pr.ref||'No')==='No'?' selected':'')+'>No</option><option'+((pr.ref||'No')==='Lavado de cara'?' selected':'')+'>Lavado de cara</option><option'+((pr.ref||'No')==='Integral'?' selected':'')+'>Integral</option></select></div>';
+  html+='<div class="field"><label>Ascensor</label><select id="f_asc"><option'+((pr.asc||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.asc||'No')==='No'?' selected':'')+'>No</option></select></div>';
   html+='<div class="field"><label>Altura máx.</label><input id="f_alt" inputmode="numeric" maxlength="1" value="'+h(pr.alt||'')+'"/></div>';
+  /* Fila 3 */
   html+='<div class="field"><label>¿Bajos?</label><select id="f_bajos"><option'+((pr.bajos||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.bajos||'No')==='No'?' selected':'')+'>No</option></select></div>';
-  html+='<div class="field"><label>Presupuesto TOTAL (€)</label><input id="f_budget" value="'+(pr.budget?toThousands(pr.budget):'')+'"/></div>';
-  html+='<div class="field"><label>P. máx COMPRA (auto)</label><input id="f_pmax" disabled value="'+(pr.pmax?toThousands(pr.pmax):'')+'"/></div>';
-  html+='<div class="field"><label>ITP estimado (auto)</label><input id="f_itp" disabled value="'+(pr.itp?toThousands(pr.itp):'')+'"/></div>';
-  /* Switch honorarios incluidos, sin añadir altura extra: */
-  html+='<div class="field row3"><label><input type="checkbox" id="f_bud_incl"'+(budIncl?' checked':'')+'> Honorarios incluidos en el presupuesto</label></div>';
+  html+='<div class="field"><label>Presupuesto (€)</label><input id="f_budget" value="'+(pr.budget?toThousands(pr.budget):'')+'"/></div>';
+  html+='<div class="field"><label>P. máx compra / ITP</label><div style="display:flex;gap:6px"><input id="f_pmax" disabled style="width:50%" value="'+(pr.pmax?toThousands(pr.pmax):'')+'"/><input id="f_itp" disabled style="width:50%" value="'+(pr.itp?toThousands(pr.itp):'')+'"/></div><small><label><input type="checkbox" id="f_bud_incl"'+(budIncl?' checked':'')+'> Incluir honorarios en presupuesto</label></small></div>';
   html+='</div></div>';
 
-  /* FINANCIACIÓN — 5 columnas en una fila (más compacto) */
+  /* FINANCIACIÓN — UNA SOLA FILA DE 5 */
   html+='<div class="block"><h5>FINANCIACIÓN</h5><div class="grid5">';
   html+='<div class="field"><label>Financiación</label><select id="f_fin"><option'+((pr.fin||'Sí')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.fin||'Sí')==='No'?' selected':'')+'>No</option></select></div>';
   html+='<div class="field"><label>Broker</label><select id="f_broker"><option'+((pr.broker||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.broker||'No')==='No'?' selected':'')+'>No</option></select></div>';
-  html+='<div class="field"><label>% financiación</label><input id="f_pct" maxlength="4" value="'+h(pr.pct||'80')+'"/></div>';
+  html+='<div class="field"><label>% fin.</label><input id="f_pct" maxlength="4" value="'+h(pr.pct||'80')+'"/></div>';
   html+='<div class="field"><label>Hipoteca</label><input id="f_hip" disabled value="'+(pr.hip?toThousands(pr.hip):'')+'"/></div>';
-  html+='<div class="field"><label>Fondos propios</label><input id="f_prop" disabled value="'+(pr.prop?toThousands(pr.prop):'')+'"/></div>';
+  html+='<div class="field"><label>Fondos</label><input id="f_prop" disabled value="'+(pr.prop?toThousands(pr.prop):'')+'"/></div>';
   html+='</div></div>';
 
   /* OBJETIVO */
   const objt=(pr.objt||'neta').toLowerCase();
   const inc=typeof pr.bruta_incluye_honorarios==='boolean'?pr.bruta_incluye_honorarios:!!CFG.bruta.include_honorarios_default;
   html+='<div class="block"><h5>OBJETIVO</h5><div class="grid">';
-  html+='<div class="field"><label>Objetivo principal</label><select id="f_objt"><option value="bruta"'+(objt==='bruta'?' selected':'')+'>Rentabilidad bruta (%)</option><option value="neta"'+(objt==='neta'?' selected':'')+'>Rentabilidad neta (%)</option><option value="flujo"'+(objt==='flujo'?' selected':'')+'>Flujo (€/mes)</option></select></div>';
-  html+='<div class="field"><label>Valor objetivo</label><input id="f_objv" maxlength="4" value="'+h(pr.objv||'')+'"/></div>';
-  html+='<div class="field"><label>Alquiler orientativo (€/mes)</label><input id="f_alq" disabled value="'+(pr.alq?toThousands(pr.alq):'')+'"/></div>';
-  html+='<div class="field row3"><label><input type="checkbox" id="f_inc_hon"'+(inc?' checked':'')+'> Incluir honorarios en Bruta (este cliente)</label></div>';
+  html+='<div class="field"><label>Principal</label><select id="f_objt"><option value="bruta"'+(objt==='bruta'?' selected':'')+'>Rent. bruta (%)</option><option value="neta"'+(objt==='neta'?' selected':'')+'>Rent. neta (%)</option><option value="flujo"'+(objt==='flujo'?' selected':'')+'>Flujo (€/mes)</option></select></div>';
+  html+='<div class="field"><label>Valor</label><input id="f_objv" maxlength="4" value="'+h(pr.objv||'')+'"/></div>';
+  html+='<div class="field"><label>Alquiler orientativo</label><input id="f_alq" disabled value="'+(pr.alq?toThousands(pr.alq):'')+'"/></div>';
+  html+='<div class="field row3"><label><input type="checkbox" id="f_inc_hon"'+(inc?' checked':'')+'> Incluir honorarios en Bruta</label></div>';
   html+='</div></div>';
 
-  /* REUNIÓN / NOTAS (siempre visible) */
-  html+='<div class="block"><h5>REUNIÓN / NOTAS</h5>';
-  html+='<div class="grid">';
+  /* REUNIÓN / NOTAS */
+  html+='<div class="block"><h5>REUNIÓN / NOTAS</h5><div class="grid">';
   if(p.phase==='CONTACTO'){
-    html+='<div class="field"><label>Fecha y hora (para pasar a Reunión)</label><input id="f_meet" type="datetime-local" value="'+h(meet.date||'')+'"/></div>';
-    html+='<div class="field row2"></div>';
+    html+='<div class="field"><label>Fecha y hora</label><input id="f_meet" type="datetime-local" value="'+h(meet.date||'')+'"/></div><div class="field row2"></div>';
   }else{
     const fv = meet.date? shortDate(meet.date) : '';
-    html+='<div class="field"><label>Fecha y hora</label><input id="f_meet_ro" value="'+h(fv)+'" disabled/></div>';
-    html+='<div class="field row2"></div>';
+    html+='<div class="field"><label>Fecha y hora</label><input id="f_meet_ro" value="'+h(fv)+'" disabled/></div><div class="field row2"></div>';
   }
-  /* Notas 3x2: más estrechas de alto pero largas de ancho */
   html+='<div class="field row3"><label>Notas (máx 300)</label><textarea id="f_notas" rows="2" maxlength="300" style="line-height:1.3">'+h(meet.notas||'')+'</textarea></div>';
   html+='</div></div>';
 
-  /* BÚSQUEDA — asignar activos (sin matching en esta versión) */
-  if(p.phase==='BUSQUEDA'){
-    html+='<div class="block"><h5>BÚSQUEDA — Asignación de activos</h5><div class="grid">';
-    html+='<div class="field row3"><div id="f_sel_evals" class="chips">';
-    const prop = Array.isArray(busc.propuestas)?busc.propuestas:[];
-    for(let j=0;j<prop.length;j++){ const ev=EVALS.find(e=>e.id===prop[j]); const tt=ev?(ev.titulo||ev.dir||ev.calle||ev.id):prop[j]; html+='<span class="chip" data-ev="'+h(prop[j])+'"><span class="t">'+h(tt)+'</span> <span class="x" data-un="'+h(prop[j])+'">×</span></span>'; }
-    html+='</div></div>';
-    html+='<div class="field"><button id="f_btn_assign" class="save" type="button">Asignar activos (BETA)</button></div>';
-    html+='<div class="field row2"><small style="color:#777">Máx 4. Si no hay evaluaciones, aviso.</small></div>';
-    html+='</div></div>';
-  }
-
   MBODY.innerHTML=html;
 
-  /* ===== Comportamiento del modal ===== */
-  /* chips localidades (máx 6) */
+  /* chips localidades */
   const chipsWrap=MBODY.querySelector('#chips_locs');
   if(chipsWrap){
     chipsWrap.addEventListener('click',e=>{
@@ -393,26 +402,6 @@ function openModal(p){
   ['#f_budget','#f_pct'].forEach(sel=>{const el=MBODY.querySelector(sel); if(el) moneyifyInput(el);});
   ['#f_budget','#f_pct','#f_objt','#f_objv','#f_fin','#f_inc_hon','#f_bud_incl'].forEach(sel=>{const el=MBODY.querySelector(sel); if(el) el.addEventListener('input',recalcFinancials);});
   recalcFinancials();
-
-  /* Asignación manual (prompt reducido) */
-  if(p.phase==='BUSQUEDA'){
-    const selWrap=MBODY.querySelector('#f_sel_evals');
-    const btnAssign=MBODY.querySelector('#f_btn_assign');
-    btnAssign.addEventListener('click',()=>{
-      const list=EVALS.slice(0,50);
-      if(!list.length){ toast('No hay evaluaciones en el sistema','warn'); return; }
-      let msg='Elige (1–'+list.length+') — máx 4:\n\n';
-      list.forEach((e,i)=>{ const t=e.titulo || e.dir || e.calle || e.id; msg+=(i+1)+') '+t+' — '+fmtEUR(e.precio||0)+'\n'; });
-      const iSel=prompt(msg,'1'); if(!iSel) return;
-      const idx=parseInt(iSel,10)-1; if(isNaN(idx)||idx<0||idx>=list.length){toast('Selección no válida','bad');return;}
-      const ev=list[idx];
-      const chips=selWrap.querySelectorAll('.chip'); if(chips.length>=4){toast('Máximo 4','warn');return;}
-      const chip=document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',ev.id);
-      const ttxt=ev.titulo||ev.dir||ev.calle||ev.id; chip.innerHTML='<span class="t">'+h(ttxt)+'</span> <span class="x" data-un="'+h(ev.id)+'">×</span>';
-      selWrap.appendChild(chip);
-    });
-    selWrap.addEventListener('click',e=>{ const un=e.target.getAttribute('data-un'); if(!un)return; const chip=e.target.parentElement; selWrap.removeChild(chip); });
-  }
 
   MB.style.display='flex';
 }
@@ -443,20 +432,85 @@ function saveModal(){
     const dt=q('#f_meet').value;
     if(dt){ p.meeting.date=dt; p.phase='REUNION'; p.phase_entered_at=Date.now(); p.history=p.history||{}; p.history.CONTACTO='OK'; }
   }
-  /* Búsqueda — propuestas guardadas */
-  if(p.phase==='BUSQUEDA'){
-    const chips=MBODY.querySelectorAll('#f_sel_evals .chip');
-    p.busqueda=p.busqueda||{propuestas:[]}; p.busqueda.propuestas=[...chips].map(ch=>ch.getAttribute('data-ev')||ch.querySelector('.t').textContent);
-  }
 
   list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived);
   toast('Guardado','ok'); closeModal(); headerKPIs(); renderBoard();
 }
 
-/* ===== Eventos globales (delegación estable) ===== */
+/* ===== Modal ASIGNACIÓN ===== */
+const AB=document.getElementById('ab'), ABODY=document.getElementById('abody'); let ASSIGN_ID=null;
+function openAssignModal(p){
+  ASSIGN_ID=p.id;
+  const busc=p.busqueda||{propuestas:[]};
+  const selected=new Set(Array.isArray(busc.propuestas)?busc.propuestas:[]);
+  let html='';
+  html+='<div class="block"><h5>Seleccionadas</h5><div class="sel-chips" id="selchips">';
+  selected.forEach(id=>{
+    const ev=EVALS.find(e=>e.id===id)||{titulo:id};
+    html+='<span class="chip" data-ev="'+h(id)+'"><span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span></span>';
+  });
+  html+='</div></div>';
+
+  html+='<div class="block"><h5>Evaluaciones disponibles</h5><div class="eval-list" id="evlist">';
+  if(!EVALS.length){
+    html+='<div class="eval-item"><span>No hay evaluaciones en el sistema</span></div>';
+  }else{
+    EVALS.forEach(ev=>{
+      const checked=selected.has(ev.id)?'checked':'';
+      const t=ev.titulo||ev.dir||ev.calle||ev.id;
+      html+='<label class="eval-item"><span>'+h(t)+' <span class="tag">'+fmtEUR(ev.precio||0)+'</span></span><input type="checkbox" data-ev="'+h(ev.id)+'" '+checked+'></label>';
+    });
+  }
+  html+='</div><small style="color:#777">Máximo 4 activos.</small></div>';
+
+  ABODY.innerHTML=html;
+  AB.style.display='flex';
+
+  ABODY.addEventListener('click',function onChip(e){
+    const un=e.target.getAttribute('data-un'); if(!un) return;
+    const c=e.target.closest('.chip'); if(c) c.remove();
+    const chk=ABODY.querySelector('input[type="checkbox"][data-ev="'+CSS.escape(un)+'"]');
+    if(chk) chk.checked=false;
+  },{once:false});
+
+  ABODY.addEventListener('change',function onCheck(e){
+    const el=e.target; if(el.tagName!=='INPUT') return;
+    const id=el.getAttribute('data-ev'); if(!id) return;
+    const wrap=ABODY.querySelector('#selchips');
+    const chips=wrap.querySelectorAll('.chip');
+    if(el.checked){
+      if(chips.length>=4){ el.checked=false; toast('Máximo 4 activos','warn'); return; }
+      const ev=EVALS.find(x=>x.id===id)||{titulo:id};
+      const chip=document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
+      chip.innerHTML='<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
+      wrap.appendChild(chip);
+    }else{
+      const c=wrap.querySelector('.chip[data-ev="'+CSS.escape(id)+'"]'); if(c) c.remove();
+    }
+  },{once:false});
+}
+function closeAssignModal(){AB.style.display='none'; ASSIGN_ID=null;}
+function saveAssignModal(){
+  if(!ASSIGN_ID) return;
+  let list=allPros(); const i=list.findIndex(x=>x.id===ASSIGN_ID); if(i<0) return;
+  const p=list[i];
+  const chips=[...ABODY.querySelectorAll('#selchips .chip')].map(ch=>ch.getAttribute('data-ev'));
+  p.busqueda=p.busqueda||{}; p.busqueda.propuestas=chips.slice(0,4);
+  list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived);
+  toast('Propuestas actualizadas','ok'); closeAssignModal(); headerKPIs(); renderBoard();
+}
+
+/* ===== Eventos globales ===== */
 document.addEventListener('click',e=>{
-  if(e.target.id==='mclose') { closeModal(); return; }
-  if(e.target.id==='msave') { saveModal(); return; }
+  /* FICHA */
+  if(e.target.id==='mclose'){ closeModal(); return; }
+  if(e.target.id==='msave'){ saveModal(); return; }
+
+  /* ASIGNACIÓN */
+  if(e.target.id==='aclose'){ closeAssignModal(); return; }
+  if(e.target.id==='asave'){ saveAssignModal(); return; }
+
+  /* Crear contacto */
   if(e.target.id==='btn_create'){
     const name=document.getElementById('new_name').value.trim();
     const phone=document.getElementById('new_phone').value.trim();
@@ -466,11 +520,16 @@ document.addEventListener('click',e=>{
     const p={id:'p_'+Math.random().toString(36).slice(2,8),name,phone,email,phase:'CONTACTO',phase_entered_at:Date.now(),history:{},profile:{tipo:'Tradicional',objt:'neta',objv:6,budget_incl_honorarios:CFG.presupuesto.honorarios_incluidos_default}};
     list.push(p); savePros(list); PROS=list.filter(x=>!x.archived); toast('Contacto creado','ok'); headerKPIs(); renderBoard(); return;
   }
+
+  /* Botones de tarjeta */
   const btn=e.target.closest('.btn-icon'); if(btn){
     const id=btn.closest('.card').dataset.id;
     let list=allPros(); const i=list.findIndex(x=>x.id===id); if(i<0)return;
     const p=list[i]; const act=btn.dataset.act;
+
     if(act==='view'){ openModal(p); return; }
+    if(act==='assign' && p.phase==='BUSQUEDA'){ openAssignModal(p); return; }
+
     if(act==='ok'){
       const ph=p.phase; const idx=PHASES.indexOf(ph);
       p.history=p.history||{}; p.history[ph]='OK';
@@ -489,7 +548,13 @@ document.addEventListener('click',e=>{
     }
   }
 });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape' && MB.style.display==='flex') closeModal(); });
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(MB.style.display==='flex'){ closeModal(); return; }
+    if(AB.style.display==='flex'){ closeAssignModal(); return; }
+  }
+});
 
 /* Drag & drop */
 let dragId=null;
@@ -504,7 +569,7 @@ document.addEventListener('drop',e=>{
   if(p.phase!==to){ p.phase=to; p.phase_entered_at=Date.now(); list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived); headerKPIs(); renderBoard(); toast('Movido','ok'); }
 });
 
-/* Export CSV (XLS simple) */
+/* Export CSV */
 document.getElementById('btn-xls').addEventListener('click',function(){
   const all=allPros(); const rows=[];
   rows.push(['id','nombre','email','tel','fase','ok_contacto','ok_reunion','ok_contrato','ok_busqueda','ok_compraventa','archivado','motivo','propuestas'].join(';'));
