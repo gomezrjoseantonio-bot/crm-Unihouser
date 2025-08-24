@@ -70,6 +70,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .btn-icon.ko{border-color:var(--bad)} .btn-icon.ko svg{stroke:var(--bad)}
 .btn-icon.del{border-color:#999} .btn-icon.del svg{stroke:#999}
 .btn-icon.assign{border-color:var(--brand)} .btn-icon.assign svg{stroke:var(--brand)}
+.btn-icon.contact{border-color:#555} .btn-icon.contact svg{stroke:#555}
 .houses{display:flex;gap:4px;margin-left:auto}
 .houses i{width:9px;height:9px;border-radius:2px;border:1px solid var(--line);background:#eee;display:inline-block}
 .houses i.on{background:var(--brand);border-color:var(--brand)}
@@ -118,6 +119,14 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .sel-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .sel-chips .chip .x{color:#999;cursor:pointer}
 
+/* Modal Contacto */
+.modal.contact{width:820px}
+.contact-body .grid{grid-template-columns:1fr 1fr}
+.contact-header{display:flex;gap:8px;align-items:center}
+.contact-header select{border:1px solid var(--line);border-radius:10px;padding:5px 7px;font-size:12px}
+.copybtn{border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:#fff;cursor:pointer}
+.copyrow{display:flex;gap:6px;align-items:center;margin-top:6px}
+
 .footer{margin:16px 0 14px;text-align:center;color:#888;font-size:11px}
 @media (max-width:980px){.board{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.col{min-height:unset}}
 </style>
@@ -146,7 +155,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
     <div class="modal" role="dialog" aria-label="Ficha del cliente" aria-modal="true">
       <header>
         <h4 id="mh">Ficha</h4>
-      <button class="close" id="mclose" title="Cerrar">×</button>
+        <button class="close" id="mclose" title="Cerrar">×</button>
       </header>
       <div class="body" id="mbody"></div>
       <footer><button class="save" id="msave">Guardar</button></footer>
@@ -162,6 +171,18 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
       </header>
       <div class="body" id="abody"></div>
       <footer><button class="save" id="asave">Guardar</button></footer>
+    </div>
+  </div>
+
+  <!-- Modal CONTACTO -->
+  <div class="modal-back" id="cb">
+    <div class="modal contact" role="dialog" aria-label="Contactar" aria-modal="true">
+      <header>
+        <h4 id="ch">Contactar</h4>
+        <button class="close" id="cclose" title="Cerrar">×</button>
+      </header>
+      <div class="body contact-body" id="cbody"></div>
+      <footer><button class="save" id="csave">Cerrar</button></footer>
     </div>
   </div>
 
@@ -248,6 +269,7 @@ function makeCard(p){
   if(p.phase==='BUSQUEDA'){
     acts+='<button class="btn-icon assign" data-act="assign" title="Asignar activos (máx 4)"><svg viewBox="0 0 24 24"><path d="M4 17l6-6 4 4 6-6"/><path d="M3 7h7v7"/></svg></button>';
   }
+  acts+='<button class="btn-icon contact" data-act="contact" title="Contactar"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H4z"/><path d="M4 4l8 7 8-7"/></svg></button>';
   acts+='<button class="btn-icon ok" data-act="ok" title="Interesa (avanzar)"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></button>';
   acts+='<button class="btn-icon ko" data-act="ko" title="No interesa (descartar)"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
   if(p.phase==='CONTACTO'){
@@ -361,7 +383,7 @@ function openModal(p){
   html+='<div class="field row3"><label><input type="checkbox" id="f_inc_hon"'+(inc?' checked':'')+'> Incluir honorarios en Bruta</label></div>';
   html+='</div></div>';
 
-  /* REUNIÓN / NOTAS (sin scroll interno, 3×2) */
+  /* REUNIÓN / NOTAS */
   html+='<div class="block"><h5>REUNIÓN / NOTAS</h5><div class="grid">';
   if(p.phase==='CONTACTO'){
     html+='<div class="field"><label>Fecha y hora</label><input id="f_meet" type="datetime-local" value="'+h(meet.date||'')+'"/></div><div class="field row2"></div>';
@@ -457,6 +479,7 @@ function scoreEvalForPros(evRaw, p){
   const pr = p.profile || {};
   const {objt, objv} = clientObjective(p);
 
+  /* ¿Incluir honorarios en base? depende del flag del cliente */
   const incBruta = !!pr.bruta_incluye_honorarios || !!pr.budget_incl_honorarios;
   const incNeta  = (typeof pr.neta_incluye_honorarios==='boolean') ? pr.neta_incluye_honorarios
                    : !!CFG.neta.include_honorarios_default || !!pr.budget_incl_honorarios;
@@ -468,21 +491,11 @@ function scoreEvalForPros(evRaw, p){
   const baseBruta = (ev.precio||0) + itp + notaria + (incBruta ? honor : 0);
   const baseNeta  = (ev.precio||0) + itp + notaria + (incNeta  ? honor : 0);
 
-  const rb = (typeof ev.kpi_bruta === 'number')
-    ? ev.kpi_bruta
-    : (baseBruta>0 ? ( (ev.ing_a||0) / baseBruta ) * 100 : 0);
-
-  const rn = (typeof ev.kpi_neta === 'number')
-    ? ev.kpi_neta
-    : (baseNeta>0 ? ( ((ev.ing_a||0)-(ev.gas_a||0)) / baseNeta ) * 100 : 0);
-
+  const rb = baseBruta>0 ? (((ev.ing_a||0) / baseBruta) * 100) : 0;
+  const rn = baseNeta>0  ? ((((ev.ing_a||0)-(ev.gas_a||0)) / baseNeta) * 100) : 0;
   const fl = (typeof ev.flujo_m === 'number') ? ev.flujo_m : ((ev.ing_m||0)-(ev.gas_m||0));
 
-  let kpi;
-  if (objt==='bruta') kpi = rb;
-  else if (objt==='neta') kpi = rn;
-  else kpi = fl;
-
+  const kpi = (objt==='bruta') ? rb : (objt==='neta') ? rn : fl;
   const target = Number(objv||0);
   const ratio  = target>0 ? (kpi/target) : 0;
   return { ev, rb, rn, fl, kpi, objt, objv:target, ratio };
@@ -588,21 +601,21 @@ function renderAssignList(p){
   };
 }
 
-// Preselección automática SOLO si no hay guardadas
+/* Preselección automática: primero VERDES, luego ÁMBAR, luego top */
 function autoMatchPreselect(p){
   const ya = (p.busqueda && Array.isArray(p.busqueda.propuestas) && p.busqueda.propuestas.length>0);
   if(ya || !EVALS.length) return;
 
-  const ranked = EVALS.map(ev=>scoreEvalForPros(ev,p)).sort((a,b)=>b.ratio-a.ratio);
+  const scored = EVALS.map(ev=>scoreEvalForPros(ev,p)).sort((a,b)=>b.ratio-a.ratio);
   const th = CFG.match?.thresholds || {green:1,amber:0.95};
-  let chosen = [];
-  for(const r of ranked){
-    if(chosen.length>=4) break;
-    if(r.ratio >= (th.amber??0.95)) chosen.push(r.ev.id || r.ev.ev_id);
-  }
-  if(!chosen.length){
-    chosen = ranked.slice(0, Math.min(2, ranked.length)).map(r=>r.ev.id || r.ev.ev_id);
-  }
+  const chosen=[];
+  // Verdes primero
+  for(const r of scored){ if(chosen.length>=4) break; if(r.ratio >= (th.green??1)) chosen.push(r.ev.id||r.ev.ev_id); }
+  // Luego ámbar
+  for(const r of scored){ if(chosen.length>=4) break; if(r.ratio >= (th.amber??0.95) && !chosen.includes(r.ev.id||r.ev.ev_id)) chosen.push(r.ev.id||r.ev.ev_id); }
+  // Si no llega, completa con mejores
+  for(const r of scored){ if(chosen.length>=4) break; const id=r.ev.id||r.ev.ev_id; if(!chosen.includes(id)) chosen.push(id); }
+
   const evlist = ABODY.querySelector('#evlist');
   const sel    = ABODY.querySelector('#selchips');
   if(!evlist || !sel) return;
@@ -624,7 +637,7 @@ function autoMatchPreselect(p){
 function openAssignModal(p){
   ASSIGN_ID=p.id;
   renderAssignList(p);
-  autoMatchPreselect(p);        // sugerencias sólo si no había guardadas
+  autoMatchPreselect(p);
   AB.style.display='flex';
 }
 function closeAssignModal(){ AB.style.display='none'; ASSIGN_ID=null; ABODY.onclick=null; ABODY.onchange=null; }
@@ -638,6 +651,76 @@ function saveAssignModal(){
   toast('Propuestas actualizadas','ok'); closeAssignModal(); headerKPIs(); renderBoard();
 }
 
+/* ========== Modal CONTACTO ========== */
+const CB=document.getElementById('cb'), CBODY=document.getElementById('cbody'); let CONTACT_ID=null;
+function fillTemplate(tpl, p, ev){
+  const pr=p.profile||{};
+  const nombre=p.name||'';
+  const localidad=ev?.localidad || (Array.isArray(pr.locs)&&pr.locs[0]||'');
+  const calle=ev?.titulo || '';
+  const precio=fmtEUR(ev?.precio||0);
+  const alquiler=fmtEUR(ev?.ing_m||0);
+  const pmax=pr.pmax?fmtEUR(pr.pmax):'';
+  const link=ev?.link || '#';
+  return (tpl||'')
+    .replaceAll('{NOMBRE}', nombre)
+    .replaceAll('{LOCALIDAD}', localidad)
+    .replaceAll('{CALLE}', calle)
+    .replaceAll('{PRECIO}', precio)
+    .replaceAll('{ALQUILER}', alquiler)
+    .replaceAll('{P_MAX}', pmax)
+    .replaceAll('{LINK}', link);
+}
+function openContactModal(p){
+  CONTACT_ID=p.id;
+  const cfgCom=CFG.comms||{};
+  const propuestas=(p.busqueda&&Array.isArray(p.busqueda.propuestas))?p.busqueda.propuestas:[];
+  const evs=propuestas.map(id=>EVALS.find(e=>e.id===id)).filter(Boolean).map(adaptEval);
+  const selectHtml = evs.length
+    ? '<label>Activo</label><select id="c_ev">'+ evs.map((e,i)=>'<option value="'+h(e.id)+'">'+h(e.titulo)+'</option>').join('') +'</select>'
+    : '<div style="color:#888">No hay activos asignados. Puedes enviar mensaje genérico.</div>';
+  const ev0 = evs[0] || null;
+  const mailSubj = fillTemplate(cfgCom.mail_subj || 'Oportunidad en {LOCALIDAD}: {CALLE}', p, ev0);
+  const mailBody = fillTemplate(cfgCom.mail_body || 'Hola {NOMBRE},\nTe encaja este piso en {LOCALIDAD}, {CALLE}? Precio {PRECIO}, alquiler {ALQUILER}. P. máx compra {P_MAX}.\n{LINK}', p, ev0);
+  const waBody   = fillTemplate(cfgCom.wa_body   || 'Hola {NOMBRE}! Mira este activo: {CALLE}, {LOCALIDAD}. {LINK}', p, ev0);
+
+  let html='';
+  html += '<div class="block"><div class="contact-header">'+selectHtml+'</div></div>';
+  html += '<div class="grid">';
+  html +=   '<div class="block"><h5>WhatsApp</h5><div class="field"><label>Mensaje</label><textarea id="wa_txt" rows="8">'+h(waBody)+'</textarea></div>'+
+            '<div class="copyrow"><button class="copybtn" id="wa_copy">Copiar</button>'+
+            (p.phone?('<a class="copybtn" id="wa_open" target="_blank" rel="noopener">Abrir WhatsApp</a>'):'')+
+            '</div></div>';
+  html +=   '<div class="block"><h5>Email</h5><div class="field"><label>Asunto</label><input id="em_subj" value="'+h(mailSubj)+'"/></div>'+
+            '<div class="field"><label>Cuerpo</label><textarea id="em_body" rows="8">'+h(mailBody)+'</textarea></div>'+
+            '<div class="copyrow"><button class="copybtn" id="em_copy">Copiar</button></div></div>';
+  html += '</div>';
+
+  CBODY.innerHTML=html;
+  // listeners dinámicos
+  const sel=CBODY.querySelector('#c_ev');
+  function refreshWith(id){
+    const ev = (id && EVALS.find(e=>e.id===id)) ? adaptEval(EVALS.find(e=>e.id===id)) : null;
+    CBODY.querySelector('#wa_txt').value = fillTemplate(cfgCom.wa_body || 'Hola {NOMBRE}! Mira este activo: {CALLE}, {LOCALIDAD}. {LINK}', p, ev);
+    CBODY.querySelector('#em_subj').value= fillTemplate(cfgCom.mail_subj || 'Oportunidad en {LOCALIDAD}: {CALLE}', p, ev);
+    CBODY.querySelector('#em_body').value= fillTemplate(cfgCom.mail_body || 'Hola {NOMBRE},\nTe encaja este piso en {LOCALIDAD}, {CALLE}? Precio {PRECIO}, alquiler {ALQUILER}. P. máx compra {P_MAX}.\n{LINK}', p, ev);
+    const waOpen=CBODY.querySelector('#wa_open');
+    if(waOpen && p.phone){
+      const text=encodeURIComponent(CBODY.querySelector('#wa_txt').value);
+      const tel = String(p.phone).replace(/[^\d]/g,'');
+      waOpen.href='https://wa.me/'+tel+'?text='+text;
+    }
+  }
+  if(sel){ sel.onchange=()=>refreshWith(sel.value); refreshWith(sel.value); } else { refreshWith(null); }
+
+  const copy=(id)=>{ const el=CBODY.querySelector(id); el.select(); el.setSelectionRange(0,99999); document.execCommand('copy'); toast('Copiado','ok'); };
+  const waCopy=CBODY.querySelector('#wa_copy'); if(waCopy) waCopy.onclick=()=>copy('#wa_txt');
+  const emCopy=CBODY.querySelector('#em_copy'); if(emCopy) emCopy.onclick=()=>copy('#em_body');
+
+  document.getElementById('cb').style.display='flex';
+}
+function closeContactModal(){ document.getElementById('cb').style.display='none'; CONTACT_ID=null; CBODY.innerHTML=''; }
+
 /* ========== Eventos globales ========== */
 document.addEventListener('click',e=>{
   /* FICHA */
@@ -647,6 +730,9 @@ document.addEventListener('click',e=>{
   /* ASIGNACIÓN */
   if(e.target.id==='aclose'){ closeAssignModal(); return; }
   if(e.target.id==='asave'){ saveAssignModal(); return; }
+
+  /* CONTACTO */
+  if(e.target.id==='cclose' || e.target.id==='csave'){ closeContactModal(); return; }
 
   /* Crear contacto */
   if(e.target.id==='btn_create'){
@@ -660,30 +746,30 @@ document.addEventListener('click',e=>{
   }
 
   /* Botones de tarjeta (delegación robusta) */
-  const btn=e.target.closest('.btn-icon'); if(btn){
-    const id=btn.closest('.card').dataset.id;
-    let list=allPros(); const i=list.findIndex(x=>x.id===id); if(i<0)return;
-    const p=list[i]; const act=btn.dataset.act;
+  const btn=e.target.closest('.btn-icon'); if(!btn) return;
+  const id=btn.closest('.card').dataset.id;
+  let list=allPros(); const i=list.findIndex(x=>x.id===id); if(i<0)return;
+  const p=list[i]; const act=btn.dataset.act;
 
-    if(act==='view'){ openModal(p); return; }
-    if(act==='assign' && p.phase==='BUSQUEDA'){ openAssignModal(p); return; }
+  if(act==='view'){ openModal(p); return; }
+  if(act==='assign' && p.phase==='BUSQUEDA'){ openAssignModal(p); return; }
+  if(act==='contact'){ openContactModal(p); return; }
 
-    if(act==='ok'){
-      const ph=p.phase; const idx=PHASES.indexOf(ph);
-      p.history=p.history||{}; p.history[ph]='OK';
-      if(ph==='COMPRAVENTA'){ p.archived=true; p.archived_reason='SUCCESS'; }
-      else if(idx<PHASES.length-1){ p.phase=PHASES[idx+1]; p.phase_entered_at=Date.now(); }
-      list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived); toast('Avanzado','ok'); headerKPIs(); renderBoard(); return;
-    }
-    if(act==='ko'){
-      const ph2=p.phase; p.history=p.history||{}; p.history[ph2]='KO';
-      if(ph2==='CONTACTO'){ list=list.filter(x=>x.id!==p.id); }
-      else{ p.archived=true; p.archived_reason='KO'; list[i]=p; }
-      savePros(list); PROS=list.filter(x=>!x.archived); toast('Descartado','bad'); headerKPIs(); renderBoard(); return;
-    }
-    if(act==='del' && p.phase==='CONTACTO'){
-      list=list.filter(x=>x.id!==p.id); savePros(list); PROS=list.filter(x=>!x.archived); toast('Eliminado','bad'); headerKPIs(); renderBoard(); return;
-    }
+  if(act==='ok'){
+    const ph=p.phase; const idx=PHASES.indexOf(ph);
+    p.history=p.history||{}; p.history[ph]='OK';
+    if(ph==='COMPRAVENTA'){ p.archived=true; p.archived_reason='SUCCESS'; }
+    else if(idx<PHASES.length-1){ p.phase=PHASES[idx+1]; p.phase_entered_at=Date.now(); }
+    list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived); toast('Avanzado','ok'); headerKPIs(); renderBoard(); return;
+  }
+  if(act==='ko'){
+    const ph2=p.phase; p.history=p.history||{}; p.history[ph2]='KO';
+    if(ph2==='CONTACTO'){ list=list.filter(x=>x.id!==p.id); }
+    else{ p.archived=true; p.archived_reason='KO'; list[i]=p; }
+    savePros(list); PROS=list.filter(x=>!x.archived); toast('Descartado','bad'); headerKPIs(); renderBoard(); return;
+  }
+  if(act==='del' && p.phase==='CONTACTO'){
+    list=list.filter(x=>x.id!==p.id); savePros(list); PROS=list.filter(x=>!x.archived); toast('Eliminado','bad'); headerKPIs(); renderBoard(); return;
   }
 });
 
@@ -691,6 +777,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(MB.style.display==='flex'){ closeModal(); return; }
     if(AB.style.display==='flex'){ closeAssignModal(); return; }
+    if(document.getElementById('cb').style.display==='flex'){ closeContactModal(); return; }
   }
 });
 
