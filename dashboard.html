@@ -74,7 +74,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .houses i.on{background:var(--brand);border-color:var(--brand)}
 .card.dragging{opacity:.5} .col.drop{outline:2px dashed var(--brand);outline-offset:-6px}
 
-/* Toast (arriba dcha) */
+/* Toast */
 .toast{position:fixed;top:12px;right:12px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);padding:8px 10px;border-radius:12px;display:none;z-index:100}
 .toast.ok{border-color:var(--ok)} .toast.bad{border-color:var(--bad)} .toast.warn{border-color:var(--accent)}
 .toast.show{display:block}
@@ -104,13 +104,20 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .save{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:7px 11px;font-weight:800;cursor:pointer;font-size:12px}
 
 /* Modal de asignación */
-.modal.small{width:720px}
-.eval-list{border:1px solid var(--line);border-radius:10px;max-height:46vh;overflow:auto;padding:6px}
-.eval-item{display:flex;align-items:center;justify-content:space-between;border-bottom:1px dashed var(--line);padding:6px 2px;font-size:12px}
+.modal.small{width:780px}
+.eval-list{border:1px solid var(--line);border-radius:10px;max-height:46vh;overflow:auto;padding:6px;background:#fff}
+.eval-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-bottom:1px dashed var(--line);padding:6px 2px;font-size:12px}
 .eval-item:last-child{border-bottom:none}
-.tag{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:1px 6px;margin-left:6px;font-size:11px}
+.eval-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.dot.green{background:var(--brand)} .dot.amber{background:var(--accent)} .dot.red{background:var(--bad)}
+.tag{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:1px 6px;margin-left:0;font-size:11px}
+.warns{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.kpiRight{display:flex;align-items:center;gap:8px}
+.kpiVal{font-weight:800}
 .sel-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .sel-chips .chip .x{color:#999;cursor:pointer}
+.actions-inline{display:flex;gap:8px;align-items:center;justify-content:space-between}
 
 .footer{margin:16px 0 14px;text-align:center;color:#888;font-size:11px}
 @media (max-width:980px){.board{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.col{min-height:unset}}
@@ -147,17 +154,18 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
     </div>
   </div>
 
-  <!-- Modal ASIGNACIÓN (fuera de la ficha) -->
+  <!-- Modal ASIGNACIÓN -->
   <div class="modal-back" id="ab">
     <div class="modal small" role="dialog" aria-label="Asignar activos" aria-modal="true">
       <header>
         <h4 id="ah">Asignar activos (máx 4)</h4>
         <button class="close" id="aclose" title="Cerrar">×</button>
       </header>
-      <div class="body" id="abody">
-        <!-- aquí se renderiza lista y chips -->
-      </div>
-      <footer><button class="save" id="asave">Guardar</button></footer>
+      <div class="body" id="abody"></div>
+      <footer>
+        <button class="save" id="btn-calc-match" style="margin-right:auto;background:var(--ok)">Calcular match</button>
+        <button class="save" id="asave">Guardar</button>
+      </footer>
     </div>
   </div>
 
@@ -219,10 +227,7 @@ function headerKPIs(){
 
 /* ===== Tarjetas ===== */
 function daysInPhase(p){const t=p.phase_entered_at?+p.phase_entered_at:Date.now();return Math.max(0,Math.floor((Date.now()-t)/86400000))}
-function shortDate(dt){
-  if(!dt) return '';
-  try{ const d=new Date(dt); const dd=('0'+d.getDate()).slice(-2); const mm=('0'+(d.getMonth()+1)).slice(-2); const hh=('0'+d.getHours()).slice(-2); const mi=('0'+d.getMinutes()).slice(-2); return dd+'/'+mm+' '+hh+':'+mi; }catch(_){ return ''; }
-}
+function shortDate(dt){ if(!dt) return ''; try{ const d=new Date(dt); const dd=('0'+d.getDate()).slice(-2); const mm=('0'+(d.getMonth()+1)).slice(-2); const hh=('0'+d.getHours()).slice(-2); const mi=('0'+d.getMinutes()).slice(-2); return dd+'/'+mm+' '+hh+':'+mi; }catch(_){ return ''; } }
 function makeCreate(){
   const c=document.createElement('div'); c.className='create';
   c.innerHTML='<div class="row"><input id="new_name" placeholder="Nombre y apellidos" maxlength="30"/><input id="new_phone" placeholder="Teléfono" maxlength="9"/></div>'+
@@ -269,7 +274,7 @@ function renderBoard(){
   });
 }
 
-/* ===== Modal FICHA ===== */
+/* ===== Modal FICHA (reunión) ===== */
 const MB=document.getElementById('mb'), MH=document.getElementById('mh'), MBODY=document.getElementById('mbody'); let MODAL_ID=null;
 
 function moneyifyInput(el){ el.addEventListener('blur',()=>{ el.value = el.value? toThousands(num(el.value)) : ''; }); }
@@ -297,7 +302,6 @@ function recalcFinancials(){
   MBODY.querySelector('#f_hip').value=hip?toThousands(hip):'';
   MBODY.querySelector('#f_prop').value=prop?toThousands(prop):'';
 
-  /* Alquiler orientativo si objetivo=bruta */
   const objt=MBODY.querySelector('#f_objt').value;
   const objv=num(MBODY.querySelector('#f_objv').value);
   if(objt==='bruta' && total>0 && objv>0){
@@ -317,8 +321,7 @@ function openModal(p){
   const budIncl = (typeof pr.budget_incl_honorarios==='boolean') ? pr.budget_incl_honorarios : !!CFG.presupuesto.honorarios_incluidos_default;
 
   let html='';
-
-  /* DATOS PERSONALES (2 filas) */
+  /* DATOS PERSONALES */
   html+='<div class="block"><h5>DATOS PERSONALES</h5><div class="grid">';
   html+='<div class="field"><label>Nombre y apellidos</label><input id="f_name" maxlength="30" value="'+h(p.name||'')+'"/></div>';
   html+='<div class="field"><label>Teléfono</label><input id="f_phone" maxlength="9" value="'+h(p.phone||'')+'"/></div>';
@@ -328,25 +331,22 @@ function openModal(p){
   html+='<div class="field"><label>Localidad</label><input id="f_locres" maxlength="10" value="'+h(pr.locres||'')+'"/></div>';
   html+='</div></div>';
 
-  /* INVERSIÓN — EXACTAMENTE 3 FILAS */
+  /* INVERSIÓN (3 filas) */
   html+='<div class="block"><h5>INVERSIÓN</h5><div class="grid">';
-  /* Fila 1 */
   html+='<div class="field row2"><label>Localidades (máx 6)</label><div class="chips limit2" id="chips_locs">';
   for(let i=0;i<locs.length;i++){ html+='<span class="chip"><span class="t">'+h(locs[i])+'</span> <span class="x" data-del="'+h(locs[i])+'">×</span></span>'; }
   html+='</div><input class="chips-input" id="add_loc" list="cfg_locs" placeholder="Añadir y Enter" maxlength="10"/></div>';
   html+='<datalist id="cfg_locs">'+(CFG.localidades.map(l=>'<option value="'+h(l)+'"></option>').join(''))+'</datalist>';
   html+='<div class="field"><label>Tipo</label><select id="f_tipo"><option'+((pr.tipo||'Tradicional')==='Tradicional'?' selected':'')+'>Tradicional</option><option'+((pr.tipo||'Tradicional')==='Habitaciones'?' selected':'')+'>Habitaciones</option></select></div>';
-  /* Fila 2 */
   html+='<div class="field"><label>Reforma</label><select id="f_ref"><option'+((pr.ref||'No')==='No'?' selected':'')+'>No</option><option'+((pr.ref||'No')==='Lavado de cara'?' selected':'')+'>Lavado de cara</option><option'+((pr.ref||'No')==='Integral'?' selected':'')+'>Integral</option></select></div>';
   html+='<div class="field"><label>Ascensor</label><select id="f_asc"><option'+((pr.asc||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.asc||'No')==='No'?' selected':'')+'>No</option></select></div>';
   html+='<div class="field"><label>Altura máx.</label><input id="f_alt" inputmode="numeric" maxlength="1" value="'+h(pr.alt||'')+'"/></div>';
-  /* Fila 3 */
   html+='<div class="field"><label>¿Bajos?</label><select id="f_bajos"><option'+((pr.bajos||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.bajos||'No')==='No'?' selected':'')+'>No</option></select></div>';
   html+='<div class="field"><label>Presupuesto (€)</label><input id="f_budget" value="'+(pr.budget?toThousands(pr.budget):'')+'"/></div>';
-  html+='<div class="field"><label>P. máx compra / ITP</label><div style="display:flex;gap:6px"><input id="f_pmax" disabled style="width:50%" value="'+(pr.pmax?toThousands(pr.pmax):'')+'"/><input id="f_itp" disabled style="width:50%" value="'+(pr.itp?toThousands(pr.itp):'')+'"/></div><small><label><input type="checkbox" id="f_bud_incl"'+(budIncl?' checked':'')+'> Incluir honorarios en presupuesto</label></small></div>';
+  html+='<div class="field"><label>P. máx / ITP</label><div style="display:flex;gap:6px"><input id="f_pmax" disabled style="width:50%" value="'+(pr.pmax?toThousands(pr.pmax):'')+'"/><input id="f_itp" disabled style="width:50%" value="'+(pr.itp?toThousands(pr.itp):'')+'"/></div><small><label><input type="checkbox" id="f_bud_incl"'+(budIncl?' checked':'')+'> Incluir honorarios en presupuesto</label></small></div>';
   html+='</div></div>';
 
-  /* FINANCIACIÓN — UNA SOLA FILA DE 5 */
+  /* FINANCIACIÓN */
   html+='<div class="block"><h5>FINANCIACIÓN</h5><div class="grid5">';
   html+='<div class="field"><label>Financiación</label><select id="f_fin"><option'+((pr.fin||'Sí')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.fin||'Sí')==='No'?' selected':'')+'>No</option></select></div>';
   html+='<div class="field"><label>Broker</label><select id="f_broker"><option'+((pr.broker||'No')==='Sí'?' selected':'')+'>Sí</option><option'+((pr.broker||'No')==='No'?' selected':'')+'>No</option></select></div>';
@@ -381,13 +381,11 @@ function openModal(p){
   /* chips localidades */
   const chipsWrap=MBODY.querySelector('#chips_locs');
   if(chipsWrap){
-    chipsWrap.addEventListener('click',e=>{
-      const del=e.target.getAttribute('data-del'); if(!del)return; const span=e.target.parentElement; span.parentElement.removeChild(span);
-    });
+    chipsWrap.onclick = (e)=>{ const del=e.target.getAttribute('data-del'); if(!del)return; e.target.parentElement.remove(); };
   }
   const add=MBODY.querySelector('#add_loc');
   if(add){
-    add.addEventListener('keydown',e=>{
+    add.onkeydown=(e)=>{
       if(e.key==='Enter'){e.preventDefault();
         const v=(add.value||'').trim(); if(!v)return;
         const cont=MBODY.querySelector('#chips_locs');
@@ -395,7 +393,7 @@ function openModal(p){
         const s=document.createElement('span'); s.className='chip'; s.innerHTML='<span class="t">'+h(v)+'</span> <span class="x" data-del="'+h(v)+'">×</span>';
         cont.appendChild(s); add.value='';
       }
-    });
+    };
   }
 
   /* money blur y cálculos */
@@ -411,85 +409,190 @@ function saveModal(){
   if(!MODAL_ID) return;
   let list=allPros(); const i=list.findIndex(x=>x.id===MODAL_ID); if(i<0) return;
   const p=list[i]; const pr=p.profile||(p.profile={}); const q=sel=>MBODY.querySelector(sel);
-  /* Datos personales */
   p.name=q('#f_name').value.trim(); p.phone=q('#f_phone').value.trim(); p.email=q('#f_email').value.trim();
   pr.dni=q('#f_dni').value.trim(); pr.dir=q('#f_dir').value.trim(); pr.locres=q('#f_locres').value.trim();
   pr.locs=[...MBODY.querySelectorAll('#chips_locs .chip .t')].map(n=>n.textContent.trim());
-  /* Inversión */
   pr.tipo=q('#f_tipo').value; pr.ref=q('#f_ref').value; pr.asc=q('#f_asc').value; pr.alt=q('#f_alt').value; pr.bajos=q('#f_bajos').value;
   pr.budget=num(q('#f_budget').value); pr.pmax=num(q('#f_pmax').value); pr.itp=num(q('#f_itp').value);
   pr.budget_incl_honorarios=!!q('#f_bud_incl').checked;
-  /* Financiación */
   pr.fin=q('#f_fin').value; pr.broker=q('#f_broker').value; pr.pct=q('#f_pct').value;
   pr.hip=num(q('#f_hip').value); pr.prop=num(q('#f_prop').value);
-  /* Objetivo */
   pr.objt=q('#f_objt').value; pr.objv=num(q('#f_objv').value);
   pr.bruta_incluye_honorarios=!!q('#f_inc_hon').checked;
   pr.alq=num(q('#f_alq').value);
-  /* Reunión */
   p.meeting=p.meeting||{}; p.meeting.notas=q('#f_notas').value.slice(0,300);
   if(p.phase==='CONTACTO'){
-    const dt=q('#f_meet').value;
-    if(dt){ p.meeting.date=dt; p.phase='REUNION'; p.phase_entered_at=Date.now(); p.history=p.history||{}; p.history.CONTACTO='OK'; }
+    const dt=q('#f_meet').value; if(dt){ p.meeting.date=dt; p.phase='REUNION'; p.phase_entered_at=Date.now(); p.history=p.history||{}; p.history.CONTACTO='OK'; }
   }
-
   list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived);
   toast('Guardado','ok'); closeModal(); headerKPIs(); renderBoard();
 }
 
+/* ===== Matching helpers ===== */
+function adaptEval(ev){
+  const n=x=>num(x);
+  const o={};
+  o.id=ev.id||ev.ev_id||('ev_'+Math.random().toString(36).slice(2,8));
+  o.titulo=ev.titulo||ev.title||ev.nombre||ev.direccion||ev.dir||ev.ref||('Evaluación '+o.id);
+  o.localidad=ev.localidad||ev.municipio||'';
+  o.tipo=ev.tipo||ev.alquiler_tipo||'Tradicional';
+  o.precio=n(ev.precio_compra??ev.precio??ev.p_venta);
+  let ing_m=n(ev.ing_m??ev.alquiler_mensual??ev.renta_mensual);
+  let ing_a=n(ev.ing_a??ev.ingresos_anuales);
+  let gas_m=n(ev.gas_m??ev.gastos_mensuales);
+  let gas_a=n(ev.gas_a??ev.gastos_anuales);
+  if(!ing_a && ing_m) ing_a=ing_m*12;
+  if(!ing_m && ing_a) ing_m=Math.round(ing_a/12);
+  if(!gas_a && gas_m) gas_a=gas_m*12;
+  if(!gas_m && gas_a) gas_m=Math.round(gas_a/12);
+  o.ing_m=ing_m; o.ing_a=ing_a; o.gas_m=gas_m; o.gas_a=gas_a;
+  o.flujo_m = ev.flujo_m!=null ? n(ev.flujo_m) : (ing_m - gas_m);
+  o.ascensor=(ev.ascensor===true||ev.ascensor==='Sí'||ev.ascensor==='si');
+  o.bajos=(ev.bajos===true||ev.planta===0||ev.es_bajo===true);
+  o.altura=parseInt(ev.altura!=null?ev.altura:(ev.planta!=null?ev.planta:''),10)||0;
+  o.reforma=(ev.reforma||ev.reforma_tipo||'No'); if(!['No','Lavado de cara','Integral'].includes(o.reforma)) o.reforma='No';
+  o.hab=parseInt(ev.habitaciones||ev.habs||ev.dormitorios||ev.num_habitaciones||0,10)||0;
+  return o;
+}
+function scoreEvalForPros(evRaw,p){
+  const ev=adaptEval(evRaw);
+  const pr=p.profile||{};
+  const objt=(pr.objt||'neta').toLowerCase();
+  const objv=num(pr.objv||0);
+  /* coste base según flags por cliente */
+  const incBruta = !!pr.bruta_incluye_honorarios;
+  const incNeta  = (typeof pr.neta_incluye_honorarios==='boolean') ? pr.neta_incluye_honorarios : !!CFG.neta.include_honorarios_default;
+  const base_cost_bruta = ev.precio + Math.round(ev.precio*CFG.itp_pct) + CFG.notaria + (incBruta?CFG.honorarios:0);
+  const base_cost_neta  = ev.precio + Math.round(ev.precio*CFG.itp_pct) + CFG.notaria + (incNeta?CFG.honorarios:0);
+  const rb = ev.ing_a>0 ? (ev.ing_a / base_cost_bruta * 100) : 0;
+  const rn = ev.ing_a>0 ? ((ev.ing_a - ev.gas_a) / base_cost_neta * 100) : 0;
+  const fl = ev.flujo_m;
+
+  let kpi=0;
+  if(objt==='bruta') kpi=rb;
+  else if(objt==='neta') kpi=rn;
+  else kpi=fl;
+
+  const ratio = objt==='flujo' ? (kpi/(objv||1)) : (kpi/((objv||1)));
+  return {ev,rb,rn,fl,ratio,kpi,objt,objv};
+}
+function colorForRatio(r){
+  const th=CFG.match?.thresholds||{green:1,amber:0.95};
+  if(r>=(th.green??1)) return 'green';
+  if(r>=(th.amber??0.95)) return 'amber';
+  return 'red';
+}
+function warningsFor(ev,p){
+  const pr=p.profile||{};
+  const warns=[];
+  /* localidad */
+  const locs=(Array.isArray(pr.locs)?pr.locs:[]).map(x=>String(x).toLowerCase());
+  if(locs.length && !locs.includes(String(ev.localidad||'').toLowerCase())) warns.push('📍 localidad');
+  /* tipo */
+  if(pr.tipo && ev.tipo && pr.tipo!==ev.tipo) warns.push('🏷 tipo');
+  /* ascensor */
+  if(pr.asc==='Sí' && !ev.ascensor) warns.push('🛗 ascensor');
+  /* altura */
+  if(pr.alt && ev.altura>num(pr.alt)) warns.push('⬆ planta');
+  /* bajos */
+  if(pr.bajos==='No' && ev.bajos) warns.push('⬇ bajos');
+  /* reforma (tolerancias) */
+  const rank={'No':0,'Lavado de cara':1,'Integral':2};
+  if(rank[ev.reforma]>rank[pr.ref||'No']) warns.push('🔧 reforma');
+  return warns;
+}
+
 /* ===== Modal ASIGNACIÓN ===== */
 const AB=document.getElementById('ab'), ABODY=document.getElementById('abody'); let ASSIGN_ID=null;
-function openAssignModal(p){
-  ASSIGN_ID=p.id;
-  const busc=p.busqueda||{propuestas:[]};
-  const selected=new Set(Array.isArray(busc.propuestas)?busc.propuestas:[]);
+function renderAssignList(p){
+  /* cabecera chips seleccionadas + acciones */
+  const busc=(p.busqueda||{}); const selected=new Set(Array.isArray(busc.propuestas)?busc.propuestas:[]);
   let html='';
   html+='<div class="block"><h5>Seleccionadas</h5><div class="sel-chips" id="selchips">';
   selected.forEach(id=>{
-    const ev=EVALS.find(e=>e.id===id)||{titulo:id};
-    html+='<span class="chip" data-ev="'+h(id)+'"><span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span></span>';
+    const raw=EVALS.find(e=>e.id===id)||{titulo:id};
+    const ev=adaptEval(raw);
+    const title=h(ev.titulo||id);
+    html+='<span class="chip" data-ev="'+h(id)+'"><span class="t">'+title+'</span> <span class="x" data-un="'+h(id)+'">×</span></span>';
   });
   html+='</div></div>';
 
-  html+='<div class="block"><h5>Evaluaciones disponibles</h5><div class="eval-list" id="evlist">';
+  html+='<div class="block"><div class="actions-inline"><h5 style="margin:0">Evaluaciones disponibles</h5><small style="color:#777">● verde ≥ '+(CFG.match.thresholds.green??1)+'× · ámbar ≥ '+(CFG.match.thresholds.amber??0.95)+'×</small></div><div class="eval-list" id="evlist">';
   if(!EVALS.length){
     html+='<div class="eval-item"><span>No hay evaluaciones en el sistema</span></div>';
   }else{
-    EVALS.forEach(ev=>{
-      const checked=selected.has(ev.id)?'checked':'';
-      const t=ev.titulo||ev.dir||ev.calle||ev.id;
-      html+='<label class="eval-item"><span>'+h(t)+' <span class="tag">'+fmtEUR(ev.precio||0)+'</span></span><input type="checkbox" data-ev="'+h(ev.id)+'" '+checked+'></label>';
+    /* calcular score y pintar fila con semillas */
+    const scored=EVALS.map(ev=>scoreEvalForPros(ev, p)).sort((a,b)=>b.ratio-a.ratio);
+    scored.forEach(s=>{
+      const ev=adaptEval(s.ev);
+      const color=colorForRatio(s.ratio);
+      const kpiTxt = (s.objt==='flujo') ? (fmtEUR(s.kpi).replace('€','')+' €/mes') : (s.kpi.toFixed(1)+'%');
+      const ratioTxt = (s.ratio).toFixed(2)+'×';
+      const warns = (color==='green' && CFG.match.warnings_only_when_green) ? warningsFor(ev,p) : [];
+      const checked = (p.busqueda&&Array.isArray(p.busqueda.propuestas) && p.busqueda.propuestas.includes(ev.id)) ? 'checked' : '';
+      const semillas = [
+        (ev.ascensor?'🛗 Sí':'🛗 No'),
+        ('Pl: '+(ev.altura||0)),
+        ('🛏 '+(ev.hab||'-')),
+        ('🔧 '+ev.reforma)
+      ].map(t=>'<span class="tag">'+h(t)+'</span>').join('');
+      html+='<label class="eval-item">' +
+              '<div>' +
+                '<div class="eval-title"><span class="dot '+color+'"></span><span>'+h(ev.titulo)+'</span>'+semillas+'</div>' +
+                (warns.length?('<div class="warns">'+warns.map(w=>'<span class="tag">'+h(w)+'</span>').join('')+'</div>'):'') +
+              '</div>' +
+              '<div class="kpiRight">' +
+                '<span class="kpiVal">'+h(kpiTxt)+'</span>' +
+                '<span class="tag">'+h(ratioTxt)+'</span>' +
+                '<input type="checkbox" data-ev="'+h(ev.id)+'" '+checked+'>' +
+              '</div>' +
+            '</label>';
     });
   }
-  html+='</div><small style="color:#777">Máximo 4 activos.</small></div>';
+  html+='</div></div>';
 
   ABODY.innerHTML=html;
-  AB.style.display='flex';
 
-  ABODY.addEventListener('click',function onChip(e){
-    const un=e.target.getAttribute('data-un'); if(!un) return;
-    const c=e.target.closest('.chip'); if(c) c.remove();
-    const chk=ABODY.querySelector('input[type="checkbox"][data-ev="'+CSS.escape(un)+'"]');
-    if(chk) chk.checked=false;
-  },{once:false});
-
-  ABODY.addEventListener('change',function onCheck(e){
-    const el=e.target; if(el.tagName!=='INPUT') return;
-    const id=el.getAttribute('data-ev'); if(!id) return;
-    const wrap=ABODY.querySelector('#selchips');
-    const chips=wrap.querySelectorAll('.chip');
-    if(el.checked){
-      if(chips.length>=4){ el.checked=false; toast('Máximo 4 activos','warn'); return; }
-      const ev=EVALS.find(x=>x.id===id)||{titulo:id};
-      const chip=document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
-      chip.innerHTML='<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
-      wrap.appendChild(chip);
-    }else{
-      const c=wrap.querySelector('.chip[data-ev="'+CSS.escape(id)+'"]'); if(c) c.remove();
+  /* Handlers SIN acumulación (se sobrescriben cada vez) */
+  ABODY.onclick = function(e){
+    const un=e.target.getAttribute && e.target.getAttribute('data-un');
+    if(un){ /* quitar chip -> desmarcar checkbox asociado */
+      const chip=e.target.closest('.chip'); if(chip) chip.remove();
+      const chk=ABODY.querySelector('input[type="checkbox"][data-ev="'+CSS.escape(un)+'"]');
+      if(chk) chk.checked=false;
+      return;
     }
-  },{once:false});
+  };
+  ABODY.onchange = function(e){
+    const el=e.target;
+    if(el.tagName==='INPUT' && el.type==='checkbox'){
+      const id=el.getAttribute('data-ev'); if(!id) return;
+      const wrap=ABODY.querySelector('#selchips');
+      const exists=wrap.querySelector('.chip[data-ev="'+CSS.escape(id)+'"]');
+      const chips=wrap.querySelectorAll('.chip');
+      if(el.checked){
+        if(chips.length>=4){ el.checked=false; toast('Máximo 4 activos','warn'); return; }
+        if(!exists){
+          const raw=EVALS.find(x=>x.id===id)||{titulo:id};
+          const ev=adaptEval(raw);
+          const chip=document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
+          chip.innerHTML='<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
+          wrap.appendChild(chip);
+        }
+      }else{
+        if(exists) exists.remove();
+      }
+    }
+  };
 }
-function closeAssignModal(){AB.style.display='none'; ASSIGN_ID=null;}
+
+function openAssignModal(p){
+  ASSIGN_ID=p.id;
+  renderAssignList(p);
+  AB.style.display='flex';
+}
+function closeAssignModal(){ AB.style.display='none'; ASSIGN_ID=null; ABODY.onclick=null; ABODY.onchange=null; }
+
 function saveAssignModal(){
   if(!ASSIGN_ID) return;
   let list=allPros(); const i=list.findIndex(x=>x.id===ASSIGN_ID); if(i<0) return;
@@ -499,6 +602,43 @@ function saveAssignModal(){
   list[i]=p; savePros(list); PROS=list.filter(x=>!x.archived);
   toast('Propuestas actualizadas','ok'); closeAssignModal(); headerKPIs(); renderBoard();
 }
+
+/* Calcular match (auto) dentro del modal de asignación) */
+document.getElementById('ab').addEventListener('click',function(e){
+  if(e.target && e.target.id==='btn-calc-match'){
+    if(!ASSIGN_ID){ toast('Abre un cliente en BÚSQUEDA primero','warn'); return; }
+    let p = allPros().find(x=>x.id===ASSIGN_ID); if(!p){ toast('Cliente no encontrado','bad'); return; }
+    if(!EVALS.length){ toast('No hay evaluaciones para hacer matching','warn'); return; }
+    const ranked=EVALS.map(ev=>scoreEvalForPros(ev,p)).sort((a,b)=>b.ratio-a.ratio);
+    const th=CFG.match?.thresholds||{green:1,amber:0.95};
+    const chosen=[];
+    for(const r of ranked){
+      if(chosen.length>=4) break;
+      if(r.ratio>=(th.amber??0.95) || chosen.length<4){ chosen.push(r.ev.id||r.ev.ev_id||r.ev); }
+    }
+    /* Si no hay ninguna ≥ ámbar, al menos 2 mejores */
+    if(!ranked.some(r=>r.ratio>=(th.amber??0.95))){
+      chosen.length=0;
+      ranked.slice(0,Math.min(2,ranked.length)).forEach(r=>chosen.push(r.ev.id||r.ev.ev_id||r.ev));
+    }
+    const evlist=ABODY.querySelector('#evlist');
+    const selwrap=ABODY.querySelector('#selchips');
+    selwrap.innerHTML='';
+    [...evlist.querySelectorAll('input[type="checkbox"]')].forEach(chk=>{
+      const id=chk.getAttribute('data-ev');
+      const pick=chosen.includes(id);
+      chk.checked=pick;
+      if(pick){
+        const raw=EVALS.find(x=>x.id===id)||{titulo:id};
+        const ev=adaptEval(raw);
+        const chip=document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
+        chip.innerHTML='<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
+        selwrap.appendChild(chip);
+      }
+    });
+    toast('Matching aplicado','ok');
+  }
+});
 
 /* ===== Eventos globales ===== */
 document.addEventListener('click',e=>{
