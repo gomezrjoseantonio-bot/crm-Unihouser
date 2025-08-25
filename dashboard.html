@@ -13,6 +13,7 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
+
 /* Topbar */
 .topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
 .top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
@@ -22,27 +23,35 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .nav a{color:var(--ink2);text-decoration:none;padding:5px 8px;border-radius:8px;font-size:12px}
 .nav a.active{background:var(--brand);color:#fff}
 .nav a:hover{background:#f3efe9}
+
 /* Layout */
 .container{max-width:1200px;margin:12px auto;padding:0 14px}
+
+/* KPIs */
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
 .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:var(--shadow)}
 .kpi .lab{font-size:11px;color:#667085}
 .kpi .val{font-weight:800;font-size:18px}
+
+/* Toolbar */
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:800;font-size:12px}
 .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
-.btn.ghost{background:#fff}
-input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min-height:26px;font-size:12px;background:#fff;color:#1a1f23}
+
+/* Crear prospecto */
 .create{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
 .create h3{margin:0 0 6px;font-size:14px;color:#444}
 .create .row{display:grid;gap:8px;grid-template-columns:repeat(4,1fr)}
 @media(max-width:980px){.create .row{grid-template-columns:1fr}}
+input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min-height:26px;font-size:12px;background:#fff;color:#1a1f23}
+
 /* Board */
 .board{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
-.col{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;min-height:420px;box-shadow:var(--shadow)}
+.col{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;min-height:520px;box-shadow:var(--shadow)}
 .col h3{margin:0 0 6px;color:var(--ink2);display:flex;align-items:center;justify-content:space-between;font-size:13px}
 .count{font-weight:700;color:#666}
-.drop{min-height:360px;border:1px dashed var(--line);border-radius:10px;padding:6px}
+.drop{min-height:420px;border:1px dashed var(--line);border-radius:10px;padding:6px}
+
 /* Card */
 .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow);display:grid;gap:6px;cursor:grab;margin-bottom:8px}
 .card header{display:flex;align-items:center;justify-content:space-between}
@@ -56,6 +65,7 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
 .btn-icon.view{border-color:var(--brand)} .btn-icon.view svg{stroke:var(--brand)}
 .btn-icon.msg{border-color:#0ea5e9} .btn-icon.msg svg{stroke:#0ea5e9}
 .btn-icon.del{border-color:#999} .btn-icon.del svg{stroke:#999}
+
 /* Drawer */
 .overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
 .overlay.open{display:block}
@@ -71,6 +81,7 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
 .kv .k{font-size:11px;color:#667085}
 .kv .v{font-weight:700}
+
 /* Modal send */
 .modal-back{position:fixed;inset:0;background:rgba(15,18,20,.28);display:none;align-items:center;justify-content:center;z-index:120}
 .modal{width:840px;max-width:95vw;max-height:88vh;background:#fff;border:2px solid #fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
@@ -81,6 +92,7 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
 .area{border:1px solid var(--line);border-radius:10px;padding:8px}
 .area input,.area textarea,.area select{width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
 .area textarea{min-height:160px;resize:vertical}
+
 /* Toasts */
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
@@ -101,6 +113,7 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
   </div>
 
   <div class="container">
+    <!-- KPIs -->
     <div class="kpis">
       <div class="kpi"><div class="lab">Prospects totales</div><div class="val" id="k_total">0</div></div>
       <div class="kpi"><div class="lab">En búsqueda</div><div class="val" id="k_busq">0</div></div>
@@ -108,12 +121,14 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
       <div class="kpi"><div class="lab">Con coincidencias</div><div class="val" id="k_match">0</div></div>
     </div>
 
+    <!-- Toolbar -->
     <div class="toolbar">
       <button class="btn" id="exp_csv">Exportar CSV</button>
       <button class="btn" id="imp_json">Importar JSON</button>
       <input id="file_imp" type="file" accept="application/json" style="display:none">
     </div>
 
+    <!-- Crear -->
     <div class="create" id="createBox">
       <h3>Crear prospecto</h3>
       <div class="row">
@@ -140,6 +155,7 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
       </div>
     </div>
 
+    <!-- Board -->
     <section class="board" id="board"></section>
   </div>
 
@@ -378,7 +394,7 @@ function card(p){
 }
 function objText(p){
   var m=(p.obj_main||p.obj_tipo||'').toString().toLowerCase().trim();
-  var v=Number(p.obj_raw||p.obj_val||p.objeto_val||0) || Number(p.obj_bruta||0)||Number(p.obj_neta||0)||Number(p.obj_flujo||0);
+  var v=Number(p.obj_raw||p.obj_val||0) || Number(p.obj_bruta||0)||Number(p.obj_neta||0)||Number(p.obj_flujo||0);
   if(!m && (p.obj_bruta||p.obj_neta||p.obj_flujo)){ m=p.obj_bruta?'bruta':(p.obj_neta?'neta':'flujo'); }
   if(!v) return '';
   if(m==='flujo') return 'Flujo '+e0(v)+'/mes';
@@ -480,18 +496,18 @@ id('d_assign').onclick=function(){
   Store.evals=evs; toast('Asignado a '+changed+' evaluación(es)','ok');
 };
 
-/* ===== Matching ===== */
+/* ===== Matching (idéntico a Evaluaciones) ===== */
 function isSearching(p){ var f=fold(p.fase||''); return f.indexOf('busq')>=0 || f.indexOf('busc')>=0; }
-function wantsNoReform(p){ var s=fold(p.pref_reforma||p.reforma||''); return s==='no'||s.indexOf('sin')>=0; }
-function wantsElevator(p){ var s=fold(p.requiere_ascensor||p.ascensor||''); return s==='si'||s==='sí'||s==='true'||s==='1'; }
-function wantsNoGround(p){ var s=fold(p.evitar_bajos||p.no_bajo||''); return s==='si'||s==='sí'||s.indexOf('evitar')>=0; }
+function wantsNoReform(p){ var r=fold(p.reforma||p.ref||p.pref_reforma||'');return r==='no'||r==='sin reforma'||r.indexOf('sin')>=0; }
+function wantsElevator(p){ var a=fold(p.asc||p.ascensor||p.requiere_ascensor||p.quiere_ascensor||'');return a==='si'||a==='sí'||a==='true'||a==='1'; }
+function wantsNoGround(p){ var b=fold(p.bajos||p.bajo||p.evitar_bajos||'');return b==='no'||b==='evitar'||b.indexOf('sin')>=0||b.indexOf('evitar')>=0; }
 function budget(p){ return Number(p.presupuesto_max||parseMoney(p.budget)||0)||0; }
-function targetInfo(p){
-  var kind=fold(p.obj_main||p.obj_tipo||'');
+function getTargetInfo(p){
+  var main=(p.obj_main||p.obj_tipo||'').toString().toLowerCase().trim();
   var raw=Number(p.obj_raw||0), b=Number(p.obj_bruta||0), n=Number(p.obj_neta||0), fm=Number(p.obj_flujo||0), fa=Number(p.obj_flujo_anual||0);
-  if(kind==='bruta'&&raw>0) return {kind:'bruta',val:raw};
-  if(kind==='neta' &&raw>0) return {kind:'neta', val:raw};
-  if(kind==='flujo'&&(raw>0||fm>0||fa>0)) return {kind:'flujo',val:(fa>0?fa:(raw>0?raw*12:fm*12))};
+  if(main==='bruta'&&raw>0) return {kind:'bruta',val:raw};
+  if(main==='neta' &&raw>0) return {kind:'neta', val:raw};
+  if(main==='flujo'&&(raw>0||fm>0||fa>0)) return {kind:'flujo',val:(fa>0?fa:(raw>0?raw*12:fm*12))};
   if(b>0) return {kind:'bruta',val:b};
   if(n>0) return {kind:'neta', val:n};
   if(fa>0||fm>0) return {kind:'flujo',val:(fa>0?fa:fm*12)};
@@ -502,7 +518,7 @@ function matchEvalProspect(e,p){
   if(fold(p.pref_tipo)!==fold(e.tipo)) return {ok:false,why:'tipo'};
   var locs=(p.locs_text||'').split(',').map(function(s){return fold(s)}).filter(Boolean);
   if(locs.length && locs.indexOf(fold(e.loc))===-1) return {ok:false,why:'localidad'};
-  var tgt=targetInfo(p); if(!tgt.val) return {ok:false,why:'objetivo'};
+  var tgt=getTargetInfo(p); if(!tgt.val) return {ok:false,why:'objetivo'};
   var br=Number(e.kpi_bruta||0), nt=Number(e.kpi_neta||0), fl=Number(e.kpi_flujo||0);
   if(tgt.kind==='bruta' && br>=tgt.val) return {ok:true,kind:'bruta'};
   if(tgt.kind==='neta'  && nt>=tgt.val) return {ok:true,kind:'neta'};
@@ -577,8 +593,8 @@ function openSend(pid){
 
   id('s_copy').onclick=function(){ navigator.clipboard.writeText(id('s_subject').value+'\\n\\n'+id('s_body').value).then(function(){toast('Copiado','ok')}); };
   id('s_mail').onclick=function(){
-    var to=(p.email||'').trim(); var link='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(id('s_subject').value)+'&body='+encodeURIComponent(id('s_body').value);
-    window.open(link,'_blank');
+    var to=(p.email||'').trim(); var mail='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(id('s_subject').value)+'&body='+encodeURIComponent(id('s_body').value);
+    window.open(mail,'_blank');
   };
   id('s_wa').onclick=function(){
     var phone=(p.phone||'').replace(/[^\\d]/g,''); var url='https://wa.me/'+phone+'?text='+encodeURIComponent(id('s_body').value);
@@ -620,9 +636,7 @@ id('file_imp').addEventListener('change',function(ev){
 });
 
 /* ===== Init ===== */
-function attach(){
-  renderBoard();
-}
+function attach(){ renderBoard(); }
 attach();
 })();
 </script>
