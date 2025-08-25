@@ -109,8 +109,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .eval-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border-bottom:1px dashed var(--line);padding:6px 2px;font-size:12px}
 .eval-item:last-child{border-bottom:none}
 .eval-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* ← colores de match reales */
 .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
-.dot.green{background:var(--brand)} .dot.amber{background:var(--accent)} .dot.red{background:var(--bad)}
+.dot.green{background:#2ecc71} .dot.amber{background:#f1c40f} .dot.red{background:var(--bad)}
 .tag{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:1px 6px;margin-left:0;font-size:11px}
 .warns{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 .kpiRight{display:flex;align-items:center;gap:8px}
@@ -592,41 +593,9 @@ function renderAssignList(p){
   };
 }
 
-function autoMatchPreselect(p){
-  const ya=(p.busqueda && Array.isArray(p.busqueda.propuestas) && p.busqueda.propuestas.length>0);
-  if(ya || !EVALS.length) return;
-  const ranked=EVALS.map(ev=>scoreEvalForPros(ev,p)).sort((a,b)=>b.ratio-a.ratio);
-  const th=CFG.match?.thresholds||{green:1,amber:0.95};
-  let chosen=[];
-  for(const r of ranked){
-    if(chosen.length>=4) break;
-    if(r.ratio>=(th.amber??0.95)) chosen.push(r.ev.id||r.ev.ev_id||r.ev);
-  }
-  if(!chosen.length){
-    chosen=ranked.slice(0,Math.min(2,ranked.length)).map(r=>r.ev.id||r.ev.ev_id||r.ev);
-  }
-  const evlist=ABODY.querySelector('#evlist');
-  const selwrap=ABODY.querySelector('#selchips');
-  if(!evlist || !selwrap) return;
-  selwrap.innerHTML='';
-  [...evlist.querySelectorAll('input[type="checkbox"]')].forEach(chk=>{
-    const id=chk.getAttribute('data-ev');
-    const pick=chosen.includes(id);
-    chk.checked=pick;
-    if(pick){
-      const raw=EVALS.find(x=>x.id===id)||{titulo:id};
-      const ev=adaptEval(raw);
-      const chip=document.createElement('span'); chip.className='chip'; chip.setAttribute('data-ev',id);
-      chip.innerHTML='<span class="t">'+h(ev.titulo||id)+'</span> <span class="x" data-un="'+h(id)+'">×</span>';
-      selwrap.appendChild(chip);
-    }
-  });
-}
-
 function openAssignModal(p){
   ASSIGN_ID=p.id;
-  renderAssignList(p);
-  autoMatchPreselect(p);   // solo si no hay guardadas
+  renderAssignList(p);       /* ← sin auto-preselección */
   AB.style.display='flex';
 }
 function closeAssignModal(){ AB.style.display='none'; ASSIGN_ID=null; ABODY.onclick=null; ABODY.onchange=null; }
