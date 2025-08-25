@@ -51,7 +51,7 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 .uh-d-title{font-weight:800}
 .uh-d-body{padding:12px 14px 18px;overflow:auto;height:calc(100% - 54px)}
 
-/* Secciones detalle (4 bloques como Evaluar) */
+/* Secciones detalle */
 .block{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin:10px 0}
 .block h4{margin:0 0 8px}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
@@ -69,9 +69,9 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 .badge.warn{border-color:#fde68a;background:#fff7ed;color:#b45309}
 .badge small{font-weight:700}
 
-/* Adjuntos: grids muy compactos (sin scroll) */
+/* Adjuntos */
 .attach-wrap{display:grid;gap:10px}
-.attach-grid{display:grid;gap:6px;grid-template-columns:repeat(6,1fr)} /* 6 miniaturas por fila */
+.attach-grid{display:grid;gap:6px;grid-template-columns:repeat(6,1fr)}
 .thumb{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;height:64px}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb .mini{display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#333}
@@ -91,6 +91,20 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
 .toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
+
+/* ===== Modal Enviar ===== */
+.modal-back{position:fixed;inset:0;background:rgba(15,18,20,.28);display:none;align-items:center;justify-content:center;z-index:120}
+.modal{width:800px;max-width:95vw;max-height:88vh;background:#fff;border:2px solid #fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
+.modal header{padding:10px 12px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between}
+.modal h4{margin:0}
+.modal .body{padding:10px 12px;display:grid;gap:8px;overflow:auto}
+.modal footer{padding:10px 12px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end}
+.row-send{display:grid;gap:8px;grid-template-columns:1fr 2fr}
+.send-to{border:1px solid #e5e7eb;border-radius:10px;padding:8px;max-height:180px;overflow:auto}
+.send-to label{display:flex;align-items:center;gap:8px;padding:4px 6px}
+.area{border:1px solid #e5e7eb;border-radius:10px;padding:8px}
+.area input,.area textarea{width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:6px 8px}
+.area textarea{min-height:140px;resize:vertical}
 </style>
 </head>
 <body>
@@ -165,7 +179,10 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
 <aside id="uhDrawer" class="uh-drawer" aria-hidden="true">
   <div class="uh-d-head">
     <span class="uh-d-title">Detalle de evaluación</span>
-    <button class="btn" id="d_cerrar">Cerrar</button>
+    <div style="display:flex;gap:6px">
+      <button class="btn" id="d_enviar">Enviar</button>
+      <button class="btn" id="d_cerrar">Cerrar</button>
+    </div>
   </div>
   <div class="uh-d-body" id="drawerBody">
     <div class="uh-meta" id="d_fecha">—</div>
@@ -182,7 +199,7 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
       </div>
     </div>
 
-    <!-- BLOQUES DE DETALLE (orden como en Evaluar) -->
+    <!-- BLOQUES DETALLE -->
     <div class="block">
       <h4>Datos del inmueble</h4>
       <div class="kv">
@@ -235,32 +252,20 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
       </div>
     </div>
 
-    <!-- ADJUNTOS (debajo de asignación) -->
+    <!-- ADJUNTOS -->
     <div class="block">
       <h4>Adjuntar archivos</h4>
-
       <div class="attach-wrap">
         <div>
-          <div class="uploader">
-            <strong>Imágenes</strong>
-            <input id="up_imgs" type="file" accept="image/*" multiple>
-          </div>
+          <div class="uploader"><strong>Imágenes</strong><input id="up_imgs" type="file" accept="image/*" multiple></div>
           <div id="grid_imgs" class="attach-grid"></div>
         </div>
-
         <div>
-          <div class="uploader">
-            <strong>Vídeos</strong>
-            <input id="up_vids" type="file" accept="video/*" multiple>
-          </div>
+          <div class="uploader"><strong>Vídeos</strong><input id="up_vids" type="file" accept="video/*" multiple></div>
           <div id="grid_vids" class="attach-grid"></div>
         </div>
-
         <div>
-          <div class="uploader">
-            <strong>PDFs</strong>
-            <input id="up_pdfs" type="file" accept="application/pdf" multiple>
-          </div>
+          <div class="uploader"><strong>PDFs</strong><input id="up_pdfs" type="file" accept="application/pdf" multiple></div>
           <div id="grid_pdfs" class="attach-grid"></div>
         </div>
       </div>
@@ -268,13 +273,51 @@ table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff
   </div>
 </aside>
 
+<!-- Modal Enviar -->
+<div class="modal-back" id="sendBack">
+  <div class="modal" role="dialog" aria-label="Enviar ficha" aria-modal="true">
+    <header><h4>Enviar ficha</h4><button class="btn" id="sendClose">Cerrar</button></header>
+    <div class="body">
+      <div class="row-send">
+        <div>
+          <div class="area" style="margin-bottom:8px">
+            <label>Canal</label>
+            <select id="sendChannel">
+              <option value="email">Email</option>
+              <option value="whatsapp">WhatsApp</option>
+            </select>
+          </div>
+          <div class="send-to" id="sendToBox">—</div>
+          <div style="margin-top:6px"><small class="small">Puedes añadir manualmente al final si no aparece.</small></div>
+        </div>
+        <div class="area">
+          <div style="display:grid;gap:6px">
+            <label>Asunto (email) / Encabezado (WhatsApp)</label>
+            <input id="sendSubject" placeholder="Asunto"/>
+            <label>Mensaje</label>
+            <textarea id="sendBody" placeholder="Texto a enviar…"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <button class="btn" id="sendCopy">Copiar</button>
+      <button class="btn" id="sendOpenWA">Abrir WhatsApp</button>
+      <button class="btn primary" id="sendOpenMail">Abrir correo</button>
+    </footer>
+  </div>
+</div>
+
 <div id="toasts" class="toast-wrap"></div>
 
 <script>
 (function(){
 "use strict";
 
-/* ===== Utils ===== */
+/* Marca desde cfg */
+try{const cfg=JSON.parse(localStorage.getItem('cfg')||'{}'); if(cfg && cfg.brand_color){document.documentElement.style.setProperty('--brand', cfg.brand_color);}}catch(_){}
+
+/* Utils */
 const id = x=>document.getElementById(x);
 const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
@@ -290,18 +333,19 @@ function toast(msg,kind){
 function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function toPct(raw){ let v=Number(raw||0); if(v>0&&v<=1)v*=100; while(v>=100)v/=10; return v; }
 
-/* ===== Store ===== */
+/* Store */
 const Store={
   get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},
   set evals(v){localStorage.setItem('evals',JSON.stringify(v))},
   get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}},
-  set pros(v){localStorage.setItem('pros',JSON.stringify(v))}
+  set pros(v){localStorage.setItem('pros',JSON.stringify(v))},
+  get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}}}
 };
 
-/* ===== Estado ===== */
+/* Estado */
 let data=[], view=[], sortKey='ts', sortAsc=true, openId=null;
 
-/* ===== Carga y KPIs ===== */
+/* Carga y KPIs */
 function load(){
   data=(Store.evals||[]).map(e=>({...e, asig:(e.prospect_ids||[]).length}));
   applyFilters();
@@ -315,7 +359,7 @@ function kpis(){
 }
 const avg = arr => arr.length? arr.reduce((a,b)=>a+Number(b||0),0)/arr.length : 0;
 
-/* ===== Filtros/orden ===== */
+/* Filtros/orden */
 function applyFilters(){
   const q=(id('f_text').value||'').toLowerCase().trim();
   const t=id('f_tipo').value||'';
@@ -347,7 +391,7 @@ function get(o,k){
   return (o[k]||'').toString().toLowerCase();
 }
 
-/* ===== Render tabla ===== */
+/* Render tabla */
 function render(){
   const tb=id('tbody'); tb.innerHTML='';
   view.forEach(e=>{
@@ -373,32 +417,26 @@ function render(){
   });
 }
 function iconBtn(action,title){
-  // Eye and trash refined
   if(action==='ver'){
     return '<button class="iconbtn" title="'+title+'" data-act="ver" aria-label="'+title+'">'+
       '<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">'+
       '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'+
       '<circle cx="12" cy="12" r="3.2" stroke="#111827" stroke-width="1.6" /></svg></button>';
   }
-  // trash
   return '<button class="iconbtn" title="'+title+'" data-act="del" aria-label="'+title+'">'+
     '<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">'+
     '<path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'+
     '<path d="M10 10v7M14 10v7" stroke="#111827" stroke-width="1.6" stroke-linecap="round"/></svg></button>';
 }
 
-/* ===== Drawer ===== */
+/* Drawer */
 function openDrawer(idEv){
   openId=idEv;
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e) return;
 
-  // Meta + acciones
   id('d_fecha').textContent=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
-
-  // Asignación — construir lista con lógica y avisos
   renderProspects(e);
 
-  // Detalle 4 bloques
   fillKV('d_loc', e.loc);   fillKV('d_calle', e.calle);
   fillKV('d_m2', e.m2? e.m2+' m²':'—'); fillKV('d_anio', e.anio);
   fillKV('d_asc', e.asc);   fillKV('d_alt', e.alt);
@@ -421,16 +459,15 @@ function openDrawer(idEv){
   fillKV('d_neta', fmtN1.format(toPct(e.kpi_neta))+' %');
   fillKV('d_flujo', e0(e.kpi_flujo)); fillKV('d_pmax', e0(e.pmax));
 
-  // Adjuntos (pequeñas miniaturas)
   renderAttachments(e);
 
-  // Handlers
   id('uhOverlay').classList.add('open');
   id('uhDrawer').classList.add('open');
 
   id('d_guardar').onclick = function(){ saveAssignAndFiles(); };
   id('d_pdf').onclick = function(){ quickPDF(e.id); };
   id('d_editar').onclick = function(){ goEvaluar(e.id); };
+  id('d_enviar').onclick = function(){ openSendModal(e); };
 }
 function refText(t){ if(!t) return '—'; if(t==='no') return 'No'; if(t==='lavado') return 'Lavado de cara'; if(t==='integral') return 'Reforma integral'; return t; }
 function fillKV(el,val){ id(el).textContent = (val==null||val==='')? '—' : String(val); }
@@ -440,7 +477,7 @@ function closeDrawer(){
   openId=null;
 }
 
-/* ===== Lógica de matching + avisos ===== */
+/* Matching + avisos (idéntico a tu base) */
 function fold(s){ return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
 function isSearching(p){ return fold(p.fase).includes('busq'); }
 function wantsNoReform(p){
@@ -499,7 +536,7 @@ function warnBadges(e,p){
   return warns;
 }
 
-/* ===== Render prospects en drawer ===== */
+/* Prospects drawer */
 function renderProspects(e){
   const wrap=id('p_list'); wrap.innerHTML='';
   const pros=Store.pros||[];
@@ -515,7 +552,8 @@ function renderProspects(e){
     const cb=document.createElement('input'); cb.type='checkbox';
     const cbVal=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
     cb.value=cbVal; cb.checked = setSel.has(cbVal);
-    const content=document.createElement('div'); // derecha
+    cb.dataset.email=p.email||''; cb.dataset.phone=p.phone||p.telefono||'';
+    const content=document.createElement('div');
     const title=document.createElement('div');
     title.innerHTML='<strong>'+esc(p.nombre||'—')+'</strong>';
     const tags=document.createElement('div'); tags.className='p-tags';
@@ -549,12 +587,10 @@ function warnBadge(text){
   return el;
 }
 
-/* ===== Adjuntos ===== */
+/* Adjuntos */
 const MAX_VIDEO_BYTES = 2*1024*1024;
 function renderAttachments(e){
-  // arrays seguras
   e.files = e.files || {images:[],videos:[],pdfs:[]};
-
   const gI=id('grid_imgs'), gV=id('grid_vids'), gP=id('grid_pdfs');
   gI.innerHTML=''; gV.innerHTML=''; gP.innerHTML='';
 
@@ -562,7 +598,6 @@ function renderAttachments(e){
   e.files.videos.forEach((f,idx)=>{ gV.appendChild(thumbVideo(f, ()=>{ e.files.videos.splice(idx,1); renderAttachments(e);})); });
   e.files.pdfs.forEach((f,idx)=>{ gP.appendChild(thumbPdf(f, ()=>{ e.files.pdfs.splice(idx,1); renderAttachments(e);})); });
 
-  // bind uploaders
   id('up_imgs').onchange = function(ev){ handleFiles(ev.target.files, 'images'); ev.target.value=''; };
   id('up_vids').onchange = function(ev){ handleFiles(ev.target.files, 'videos'); ev.target.value=''; };
   id('up_pdfs').onchange = function(ev){ handleFiles(ev.target.files, 'pdfs'); ev.target.value=''; };
@@ -570,7 +605,6 @@ function renderAttachments(e){
   function handleFiles(fileList, kind){
     const arr = Array.prototype.slice.call(fileList||[]);
     if(!arr.length) return;
-    const readers=[];
     arr.forEach(file=>{
       if(kind==='videos' && file.size>MAX_VIDEO_BYTES){ toast('Vídeo "'+file.name+'" supera 2 MB','warn'); return; }
       const r=new FileReader();
@@ -582,51 +616,30 @@ function renderAttachments(e){
         renderAttachments(e);
       };
       r.readAsDataURL(file);
-      readers.push(r);
     });
   }
-
-  function thumbImg(f, onX){
-    const d=document.createElement('div'); d.className='thumb';
-    const img=new Image(); img.src=f.data; d.appendChild(img);
-    d.appendChild(xBtn(onX)); return d;
-  }
-  function thumbVideo(f, onX){
-    const d=document.createElement('div'); d.className='thumb';
-    const inner=document.createElement('div'); inner.className='mini';
-    inner.innerHTML='▶<br>'+esc(trimName(f.name));
-    d.appendChild(inner); d.appendChild(xBtn(onX)); return d;
-  }
-  function thumbPdf(f, onX){
-    const d=document.createElement('div'); d.className='thumb';
-    const inner=document.createElement('div'); inner.className='mini';
-    inner.innerHTML='PDF<br>'+esc(trimName(f.name));
-    d.appendChild(inner); d.appendChild(xBtn(onX)); return d;
-  }
-  function xBtn(onX){
-    const b=document.createElement('div'); b.className='x'; b.title='Quitar';
-    b.innerHTML='×'; b.onclick=onX; return b;
-  }
+  function thumbImg(f, onX){const d=document.createElement('div'); d.className='thumb'; const img=new Image(); img.src=f.data; d.appendChild(img); d.appendChild(xBtn(onX)); return d;}
+  function thumbVideo(f, onX){const d=document.createElement('div'); d.className='thumb'; const inner=document.createElement('div'); inner.className='mini'; inner.innerHTML='▶<br>'+esc(trimName(f.name)); d.appendChild(inner); d.appendChild(xBtn(onX)); return d;}
+  function thumbPdf(f, onX){const d=document.createElement('div'); d.className='thumb'; const inner=document.createElement('div'); inner.className='mini'; inner.innerHTML='PDF<br>'+esc(trimName(f.name)); d.appendChild(inner); d.appendChild(xBtn(onX)); return d;}
+  function xBtn(onX){const b=document.createElement('div'); b.className='x'; b.title='Quitar'; b.innerHTML='×'; b.onclick=onX; return b;}
   function trimName(n){ n=String(n||''); return n.length>14? n.slice(0,12)+'…': n; }
 }
 
-/* ===== Guardar asignación + adjuntos ===== */
+/* Guardar asignación */
 function saveAssignAndFiles(){
   if(!openId) return;
   const list=Store.evals||[];
   const idx=list.findIndex(x=>x.id===openId); if(idx<0) return;
 
-  // prospects seleccionados
   const choices=[].slice.call(id('p_list').querySelectorAll('input[type=checkbox]'));
   list[idx].prospect_ids = choices.filter(c=>c.checked).map(c=>c.value);
 
-  // recoger adjuntos de la UI ya están en list[idx].files (se actualiza al renderAttachments)
   Store.evals=list;
   toast('Asignación y adjuntos guardados','ok');
-  load(); // refresca contador "Asignados"
+  load();
 }
 
-/* ===== PDF ===== */
+/* PDF */
 function quickPDF(idEv){
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e){toast('No encontrado','bad');return;}
   const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
@@ -662,11 +675,108 @@ function quickPDF(idEv){
   const w=window.open('','_blank'); if(!w){toast('Popup bloqueado','warn');return;}
   w.document.open(); w.document.write(html); w.document.close();
   const tryPrint=function(){try{w.focus();}catch(_){}}; w.onload=tryPrint; setTimeout(tryPrint,600);
-
   function kv(l,v){ return '<div class="box"><div class="lab">'+esc(l)+'</div><div class="val">'+esc(v)+'</div></div>'; }
 }
 
-/* ===== Export CSV ===== */
+/* ===== Mensajería ===== */
+function getCfg(){
+  const c=Store.cfg||{}; const brand=(c.brand_name||'Unihouser'); const notifs=c.notifs||{};
+  return {
+    brand,
+    notifs:{
+      email_subject_tpl: notifs.email_subject_tpl || ${brand} · {loc} · {calle},
+      email_body_tpl: notifs.email_body_tpl || 
+`Hola {name},
+
+Te comparto una oportunidad en {loc} · {calle} ({tipo}).
+• Precio: {precio} · Inversión: {inv}
+• Bruta: {rb}% · Neta: {rn}% · Flujo anual: {fl}
+• P. máx orientativo: {pmax}
+{url}
+
+Un saludo,
+${brand}`,
+      wa_text_tpl: notifs.wa_text_tpl || 
+`{name ? ('Hola '+name+', ') : ''}te comparto oportunidad: {loc} · {calle} ({tipo})
+Precio {precio} | Inv {inv}
+Bruta {rb}% · Neta {rn}% · Flujo {fl}
+Pmax {pmax}
+{url}`
+    }
+  };
+}
+function fillTpl(tpl, e, person){
+  const rb = (Math.round(Number(e.kpi_bruta||0)*10)/10).toFixed(1).replace('.',',');
+  const rn = (Math.round(Number(e.kpi_neta ||0)*10)/10).toFixed(1).replace('.',',');
+  return tpl
+    .replace(/\{brand\}/g, getCfg().brand)
+    .replace(/\{name\}/g, person?.nombre||person?.name||'')
+    .replace(/\{loc\}/g, e.loc||'')
+    .replace(/\{calle\}/g, e.calle||'')
+    .replace(/\{tipo\}/g, e.tipo||'')
+    .replace(/\{precio\}/g, e0(e.precio||0))
+    .replace(/\{inv\}/g, e0(e.inv_total||0))
+    .replace(/\{rb\}/g, rb)
+    .replace(/\{rn\}/g, rn)
+    .replace(/\{fl\}/g, e0(e.kpi_flujo||0))
+    .replace(/\{pmax\}/g, e0(e.pmax||0))
+    .replace(/\{url\}/g, e.url||'');
+}
+function openSendModal(e){
+  const back=id('sendBack'), box=id('sendToBox'); back.style.display='flex';
+  const cfg=getCfg();
+
+  // construir listado con los prospects marcados en el drawer
+  box.innerHTML='';
+  const checks=[...id('p_list').querySelectorAll('input[type=checkbox]')];
+  const targets = checks.filter(c=>c.checked).map(c=>{
+    return { name:c.parentElement?.querySelector('strong')?.textContent||'-', email:c.dataset.email||'', phone:c.dataset.phone||'' };
+  });
+  if(!targets.length) box.textContent='Marca al menos un prospect arriba para proponerles este activo.';
+
+  const rows=[];
+  targets.forEach(t=>{
+    const row=document.createElement('div'); row.className='area';
+    row.innerHTML='<div><strong>'+esc(t.name)+'</strong></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">'+
+      '<input value="'+esc(t.email)+'" placeholder="email">'+
+      '<input value="'+esc(t.phone)+'" placeholder="móvil">'+
+      '</div>';
+    box.appendChild(row); rows.push(row);
+  });
+
+  const subjectEl=id('sendSubject'), bodyEl=id('sendBody');
+  subjectEl.value = fillTpl(cfg.notifs.email_subject_tpl, e);
+  bodyEl.value    = fillTpl(cfg.notifs.email_body_tpl, e, targets[0]);
+
+  id('sendChannel').onchange=function(){
+    if(this.value==='email'){
+      subjectEl.disabled=false;
+      subjectEl.value = fillTpl(cfg.notifs.email_subject_tpl, e);
+      bodyEl.value    = fillTpl(cfg.notifs.email_body_tpl, e, targets[0]);
+    }else{
+      subjectEl.disabled=true; subjectEl.value='WhatsApp';
+      bodyEl.value    = fillTpl(cfg.notifs.wa_text_tpl, e, targets[0]);
+    }
+  };
+
+  id('sendCopy').onclick=function(){
+    navigator.clipboard.writeText(subjectEl.value+'\n\n'+bodyEl.value).then(()=>toast('Copiado','ok'));
+  };
+  id('sendOpenMail').onclick=function(){
+    const emails=[...box.querySelectorAll('input[placeholder="email"]')].map(i=>i.value.trim()).filter(v=>v.includes('@'));
+    const mailto='mailto:'+encodeURIComponent(emails.join(','))+'?subject='+encodeURIComponent(subjectEl.value)+'&body='+encodeURIComponent(bodyEl.value);
+    window.open(mailto,'_blank');
+  };
+  id('sendOpenWA').onclick=function(){
+    const phone= (box.querySelector('input[placeholder="móvil"]')?.value||'').replace(/[^\d]/g,'');
+    const url='https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(bodyEl.value);
+    window.open(url,'_blank');
+  };
+  id('sendClose').onclick=function(){ back.style.display='none'; };
+}
+
+/* Export CSV */
 function toCSV(rows){
   const headers=["Id","Fecha","Localidad","Calle","Tipo","Precio","ITP","Notaría","PSI","Reforma","Comunidad","IBI","Hogar","Impago","Gestión","Alquiler","Bruta%","Neta%","Flujo","Pmax","InvTotal","Asignados","URL"];
   const lines=[headers.join(';')];
@@ -693,7 +803,7 @@ function download(name,content){
   setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},0);
 }
 
-/* ===== Eventos tabla/UI ===== */
+/* Eventos tabla/UI */
 function onTableClick(ev){
   const btn=ev.target.closest('button[data-act]'); const tr=ev.target.closest('tr');
   if(!tr) return; const idEv=tr.dataset.id;
@@ -715,13 +825,13 @@ function bindSort(){
   });
 }
 
-/* ===== Abrir en Evaluar ===== */
+/* Abrir en Evaluar */
 function goEvaluar(idEv){
   localStorage.setItem('load_eval', idEv);
   location.href = 'evaluar.html';
 }
 
-/* ===== Attach ===== */
+/* Attach */
 function attach(){
   id('b_filtrar').addEventListener('click',applyFilters);
   id('b_limpiar').addEventListener('click',function(){
