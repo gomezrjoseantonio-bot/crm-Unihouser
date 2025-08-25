@@ -90,7 +90,7 @@ small.muted{color:#8b8f93}
           <div class="block">
             <h5>Identidad</h5>
             <div class="grid">
-              <div class="field"><label>Nombre empresa</label><input id="g_name" maxlength="40" placeholder="Unihouser"/></div>
+              <div class="field"><label>Nombre marca</label><input id="g_name" maxlength="40" placeholder="Unihouser"/></div>
               <div class="field"><label>Correo general</label><input id="g_email" type="email" maxlength="50" placeholder="info@unihouser.es"/></div>
               <div class="field"><label>Teléfono</label><input id="g_phone" maxlength="15" placeholder="644 300 200"/></div>
               <div class="field"><label>Color marca (hex)</label><input id="g_brand" maxlength="7" placeholder="#c7530c"/></div>
@@ -110,8 +110,8 @@ small.muted{color:#8b8f93}
             <h5>Compras</h5>
             <div class="grid">
               <div class="field"><label>ITP (%)</label><input id="p_itp" type="number" inputmode="decimal" min="0" max="21" step="0.1" placeholder="8"/></div>
-              <div class="field"><label>Notaría (€)</label><input id="p_not" type="number" inputmode="numeric" min="0" step="100" placeholder="1200"/></div>
-              <div class="field"><label>Honorarios (€)</label><input id="p_fee" type="number" inputmode="numeric" min="0" step="10" placeholder="3630"/></div>
+              <div class="field"><label>Notaría (€)</label><input id="p_not" type="number" inputmode="numeric" min="0" step="100" placeholder="1500"/></div>
+              <div class="field"><label>Honorarios (€)</label><input id="p_fee" type="number" inputmode="numeric" min="0" step="10" placeholder="4235"/></div>
               <div class="field row3 inline">
                 <label><input type="checkbox" id="p_bud_incl"/> Incluir honorarios por defecto en presupuesto del cliente</label>
               </div>
@@ -152,6 +152,19 @@ small.muted{color:#8b8f93}
         <div class="panel" id="panel-mensajeria">
           <h3>Mensajería</h3>
 
+          <!-- NOTIFICACIONES GLOBALES (lo que pediste) -->
+          <div class="block">
+            <h5>Notificaciones (global)</h5>
+            <div class="grid">
+              <div class="field row3"><label>Email remitente (por defecto)</label><input id="n_email_from" type="email" maxlength="60"/></div>
+              <div class="field row3"><label>Asunto email — plantilla</label><input id="n_email_subj" maxlength="80"/></div>
+              <div class="field row3"><label>Cuerpo email — plantilla</label><textarea id="n_email_body" rows="2" maxlength="500"></textarea></div>
+              <div class="field row3"><label>WhatsApp — plantilla</label><textarea id="n_wa_body" rows="2" maxlength="350"></textarea></div>
+            </div>
+            <small class="muted">Placeholders: {NOMBRE}, {LOCALIDAD}, {CALLE}, {PRECIO}, {ALQUILER}, {P_MAX}, {LINK}</small>
+          </div>
+
+          <!-- Canales (opcional/avanzado) -->
           <div class="block">
             <h5>Canales</h5>
             <div class="grid">
@@ -275,26 +288,68 @@ small.muted{color:#8b8f93}
 var LS={get:function(k,fb){try{var v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch(_){return fb}},set:function(k,v){localStorage.setItem(k,JSON.stringify(v))}};
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},1300);}
 
+/* Normaliza cfg y asegura compatibilidad Evaluar/Evaluaciones */
 function normCfg(c){
   c=c&&typeof c==='object'?JSON.parse(JSON.stringify(c)):{};
-  if(typeof c.notaria_eur==='number'){c.notaria=c.notaria_eur;}
-  if(typeof c.psi_fee_eur==='number'){c.honorarios=c.psi_fee_eur;}
-  if(typeof c.itp_pct==='number' && c.itp_pct>1){c.itp_pct=c.itp_pct/100;}
-  c.itp_pct=(typeof c.itp_pct==='number')?c.itp_pct:.08;
-  c.notaria=(typeof c.notaria==='number')?c.notaria:1200;
-  c.honorarios=(typeof c.honorarios==='number')?c.honorarios:3630;
-  c.localidades=Array.isArray(c.localidades)&&c.localidades.length?c.localidades:['Oviedo','Gijón','Avilés','Mieres','Pola de Siero','Langreo','Gozón'];
-  c.objetivos=c.objetivos||{tradicional:{bruta_pct:10,neta_pct:6,flujo_mes_eur:0},habitaciones:{bruta_pct:12,neta_pct:7,flujo_mes_eur:0}};
+
+  /* Compat: notaría/honorarios en ambos nombres */
+  if(typeof c.notaria_eur==='number') c.notaria=c.notaria_eur;
+  if(typeof c.notaria==='number' && c.notaria_eur==null) c.notaria_eur=c.notaria;
+
+  if(typeof c.psi_fee_eur==='number') c.honorarios=c.psi_fee_eur;
+  if(typeof c.honorarios==='number' && c.psi_fee_eur==null) c.psi_fee_eur=c.honorarios;
+
+  /* ITP: guardar como porcentaje (8). Si llegó 0.08 lo subimos a 8. */
+  if(typeof c.itp_pct!=='number'){ c.itp_pct=8; }
+  else if(c.itp_pct<=1){ c.itp_pct = c.itp_pct*100; }
+
+  /* Defaults varios */
+  c.notaria   =(typeof c.notaria==='number')   ? c.notaria   : 1500;
+  c.honorarios=(typeof c.honorarios==='number')? c.honorarios: 4235;
+
+  /* Marca */
+  c.brand_color = c.brand_color || '#c7530c';
+  c.brand_name  = c.brand_name  || c.company_name || 'Unihouser';
+  c.company_email = c.company_email || 'info@unihouser.es';
+  c.company_phone = c.company_phone || '644 300 200';
+
+  /* Localidades por defecto */
+  c.localidades=Array.isArray(c.localidades)&&c.localidades.length?c.localidades:
+    ['Oviedo','Gijón','Avilés','Mieres','Pola de Siero','Langreo','Gozón'];
+
+  /* Objetivos */
+  c.objetivos=c.objetivos||{
+    tradicional :{bruta_pct:10,neta_pct:6,flujo_mes_eur:0},
+    habitaciones:{bruta_pct:12,neta_pct:7,flujo_mes_eur:0}
+  };
+
+  /* Matching */
   c.match=c.match||{thresholds:{green:1,amber:0.95},warnings_only_when_green:true};
+
+  /* Bruta/Neta flags */
   c.bruta=c.bruta||{include_honorarios_default:false};
-  c.neta=c.neta||{include_honorarios_default:false};
+  c.neta =c.neta ||{include_honorarios_default:false};
+
+  /* Presupuesto */
   var pres=c.presupuesto||{};
-  if(typeof c.incluir_psi_por_defecto==='boolean' && pres.honorarios_incluidos_default==null){pres.honorarios_incluidos_default=c.incluir_psi_por_defecto;}
-  if(pres.honorarios_incluidos_default==null){pres.honorarios_incluidos_default=true;}
+  if(typeof c.incluir_psi_por_defecto==='boolean' && pres.honorarios_incluidos_default==null){
+    pres.honorarios_incluidos_default=c.incluir_psi_por_defecto;
+  }
+  if(pres.honorarios_incluidos_default==null) pres.honorarios_incluidos_default=true;
   c.presupuesto=pres;
+
+  /* MENSAJERÍA: NOTIFICACIONES GLOBALES (lo que pediste) */
+  c.notifs = c.notifs || {
+    email_from: c.company_email || 'info@unihouser.es',
+    email_subject_tpl: 'Contacto — {NOMBRE}',
+    email_body_tpl:    'Hola {NOMBRE},\\nTe escribimos sobre el activo en {LOCALIDAD} {CALLE}. Precio {PRECIO}, alquiler {ALQUILER}. Pmáx {P_MAX}.\\n{LINK}',
+    wa_text_tpl:       'Hola {NOMBRE}! Te paso info del activo en {LOCALIDAD} {CALLE}. Precio {PRECIO} · Alq {ALQUILER} · Pmáx {P_MAX}. {LINK}'
+  };
+
+  /* MENSAJERÍA: Canales + plantillas por fase (avanzado, opcional) */
   c.comms=c.comms||{};
   c.comms.channels=c.comms.channels||{
-    email:{enabled:true,mode:'mailto',from_name:'Unihouser',from_email:'info@unihouser.es',reply_to:'',bcc:'',smtp:{host:'',port:465,secure:true,user:'',pass:''}},
+    email:{enabled:true,mode:'mailto',from_name:c.brand_name,from_email:c.company_email,reply_to:'',bcc:'',smtp:{host:'',port:465,secure:true,user:'',pass:''}},
     whatsapp:{enabled:true,mode:'link',from_number:'+34644300200',provider:'meta',
       meta:{business_id:'',phone_number_id:'',access_token:''},
       twilio:{account_sid:'',auth_token:'',from_whatsapp:''}}
@@ -306,9 +361,13 @@ function normCfg(c){
       c.comms.templates[ph]={email:{subject:ph+' — {NOMBRE}', body:'Hola {NOMBRE},\\n…'},whatsapp:{body:'Hola {NOMBRE}! …'}};
     }
   });
+
   return c;
 }
 var CFG=normCfg(LS.get('cfg',{}));
+
+/* Aplica color de marca a la variable CSS */
+try{ document.documentElement.style.setProperty('--brand', CFG.brand_color); }catch(_){}
 
 /* ===== Tabs ===== */
 document.getElementById('tabs').addEventListener('click',function(e){
@@ -343,25 +402,27 @@ chipsWrap.addEventListener('click',function(e){
   CFG.localidades=CFG.localidades.filter(function(x){return x!==del}); paintLocs();
 });
 function loadGeneral(){
-  document.getElementById('g_name').value = CFG.company_name||'Unihouser';
+  document.getElementById('g_name').value  = CFG.brand_name||'Unihouser';
   document.getElementById('g_email').value = CFG.company_email||'info@unihouser.es';
   document.getElementById('g_phone').value = CFG.company_phone||'644 300 200';
-  document.getElementById('g_brand').value = (CFG.brand_color||'#c7530c');
+  document.getElementById('g_brand').value = CFG.brand_color||'#c7530c';
   paintLocs();
 }
 document.getElementById('save-general').onclick=function(){
-  CFG.company_name = document.getElementById('g_name').value.trim();
-  CFG.company_email= document.getElementById('g_email').value.trim();
-  CFG.company_phone= document.getElementById('g_phone').value.trim();
+  CFG.brand_name   = document.getElementById('g_name').value.trim() || 'Unihouser';
+  CFG.company_email= document.getElementById('g_email').value.trim() || 'info@unihouser.es';
+  CFG.company_phone= document.getElementById('g_phone').value.trim() || '644 300 200';
   CFG.brand_color  = document.getElementById('g_brand').value.trim() || '#c7530c';
-  LS.set('cfg',CFG); toast('Guardado general');
+  LS.set('cfg',CFG);
+  try{ document.documentElement.style.setProperty('--brand', CFG.brand_color); }catch(_){}
+  toast('Guardado general');
 };
 
 /* ===== PRESUPUESTO ===== */
 function loadPresu(){
-  document.getElementById('p_itp').value = (CFG.itp_pct*100).toFixed(2).replace(/\.00$/,'');
-  document.getElementById('p_not').value = CFG.notaria;
-  document.getElementById('p_fee').value = CFG.honorarios;
+  document.getElementById('p_itp').value = CFG.itp_pct;           /* porcentaje (8) */
+  document.getElementById('p_not').value = CFG.notaria_eur||CFG.notaria;
+  document.getElementById('p_fee').value = CFG.psi_fee_eur||CFG.honorarios;
   document.getElementById('p_bud_incl').checked = !!CFG.presupuesto.honorarios_incluidos_default;
   var o=CFG.objetivos;
   document.getElementById('o_tb').value=o.tradicional.bruta_pct;
@@ -374,9 +435,16 @@ function loadPresu(){
 }
 document.getElementById('save-presu').onclick=function(){
   var itp = parseFloat(document.getElementById('p_itp').value||'8'); if(isNaN(itp)) itp=8;
-  CFG.itp_pct = itp/100;
-  CFG.notaria = Math.max(0, parseInt(document.getElementById('p_not').value||'1200',10));
-  CFG.honorarios = Math.max(0, parseInt(document.getElementById('p_fee').value||'3630',10));
+  var notv= Math.max(0, parseInt(document.getElementById('p_not').value||'1500',10));
+  var feev= Math.max(0, parseInt(document.getElementById('p_fee').value||'4235',10));
+
+  /* Guardar en ambos nombres para compatibilidad total */
+  CFG.itp_pct      = itp;                 /* porcentaje entero para Evaluar/Evaluaciones */
+  CFG.notaria      = notv;
+  CFG.notaria_eur  = notv;
+  CFG.honorarios   = feev;
+  CFG.psi_fee_eur  = feev;
+
   CFG.presupuesto.honorarios_incluidos_default = document.getElementById('p_bud_incl').checked;
   CFG.objetivos.tradicional.bruta_pct = parseFloat(document.getElementById('o_tb').value||'10')||10;
   CFG.objetivos.tradicional.neta_pct  = parseFloat(document.getElementById('o_tn').value||'6')||6;
@@ -421,12 +489,18 @@ function rowTpl(ph){
     '</div>';
 }
 function loadMensajeria(){
-  /* Email */
+  /* Notifs (global) */
+  document.getElementById('n_email_from').value = CFG.notifs.email_from||CFG.company_email||'info@unihouser.es';
+  document.getElementById('n_email_subj').value = CFG.notifs.email_subject_tpl||'';
+  document.getElementById('n_email_body').value = CFG.notifs.email_body_tpl||'';
+  document.getElementById('n_wa_body').value   = CFG.notifs.wa_text_tpl||'';
+
+  /* Email canal */
   var em=CFG.comms.channels.email||{};
   document.getElementById('c_email_en').checked = !!em.enabled;
   document.getElementById('c_email_mode').value = em.mode||'mailto';
-  document.getElementById('c_email_from_name').value = em.from_name||'Unihouser';
-  document.getElementById('c_email_from').value = em.from_email||'info@unihouser.es';
+  document.getElementById('c_email_from_name').value = em.from_name||CFG.brand_name||'Unihouser';
+  document.getElementById('c_email_from').value = em.from_email||CFG.company_email||'info@unihouser.es';
   document.getElementById('c_email_reply').value = em.reply_to||'';
   document.getElementById('c_email_bcc').value   = em.bcc||'';
   var sm=em.smtp||{host:'',port:465,secure:true,user:'',pass:''};
@@ -436,7 +510,7 @@ function loadMensajeria(){
   document.getElementById('c_smtp_user').value = sm.user||'';
   document.getElementById('c_smtp_pass').value = sm.pass||'';
 
-  /* WA */
+  /* WA canal */
   var wa=CFG.comms.channels.whatsapp||{meta:{},twilio:{}};
   if(!wa.meta) wa.meta={}; if(!wa.twilio) wa.twilio={};
   document.getElementById('w_en').checked = !!wa.enabled;
@@ -450,12 +524,10 @@ function loadMensajeria(){
   document.getElementById('w_tw_tok').value=wa.twilio.auth_token||'';
   document.getElementById('w_tw_from').value=wa.twilio.from_whatsapp||'';
 
-  /* Plantillas */
+  /* Plantillas por fase */
   var box=document.getElementById('tpl-table');
   Array.prototype.forEach.call(box.querySelectorAll('.row:not(.head)'),function(n){n.parentNode.removeChild(n);});
-  PHASES.forEach(function(ph){
-    box.insertAdjacentHTML('beforeend', rowTpl(ph));
-  });
+  PHASES.forEach(function(ph){ box.insertAdjacentHTML('beforeend', rowTpl(ph)); });
   PHASES.forEach(function(ph){
     var id=ph.toLowerCase(); var t=CFG.comms.templates[ph];
     document.getElementById('t_'+id+'_es').value=t.email.subject||'';
@@ -464,11 +536,18 @@ function loadMensajeria(){
   });
 }
 document.getElementById('save-mensajeria').onclick=function(){
+  /* Notifs (global) */
+  CFG.notifs.email_from      = (document.getElementById('n_email_from').value||'').trim() || (CFG.company_email||'info@unihouser.es');
+  CFG.notifs.email_subject_tpl = document.getElementById('n_email_subj').value.slice(0,80);
+  CFG.notifs.email_body_tpl    = document.getElementById('n_email_body').value.slice(0,500);
+  CFG.notifs.wa_text_tpl       = document.getElementById('n_wa_body').value.slice(0,350);
+
+  /* Canales avanzados + plantillas por fase */
   var em=CFG.comms.channels.email;
   em.enabled=document.getElementById('c_email_en').checked;
   em.mode   =document.getElementById('c_email_mode').value;
-  em.from_name=document.getElementById('c_email_from_name').value.trim();
-  em.from_email=document.getElementById('c_email_from').value.trim();
+  em.from_name=document.getElementById('c_email_from_name').value.trim() || CFG.brand_name || 'Unihouser';
+  em.from_email=document.getElementById('c_email_from').value.trim() || CFG.company_email || 'info@unihouser.es';
   em.reply_to=document.getElementById('c_email_reply').value.trim();
   em.bcc=document.getElementById('c_email_bcc').value.trim();
   em.smtp.host=document.getElementById('c_smtp_host').value.trim();
@@ -511,17 +590,15 @@ document.getElementById('ph-insert').onchange=function(){
   el.value=el.value.slice(0,s)+ph+el.value.slice(ee);
   el.focus(); el.selectionStart=el.selectionEnd=s+ph.length;
 };
-/* Pruebas */
+/* Pruebas rápidas */
 document.getElementById('test-email').onclick=function(){
-  var t=CFG.comms.templates.CONTACTO;
-  var subj=encodeURIComponent((t.email.subject||'').replace('{NOMBRE}','Test'));
-  var body=encodeURIComponent((t.email.body||'').replace('{NOMBRE}','Test'));
-  var to=encodeURIComponent(CFG.company_email||'info@unihouser.es');
+  var subj=encodeURIComponent((CFG.notifs.email_subject_tpl||'').replace('{NOMBRE}','Test'));
+  var body=encodeURIComponent((CFG.notifs.email_body_tpl||'').replace('{NOMBRE}','Test'));
+  var to=encodeURIComponent(CFG.notifs.email_from||CFG.company_email||'info@unihouser.es');
   window.open('mailto:'+to+'?subject='+subj+'&body='+body,'_blank');
 };
 document.getElementById('test-wa').onclick=function(){
-  var t=CFG.comms.templates.CONTACTO;
-  var msg=encodeURIComponent((t.whatsapp.body||'').replace('{NOMBRE}','Test'));
+  var msg=encodeURIComponent((CFG.notifs.wa_text_tpl||'').replace('{NOMBRE}','Test'));
   var n=(CFG.comms.channels.whatsapp.from_number||'').replace(/\D/g,'');
   window.open('https://wa.me/'+n+'?text='+msg,'_blank');
 };
@@ -557,6 +634,7 @@ document.getElementById('file-import').addEventListener('change',function(e){
       var obj=JSON.parse(fr.result);
       CFG=normCfg(obj); LS.set('cfg',CFG);
       loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval();
+      try{ document.documentElement.style.setProperty('--brand', CFG.brand_color); }catch(_){}
       toast('Importado y aplicado');
     }catch(_){ toast('JSON inválido'); }
   };
@@ -565,6 +643,7 @@ document.getElementById('file-import').addEventListener('change',function(e){
 document.getElementById('btn-reset').onclick=function(){
   CFG=normCfg({}); LS.set('cfg',CFG);
   loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval();
+  try{ document.documentElement.style.setProperty('--brand', CFG.brand_color); }catch(_){}
   toast('Valores por defecto');
 };
 
