@@ -4,19 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Evaluaciones</title>
-<link rel="icon" href="data:,"><!-- evita 404 -->
+<link rel="icon" href="data:,">
 <style>
-/* ===== Base / marca (misma piel que Configuración) ===== */
 :root{
   --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
   --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
-  --shadow:0 4px 22px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif; --fz:12px;
+  --shadow:0 4px 22px rgba(0,0,0,.06);
+  --ui-font: system-ui, -apple-system, Inter, Roboto, Arial, sans-serif;
+  --ui-font-size: 12px;
+  --ff: var(--ui-font);
+  --fz: var(--ui-font-size);
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
 
-/* Topbar & nav (como Configuración) */
+/* Topbar & nav */
 .topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
 .top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:8px}
@@ -46,10 +49,11 @@ input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6p
 .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:800;font-size:12px}
 .btn.primary{background:var(--brand);color:#fff;border:none}
 
-/* Tabla */
-.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+/* Tabla responsive */
+.table-wrap{overflow:auto}
+.table{min-width:980px;width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .table th,.table td{padding:9px 10px;border-bottom:1px dashed var(--line);text-align:left;font-size:12px;white-space:nowrap}
-.table th{background:#FAF8F7;color:#1a1f23;cursor:pointer}
+.table th{background:#FAF8F7;color:#1a1f23;cursor:pointer;position:sticky;top:0;z-index:1}
 .table tr:last-child td{border-bottom:none}
 .pill{display:inline-block;padding:.15rem .45rem;border-radius:999px;background:var(--chip);font-size:11px;border:1px solid var(--line)}
 
@@ -84,12 +88,12 @@ input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6p
 .badge.warn{border-color:#fde68a;background:#fff7ed;color:#b45309}
 .badge small{font-weight:700}
 
-/* Adjuntos (mini rejilla) */
+/* Adjuntos */
 .attach-wrap{display:grid;gap:8px}
-.attach-grid{display:grid;gap:6px;grid-template-columns:repeat(6,1fr)}
-.thumb{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;height:64px}
+.attach-grid{display:grid;gap:6px;grid-template-columns:repeat(auto-fit,minmax(90px,1fr))}
+.thumb{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;height:64px;cursor:pointer}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.thumb .mini{display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#333}
+.thumb .mini{display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#333;text-align:center;line-height:1.15}
 .thumb .x{position:absolute;top:3px;right:3px;background:#fff;border:1px solid var(--line);border-radius:8px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 
 /* Modal enviar */
@@ -106,6 +110,15 @@ input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6p
 .area input,.area textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
 .area textarea{min-height:140px;resize:vertical}
 
+/* Lightbox imágenes */
+.lb-back{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:130}
+.lb-back.open{display:flex}
+.lb-inner{position:relative;max-width:95vw;max-height:90vh}
+.lb-inner img{max-width:95vw;max-height:90vh;display:block}
+.lb-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);border:none;color:#fff;font-weight:800;border-radius:10px;padding:10px;cursor:pointer}
+.lb-prev{left:-52px} .lb-next{right:-52px}
+.lb-close{position:absolute;top:-44px;right:0;background:#fff;border:none;border-radius:999px;padding:6px 10px;cursor:pointer}
+
 /* Toasts */
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
@@ -113,11 +126,21 @@ input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6p
 
 @media (max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
 </style>
+
+<script>
+/* Aplicar marca y tipografía desde cfg */
+try{
+  const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
+  if(cfg.brand_color) document.documentElement.style.setProperty('--brand', cfg.brand_color);
+  if(cfg.ui_font) document.documentElement.style.setProperty('--ui-font', cfg.ui_font);
+  if(cfg.ui_font_size) document.documentElement.style.setProperty('--ui-font-size', (''+cfg.ui_font_size).replace('px','')+'px');
+}catch(_){}
+</script>
 </head>
 <body>
   <div class="topbar">
     <div class="top-inner">
-      <div class="brand"><div class="logo">U</div><div class="title">Unihouser — Evaluaciones</div></div>
+      <div class="brand"><div class="logo" id="logoTop">U</div><div class="title" id="titleTop">Unihouser — Evaluaciones</div></div>
       <nav class="nav">
         <a href="evaluar.html">Evaluar</a>
         <a class="active" href="evaluaciones.html">Evaluaciones</a>
@@ -156,25 +179,27 @@ input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6p
       </div>
 
       <div class="card" style="margin-top:10px">
-        <table class="table" id="tbl">
-          <thead>
-            <tr>
-              <th data-k="ts">Fecha</th>
-              <th data-k="loc">Localidad</th>
-              <th data-k="calle">Calle</th>
-              <th data-k="tipo">Tipo</th>
-              <th data-k="precio" style="text-align:right">Precio</th>
-              <th data-k="alq" style="text-align:right">Alquiler</th>
-              <th data-k="kpi_bruta" style="text-align:right">Bruta %</th>
-              <th data-k="kpi_neta" style="text-align:right">Neta %</th>
-              <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
-              <th data-k="pmax" style="text-align:right">P. máx</th>
-              <th data-k="asig" style="text-align:center">Asignados</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="table" id="tbl">
+            <thead>
+              <tr>
+                <th data-k="ts">Fecha</th>
+                <th data-k="loc">Localidad</th>
+                <th data-k="calle">Calle</th>
+                <th data-k="tipo">Tipo</th>
+                <th data-k="precio" style="text-align:right">Precio</th>
+                <th data-k="alq" style="text-align:right">Alquiler</th>
+                <th data-k="kpi_bruta" style="text-align:right">Bruta %</th>
+                <th data-k="kpi_neta" style="text-align:right">Neta %</th>
+                <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
+                <th data-k="pmax" style="text-align:right">P. máx</th>
+                <th data-k="asig" style="text-align:center">Asignados</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </div>
@@ -184,7 +209,7 @@ input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6p
   <div id="uhOverlay" class="uh-overlay"></div>
   <aside id="uhDrawer" class="uh-drawer" aria-hidden="true">
     <div class="uh-d-head">
-      <span class="uh-d-title">Detalle de evaluación</span>
+      <span class="uh-d-title" id="d_title">Detalle de evaluación</span>
       <div style="display:flex;gap:6px">
         <button class="btn" id="d_enviar">Enviar</button>
         <button class="btn" id="d_cerrar">Cerrar</button>
@@ -314,19 +339,31 @@ input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6p
     </div>
   </div>
 
+  <!-- Lightbox imágenes -->
+  <div class="lb-back" id="lbBack" aria-hidden="true">
+    <div class="lb-inner">
+      <button class="lb-btn lb-prev" id="lbPrev" aria-label="Anterior">‹</button>
+      <img id="lbImg" alt="Vista" />
+      <button class="lb-btn lb-next" id="lbNext" aria-label="Siguiente">›</button>
+      <button class="lb-close" id="lbClose" aria-label="Cerrar">✕</button>
+    </div>
+  </div>
+
   <div id="toasts" class="toast-wrap"></div>
 
 <script>
 (function(){
 "use strict";
 
-/* Aplicar brand_color desde cfg */
+/* Brand name/initial */
 try{
-  var _cfg=JSON.parse(localStorage.getItem('cfg')||'{}');
-  if(_cfg && _cfg.brand_color){ document.documentElement.style.setProperty('--brand', _cfg.brand_color); }
+  const cfg=JSON.parse(localStorage.getItem('cfg')||'{}')||{};
+  const name=cfg.brand_name||cfg.company_name||'Unihouser';
+  document.getElementById('titleTop').textContent = name+' — Evaluaciones';
+  document.getElementById('logoTop').textContent  = (name||'U').toString().trim().charAt(0).toUpperCase()||'U';
 }catch(_){}
 
-/* ===== Utils ===== */
+/* Utils */
 const id = x=>document.getElementById(x);
 const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
@@ -341,7 +378,7 @@ function toast(msg,kind){
 function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function toPct(raw){ let v=Number(raw||0); if(v>0&&v<=1)v*=100; while(v>=100)v/=10; return v; }
 
-/* ===== Store ===== */
+/* Store */
 const Store={
   get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},
   set evals(v){localStorage.setItem('evals',JSON.stringify(v))},
@@ -350,10 +387,10 @@ const Store={
   get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}}}
 };
 
-/* ===== Estado ===== */
+/* Estado */
 let data=[], view=[], sortKey='ts', sortAsc=true, openId=null;
 
-/* ===== Carga y KPIs ===== */
+/* Carga y KPIs */
 function load(){
   data=(Store.evals||[]).map(e=>({...e, asig:(e.prospect_ids||[]).length}));
   applyFilters(); kpis();
@@ -366,7 +403,7 @@ function kpis(){
 }
 const avg = arr => arr.length? arr.reduce((a,b)=>a+Number(b||0),0)/arr.length : 0;
 
-/* ===== Filtros/orden ===== */
+/* Filtros/orden */
 function applyFilters(){
   const q=(id('f_text').value||'').toLowerCase().trim();
   const t=id('f_tipo').value||'';
@@ -389,7 +426,7 @@ function get(o,k){
   if(k==='ts') return new Date(o.ts||o.id?.slice(3)).getTime();
   if(k==='asig') return (o.prospect_ids||[]).length;
   if(k==='kpi_bruta') return toPct(o.kpi_bruta);
-  if(k==='kpi_neta') return toPct(o.kpi_neta);
+  if(k==='kpi_neta')  return toPct(o.kpi_neta);
   if(k==='kpi_flujo') return Number(parseNum(o.kpi_flujo));
   if(k==='pmax') return Number(o.pmax||0);
   if(k==='precio') return Number(o.precio||0);
@@ -398,7 +435,7 @@ function get(o,k){
   return (o[k]||'').toString().toLowerCase();
 }
 
-/* ===== Render tabla ===== */
+/* Render tabla */
 function render(){
   const tb=id('tbody'); tb.innerHTML='';
   view.forEach(e=>{
@@ -433,11 +470,12 @@ function iconBtn(action,title){
     '<path d="M10 10v7M14 10v7" stroke="#1a1f23" stroke-width="1.6" stroke-linecap="round"/></svg></button>';
 }
 
-/* ===== Drawer ===== */
+/* Drawer */
 function openDrawer(idEv){
   openId=idEv;
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e) return;
 
+  id('d_title').textContent='Detalle de evaluación — '+(e.loc||'-')+' · '+(e.calle||'-');
   id('d_fecha').textContent=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
   renderProspects(e);
 
@@ -481,7 +519,7 @@ function closeDrawer(){
   openId=null;
 }
 
-/* ===== Matching + avisos ===== */
+/* Matching + avisos (umbrales cfg) */
 function fold(s){ return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
 function isSearching(p){ return fold(p.fase).includes('busq'); }
 function wantsNoReform(p){
@@ -515,17 +553,26 @@ function getTargetInfo(p){
   if(fa>0||fm>0) return {kind:'flujo',val:(fa>0?fa:fm*12)};
   return {kind:'',val:0};
 }
+function classifyRatio(actual,target,thresholds){
+  if(!target||target<=0) return {cls:'r',ratio:0};
+  const ratio = actual/target;
+  const green = Number(thresholds.green||1);
+  const amber = Number(thresholds.amber||0.95);
+  const cls = ratio>=green ? 'g' : (ratio>=amber ? 'y' : 'r');
+  return {cls, ratio};
+}
 function matchEvalProspect(e,p){
   if(!isSearching(p)) return {ok:false,why:'fase'};
   if(fold(p.pref_tipo)!==fold(e.tipo)) return {ok:false,why:'tipo'};
   const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
   if(!locs.includes(fold(e.loc))) return {ok:false,why:'localidad'};
   const tgt=getTargetInfo(p); if(!tgt.val) return {ok:false,why:'objetivo'};
-  const br=Number(e.kpi_bruta||0), nt=Number(e.kpi_neta||0), fl=Number(e.kpi_flujo||0);
-  if(tgt.kind==='bruta' && br>=tgt.val) return {ok:true,kind:'bruta'};
-  if(tgt.kind==='neta'  && nt>=tgt.val) return {ok:true,kind:'neta'};
-  if(tgt.kind==='flujo' && fl>=tgt.val) return {ok:true,kind:'flujo'};
-  return {ok:false,why:'kpi'};
+  const c = (tgt.kind==='bruta') ? classifyRatio(Number(e.kpi_bruta||0), Number(tgt.val), (Store.cfg.match||{}).thresholds||{green:1,amber:.95})
+          : (tgt.kind==='neta')  ? classifyRatio(Number(e.kpi_neta ||0), Number(tgt.val), (Store.cfg.match||{}).thresholds||{green:1,amber:.95})
+          : classifyRatio(Number(e.kpi_flujo||0), Number(tgt.val), (Store.cfg.match||{}).thresholds||{green:1,amber:.95});
+  if(c.cls==='g') return {ok:true,kind:tgt.kind,cls:c.cls};
+  if(c.cls==='y') return {ok:false,why:'ambar'}; /* no auto, pero visible si quisiéramos */
+  return {ok:false,why:'rojo'};
 }
 function warnBadges(e,p){
   const warns=[];
@@ -540,12 +587,13 @@ function warnBadges(e,p){
   return warns;
 }
 
-/* ===== Prospects en drawer ===== */
+/* Prospects en drawer (auto-selección cuando coincide) */
 function renderProspects(e){
   const wrap=id('p_list'); wrap.innerHTML='';
   const pros=Store.pros||[];
   if(!pros.length){ wrap.textContent='No hay prospects guardados.'; id('matchInfo').textContent='—'; return; }
 
+  const cfg=Store.cfg||{}; const onlyWarnGreen = !!(cfg.match&&cfg.match.warnings_only_when_green);
   let coinc=0;
   const setSel=new Set(e.prospect_ids||[]);
   const frag=document.createDocumentFragment();
@@ -555,7 +603,9 @@ function renderProspects(e){
     const row=document.createElement('label');
     const cb=document.createElement('input'); cb.type='checkbox';
     const cbVal=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
-    cb.value=cbVal; cb.checked = setSel.has(cbVal);
+    cb.value=cbVal;
+    /* auto-selección si match verde o ya guardado */
+    cb.checked = m.ok || setSel.has(cbVal);
     cb.dataset.email=p.email||''; cb.dataset.phone=p.phone||p.telefono||'';
     const content=document.createElement('div');
     const title=document.createElement('div');
@@ -565,8 +615,10 @@ function renderProspects(e){
     if(m.ok){ coinc++; tags.appendChild(badge('Coincide por ', m.kind, true)); }
     else { tags.appendChild(badge('No coincide', (m.why||'').toString(), false)); }
 
-    const warns=warnBadges(e,p);
-    warns.forEach(w=>{ tags.appendChild(warnBadge(w)); });
+    if(m.ok && onlyWarnGreen){
+      const warns=warnBadges(e,p);
+      warns.forEach(w=>{ tags.appendChild(warnBadge(w)); });
+    }
 
     content.appendChild(title);
     content.appendChild(tags);
@@ -580,7 +632,7 @@ function renderProspects(e){
   id('matchInfo').textContent = coinc+' coincidencias de '+pros.length;
 }
 function badge(text, kind, ok){
-  const el=document.createElement('span'); el.className='badge '+(ok?'ok':'');
+  const el=document.createElement('span'); el.className='badge '+(ok?'ok':'' );
   const k=kind==='bruta'?'bruta':kind==='neta'?'neta':kind==='flujo'?'flujo':kind;
   el.innerHTML = (ok?'<small>✓</small> ':'')+ esc(text)+(ok?('<strong>'+k+'</strong>') : ' ('+esc(k)+')');
   return el;
@@ -591,16 +643,22 @@ function warnBadge(text){
   return el;
 }
 
-/* ===== Adjuntos ===== */
+/* Adjuntos + Lightbox/PDF */
 const MAX_VIDEO_BYTES = 2*1024*1024;
+let LB={arr:[],idx:0};
+function openLB(arr,idx){ LB.arr=arr||[]; LB.idx=idx||0; if(!LB.arr.length) return; id('lbBack').classList.add('open'); paintLB(); }
+function closeLB(){ id('lbBack').classList.remove('open'); }
+function nextLB(){ if(!LB.arr.length) return; LB.idx=(LB.idx+1)%LB.arr.length; paintLB(); }
+function prevLB(){ if(!LB.arr.length) return; LB.idx=(LB.idx-1+LB.arr.length)%LB.arr.length; paintLB(); }
+function paintLB(){ const im=LB.arr[LB.idx]; id('lbImg').src=im.data; }
 function renderAttachments(e){
   e.files = e.files || {images:[],videos:[],pdfs:[]};
   const gI=id('grid_imgs'), gV=id('grid_vids'), gP=id('grid_pdfs');
   gI.innerHTML=''; gV.innerHTML=''; gP.innerHTML='';
 
-  e.files.images.forEach((f,idx)=>{ gI.appendChild(thumbImg(f, ()=>{ e.files.images.splice(idx,1); renderAttachments(e);})); });
+  e.files.images.forEach((f,idx)=>{ gI.appendChild(thumbImg(f, ()=>{ e.files.images.splice(idx,1); renderAttachments(e);}, ()=>openLB(e.files.images, idx))); });
   e.files.videos.forEach((f,idx)=>{ gV.appendChild(thumbVideo(f, ()=>{ e.files.videos.splice(idx,1); renderAttachments(e);})); });
-  e.files.pdfs.forEach((f,idx)=>{ gP.appendChild(thumbPdf(f, ()=>{ e.files.pdfs.splice(idx,1); renderAttachments(e);})); });
+  e.files.pdfs.forEach((f,idx)=>{ gP.appendChild(thumbPdf(f, ()=>{ e.files.pdfs.splice(idx,1); renderAttachments(e);}, ()=>window.open(f.data,'_blank'))); });
 
   id('up_imgs').onchange = function(ev){ handleFiles(ev.target.files, 'images'); ev.target.value=''; };
   id('up_vids').onchange = function(ev){ handleFiles(ev.target.files, 'videos'); ev.target.value=''; };
@@ -617,20 +675,21 @@ function renderAttachments(e){
         if(kind==='images') e.files.images.push(rec);
         if(kind==='videos') e.files.videos.push(rec);
         if(kind==='pdfs')   e.files.pdfs.push(rec);
+        saveAssignAndFiles(false); /* persist silencioso */
         renderAttachments(e);
       };
       r.readAsDataURL(file);
     });
   }
-  function thumbImg(f, onX){const d=document.createElement('div'); d.className='thumb'; const img=new Image(); img.src=f.data; d.appendChild(img); d.appendChild(xBtn(onX)); return d;}
+  function thumbImg(f, onX, onOpen){const d=document.createElement('div'); d.className='thumb'; const img=new Image(); img.src=f.data; d.appendChild(img); d.appendChild(xBtn(onX)); d.onclick=onOpen; return d;}
   function thumbVideo(f, onX){const d=document.createElement('div'); d.className='thumb'; const inner=document.createElement('div'); inner.className='mini'; inner.innerHTML='▶<br>'+esc(trimName(f.name)); d.appendChild(inner); d.appendChild(xBtn(onX)); return d;}
-  function thumbPdf(f, onX){const d=document.createElement('div'); d.className='thumb'; const inner=document.createElement('div'); inner.className='mini'; inner.innerHTML='PDF<br>'+esc(trimName(f.name)); d.appendChild(inner); d.appendChild(xBtn(onX)); return d;}
-  function xBtn(onX){const b=document.createElement('div'); b.className='x'; b.title='Quitar'; b.innerHTML='×'; b.onclick=onX; return b;}
+  function thumbPdf(f, onX, onOpen){const d=document.createElement('div'); d.className='thumb'; const inner=document.createElement('div'); inner.className='mini'; inner.innerHTML='PDF<br>'+esc(trimName(f.name)); d.appendChild(inner); d.appendChild(xBtn(onX)); d.onclick=onOpen; return d;}
+  function xBtn(onX){const b=document.createElement('div'); b.className='x'; b.title='Quitar'; b.innerHTML='×'; b.onclick=function(ev){ ev.stopPropagation(); onX(); }; return b;}
   function trimName(n){ n=String(n||''); return n.length>14? n.slice(0,12)+'…': n; }
 }
 
-/* ===== Guardar asignación ===== */
-function saveAssignAndFiles(){
+/* Guardar asignación/archivos */
+function saveAssignAndFiles(showToast=true){
   if(!openId) return;
   const list=Store.evals||[];
   const idx=list.findIndex(x=>x.id===openId); if(idx<0) return;
@@ -638,10 +697,10 @@ function saveAssignAndFiles(){
   const choices=[].slice.call(id('p_list').querySelectorAll('input[type=checkbox]'));
   list[idx].prospect_ids = choices.filter(c=>c.checked).map(c=>c.value);
 
-  Store.evals=list; toast('Asignación y adjuntos guardados','ok'); load();
+  Store.evals=list; if(showToast) toast('Asignación y adjuntos guardados','ok'); load();
 }
 
-/* ===== PDF rápido ===== */
+/* PDF rápido */
 function quickPDF(idEv){
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e){toast('No encontrado','bad');return;}
   const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
@@ -656,6 +715,7 @@ function quickPDF(idEv){
     'h2{font-size:16px;margin:16px 0 8px}',
     '.foot{margin-top:16px;font-size:12px;color:#667085;text-align:center}'
   ].join('');
+  function kv(l,v){ return '<div class="box"><div class="lab">'+esc(l)+'</div><div class="val">'+esc(v)+'</div></div>'; }
   const html =
 '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Unihouser — Informe</title>'+
 '<style>'+css+'</style></head><body>'+
@@ -672,15 +732,13 @@ function quickPDF(idEv){
   kv('Tipo', e.tipo||'-')+ kv('Alquiler (mes)', fmtE0.format(e.alq||0))+
   kv('Precio', fmtE0.format(e.precio||0))+ kv('Inversión total', fmtE0.format(e.inv_total||0))+
 '</div>'+
-'<div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>'+
+'<div class="foot">© 2025 Unihouser · unihouser.es · 644 300 200</div>'+
 '</body></html>';
   const w=window.open('','_blank'); if(!w){toast('Popup bloqueado','warn');return;}
-  w.document.open(); w.document.write(html); w.document.close();
-  const tryPrint=function(){try{w.focus();}catch(_){}}; w.onload=tryPrint; setTimeout(tryPrint,600);
-  function kv(l,v){ return '<div class="box"><div class="lab">'+esc(l)+'</div><div class="val">'+esc(v)+'</div></div>'; }
+  w.document.open(); w.document.write(html); w.document.close(); try{w.focus();}catch(_){}
 }
 
-/* ===== Mensajería (sin ${} sueltos) ===== */
+/* Mensajería (cfg.notifs + placeholders {brand,name,loc,calle,tipo,precio,inv,rb,rn,fl,pmax,url}) */
 function getCfgNotifs(){
   const c=Store.cfg||{}; const brand=(c.brand_name||'Unihouser'); const n=c.notifs||{};
   const subj = (n.email_subject_tpl && String(n.email_subject_tpl).trim()) ? n.email_subject_tpl : (brand+' · {loc} · {calle}');
@@ -694,6 +752,7 @@ function fillTpl(tpl, e, person){
   const rb = (Math.round(Number(e.kpi_bruta||0)*10)/10).toFixed(1).replace('.',',');
   const rn = (Math.round(Number(e.kpi_neta ||0)*10)/10).toFixed(1).replace('.',',');
   return tpl
+    .replace(/\{brand\}/g, (Store.cfg.brand_name||'Unihouser'))
     .replace(/\{name\}/g, (person&&person.name)||'')
     .replace(/\{loc\}/g, e.loc||'')
     .replace(/\{calle\}/g, e.calle||'')
@@ -760,7 +819,7 @@ function openSendModal(e){
   id('sendClose').onclick=function(){ back.style.display='none'; };
 }
 
-/* ===== Export CSV ===== */
+/* Export CSV */
 function toCSV(rows){
   const headers=["Id","Fecha","Localidad","Calle","Tipo","Precio","ITP","Notaría","PSI","Reforma","Comunidad","IBI","Hogar","Impago","Gestión","Alquiler","Bruta%","Neta%","Flujo","Pmax","InvTotal","Asignados","URL"];
   const lines=[headers.join(';')];
@@ -787,7 +846,7 @@ function download(name,content){
   setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},0);
 }
 
-/* ===== Eventos tabla/UI ===== */
+/* Tabla/UI */
 function onTableClick(ev){
   const btn=ev.target.closest('button[data-act]'); const tr=ev.target.closest('tr');
   if(!tr) return; const idEv=tr.dataset.id;
@@ -809,28 +868,41 @@ function bindSort(){
   });
 }
 
-/* ===== Abrir en Evaluar ===== */
+/* Abrir en Evaluar */
 function goEvaluar(idEv){
   localStorage.setItem('load_eval', idEv);
   location.href = 'evaluar.html';
 }
 
-/* ===== Attach ===== */
+/* Attach */
 function attach(){
   id('b_filtrar').addEventListener('click',applyFilters);
   id('b_limpiar').addEventListener('click',function(){
     id('f_text').value=''; id('f_tipo').value=''; id('f_desde').value=''; id('f_hasta').value=''; applyFilters();
   });
   id('b_export').addEventListener('click',function(){
-    if(!view.length){toast('Nada que exportar','warn');return;}
-    download('evaluaciones.csv',toCSV(view));
+    download('evaluaciones.csv', toCSV(view.length?view:data));
   });
-  id('tbody').addEventListener('click',onTableClick);
-  id('d_cerrar').addEventListener('click',closeDrawer);
-  id('uhOverlay').addEventListener('click',closeDrawer);
-  bindSort(); load();
+  id('tbl').addEventListener('click', onTableClick);
+  id('uhOverlay').addEventListener('click', closeDrawer);
+  id('d_cerrar').addEventListener('click', closeDrawer);
+
+  id('lbPrev').addEventListener('click', prevLB);
+  id('lbNext').addEventListener('click', nextLB);
+  id('lbClose').addEventListener('click', closeLB);
+  id('lbBack').addEventListener('click', function(ev){ if(ev.target.id==='lbBack') closeLB(); });
+
+  document.addEventListener('keydown', function(ev){
+    if(ev.key==='Escape'){ closeDrawer(); closeLB(); }
+    if(id('lbBack').classList.contains('open')){
+      if(ev.key==='ArrowRight') nextLB();
+      if(ev.key==='ArrowLeft')  prevLB();
+    }
+  });
+
+  load(); bindSort();
 }
-document.addEventListener('DOMContentLoaded',attach);
+document.addEventListener('DOMContentLoaded', attach);
 })();
 </script>
 </body>
