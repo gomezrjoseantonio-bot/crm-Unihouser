@@ -92,7 +92,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .field{display:flex;flex-direction:column;gap:2px}
 .field label{color:#555;font-size:11px}
-.field input,.field select,.field textarea,.chips-input{border:1px solid var(--line);border-radius:10px;padding:5px 7px;min-height:24px;font-size:12px;background:#fff;color:var(--ink)}
+.field input,.field select,.field textarea,.chips-input{border:1px solid var(--line);border-radius:10px;padding:5px 7px;min-height:24px;font-size:12px;background:#fff;color:#000}
 .field textarea{resize:none}
 .row2{grid-column:span 2} .row3{grid-column:span 3}
 .chips{display:flex;gap:6px;flex-wrap:wrap;line-height:18px}
@@ -450,18 +450,18 @@ function adaptEval(ev){
   o.kpi_neta =(typeof ev.kpi_neta ==='number')?ev.kpi_neta :undefined;
   o.flujo_m  =(ev.flujo_m!=null) ? n(ev.flujo_m) : (ev.kpi_flujo!=null ? n(ev.kpi_flujo) : (ing_m - gas_m));
 
-  // Ascensor (acepta alias: asc / ascensor)
+  // Ascensor
   const ascStr=lower(ev.ascensor!=null?ev.ascensor:ev.asc);
   o.ascensor=(ascStr==='sí'||ascStr==='si'||ascStr==='true'||ascStr==='1'||ascStr==='y'||ascStr==='s'||ev.ascensor===true);
 
-  // Bajo (alias: bajo / bajos / planta==0 / alt==0)
+  // Bajo
   const bajoStr=lower(ev.bajo!=null?ev.bajo:ev.bajos);
   o.bajos=(bajoStr==='sí'||bajoStr==='si'||bajoStr==='true'||bajoStr==='1'||ev.planta===0||ev.pl===0||ev.alt===0||ev.es_bajo===true);
 
-  // Planta (alias: altura / alt / planta / pl)
+  // Planta
   o.altura=parseInt(ev.altura!=null?ev.altura:(ev.alt!=null?ev.alt:(ev.planta!=null?ev.planta:(ev.pl!=null?ev.pl:''))),10)||0;
 
-  // Reforma (num 0/1/2 o textos)
+  // Reforma
   let refRaw = (ev.reforma ?? ev.reforma_tipo ?? ev.ref_tip ?? ev.ref ?? ev.reforma_necesaria ?? ev.necesita_reforma ?? '').toString().trim().toLowerCase();
   if(refRaw && /^[0-9.]+$/.test(refRaw)){
     const rn = Number(refRaw);
@@ -473,7 +473,7 @@ function adaptEval(ev){
   else if(/lavado|cosm|pint|ligera|parcial|si|sí|true/.test(refRaw)) o.reforma='Lavado de cara';
   else o.reforma='No';
 
-  // Habitaciones (muchos alias)
+  // Habitaciones
   o.hab=parseInt(ev.habitaciones||ev.habs||ev.hab||ev.rooms||ev.dormitorios||ev.num_habitaciones||0,10)||0;
 
   return o;
@@ -509,14 +509,19 @@ function scoreEvalForPros(evRaw,p){
   const fl=(typeof ev.flujo_m==='number')?ev.flujo_m:((ev.ing_m||0)-(ev.gas_m||0));
 
   let kpi; if(objt==='bruta')kpi=rb; else if(objt==='neta')kpi=rn; else kpi=fl;
+
   const target=Number(objv||0);
-  const ratio=target>0?(kpi/target):0;
-  return {ev,rb,rn,fl,kpi,objt,objv:target,ratio};
+  const kpiN=Number(kpi)||0, targetN=Number(target)||0;
+  const ratio= targetN>0 ? (kpiN/targetN) : 0;
+
+  return {ev,rb,rn,fl,kpi:kpiN,objt,objv:targetN,ratio};
 }
 function colorForRatio(r){
   const th=CFG.match?.thresholds||{green:1,amber:0.95};
-  if(r>=(th.green??1)) return 'green';
-  if(r>=(th.amber??0.95)) return 'amber';
+  const g=Number(th.green??1), a=Number(th.amber??0.95);
+  const EPS=1e-6;
+  if(r>=g-EPS) return 'green';
+  if(r>=a-EPS) return 'amber';
   return 'red';
 }
 function warningsFor(ev,p){
@@ -556,7 +561,7 @@ function renderAssignList(p){
   });
   html+='</div></div>';
 
-  /* Lista (deduplicada y sin repetir dirección en otra etiqueta) */
+  /* Lista (deduplicada) */
   html+='<div class="block"><h5 style="margin:0">Evaluaciones disponibles</h5><div class="eval-list" id="evlist">';
   if(!EVALS.length){
     html+='<div class="eval-item"><span>No hay evaluaciones en el sistema</span></div>';
@@ -633,7 +638,7 @@ function autoMatchPreselect(p){
   let chosen=[];
   for(const r of ranked){
     if(chosen.length>=4) break;
-    if(r.ratio>=(th.amber??0.95)) chosen.push(r.ev.id||r.ev.ev_id||r.ev);
+    if(r.ratio>=(Number(th.amber??0.95))) chosen.push(r.ev.id||r.ev.ev_id||r.ev);
   }
   if(!chosen.length){
     chosen=ranked.slice(0,Math.min(2,ranked.length)).map(r=>r.ev.id||r.ev.ev_id||r.ev);
