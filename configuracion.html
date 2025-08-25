@@ -1,381 +1,572 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Unihouser — Configuración</title>
-<link rel="stylesheet" href="css/style.css">
 <style>
-/* Afinado visual local (coherente con Evaluar/Dashboard) */
-.grid-2{display:grid;gap:12px;grid-template-columns:1fr 1fr}
-.grid-3{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr}
-.grid-4{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr 1fr}
-@media(max-width:960px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
-.section h3{margin:0 0 8px}
-.switch{display:flex;align-items:center;gap:10px}
-.switch input{width:42px;height:22px;appearance:none;background:#e5e7eb;border-radius:999px;position:relative;outline:none;border:1px solid #e5e7eb}
-.switch input:checked{background:#ff5a1f;border-color:#ff5a1f}
-.switch input::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .18s}
-.switch input:checked::after{left:22px}
-.slider{appearance:none;width:100%;height:8px;border-radius:999px;background:#eef2f7;outline:none}
-.slider::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:#ff5a1f;border:2px solid #ff5a1f}
-.inline{display:flex;gap:10px;align-items:center}
-.help{color:#667085;font-size:12px;margin-top:4px}
-.badge{display:inline-block;background:#eef2f7;border-radius:999px;padding:2px 8px;font-size:12px}
-.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
-.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
-.toast.ok{background:#16a34a}
-textarea{min-height:120px;resize:vertical}
-code.placeholder{background:#f3f4f6;border-radius:6px;padding:0 6px}
+:root{
+  --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
+  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
+  --shadow:0 4px 22px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif; --fz:12px;
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
+.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
+.title{font-weight:700;color:var(--ink2);font-size:13px}
+.nav a{color:var(--ink2);text-decoration:none;padding:5px 8px;border-radius:8px;font-size:12px}
+.nav a.active{background:var(--brand);color:#fff}
+.nav a:hover{background:#f3efe9}
+
+.container{max-width:1200px;margin:12px auto;padding:0 14px}
+.config{display:grid;grid-template-columns:220px 1fr;gap:12px;min-height:70vh}
+.side{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow);display:grid;gap:6px;height:max-content}
+.tabbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px;text-align:left;cursor:pointer}
+.tabbtn.active{border-color:var(--brand);outline:2px solid rgba(199,83,12,.15);background:#fff}
+.content{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--shadow)}
+.panel{display:none}
+.panel.active{display:block}
+h3{margin:0 0 8px;font-size:14px;color:#444}
+.block{border:1px dashed var(--line);border-radius:12px;padding:8px;margin-bottom:8px;background:#fff}
+.block h5{margin:0 0 6px;color:#666;font-weight:700;font-size:11px;letter-spacing:.2px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.field{display:flex;flex-direction:column;gap:2px}
+.field label{color:#555;font-size:11px}
+input,select,textarea,.chips-input{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min-height:26px;font-size:12px;background:#fff;color:#1a1f23}
+textarea{resize:none}
+.row2{grid-column:span 2} .row3{grid-column:span 3}
+small.muted{color:#8b8f93}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;display:inline-flex;gap:6px;align-items:center}
+.chip .x{cursor:pointer;color:#999}
+.chips-input{width:220px}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+.btn{border:none;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:800;font-size:12px}
+.save{background:var(--brand);color:#fff} .sec{background:#f3efe9}
+.inline{display:flex;gap:6px;align-items:center}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:6px;align-items:center}
+.table{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.row{display:grid;grid-template-columns:110px 1fr 1fr;gap:6px;padding:6px;border-bottom:1px dashed var(--line);align-items:center}
+.row.head{background:#FAF8F7;font-weight:700}
+.row:last-child{border-bottom:none}
+.toast{position:fixed;top:12px;right:12px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);padding:8px 10px;border-radius:12px;display:none;z-index:100}
+.toast.show{display:block}
+.footer{margin:16px 0 14px;text-align:center;color:#888;font-size:11px}
+@media (max-width:980px){.config{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.grid5{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="container flex between center">
-    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
-    <nav class="nav">
-      <a href="evaluar.html">Evaluar</a>
-      <a href="evaluaciones.html">Evaluaciones</a>
-      <a href="prospectos.html">Prospectos</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="configuracion.html" class="active">Configuración</a>
-    </nav>
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="brand"><div class="logo">U</div><div class="title">Unihouser — Configuración</div></div>
+      <nav class="nav">
+        <a href="evaluar.html">Evaluar</a>
+        <a href="evaluaciones.html">Evaluaciones</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a class="active" href="configuracion.html">Configuración</a>
+      </nav>
+    </div>
   </div>
-</header>
 
-<main class="container">
-  <section class="card">
-    <h2>Configuración</h2>
+  <div class="container">
+    <div class="config">
+      <aside class="side" id="tabs">
+        <button class="tabbtn active" data-tab="general">General</button>
+        <button class="tabbtn" data-tab="presu">Presupuesto & cálculos</button>
+        <button class="tabbtn" data-tab="matching">Matching</button>
+        <button class="tabbtn" data-tab="mensajeria">Mensajería</button>
+        <button class="tabbtn" data-tab="eval">Parámetros de evaluación</button>
+        <button class="tabbtn" data-tab="backup">Exportar / Importar</button>
+      </aside>
 
-    <!-- IMPUESTOS Y COSTES -->
-    <div class="section">
-      <h3>Impuestos y costes de adquisición</h3>
-      <div class="grid-4">
-        <div class="field">
-          <label>ITP (%)</label>
-          <input id="c_itp" data-pct placeholder="8,0">
-          <small class="help">Asturias: 8 % por defecto.</small>
-        </div>
-        <div class="field">
-          <label>Notaría y Registro (€)</label>
-          <input id="c_notaria" data-money placeholder="1.500">
-          <small class="help">Se muestra con separador de miles.</small>
-        </div>
-        <div class="field">
-          <label>Honorarios PSI (€)</label>
-          <input id="c_psi" data-money placeholder="4.235">
-          <small class="help">Incluye IVA</small>
-        </div>
-        <div class="field">
-          <label>Incluir PSI por defecto en P. máx</label>
-          <div class="switch"><input type="checkbox" id="c_incluir_psi"><span class="badge">Aplicado en “Precio máx. de compra”</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SEGUROS Y GESTIÓN -->
-    <div class="section">
-      <h3>Seguros y gestión (como % del alquiler anual)</h3>
-      <div class="grid-4">
-        <div class="field">
-          <label>Seguro hogar (%)</label>
-          <input id="c_hogar" data-pct placeholder="3,5">
-        </div>
-        <div class="field">
-          <label>Seguro impago — Tradicional (%)</label>
-          <input id="c_impago_trad" data-pct placeholder="4,0">
-        </div>
-        <div class="field">
-          <label>Seguro impago — Habitaciones (%)</label>
-          <input id="c_impago_hab" data-pct placeholder="4,0">
-        </div>
-        <div class="field">
-          <label>Gestión — Tradicional (%)</label>
-          <input id="c_gestion_trad" data-pct placeholder="15,0">
-        </div>
-      </div>
-      <div class="grid-4" style="margin-top:8px">
-        <div class="field">
-          <label>Gestión — Habitaciones (%)</label>
-          <input id="c_gestion_hab" data-pct placeholder="25,0">
-        </div>
-      </div>
-    </div>
-
-    <!-- OBJETIVOS POR TIPO -->
-    <div class="section">
-      <h3>Objetivos por tipo de alquiler</h3>
-      <div class="card" style="margin-bottom:10px">
-        <div class="inline"><strong>Tradicional</strong><span class="help">Valores por defecto usados en Evaluar y matching.</span></div>
-        <div class="grid-4" style="margin-top:10px">
-          <div class="field"><label>Rentabilidad bruta (%)</label><input id="c_obj_t_bruta" data-pct placeholder="10,0"></div>
-          <div class="field"><label>Rentabilidad neta (%)</label><input id="c_obj_t_neta" data-pct placeholder="6,0"></div>
-          <div class="field"><label>Flujo objetivo (€/mes)</label><input id="c_obj_t_flujo" data-money placeholder="0"></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="inline"><strong>Habitaciones</strong><span class="help">Valores por defecto usados en Evaluar y matching.</span></div>
-        <div class="grid-4" style="margin-top:10px">
-          <div class="field"><label>Rentabilidad bruta (%)</label><input id="c_obj_h_bruta" data-pct placeholder="12,0"></div>
-          <div class="field"><label>Rentabilidad neta (%)</label><input id="c_obj_h_neta" data-pct placeholder="7,0"></div>
-          <div class="field"><label>Flujo objetivo (€/mes)</label><input id="c_obj_h_flujo" data-money placeholder="0"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PESOS DE MATCHING -->
-    <div class="section">
-      <h3>Pesos de matching (sugerencia de inversor para un activo)</h3>
-      <div class="grid-3">
-        <div class="field">
-          <label>Localidad (peso)</label>
-          <input id="c_w_loc" class="slider" type="range" min="0" max="100" step="5">
-          <div class="inline"><span class="help">Peso actual:</span><strong id="c_w_loc_v">50</strong></div>
-        </div>
-        <div class="field">
-          <label>Tipo de alquiler (peso)</label>
-          <input id="c_w_tipo" class="slider" type="range" min="0" max="100" step="5">
-          <div class="inline"><span class="help">Peso actual:</span><strong id="c_w_tipo_v">30</strong></div>
-        </div>
-        <div class="field">
-          <label>Gap objetivo KPI (peso)</label>
-          <input id="c_w_kpi" class="slider" type="range" min="0" max="100" step="5">
-          <div class="inline"><span class="help">Peso actual:</span><strong id="c_w_kpi_v">20</strong></div>
-        </div>
-      </div>
-      <small class="help">La suma no necesita ser 100; normalizamos internamente.</small>
-    </div>
-
-    <!-- COMUNICACIONES -->
-    <div class="section">
-      <h3>Comunicaciones (plantillas)</h3>
-      <div class="grid-2">
-        <div class="card">
-          <div class="field">
-            <label>Asunto email</label>
-            <input id="c_mail_subj" placeholder="Oportunidad en {LOCALIDAD}: {CALLE}">
+      <section class="content">
+        <!-- GENERAL -->
+        <div class="panel active" id="panel-general">
+          <h3>General</h3>
+          <div class="block">
+            <h5>Identidad</h5>
+            <div class="grid">
+              <div class="field"><label>Nombre empresa</label><input id="g_name" maxlength="40" placeholder="Unihouser"/></div>
+              <div class="field"><label>Correo general</label><input id="g_email" type="email" maxlength="50" placeholder="info@unihouser.es"/></div>
+              <div class="field"><label>Teléfono</label><input id="g_phone" maxlength="15" placeholder="644 300 200"/></div>
+              <div class="field"><label>Color marca (hex)</label><input id="g_brand" maxlength="7" placeholder="#c7530c"/></div>
+              <div class="field row2"><label>Localidades por defecto (chips)</label>
+                <div class="chips" id="chips_locs"></div>
+                <div class="inline"><input class="chips-input" id="add_loc" maxlength="20" placeholder="Añadir y Enter"/><small class="muted">Máx 12</small></div>
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label>Cuerpo email</label>
-            <textarea id="c_mail_body" placeholder="Hola {NOMBRE},&#10;Te encaja este piso en {LOCALIDAD}, {CALLE}? Precio {PRECIO}, alquiler {ALQUILER}. P. máx compra {P_MAX}.&#10;{LINK}"></textarea>
+          <div class="actions"><button class="btn save" id="save-general">Guardar</button></div>
+        </div>
+
+        <!-- PRESUPUESTO -->
+        <div class="panel" id="panel-presu">
+          <h3>Presupuesto & cálculos</h3>
+          <div class="block">
+            <h5>Compras</h5>
+            <div class="grid">
+              <div class="field"><label>ITP (%)</label><input id="p_itp" type="number" inputmode="decimal" min="0" max="21" step="0.1" placeholder="8"/></div>
+              <div class="field"><label>Notaría (€)</label><input id="p_not" type="number" inputmode="numeric" min="0" step="100" placeholder="1200"/></div>
+              <div class="field"><label>Honorarios (€)</label><input id="p_fee" type="number" inputmode="numeric" min="0" step="10" placeholder="3630"/></div>
+              <div class="field row3 inline">
+                <label><input type="checkbox" id="p_bud_incl"/> Incluir honorarios por defecto en presupuesto del cliente</label>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <h5>Objetivos por defecto</h5>
+            <div class="grid5">
+              <div class="field"><label>Tradicional · Bruta (%)</label><input id="o_tb" type="number" min="0" max="30" step="0.1"/></div>
+              <div class="field"><label>Tradicional · Neta (%)</label><input id="o_tn" type="number" min="0" max="30" step="0.1"/></div>
+              <div class="field"><label>Tradicional · Flujo €/mes</label><input id="o_tf" type="number" min="0" step="10"/></div>
+              <div class="field"><label>Habitaciones · Bruta (%)</label><input id="o_hb" type="number" min="0" max="30" step="0.1"/></div>
+              <div class="field"><label>Habitaciones · Neta (%)</label><input id="o_hn" type="number" min="0" max="30" step="0.1"/></div>
+            </div>
+            <div class="grid">
+              <div class="field inline row3"><label><input type="checkbox" id="o_bruta_inc"/> Incluir honorarios en Bruta por defecto</label></div>
+              <div class="field inline row3"><label><input type="checkbox" id="o_neta_inc"/> Incluir honorarios en Neta por defecto</label></div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn save" id="save-presu">Guardar</button></div>
+        </div>
+
+        <!-- MATCHING -->
+        <div class="panel" id="panel-matching">
+          <h3>Matching</h3>
+          <div class="block">
+            <h5>Umbrales</h5>
+            <div class="grid">
+              <div class="field"><label>Verde (ratio)</label><input id="m_green" type="number" min="0.1" max="2" step="0.01" placeholder="1.00"/></div>
+              <div class="field"><label>Ámbar (ratio)</label><input id="m_amber" type="number" min="0.1" max="2" step="0.01" placeholder="0.95"/></div>
+              <div class="field inline"><label><input type="checkbox" id="m_warn_green"/> Mostrar advertencias sólo si es verde</label></div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn save" id="save-matching">Guardar</button></div>
+        </div>
+
+        <!-- MENSAJERÍA -->
+        <div class="panel" id="panel-mensajeria">
+          <h3>Mensajería</h3>
+
+          <div class="block">
+            <h5>Canales</h5>
+            <div class="grid">
+              <div class="field inline row3"><label><input type="checkbox" id="c_email_en"/> Email habilitado</label></div>
+              <div class="field"><label>Modo Email</label>
+                <select id="c_email_mode">
+                  <option value="mailto">mailto (cliente correo)</option>
+                  <option value="smtp">SMTP</option>
+                  <option value="gmail">Gmail API</option>
+                </select>
+              </div>
+              <div class="field"><label>Nombre remitente</label><input id="c_email_from_name" maxlength="40"/></div>
+              <div class="field"><label>Correo remitente</label><input id="c_email_from" type="email" maxlength="60"/></div>
+              <div class="field"><label>Reply-To (opcional)</label><input id="c_email_reply" type="email" maxlength="60"/></div>
+              <div class="field"><label>BCC (opcional)</label><input id="c_email_bcc" maxlength="120"/></div>
+              <div class="field row3"><small class="muted">SMTP (sólo si Modo=SMTP)</small></div>
+              <div class="field"><label>SMTP Host</label><input id="c_smtp_host" /></div>
+              <div class="field"><label>Puerto</label><input id="c_smtp_port" type="number" min="1" step="1"/></div>
+              <div class="field inline"><label><input type="checkbox" id="c_smtp_tls"/> SSL/TLS</label></div>
+              <div class="field"><label>Usuario</label><input id="c_smtp_user"/></div>
+              <div class="field"><label>Contraseña</label><input id="c_smtp_pass" type="password"/></div>
+            </div>
+            <div class="inline"><button class="btn sec" id="test-email">Probar email</button><small class="muted">Usa plantillas de la fase CONTACTO</small></div>
+          </div>
+
+          <div class="block">
+            <h5>WhatsApp</h5>
+            <div class="grid">
+              <div class="field inline row3"><label><input type="checkbox" id="w_en"/> WhatsApp habilitado</label></div>
+              <div class="field"><label>Modo</label>
+                <select id="w_mode">
+                  <option value="link">wa.me link</option>
+                  <option value="api">API</option>
+                </select>
+              </div>
+              <div class="field"><label>Nº remitente (+34…)</label><input id="w_from" maxlength="20"/></div>
+              <div class="field"><label>Proveedor API</label>
+                <select id="w_prov">
+                  <option value="meta">Meta Cloud</option>
+                  <option value="twilio">Twilio</option>
+                </select>
+              </div>
+              <div class="field"><label>Meta · Business ID</label><input id="w_meta_bid"/></div>
+              <div class="field"><label>Meta · Phone Number ID</label><input id="w_meta_pid"/></div>
+              <div class="field"><label>Meta · Access Token</label><input id="w_meta_tok" type="password"/></div>
+              <div class="field"><label>Twilio · Account SID</label><input id="w_tw_sid"/></div>
+              <div class="field"><label>Twilio · Auth Token</label><input id="w_tw_tok" type="password"/></div>
+              <div class="field"><label>Twilio · From (whatsapp:+…)</label><input id="w_tw_from"/></div>
+            </div>
+            <div class="inline"><button class="btn sec" id="test-wa">Probar WhatsApp</button><small class="muted">Usa plantilla CONTACTO</small></div>
+          </div>
+
+          <div class="block">
+            <h5>Plantillas por fase</h5>
+            <div class="table" id="tpl-table">
+              <div class="row head"><div>Fase</div><div>Email (asunto + cuerpo)</div><div>WhatsApp</div></div>
+              <!-- filas se inyectan -->
+            </div>
+            <div class="inline" style="margin-top:6px;">
+              <select id="ph-insert">
+                <option value="">Insertar placeholder…</option>
+                <option value="{NOMBRE}">{NOMBRE}</option>
+                <option value="{LOCALIDAD}">{LOCALIDAD}</option>
+                <option value="{CALLE}">{CALLE}</option>
+                <option value="{PRECIO}">{PRECIO}</option>
+                <option value="{ALQUILER}">{ALQUILER}</option>
+                <option value="{P_MAX}">{P_MAX}</option>
+                <option value="{LINK}">{LINK}</option>
+              </select>
+              <small class="muted">Coloca el cursor en el campo y elige el placeholder.</small>
+            </div>
+          </div>
+
+          <div class="actions"><button class="btn save" id="save-mensajeria">Guardar</button></div>
+        </div>
+
+        <!-- PARÁMETROS EVALUACIÓN -->
+        <div class="panel" id="panel-eval">
+          <h3>Parámetros de evaluación</h3>
+          <div class="block">
+            <h5>Porcentajes y gestión</h5>
+            <div class="grid">
+              <div class="field"><label>Hogar (%)</label><input id="e_hogar" type="number" min="0" max="20" step="0.1"/></div>
+              <div class="field"><label>Impago Trad. (%)</label><input id="e_imp_trad" type="number" min="0" max="20" step="0.1"/></div>
+              <div class="field"><label>Impago Hab. (%)</label><input id="e_imp_hab" type="number" min="0" max="20" step="0.1"/></div>
+              <div class="field"><label>Gestión Trad. (%)</label><input id="e_g_trad" type="number" min="0" max="50" step="0.1"/></div>
+              <div class="field"><label>Gestión Hab. (%)</label><input id="e_g_hab" type="number" min="0" max="50" step="0.1"/></div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn save" id="save-eval">Guardar</button></div>
+        </div>
+
+        <!-- BACKUP -->
+        <div class="panel" id="panel-backup">
+          <h3>Exportar / Importar configuración</h3>
+          <div class="block">
+            <div class="inline">
+              <button class="btn sec" id="btn-export">Exportar JSON</button>
+              <label class="btn sec" for="file-import">Importar JSON</label>
+              <input id="file-import" type="file" accept="application/json" style="display:none"/>
+              <small class="muted">Se guardará en localStorage como <b>cfg</b>.</small>
+            </div>
+          </div>
+          <div class="block">
+            <h5>Peligro</h5>
+            <div class="inline">
+              <button class="btn" id="btn-reset" style="background:#ffe9e6;border:1px solid #f2c2bc;">Reiniciar a valores por defecto</button>
+              <small class="muted">No borra tus prospectos ni evaluaciones.</small>
+            </div>
           </div>
         </div>
-        <div class="card">
-          <div class="field">
-            <label>Mensaje WhatsApp</label>
-            <textarea id="c_wa_body" placeholder="Hola {NOMBRE}! Mira este activo: {CALLE}, {LOCALIDAD}. {LINK}"></textarea>
-          </div>
-        </div>
-      </div>
-      <small class="help">
-        Placeholders disponibles:
-        <code class="placeholder">{NOMBRE}</code>
-        <code class="placeholder">{CALLE}</code>
-        <code class="placeholder">{LOCALIDAD}</code>
-        <code class="placeholder">{PRECIO}</code>
-        <code class="placeholder">{P_MAX}</code>
-        <code class="placeholder">{ALQUILER}</code>
-        <code class="placeholder">{LINK}</code>
-      </small>
+      </section>
     </div>
+  </div>
 
-    <!-- ACCIONES -->
-    <div class="actions" style="margin-top:12px">
-      <button type="button" class="btn" id="c_reset">Restablecer valores por defecto</button>
-      <button type="button" class="btn primary" id="c_save">Guardar configuración</button>
-    </div>
-  </section>
-</main>
-
-<footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
-
-<div id="toasts" class="toast-wrap"></div>
+  <div class="toast" id="toast"></div>
+  <div class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
 
 <script>
-(function(){
-"use strict";
-
-/* ======= Formato ES ======= */
-const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
-const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
-const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
-function parseEs(str){
-  if(str==null) return NaN;
-  const s=String(str).trim().replace(/\./g,'').replace(',', '.');
-  if(!s) return NaN;
-  const n=Number(s);
-  return Number.isFinite(n)?n:NaN;
-}
-function p1(v){ return fmtN1.format(v||0); }
-
-/* ======= Helpers de formato en vivo ======= */
-function setupMoneyLive(){
-  document.querySelectorAll('input[data-money]').forEach(inp=>{
-    inp.addEventListener('input', ()=>{
-      const digits=(inp.value||'').replace(/[^\d]/g,'');
-      if(!digits){inp.value='';return;}
-      const n=Number(digits);
-      inp.value=fmtN0.format(n);
-    });
-    inp.addEventListener('blur', ()=>{
-      const n=parseEs(inp.value);
-      if(Number.isFinite(n)) inp.value=fmtN0.format(Math.round(n));
-    });
-  });
-}
-function setupPctLive(){
-  document.querySelectorAll('input[data-pct]').forEach(inp=>{
-    inp.addEventListener('input', ()=>{
-      const v=(inp.value||'').replace(/[^\d,]/g,'');
-      inp.value=v;
-    });
-    inp.addEventListener('blur', ()=>{
-      const n=parseEs(inp.value);
-      if(Number.isFinite(n)) inp.value=p1(n);
-    });
-  });
-}
-
-/* ======= Store ======= */
-const Store={
-  get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
-  set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); }
-};
-
-/* ======= Defaults ======= */
-const DEF={
-  itp_pct: 8.0,
-  notaria_eur: 1500,
-  psi_fee_eur: 4235,
-  incluir_psi_por_defecto: true,
-  hogar_pct: 3.5,
-  impago_trad_pct: 4.0,
-  impago_hab_pct: 4.0,
-  gestion_trad_pct: 15.0,
-  gestion_hab_pct: 25.0,
-  objetivos:{
-    tradicional:{ bruta_pct:10.0, neta_pct:6.0, flujo_mes_eur:0 },
-    habitaciones:{ bruta_pct:12.0, neta_pct:7.0, flujo_mes_eur:0 }
-  },
-  matching:{ peso_localidad:50, peso_tipo:30, peso_kpi:20 },
-  comms:{
-    mail_subj: 'Oportunidad en {LOCALIDAD}: {CALLE}',
-    mail_body: 'Hola {NOMBRE},\nTe encaja este piso en {LOCALIDAD}, {CALLE}? Precio {PRECIO}, alquiler {ALQUILER}. P. máx compra {P_MAX}.\n{LINK}',
-    wa_body: 'Hola {NOMBRE}! Mira este activo: {CALLE}, {LOCALIDAD}. {LINK}'
-  }
-};
-
-/* ======= UI helpers ======= */
-const id = s=>document.getElementById(s);
-function toast(msg){
-  const wrap=id('toasts');
-  // Evitar duplicados: limpiamos el anterior
-  while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
-  const el=document.createElement('div');
-  el.className='toast ok'; el.textContent=msg;
-  wrap.appendChild(el);
-  setTimeout(()=>el.style.opacity='0',1600);
-  setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
-}
-
-/* ======= Cargar en el formulario ======= */
-function loadForm(){
-  const cfg = Object.assign({}, DEF, Store.cfg||{});
-  id('c_itp').value          = p1(cfg.itp_pct);
-  id('c_notaria').value      = fmtN0.format(cfg.notaria_eur||0);
-  id('c_psi').value          = fmtN0.format(cfg.psi_fee_eur||0);
-  id('c_incluir_psi').checked= !!cfg.incluir_psi_por_defecto;
-
-  id('c_hogar').value        = p1(cfg.hogar_pct);
-  id('c_impago_trad').value  = p1(cfg.impago_trad_pct);
-  id('c_impago_hab').value   = p1(cfg.impago_hab_pct);
-  id('c_gestion_trad').value = p1(cfg.gestion_trad_pct);
-  id('c_gestion_hab').value  = p1(cfg.gestion_hab_pct);
-
-  id('c_obj_t_bruta').value  = p1(cfg.objetivos.tradicional.bruta_pct);
-  id('c_obj_t_neta').value   = p1(cfg.objetivos.tradicional.neta_pct);
-  id('c_obj_t_flujo').value  = fmtN0.format(cfg.objetivos.tradicional.flujo_mes_eur||0);
-
-  id('c_obj_h_bruta').value  = p1(cfg.objetivos.habitaciones.bruta_pct);
-  id('c_obj_h_neta').value   = p1(cfg.objetivos.habitaciones.neta_pct);
-  id('c_obj_h_flujo').value  = fmtN0.format(cfg.objetivos.habitaciones.flujo_mes_eur||0);
-
-  id('c_w_loc').value        = Number(cfg.matching.peso_localidad||0);
-  id('c_w_tipo').value       = Number(cfg.matching.peso_tipo||0);
-  id('c_w_kpi').value        = Number(cfg.matching.peso_kpi||0);
-  id('c_w_loc_v').textContent = id('c_w_loc').value;
-  id('c_w_tipo_v').textContent= id('c_w_tipo').value;
-  id('c_w_kpi_v').textContent = id('c_w_kpi').value;
-
-  const comms = cfg.comms||DEF.comms;
-  id('c_mail_subj').value = comms.mail_subj||'';
-  id('c_mail_body').value = comms.mail_body||'';
-  id('c_wa_body').value   = comms.wa_body||'';
-}
-
-/* ======= Guardar desde el formulario ======= */
-function saveForm(){
-  const cfg={
-    itp_pct:           parseEs(id('c_itp').value)||0,
-    notaria_eur:       parseEs(id('c_notaria').value)||0,
-    psi_fee_eur:       parseEs(id('c_psi').value)||0,
-    incluir_psi_por_defecto: !!id('c_incluir_psi').checked,
-
-    hogar_pct:         parseEs(id('c_hogar').value)||0,
-    impago_trad_pct:   parseEs(id('c_impago_trad').value)||0,
-    impago_hab_pct:    parseEs(id('c_impago_hab').value)||0,
-    gestion_trad_pct:  parseEs(id('c_gestion_trad').value)||0,
-    gestion_hab_pct:   parseEs(id('c_gestion_hab').value)||0,
-
-    objetivos:{
-      tradicional:{
-        bruta_pct:       parseEs(id('c_obj_t_bruta').value)||0,
-        neta_pct:        parseEs(id('c_obj_t_neta').value)||0,
-        flujo_mes_eur:   parseEs(id('c_obj_t_flujo').value)||0
-      },
-      habitaciones:{
-        bruta_pct:       parseEs(id('c_obj_h_bruta').value)||0,
-        neta_pct:        parseEs(id('c_obj_h_neta').value)||0,
-        flujo_mes_eur:   parseEs(id('c_obj_h_flujo').value)||0
-      }
-    },
-    matching:{
-      peso_localidad: parseInt(id('c_w_loc').value,10)||0,
-      peso_tipo:      parseInt(id('c_w_tipo').value,10)||0,
-      peso_kpi:       parseInt(id('c_w_kpi').value,10)||0
-    },
-    comms:{
-      mail_subj: (id('c_mail_subj').value||'').trim(),
-      mail_body: (id('c_mail_body').value||'').trim(),
-      wa_body:   (id('c_wa_body').value||'').trim()
-    }
+/* ===== Utils & CFG ===== */
+const LS={get:(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch(_){return fb}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1300);}
+function normCfg(c){
+  c=c&&typeof c==='object'?JSON.parse(JSON.stringify(c)):{};
+  if(typeof c.notaria_eur==='number') c.notaria=c.notaria_eur;
+  if(typeof c.psi_fee_eur==='number') c.honorarios=c.psi_fee_eur;
+  if(typeof c.itp_pct==='number' && c.itp_pct>1) c.itp_pct=c.itp_pct/100;
+  c.itp_pct=(typeof c.itp_pct==='number')?c.itp_pct:.08;
+  c.notaria=(typeof c.notaria==='number')?c.notaria:1200;
+  c.honorarios=(typeof c.honorarios==='number')?c.honorarios:3630;
+  c.localidades=Array.isArray(c.localidades)&&c.localidades.length?c.localidades:['Oviedo','Gijón','Avilés','Mieres','Pola de Siero','Langreo','Gozón'];
+  c.objetivos=c.objetivos||{tradicional:{bruta_pct:10,neta_pct:6,flujo_mes_eur:0},habitaciones:{bruta_pct:12,neta_pct:7,flujo_mes_eur:0}};
+  c.match=c.match||{thresholds:{green:1,amber:0.95},warnings_only_when_green:true};
+  c.bruta=c.bruta||{include_honorarios_default:false};
+  c.neta=c.neta||{include_honorarios_default:false};
+  const pres=c.presupuesto||{};
+  if(typeof c.incluir_psi_por_defecto==='boolean' && pres.honorarios_incluidos_default==null) pres.honorarios_incluidos_default=c.incluir_psi_por_defecto;
+  if(pres.honorarios_incluidos_default==null) pres.honorarios_incluidos_default=true;
+  c.presupuesto=pres;
+  c.comms=c.comms||{};
+  c.comms.channels=c.comms.channels||{
+    email:{enabled:true,mode:'mailto',from_name:'Unihouser',from_email:'info@unihouser.es',reply_to:'',bcc:'',smtp:{host:'',port:465,secure:true,user:'',pass:''}},
+    whatsapp:{enabled:true,mode:'link',from_number:'+34644300200',provider:'meta',
+      meta:{business_id:'',phone_number_id:'',access_token:''},
+      twilio:{account_sid:'',auth_token:'',from_whatsapp:''}}
   };
-  Store.cfg = cfg;
-  toast('Nueva configuración guardada con éxito');
+  const PH=['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA','EXITO'];
+  c.comms.templates=c.comms.templates||{};
+  PH.forEach(ph=>{
+    c.comms.templates[ph]=c.comms.templates[ph]||{
+      email:{subject:${ph} — {NOMBRE}, body:Hola {NOMBRE},\n…},
+      whatsapp:{body:Hola {NOMBRE}! …}
+    };
+  });
+  return c;
 }
+let CFG=normCfg(LS.get('cfg',{}));
 
-/* ======= Restablecer ======= */
-function resetDefaults(){
-  Store.cfg = DEF;
-  loadForm();
-  toast('Valores por defecto restablecidos');
+/* ===== Tabs ===== */
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('.tabbtn'); if(!b) return;
+  document.querySelectorAll('.tabbtn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  const id='panel-'+b.dataset.tab;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+});
+
+/* ===== GENERAL ===== */
+const chipsWrap=document.getElementById('chips_locs');
+function paintLocs(){
+  chipsWrap.innerHTML='';
+  (CFG.localidades||[]).slice(0,12).forEach(l=>{
+    const sp=document.createElement('span'); sp.className='chip';
+    sp.innerHTML=<span class="t">${l}</span> <span class="x" data-del="${l}">×</span>;
+    chipsWrap.appendChild(sp);
+  });
 }
-
-/* ======= Eventos ======= */
-function attach(){
-  setupMoneyLive();
-  setupPctLive();
-
-  id('c_w_loc').addEventListener('input',()=>id('c_w_loc_v').textContent=id('c_w_loc').value);
-  id('c_w_tipo').addEventListener('input',()=>id('c_w_tipo_v').textContent=id('c_w_tipo').value);
-  id('c_w_kpi').addEventListener('input',()=>id('c_w_kpi_v').textContent=id('c_w_kpi').value);
-
-  id('c_save').addEventListener('click', saveForm);
-  id('c_reset').addEventListener('click', resetDefaults);
-
-  loadForm();
+document.getElementById('add_loc').addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const v=(e.target.value||'').trim(); if(!v) return;
+  if(CFG.localidades.length>=12){ toast('Máximo 12 localidades'); return; }
+  if(!CFG.localidades.includes(v)) CFG.localidades.push(v);
+  e.target.value=''; paintLocs();
+});
+chipsWrap.addEventListener('click',e=>{
+  const del=e.target.getAttribute && e.target.getAttribute('data-del'); if(!del) return;
+  CFG.localidades=CFG.localidades.filter(x=>x!==del); paintLocs();
+});
+function loadGeneral(){
+  document.getElementById('g_name').value = CFG.company_name||'Unihouser';
+  document.getElementById('g_email').value = CFG.company_email||'info@unihouser.es';
+  document.getElementById('g_phone').value = CFG.company_phone||'644 300 200';
+  document.getElementById('g_brand').value = (CFG.brand_color||'#c7530c');
+  paintLocs();
 }
-document.addEventListener('DOMContentLoaded', attach);
+document.getElementById('save-general').onclick=()=>{
+  CFG.company_name = document.getElementById('g_name').value.trim();
+  CFG.company_email= document.getElementById('g_email').value.trim();
+  CFG.company_phone= document.getElementById('g_phone').value.trim();
+  CFG.brand_color  = document.getElementById('g_brand').value.trim() || '#c7530c';
+  LS.set('cfg',CFG); toast('Guardado general');
+};
+
+/* ===== PRESUPUESTO ===== */
+function loadPresu(){
+  document.getElementById('p_itp').value = (CFG.itp_pct*100).toFixed(2).replace(/\.00$/,'');
+  document.getElementById('p_not').value = CFG.notaria;
+  document.getElementById('p_fee').value = CFG.honorarios;
+  document.getElementById('p_bud_incl').checked = !!CFG.presupuesto.honorarios_incluidos_default;
+  const o=CFG.objetivos;
+  document.getElementById('o_tb').value=o.tradicional.bruta_pct;
+  document.getElementById('o_tn').value=o.tradicional.neta_pct;
+  document.getElementById('o_tf').value=o.tradicional.flujo_mes_eur;
+  document.getElementById('o_hb').value=o.habitaciones.bruta_pct;
+  document.getElementById('o_hn').value=o.habitaciones.neta_pct;
+  document.getElementById('o_bruta_inc').checked = !!CFG.bruta.include_honorarios_default;
+  document.getElementById('o_neta_inc').checked  = !!CFG.neta.include_honorarios_default;
+}
+document.getElementById('save-presu').onclick=()=>{
+  let itp = parseFloat(document.getElementById('p_itp').value||'8'); if(isNaN(itp)) itp=8;
+  CFG.itp_pct = itp/100;
+  CFG.notaria = Math.max(0, parseInt(document.getElementById('p_not').value||'1200',10));
+  CFG.honorarios = Math.max(0, parseInt(document.getElementById('p_fee').value||'3630',10));
+  CFG.presupuesto.honorarios_incluidos_default = document.getElementById('p_bud_incl').checked;
+  CFG.objetivos.tradicional.bruta_pct = parseFloat(document.getElementById('o_tb').value||'10')||10;
+  CFG.objetivos.tradicional.neta_pct  = parseFloat(document.getElementById('o_tn').value||'6')||6;
+  CFG.objetivos.tradicional.flujo_mes_eur = parseInt(document.getElementById('o_tf').value||'0',10)||0;
+  CFG.objetivos.habitaciones.bruta_pct = parseFloat(document.getElementById('o_hb').value||'12')||12;
+  CFG.objetivos.habitaciones.neta_pct  = parseFloat(document.getElementById('o_hn').value||'7')||7;
+  CFG.bruta.include_honorarios_default = document.getElementById('o_bruta_inc').checked;
+  CFG.neta.include_honorarios_default  = document.getElementById('o_neta_inc').checked;
+  LS.set('cfg',CFG); toast('Guardado presupuesto');
+};
+
+/* ===== MATCHING ===== */
+function loadMatching(){
+  const th=(CFG.match&&CFG.match.thresholds)||{green:1,amber:.95};
+  document.getElementById('m_green').value=th.green;
+  document.getElementById('m_amber').value=th.amber;
+  document.getElementById('m_warn_green').checked=!!CFG.match.warnings_only_when_green;
+}
+document.getElementById('save-matching').onclick=()=>{
+  const g=parseFloat(document.getElementById('m_green').value||'1')||1;
+  const a=parseFloat(document.getElementById('m_amber').value||'0.95')||0.95;
+  CFG.match=CFG.match||{};
+  CFG.match.thresholds={green:g, amber:a};
+  CFG.match.warnings_only_when_green=document.getElementById('m_warn_green').checked;
+  LS.set('cfg',CFG); toast('Guardado matching');
+};
+
+/* ===== MENSAJERÍA ===== */
+const PHASES=['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA','EXITO'];
+function rowTpl(ph,tpl){
+  const id=ph.toLowerCase();
+  return `
+    <div class="row">
+      <div>${ph}</div>
+      <div>
+        <div class="kv"><span>Asunto</span><input id="t_${id}_es" maxlength="80"/></div>
+        <div class="kv"><span>Cuerpo</span><textarea id="t_${id}_eb" rows="2" maxlength="500"></textarea></div>
+      </div>
+      <div>
+        <div class="kv"><span>Mensaje</span><textarea id="t_${id}_wb" rows="2" maxlength="350"></textarea></div>
+      </div>
+    </div>`;
+}
+function loadMensajeria(){
+  /* Canales - Email */
+  const em=CFG.comms.channels.email||{};
+  document.getElementById('c_email_en').checked = !!em.enabled;
+  document.getElementById('c_email_mode').value = em.mode||'mailto';
+  document.getElementById('c_email_from_name').value = em.from_name||'Unihouser';
+  document.getElementById('c_email_from').value = em.from_email||'info@unihouser.es';
+  document.getElementById('c_email_reply').value = em.reply_to||'';
+  document.getElementById('c_email_bcc').value   = em.bcc||'';
+  const sm=em.smtp||{};
+  document.getElementById('c_smtp_host').value = sm.host||'';
+  document.getElementById('c_smtp_port').value = sm.port||465;
+  document.getElementById('c_smtp_tls').checked= !!sm.secure;
+  document.getElementById('c_smtp_user').value = sm.user||'';
+  document.getElementById('c_smtp_pass').value = sm.pass||'';
+
+  /* Canales - WA */
+  const wa=CFG.comms.channels.whatsapp||{};
+  document.getElementById('w_en').checked = !!wa.enabled;
+  document.getElementById('w_mode').value = wa.mode||'link';
+  document.getElementById('w_from').value = wa.from_number||'';
+  document.getElementById('w_prov').value = wa.provider||'meta';
+  document.getElementById('w_meta_bid').value=wa.meta?.business_id||'';
+  document.getElementById('w_meta_pid').value=wa.meta?.phone_number_id||'';
+  document.getElementById('w_meta_tok').value=wa.meta?.access_token||'';
+  document.getElementById('w_tw_sid').value=wa.twilio?.account_sid||'';
+  document.getElementById('w_tw_tok').value=wa.twilio?.auth_token||'';
+  document.getElementById('w_tw_from').value=wa.twilio?.from_whatsapp||'';
+
+  /* Plantillas */
+  const box=document.getElementById('tpl-table');
+  box.querySelectorAll('.row:not(.head)').forEach(n=>n.remove());
+  PHASES.forEach(ph=>{
+    box.insertAdjacentHTML('beforeend', rowTpl(ph, CFG.comms.templates[ph]));
+  });
+  PHASES.forEach(ph=>{
+    const id=ph.toLowerCase(); const t=CFG.comms.templates[ph];
+    document.getElementById(t_${id}_es).value=t.email.subject||'';
+    document.getElementById(t_${id}_eb).value=t.email.body||'';
+    document.getElementById(t_${id}_wb).value=t.whatsapp.body||'';
+  });
+}
+document.getElementById('save-mensajeria').onclick=()=>{
+  const em=CFG.comms.channels.email;
+  em.enabled=document.getElementById('c_email_en').checked;
+  em.mode   =document.getElementById('c_email_mode').value;
+  em.from_name=document.getElementById('c_email_from_name').value.trim();
+  em.from_email=document.getElementById('c_email_from').value.trim();
+  em.reply_to=document.getElementById('c_email_reply').value.trim();
+  em.bcc=document.getElementById('c_email_bcc').value.trim();
+  em.smtp.host=document.getElementById('c_smtp_host').value.trim();
+  em.smtp.port=parseInt(document.getElementById('c_smtp_port').value||'465',10);
+  em.smtp.secure=document.getElementById('c_smtp_tls').checked;
+  em.smtp.user=document.getElementById('c_smtp_user').value.trim();
+  em.smtp.pass=document.getElementById('c_smtp_pass').value;
+
+  const wa=CFG.comms.channels.whatsapp;
+  wa.enabled=document.getElementById('w_en').checked;
+  wa.mode   =document.getElementById('w_mode').value;
+  wa.from_number=document.getElementById('w_from').value.trim();
+  wa.provider=document.getElementById('w_prov').value;
+  wa.meta.business_id=document.getElementById('w_meta_bid').value.trim();
+  wa.meta.phone_number_id=document.getElementById('w_meta_pid').value.trim();
+  wa.meta.access_token=document.getElementById('w_meta_tok').value;
+  wa.twilio.account_sid=document.getElementById('w_tw_sid').value.trim();
+  wa.twilio.auth_token=document.getElementById('w_tw_tok').value;
+  wa.twilio.from_whatsapp=document.getElementById('w_tw_from').value.trim();
+
+  PHASES.forEach(ph=>{
+    const id=ph.toLowerCase(); const t=CFG.comms.templates[ph];
+    t.email.subject=document.getElementById(t_${id}_es).value.slice(0,80);
+    t.email.body   =document.getElementById(t_${id}_eb).value.slice(0,500);
+    t.whatsapp.body=document.getElementById(t_${id}_wb).value.slice(0,350);
+  });
+
+  LS.set('cfg',CFG); toast('Guardado mensajería');
+};
+/* Placeholder helper */
+let lastFocused=null;
+document.addEventListener('focusin',e=>{
+  if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') lastFocused=e.target;
+});
+document.getElementById('ph-insert').onchange=function(){
+  const ph=this.value; this.value='';
+  if(!ph||!lastFocused) return;
+  const el=lastFocused; const s=el.selectionStart||0; const e=el.selectionEnd||0;
+  el.value=el.value.slice(0,s)+ph+el.value.slice(e);
+  el.focus(); el.selectionStart=el.selectionEnd=s+ph.length;
+};
+/* Pruebas de envío (básico) */
+document.getElementById('test-email').onclick=()=>{
+  const t=CFG.comms.templates.CONTACTO;
+  const subj=encodeURIComponent(t.email.subject.replace('{NOMBRE}','Test'));
+  const body=encodeURIComponent(t.email.body.replace('{NOMBRE}','Test'));
+  const to=encodeURIComponent(CFG.company_email||'info@unihouser.es');
+  window.open(mailto:${to}?subject=${subj}&body=${body},'_blank');
+};
+document.getElementById('test-wa').onclick=()=>{
+  const t=CFG.comms.templates.CONTACTO;
+  const msg=encodeURIComponent(t.whatsapp.body.replace('{NOMBRE}','Test'));
+  const n=(CFG.comms.channels.whatsapp.from_number||'').replace(/\D/g,'');
+  window.open(https://wa.me/${n}?text=${msg},'_blank');
+};
+
+/* ===== PARÁMETROS DE EVALUACIÓN ===== */
+function loadEval(){
+  document.getElementById('e_hogar').value = (CFG.hogar_pct ?? 3.5);
+  document.getElementById('e_imp_trad').value = (CFG.impago_trad_pct ?? 4);
+  document.getElementById('e_imp_hab').value = (CFG.impago_hab_pct ?? 4);
+  document.getElementById('e_g_trad').value = (CFG.gestion_trad_pct ?? 15);
+  document.getElementById('e_g_hab').value = (CFG.gestion_hab_pct ?? 25);
+}
+document.getElementById('save-eval').onclick=()=>{
+  CFG.hogar_pct = parseFloat(document.getElementById('e_hogar').value||'3.5')||3.5;
+  CFG.impago_trad_pct = parseFloat(document.getElementById('e_imp_trad').value||'4')||4;
+  CFG.impago_hab_pct  = parseFloat(document.getElementById('e_imp_hab').value||'4')||4;
+  CFG.gestion_trad_pct= parseFloat(document.getElementById('e_g_trad').value||'15')||15;
+  CFG.gestion_hab_pct = parseFloat(document.getElementById('e_g_hab').value||'25')||25;
+  LS.set('cfg',CFG); toast('Guardado evaluación');
+};
+
+/* ===== BACKUP ===== */
+document.getElementById('btn-export').onclick=()=>{
+  const blob=new Blob([JSON.stringify(CFG,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='unihouser_cfg.json'; a.click(); URL.revokeObjectURL(a.href);
+  toast('Exportado');
+};
+document.getElementById('file-import').addEventListener('change',async (e)=>{
+  const f=e.target.files[0]; if(!f) return;
+  const txt=await f.text();
+  try{
+    const obj=JSON.parse(txt);
+    CFG=normCfg(obj); LS.set('cfg',CFG);
+    // repintar
+    loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval();
+    toast('Importado y aplicado');
+  }catch(_){ toast('JSON inválido'); }
+});
+document.getElementById('btn-reset').onclick=()=>{
+  CFG=normCfg({}); LS.set('cfg',CFG);
+  loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval();
+  toast('Valores por defecto');
+};
+
+/* ===== Init ===== */
+(function init(){
+  loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval();
 })();
 </script>
 </body>
