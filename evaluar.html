@@ -30,6 +30,22 @@
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
 .toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
+
+/* ===== Modal enviar ===== */
+.modal-back{position:fixed;inset:0;background:rgba(15,18,20,.28);display:none;align-items:center;justify-content:center;z-index:120}
+.modal{width:800px;max-width:95vw;max-height:88vh;background:#fff;border:2px solid #fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
+.modal header{padding:10px 12px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between}
+.modal h4{margin:0}
+.modal .body{padding:10px 12px;display:grid;gap:8px;overflow:auto}
+.modal footer{padding:10px 12px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end}
+.row-send{display:grid;gap:8px;grid-template-columns:1fr 2fr}
+.send-to{border:1px solid #e5e7eb;border-radius:10px;padding:8px;max-height:180px;overflow:auto}
+.send-to label{display:flex;align-items:center;gap:8px;padding:4px 6px}
+.area{border:1px solid #e5e7eb;border-radius:10px;padding:8px}
+.area input,.area textarea, .send-to input{width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:6px 8px}
+.area textarea{min-height:140px;resize:vertical}
+.btn{border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn.primary{background:var(--brand,#ff5a1f);color:#fff;border:none}
 </style>
 </head>
 <body>
@@ -127,6 +143,7 @@
     <button class="btn primary" id="e_calc">Calcular</button>
     <button class="btn" id="e_save">Guardar</button>
     <button class="btn" id="e_save_assign">Guardar y asignar</button>
+    <button class="btn" id="e_send">Enviar ficha</button>
     <button class="btn ghost" id="e_clean">Limpiar</button>
   </div>
 
@@ -164,9 +181,47 @@
 
 <footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
 
+<!-- Modal Enviar -->
+<div class="modal-back" id="sendBack">
+  <div class="modal" role="dialog" aria-label="Enviar ficha" aria-modal="true">
+    <header><h4>Enviar ficha</h4><button class="btn" id="sendClose">Cerrar</button></header>
+    <div class="body">
+      <div class="row-send">
+        <div>
+          <div class="area" style="margin-bottom:8px">
+            <label>Canal</label>
+            <select id="sendChannel">
+              <option value="email">Email</option>
+              <option value="whatsapp">WhatsApp</option>
+            </select>
+          </div>
+          <div class="send-to" id="sendToBox">—</div>
+          <div style="margin-top:6px"><small class="small">No ves a alguien? Puedes escribir manualmente abajo.</small></div>
+        </div>
+        <div class="area">
+          <div style="display:grid;gap:6px">
+            <label>Asunto (email) / Encabezado (WhatsApp)</label>
+            <input id="sendSubject" placeholder="Asunto"/>
+            <label>Mensaje</label>
+            <textarea id="sendBody" placeholder="Texto a enviar…"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <button class="btn" id="sendCopy">Copiar</button>
+      <button class="btn" id="sendOpenWA">Abrir WhatsApp</button>
+      <button class="btn primary" id="sendOpenMail">Abrir correo</button>
+    </footer>
+  </div>
+</div>
+
 <script>
 (function(){
 "use strict";
+
+/* ===== Marca desde cfg ===== */
+try{const cfg=JSON.parse(localStorage.getItem('cfg')||'{}'); if(cfg && cfg.brand_color){document.documentElement.style.setProperty('--brand', cfg.brand_color);}}catch(_){}
 
 /* ===== Utils / formato ES ===== */
 const id = x=>document.getElementById(x);
@@ -231,9 +286,11 @@ function loadLocalidades(){
   });
 }
 
-/* ===== Leer cfg con defaults ===== */
+/* ===== Leer cfg con defaults + notifs ===== */
 function getCfg(){
   const c=Store.cfg||{};
+  const brand=(c.brand_name||'Unihouser');
+  const notifs=c.notifs||{};
   return {
     itp_pct: Number(c.itp_pct ?? 8),
     notaria_eur: Number(c.notaria_eur ?? 1500),
@@ -246,7 +303,29 @@ function getCfg(){
     obj_bruta_trad: Number((c.objetivos?.tradicional?.bruta_pct) ?? 10.0),
     obj_bruta_hab:  Number((c.objetivos?.habitaciones?.bruta_pct) ?? 12.0),
     obj_neta_trad:  Number((c.objetivos?.tradicional?.neta_pct) ?? 6.0),
-    obj_neta_hab:   Number((c.objetivos?.habitaciones?.neta_pct) ?? 7.0)
+    obj_neta_hab:   Number((c.objetivos?.habitaciones?.neta_pct) ?? 7.0),
+    brand,
+    notifs:{
+      email_from: notifs.email_from||'',
+      email_subject_tpl: notifs.email_subject_tpl || ${brand} · {loc} · {calle},
+      email_body_tpl: notifs.email_body_tpl || 
+`Hola {name},
+
+Te comparto una oportunidad en {loc} · {calle} ({tipo}).
+• Precio: {precio} · Inversión: {inv}
+• Bruta: {rb}% · Neta: {rn}% · Flujo anual: {fl}
+• P. máx orientativo: {pmax}
+{url}
+
+Un saludo,
+${brand}`,
+      wa_text_tpl: notifs.wa_text_tpl || 
+`{name ? ('Hola '+name+', ') : ''}te comparto oportunidad: {loc} · {calle} ({tipo})
+Precio {precio} | Inv {inv}
+Bruta {rb}% · Neta {rn}% · Flujo {fl}
+Pmax {pmax}
+{url}`
+    }
   };
 }
 
@@ -394,39 +473,35 @@ function paintDot(idDot, gap){
   const el=id(idDot); el.className='dot '+(gap>=0?'g':(gap>-1?'y':'r'));
 }
 
-/* ===== Mini chart: barra naranja + línea discontinua gris ===== */
+/* ===== Mini chart ===== */
 function drawChart(real, objetivo){
   const c=id('chartKPI'); const ctx=c.getContext('2d');
   ctx.clearRect(0,0,c.width,c.height);
   const pad=36; const W=c.width, H=c.height;
   const max = Math.max( Math.ceil((Math.max(real, objetivo)+2)/2)*2 , 2);
 
-  // grid claro
   ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=1;
   for(let y=0;y<=max;y+=2){
     const yy = H - pad - (H-2*pad)* (y/max);
     ctx.beginPath(); ctx.moveTo(pad,yy); ctx.lineTo(W-pad,yy); ctx.stroke();
   }
 
-  // barra real (naranja)
   const barW=80;
   const realH=(H-2*pad)*(real/max);
   ctx.fillStyle='#ff5a1f';
   ctx.fillRect(W/2 - barW/2, H - pad - realH, barW, realH);
 
-  // línea objetivo (gris discontinua)
   const yObj = H - pad - (H-2*pad)*(objetivo/max);
   ctx.setLineDash([6,4]); ctx.strokeStyle='#9ca3af'; ctx.lineWidth=2;
   ctx.beginPath(); ctx.moveTo(pad, yObj); ctx.lineTo(W-pad, yObj); ctx.stroke();
   ctx.setLineDash([]);
 
-  // etiquetas
   ctx.fillStyle='#111827'; ctx.font='12px Inter, Arial';
   ctx.fillText('Bruta real', W/2 - 30, H - 8);
   ctx.fillText('Objetivo', pad, yObj - 6);
 }
 
-/* ===== Matching prospects (fase, tipo, localidad; avisos) ===== */
+/* ===== Matching prospects ===== */
 function fold(s){return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
 function isSearching(p){ const f=fold(p.fase||''); return f.includes('busq')||f.includes('busc'); }
 function parseMoney(v){ if(v==null) return 0; return Number(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0; }
@@ -455,7 +530,6 @@ function warnBadges(p, ctx){
 
 function norm(s){ return (s||'').toString().trim().toLowerCase(); }
 function getTargetInfo(p){
-  // Devuelve una preferencia principal si existe
   const main=(p.obj_main||p.obj_tipo||'').toString().toLowerCase().trim();
   const b=Number(p.obj_bruta||0), n=Number(p.obj_neta||0), fm=Number(p.obj_flujo||0), fa=Number(p.obj_flujo_anual||0);
   if(main==='bruta' && b>0) return {kind:'bruta', val:b};
@@ -518,6 +592,7 @@ function suggestProspects(ctx){
       if(!added.has(key)){
         added.add(key);
         const opt=document.createElement('option'); opt.value=key; opt.textContent=p.nombre||'-';
+        opt.dataset.email=p.email||''; opt.dataset.phone=p.phone||p.telefono||'';
         asignSel.appendChild(opt);
       }
     });
@@ -533,7 +608,6 @@ function gather(){ return calc(); }
 function save(alsoAssign){
   const e=gather();
 
-  // Si venimos de Evaluaciones, respetar ID original
   const loaded = localStorage.getItem('load_eval');
   let list=Store.evals||[];
   if(loaded){
@@ -541,11 +615,11 @@ function save(alsoAssign){
     if(idx>=0){ e.id=list[idx].id; e.ts=list[idx].ts; CURRENT_ID=e.id; }
     localStorage.removeItem('load_eval');
   }
-  if(CURRENT_ID) e.id = CURRENT_ID; // mantener mismo id tras primer guardado
+  if(CURRENT_ID) e.id = CURRENT_ID;
 
   if(alsoAssign){
     const sel=[...document.getElementById('assign_cli').options].filter(o=>o.selected).map(o=>o.value);
-    e.prospect_ids = sel; // se vuelca en Evaluaciones (columna Asignados)
+    e.prospect_ids = sel;
   }
 
   const idx2=list.findIndex(x=>x.id===e.id);
@@ -573,7 +647,7 @@ function limpiar(){
   CURRENT_ID=null;
 }
 
-/* ===== Preload desde Evaluaciones (solo si existe) ===== */
+/* ===== Preload desde Evaluaciones ===== */
 function preloadIfAny(){
   const evId = localStorage.getItem('load_eval');
   if(!evId) return;
@@ -611,7 +685,7 @@ function preloadIfAny(){
   calc();
 }
 
-/* ===== PDF rápido (opcional) ===== */
+/* ===== PDF rápido ===== */
 function quickPDFfrom(e){
   const fecha=new Date(e.ts||Date.now()).toLocaleString('es-ES');
   const htmlParts = [
@@ -650,6 +724,89 @@ function quickPDFfrom(e){
 }
 function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
+/* ===== Mensajería: helpers ===== */
+function fillTpl(tpl, e, person){
+  const rb = (Math.round(Number(e.kpi_bruta||0)*10)/10).toFixed(1).replace('.',',');
+  const rn = (Math.round(Number(e.kpi_neta ||0)*10)/10).toFixed(1).replace('.',',');
+  const body = tpl
+    .replace(/\{brand\}/g, getCfg().brand)
+    .replace(/\{name\}/g, person?.nombre||person?.name||'')
+    .replace(/\{loc\}/g, e.loc||'')
+    .replace(/\{calle\}/g, e.calle||'')
+    .replace(/\{tipo\}/g, e.tipo||'')
+    .replace(/\{precio\}/g, e0(e.precio||0))
+    .replace(/\{inv\}/g, e0(e.inv_total||0))
+    .replace(/\{rb\}/g, rb)
+    .replace(/\{rn\}/g, rn)
+    .replace(/\{fl\}/g, e0(e.kpi_flujo||0))
+    .replace(/\{pmax\}/g, e0(e.pmax||0))
+    .replace(/\{url\}/g, e.url||'');
+  return body;
+}
+function openSendModal(e){
+  const back=id('sendBack'), box=id('sendToBox');
+  const cfg=getCfg(); back.style.display='flex';
+
+  // lista destinatarios desde selección actual de assign_cli
+  box.innerHTML='';
+  const selOps=[...id('assign_cli').options].filter(o=>o.selected);
+  const listPros = (Store.pros||[]);
+  const targets=[];
+
+  selOps.forEach(op=>{
+    const p = listPros.find(pp => (pp.id||pp.email||pp.nombre)===op.value) || {nombre:op.textContent,email:op.dataset.email,phone:op.dataset.phone};
+    const row=document.createElement('label');
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=true; cb.dataset.email=p.email||''; cb.dataset.phone=p.phone||p.telefono||'';
+    const span=document.createElement('span'); span.textContent=p.nombre||op.textContent||'-';
+    row.appendChild(cb); row.appendChild(span); box.appendChild(row);
+    targets.push({el:cb, person:p});
+  });
+
+  // si no hay destinatarios, permite manual
+  if(!targets.length){
+    const row=document.createElement('div'); row.innerHTML='<div class="area"><label>Destinatario manual (email o móvil)</label><input id="sendManual" placeholder="email@dominio o 6XXXXXXXX"></div>';
+    box.appendChild(row);
+  }
+
+  const subjectEl=id('sendSubject'), bodyEl=id('sendBody');
+  subjectEl.value = fillTpl(cfg.notifs.email_subject_tpl, e);
+  bodyEl.value = fillTpl(cfg.notifs.email_body_tpl, e);
+
+  id('sendChannel').onchange = function(){
+    const ch=this.value;
+    if(ch==='email'){
+      subjectEl.disabled=false;
+      subjectEl.value = fillTpl(cfg.notifs.email_subject_tpl, e);
+      bodyEl.value = fillTpl(cfg.notifs.email_body_tpl, e);
+    }else{
+      subjectEl.disabled=true;
+      subjectEl.value='WhatsApp';
+      const person = targets[0]?.person;
+      bodyEl.value = fillTpl(cfg.notifs.wa_text_tpl, e, person);
+    }
+  };
+
+  id('sendCopy').onclick=function(){
+    navigator.clipboard.writeText(subjectEl.value+'\n\n'+bodyEl.value).then(()=>toast('Copiado','ok'));
+  };
+  id('sendOpenMail').onclick=function(){
+    const selected = targets.filter(t=>t.el.checked && t.el.dataset.email).map(t=>t.el.dataset.email);
+    const manual = document.getElementById('sendManual')?.value?.trim();
+    const to = [...selected, (manual&&manual.includes('@')?manual:null)].filter(Boolean).join(',');
+    const mailto='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subjectEl.value)+'&body='+encodeURIComponent(bodyEl.value);
+    window.open(mailto,'_blank');
+  };
+  id('sendOpenWA').onclick=function(){
+    const selected = targets.filter(t=>t.el.checked && t.el.dataset.phone).map(t=>String(t.el.dataset.phone).replace(/[^\d]/g,''));
+    const manual = document.getElementById('sendManual')?.value?.trim();
+    const phone = (manual && !manual.includes('@')) ? manual.replace(/[^\d]/g,'') : (selected[0]||'');
+    const text = bodyEl.value;
+    const url = 'https://wa.me/'+(phone?phone:'')+'?text='+encodeURIComponent(text);
+    window.open(url,'_blank');
+  };
+  id('sendClose').onclick=function(){ back.style.display='none'; };
+}
+
 /* ===== Eventos ===== */
 function attach(){
   loadLocalidades();
@@ -662,8 +819,9 @@ function attach(){
   id('save_only') && id('save_only').addEventListener('click', ()=>save(false));
   id('save_assign') && id('save_assign').addEventListener('click', ()=>save(true));
   id('e_clean').addEventListener('click', limpiar);
+  id('e_send').addEventListener('click', ()=>{ const e=gather(); openSendModal(e); });
 
-  preloadIfAny(); // solo precarga si venimos de Evaluaciones
+  preloadIfAny();
 }
 
 document.addEventListener('DOMContentLoaded', attach);
