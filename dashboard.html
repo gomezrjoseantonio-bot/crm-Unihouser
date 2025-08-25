@@ -68,7 +68,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .modal{width:980px;max-width:95vw;max-height:88vh;background:#fff;border:2px solid #fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
 .modal header{padding:8px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:#fff}
 .modal h4{margin:0;font-size:14px}
-.modal .close{width:28px;height:28px;border-radius:999px;border:2px solid var(--brand);background:#fff;color:var(--brand);display:grid;place-items:center;font-weight:800;cursor:pointer}
+.modal .close{width:28px;height:28px;border-radius:999px;border:2px solid var(--brand);background:#fff;color:#var(--brand);display:grid;place-items:center;font-weight:800;cursor:pointer}
 .modal .body{padding:8px 10px;display:grid;gap:6px;flex:1 1 auto;overflow:auto;background:#fff}
 .block{border:1px dashed var(--line);border-radius:12px;padding:6px;background:#fff}
 .block h5{margin:0 0 4px;color:#666;font-weight:700;font-size:11px;letter-spacing:.2px}
@@ -279,6 +279,13 @@ function e0(v){return fmtE0.format(Number(v||0));}
 function n0(v){return fmtN0.format(Number(v||0));}
 function nOnly(s){return Number(String(s??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;}
 function toast(msg,kind){const t=id('toast');t.textContent=msg;t.className='toast show '+(kind||'');setTimeout(()=>t.classList.remove('show'),1500);}
+/* boolLike (FALTA EN TU CONSOLA — AÑADIDO) */
+function boolLike(x){
+  if(x===true) return true;
+  if(x===false) return false;
+  var s=String(x==null?'':x).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  return s==='si'||s==='sí'||s==='true'||s==='1'||s==='y'||s==='yes';
+}
 
 /* Dinero en inputs */
 (function moneyLive(){
