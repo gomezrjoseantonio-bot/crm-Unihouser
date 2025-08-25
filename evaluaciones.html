@@ -4,324 +4,329 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Evaluaciones</title>
-<link rel="icon" href="data:,"><!-- evita 404 del favicon -->
-<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:,"><!-- evita 404 -->
 <style>
-/* ===== Base / marca ===== */
+/* ===== Base / marca (misma piel que Configuración) ===== */
 :root{
-  --brand:#ff5a1f;
-  --ink:#111827;
-  --muted:#667085;
-  --line:#e5e7eb;
-  --bg:#ffffff;
+  --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
+  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
+  --shadow:0 4px 22px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif; --fz:12px;
 }
-body{background:#f6f7f9;color:var(--ink)}
-a{color:var(--brand)}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
 
-/* Topbar & layout */
-.topbar{background:#fff;border-bottom:1px solid var(--line)}
-.container{max-width:1100px;margin:0 auto;padding:12px}
-.nav a.active{color:var(--brand);font-weight:700}
+/* Topbar & nav (como Configuración) */
+.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
+.title{font-weight:700;color:var(--ink2);font-size:13px}
+.nav a{color:var(--ink2);text-decoration:none;padding:5px 8px;border-radius:8px;font-size:12px}
+.nav a.active{background:var(--brand);color:#fff}
+.nav a:hover{background:#f3efe9}
+
+/* Layout */
+.container{max-width:1200px;margin:12px auto;padding:0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow)}
+h2{margin:0 0 8px}
+h3{margin:0 0 6px;font-size:14px;color:#444}
 
 /* KPIs */
-.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
-.kpi .lab{font-size:12px;color:var(--muted)}
-.kpi .val{font-weight:800;font-size:20px}
-.kpis{display:grid;gap:10px;grid-template-columns:repeat(4,1fr)}
+.kpis{display:grid;gap:8px;grid-template-columns:repeat(4,1fr)}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+.kpi .lab{font-size:11px;color:var(--ink2)}
+.kpi .val{font-weight:800;font-size:18px}
+
+/* Filtros */
+.filters .row{display:grid;gap:8px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;color:#555}
+input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6px 7px;background:#fff;font-size:12px;color:var(--ink)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:800;font-size:12px}
+.btn.primary{background:var(--brand);color:#fff;border:none}
 
 /* Tabla */
-table.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.table th,.table td{padding:10px 12px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px;white-space:nowrap}
-.table th{background:#f8fafc;color:#111827;cursor:pointer}
+.table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.table th,.table td{padding:9px 10px;border-bottom:1px dashed var(--line);text-align:left;font-size:12px;white-space:nowrap}
+.table th{background:#FAF8F7;color:#1a1f23;cursor:pointer}
 .table tr:last-child td{border-bottom:none}
-.table tr{cursor:pointer}
-.pill{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#f1f5f9;font-size:12px}
+.pill{display:inline-block;padding:.15rem .45rem;border-radius:999px;background:var(--chip);font-size:11px;border:1px solid var(--line)}
 
 /* Acciones */
 .actions-cell{display:flex;gap:6px;align-items:center}
-.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer}
-.iconbtn:hover{background:#f8fafc}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer}
+.iconbtn:hover{background:#f3efe9}
 .icon{width:18px;height:18px;display:block}
 
-/* Overlay + Drawer */
+/* Overlay + Drawer (detalle) */
 .uh-overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
 .uh-overlay.open{display:block}
 .uh-drawer{position:fixed;top:0;right:-560px;height:100%;width:560px;max-width:100%;background:#fff;border-left:1px solid var(--line);box-shadow:0 10px 24px rgba(0,0,0,.25);transition:right .2s ease;z-index:90}
 .uh-drawer.open{right:0}
-.uh-d-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #eef2f7}
+.uh-d-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--line)}
 .uh-d-title{font-weight:800}
-.uh-d-body{padding:12px 14px 18px;overflow:auto;height:calc(100% - 54px)}
-
-/* Secciones detalle */
-.block{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin:10px 0}
-.block h4{margin:0 0 8px}
+.uh-d-body{padding:10px 12px 16px;overflow:auto;height:calc(100% - 48px)}
+.block{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:8px;margin:8px 0}
+.block h4{margin:0 0 6px}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
-.kv .k{color:var(--muted);font-size:12px}
+.kv .k{color:var(--ink2);font-size:11px}
 .kv .v{font-weight:700}
 
-/* Prospects en drawer */
-.match-meta{font-size:12px;color:var(--muted);margin:6px 0 4px}
+/* Prospects drawer */
+.match-meta{font-size:11px;color:var(--ink2);margin:4px 0}
 .uh-list-pros{display:grid;gap:6px;margin-top:4px}
-.uh-list-pros label{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border:1px solid #eef2f7;border-radius:10px;background:#fff}
+.uh-list-pros label{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border:1px solid var(--line);border-radius:10px;background:#fff}
 .uh-list-pros input{width:16px;height:16px;margin-top:2px}
 .p-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;border-radius:999px;padding:2px 8px;border:1px solid #e5e7eb;background:#f9fafb}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;border-radius:999px;padding:2px 8px;border:1px solid var(--line);background:#f9fafb}
 .badge.ok{border-color:#86efac;background:#ecfdf5}
 .badge.warn{border-color:#fde68a;background:#fff7ed;color:#b45309}
 .badge small{font-weight:700}
 
-/* Adjuntos */
-.attach-wrap{display:grid;gap:10px}
+/* Adjuntos (mini rejilla) */
+.attach-wrap{display:grid;gap:8px}
 .attach-grid{display:grid;gap:6px;grid-template-columns:repeat(6,1fr)}
 .thumb{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;height:64px}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb .mini{display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#333}
 .thumb .x{position:absolute;top:3px;right:3px;background:#fff;border:1px solid var(--line);border-radius:8px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.uploader{display:flex;align-items:center;gap:8px}
-.uploader input{max-width:70%}
 
-/* Filtros */
-.filters .row{display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
-@media(max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
-
-/* Botones */
-.btn.primary{background:var(--brand);color:#fff;border:none}
-.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+/* Modal enviar */
+.modal-back{position:fixed;inset:0;background:rgba(15,18,20,.28);display:none;align-items:center;justify-content:center;z-index:120}
+.modal{width:800px;max-width:95vw;max-height:88vh;background:#fff;border:2px solid #fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
+.modal header{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.modal h4{margin:0}
+.modal .body{padding:10px 12px;display:grid;gap:8px;overflow:auto}
+.modal footer{padding:10px 12px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.row-send{display:grid;gap:8px;grid-template-columns:1fr 2fr}
+.send-to{border:1px solid var(--line);border-radius:10px;padding:8px;max-height:180px;overflow:auto}
+.send-to label{display:flex;align-items:center;gap:8px;padding:4px 6px}
+.area{border:1px solid var(--line);border-radius:10px;padding:8px}
+.area input,.area textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.area textarea{min-height:140px;resize:vertical}
 
 /* Toasts */
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
 .toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
 
-/* ===== Modal Enviar ===== */
-.modal-back{position:fixed;inset:0;background:rgba(15,18,20,.28);display:none;align-items:center;justify-content:center;z-index:120}
-.modal{width:800px;max-width:95vw;max-height:88vh;background:#fff;border:2px solid #fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
-.modal header{padding:10px 12px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between}
-.modal h4{margin:0}
-.modal .body{padding:10px 12px;display:grid;gap:8px;overflow:auto}
-.modal footer{padding:10px 12px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end}
-.row-send{display:grid;gap:8px;grid-template-columns:1fr 2fr}
-.send-to{border:1px solid #e5e7eb;border-radius:10px;padding:8px;max-height:180px;overflow:auto}
-.send-to label{display:flex;align-items:center;gap:8px;padding:4px 6px}
-.area{border:1px solid #e5e7eb;border-radius:10px;padding:8px}
-.area input,.area textarea{width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:6px 8px}
-.area textarea{min-height:140px;resize:vertical}
+@media (max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="container flex between center">
-    <div class="brand flex center"><div class="title">Unihouser — CRM & BuyBox</div></div>
-    <nav class="nav">
-      <a href="evaluar.html">Evaluar</a>
-      <a href="evaluaciones.html" class="active">Evaluaciones</a>
-      <a href="prospectos.html">Prospectos</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="configuracion.html">Configuración</a>
-    </nav>
-  </div>
-</header>
-
-<main class="container">
-  <section class="card">
-    <h2>Evaluaciones</h2>
-
-    <div class="kpis" style="margin-top:6px">
-      <div class="kpi"><div class="lab">Total evaluaciones</div><div class="val" id="k_total">0</div></div>
-      <div class="kpi"><div class="lab">Asignadas</div><div class="val" id="k_asig">0</div></div>
-      <div class="kpi"><div class="lab">Bruta media</div><div class="val" id="k_bruta">0,0 %</div></div>
-      <div class="kpi"><div class="lab">Neta media</div><div class="val" id="k_neta">0,0 %</div></div>
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="brand"><div class="logo">U</div><div class="title">Unihouser — Evaluaciones</div></div>
+      <nav class="nav">
+        <a href="evaluar.html">Evaluar</a>
+        <a class="active" href="evaluaciones.html">Evaluaciones</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="configuracion.html">Configuración</a>
+      </nav>
     </div>
+  </div>
 
-    <div class="card" style="margin-top:12px">
-      <h3 style="margin:0 0 6px">Filtros</h3>
-      <div class="filters">
-        <div class="row">
-          <div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad o calle"></div>
-          <div class="field"><label>Tipo</label>
-            <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
+  <div class="container">
+    <section class="card">
+      <h2>Evaluaciones</h2>
+
+      <div class="kpis" style="margin-top:6px">
+        <div class="kpi"><div class="lab">Total evaluaciones</div><div class="val" id="k_total">0</div></div>
+        <div class="kpi"><div class="lab">Asignadas</div><div class="val" id="k_asig">0</div></div>
+        <div class="kpi"><div class="lab">Bruta media</div><div class="val" id="k_bruta">0,0 %</div></div>
+        <div class="kpi"><div class="lab">Neta media</div><div class="val" id="k_neta">0,0 %</div></div>
+      </div>
+
+      <div class="card" style="margin-top:10px">
+        <h3 style="margin:0 0 6px">Filtros</h3>
+        <div class="filters">
+          <div class="row">
+            <div class="field"><label>Buscar</label><input id="f_text" placeholder="Localidad o calle"></div>
+            <div class="field"><label>Tipo</label>
+              <select id="f_tipo"><option value="">Todos</option><option>Tradicional</option><option>Habitaciones</option></select>
+            </div>
+            <div class="field"><label>Desde</label><input id="f_desde" type="date"></div>
+            <div class="field"><label>Hasta</label><input id="f_hasta" type="date"></div>
+            <div class="field" style="align-self:end"><button class="btn" id="b_limpiar">Limpiar</button></div>
+            <div class="field" style="align-self:end"><button class="btn primary" id="b_filtrar">Filtrar</button></div>
+            <div class="field" style="align-self:end"><button class="btn" id="b_export">Exportar CSV</button></div>
           </div>
-          <div class="field"><label>Desde</label><input id="f_desde" type="date"></div>
-          <div class="field"><label>Hasta</label><input id="f_hasta" type="date"></div>
-          <div class="field" style="align-self:end"><button class="btn" id="b_limpiar">Limpiar</button></div>
-          <div class="field" style="align-self:end"><button class="btn primary" id="b_filtrar">Filtrar</button></div>
-          <div class="field" style="align-self:end"><button class="btn" id="b_export">Exportar CSV</button></div>
         </div>
       </div>
-    </div>
 
-    <div class="card" style="margin-top:12px">
-      <table class="table" id="tbl">
-        <thead>
-          <tr>
-            <th data-k="ts">Fecha</th>
-            <th data-k="loc">Localidad</th>
-            <th data-k="calle">Calle</th>
-            <th data-k="tipo">Tipo</th>
-            <th data-k="precio" style="text-align:right">Precio</th>
-            <th data-k="alq" style="text-align:right">Alquiler</th>
-            <th data-k="kpi_bruta" style="text-align:right">Bruta %</th>
-            <th data-k="kpi_neta" style="text-align:right">Neta %</th>
-            <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
-            <th data-k="pmax" style="text-align:right">P. máx</th>
-            <th data-k="asig" style="text-align:center">Asignados</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-  </section>
-</main>
-
-<footer class="foot"><div class="container foot-inner">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div></footer>
-
-<div id="uhOverlay" class="uh-overlay"></div>
-<aside id="uhDrawer" class="uh-drawer" aria-hidden="true">
-  <div class="uh-d-head">
-    <span class="uh-d-title">Detalle de evaluación</span>
-    <div style="display:flex;gap:6px">
-      <button class="btn" id="d_enviar">Enviar</button>
-      <button class="btn" id="d_cerrar">Cerrar</button>
-    </div>
+      <div class="card" style="margin-top:10px">
+        <table class="table" id="tbl">
+          <thead>
+            <tr>
+              <th data-k="ts">Fecha</th>
+              <th data-k="loc">Localidad</th>
+              <th data-k="calle">Calle</th>
+              <th data-k="tipo">Tipo</th>
+              <th data-k="precio" style="text-align:right">Precio</th>
+              <th data-k="alq" style="text-align:right">Alquiler</th>
+              <th data-k="kpi_bruta" style="text-align:right">Bruta %</th>
+              <th data-k="kpi_neta" style="text-align:right">Neta %</th>
+              <th data-k="kpi_flujo" style="text-align:right">Flujo</th>
+              <th data-k="pmax" style="text-align:right">P. máx</th>
+              <th data-k="asig" style="text-align:center">Asignados</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
   </div>
-  <div class="uh-d-body" id="drawerBody">
-    <div class="uh-meta" id="d_fecha">—</div>
 
-    <!-- ASIGNACIÓN -->
-    <div class="block">
-      <h4>Asignar a prospects</h4>
-      <div class="match-meta" id="matchInfo">—</div>
-      <div id="p_list" class="uh-list-pros">—</div>
-      <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-        <button class="btn primary" id="d_guardar">Guardar asignación</button>
-        <button class="btn" id="d_pdf">PDF</button>
-        <button class="btn" id="d_editar">Abrir en Evaluar</button>
+  <footer class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</footer>
+
+  <div id="uhOverlay" class="uh-overlay"></div>
+  <aside id="uhDrawer" class="uh-drawer" aria-hidden="true">
+    <div class="uh-d-head">
+      <span class="uh-d-title">Detalle de evaluación</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn" id="d_enviar">Enviar</button>
+        <button class="btn" id="d_cerrar">Cerrar</button>
       </div>
     </div>
+    <div class="uh-d-body" id="drawerBody">
+      <div class="uh-meta" id="d_fecha">—</div>
 
-    <!-- BLOQUES DETALLE -->
-    <div class="block">
-      <h4>Datos del inmueble</h4>
-      <div class="kv">
-        <div class="k">Localidad</div><div class="v" id="d_loc">—</div>
-        <div class="k">Calle</div><div class="v" id="d_calle">—</div>
-        <div class="k">Superficie</div><div class="v" id="d_m2">—</div>
-        <div class="k">Año</div><div class="v" id="d_anio">—</div>
-        <div class="k">Ascensor</div><div class="v" id="d_asc">—</div>
-        <div class="k">Planta</div><div class="v" id="d_alt">—</div>
-        <div class="k">¿Bajo?</div><div class="v" id="d_bajo">—</div>
-        <div class="k">Habitaciones</div><div class="v" id="d_habs">—</div>
-        <div class="k">Baños</div><div class="v" id="d_banos">—</div>
-        <div class="k">Reforma</div><div class="v" id="d_ref">—</div>
-        <div class="k">URL</div><div class="v" id="d_url">—</div>
-      </div>
-    </div>
-
-    <div class="block">
-      <h4>Gastos de adquisición</h4>
-      <div class="kv">
-        <div class="k">Precio</div><div class="v" id="d_precio">—</div>
-        <div class="k">ITP</div><div class="v" id="d_itp">—</div>
-        <div class="k">Notaría</div><div class="v" id="d_notaria">—</div>
-        <div class="k">PSI</div><div class="v" id="d_psi">—</div>
-        <div class="k">Reforma (€)</div><div class="v" id="d_reforma_eur">—</div>
-        <div class="k">Inversión total</div><div class="v" id="d_inv">—</div>
-      </div>
-    </div>
-
-    <div class="block">
-      <h4>Gastos de mantenimiento</h4>
-      <div class="kv">
-        <div class="k">Comunidad/año</div><div class="v" id="d_comu">—</div>
-        <div class="k">IBI/año</div><div class="v" id="d_ibi">—</div>
-        <div class="k">Hogar/año</div><div class="v" id="d_hogar">—</div>
-        <div class="k">Impago/año</div><div class="v" id="d_impago">—</div>
-        <div class="k">Gestión/año</div><div class="v" id="d_gestion">—</div>
-      </div>
-    </div>
-
-    <div class="block">
-      <h4>Explotación e ingresos</h4>
-      <div class="kv">
-        <div class="k">Tipo alquiler</div><div class="v" id="d_tipo">—</div>
-        <div class="k">Alquiler mensual</div><div class="v" id="d_alq">—</div>
-        <div class="k">Bruta</div><div class="v" id="d_bruta">—</div>
-        <div class="k">Neta</div><div class="v" id="d_neta">—</div>
-        <div class="k">Flujo anual</div><div class="v" id="d_flujo">—</div>
-        <div class="k">Precio máx.</div><div class="v" id="d_pmax">—</div>
-      </div>
-    </div>
-
-    <!-- ADJUNTOS -->
-    <div class="block">
-      <h4>Adjuntar archivos</h4>
-      <div class="attach-wrap">
-        <div>
-          <div class="uploader"><strong>Imágenes</strong><input id="up_imgs" type="file" accept="image/*" multiple></div>
-          <div id="grid_imgs" class="attach-grid"></div>
-        </div>
-        <div>
-          <div class="uploader"><strong>Vídeos</strong><input id="up_vids" type="file" accept="video/*" multiple></div>
-          <div id="grid_vids" class="attach-grid"></div>
-        </div>
-        <div>
-          <div class="uploader"><strong>PDFs</strong><input id="up_pdfs" type="file" accept="application/pdf" multiple></div>
-          <div id="grid_pdfs" class="attach-grid"></div>
+      <!-- ASIGNACIÓN -->
+      <div class="block">
+        <h4>Asignar a prospects</h4>
+        <div class="match-meta" id="matchInfo">—</div>
+        <div id="p_list" class="uh-list-pros">—</div>
+        <div class="actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn primary" id="d_guardar">Guardar asignación</button>
+          <button class="btn" id="d_pdf">PDF</button>
+          <button class="btn" id="d_editar">Abrir en Evaluar</button>
         </div>
       </div>
-    </div>
-  </div>
-</aside>
 
-<!-- Modal Enviar -->
-<div class="modal-back" id="sendBack">
-  <div class="modal" role="dialog" aria-label="Enviar ficha" aria-modal="true">
-    <header><h4>Enviar ficha</h4><button class="btn" id="sendClose">Cerrar</button></header>
-    <div class="body">
-      <div class="row-send">
-        <div>
-          <div class="area" style="margin-bottom:8px">
-            <label>Canal</label>
-            <select id="sendChannel">
-              <option value="email">Email</option>
-              <option value="whatsapp">WhatsApp</option>
-            </select>
+      <!-- BLOQUES DETALLE -->
+      <div class="block">
+        <h4>Datos del inmueble</h4>
+        <div class="kv">
+          <div class="k">Localidad</div><div class="v" id="d_loc">—</div>
+          <div class="k">Calle</div><div class="v" id="d_calle">—</div>
+          <div class="k">Superficie</div><div class="v" id="d_m2">—</div>
+          <div class="k">Año</div><div class="v" id="d_anio">—</div>
+          <div class="k">Ascensor</div><div class="v" id="d_asc">—</div>
+          <div class="k">Planta</div><div class="v" id="d_alt">—</div>
+          <div class="k">¿Bajo?</div><div class="v" id="d_bajo">—</div>
+          <div class="k">Habitaciones</div><div class="v" id="d_habs">—</div>
+          <div class="k">Baños</div><div class="v" id="d_banos">—</div>
+          <div class="k">Reforma</div><div class="v" id="d_ref">—</div>
+          <div class="k">URL</div><div class="v" id="d_url">—</div>
+        </div>
+      </div>
+
+      <div class="block">
+        <h4>Gastos de adquisición</h4>
+        <div class="kv">
+          <div class="k">Precio</div><div class="v" id="d_precio">—</div>
+          <div class="k">ITP</div><div class="v" id="d_itp">—</div>
+          <div class="k">Notaría</div><div class="v" id="d_notaria">—</div>
+          <div class="k">PSI</div><div class="v" id="d_psi">—</div>
+          <div class="k">Reforma (€)</div><div class="v" id="d_reforma_eur">—</div>
+          <div class="k">Inversión total</div><div class="v" id="d_inv">—</div>
+        </div>
+      </div>
+
+      <div class="block">
+        <h4>Gastos de mantenimiento</h4>
+        <div class="kv">
+          <div class="k">Comunidad/año</div><div class="v" id="d_comu">—</div>
+          <div class="k">IBI/año</div><div class="v" id="d_ibi">—</div>
+          <div class="k">Hogar/año</div><div class="v" id="d_hogar">—</div>
+          <div class="k">Impago/año</div><div class="v" id="d_impago">—</div>
+          <div class="k">Gestión/año</div><div class="v" id="d_gestion">—</div>
+        </div>
+      </div>
+
+      <div class="block">
+        <h4>Explotación e ingresos</h4>
+        <div class="kv">
+          <div class="k">Tipo alquiler</div><div class="v" id="d_tipo">—</div>
+          <div class="k">Alquiler mensual</div><div class="v" id="d_alq">—</div>
+          <div class="k">Bruta</div><div class="v" id="d_bruta">—</div>
+          <div class="k">Neta</div><div class="v" id="d_neta">—</div>
+          <div class="k">Flujo anual</div><div class="v" id="d_flujo">—</div>
+          <div class="k">Precio máx.</div><div class="v" id="d_pmax">—</div>
+        </div>
+      </div>
+
+      <!-- ADJUNTOS -->
+      <div class="block">
+        <h4>Adjuntar archivos</h4>
+        <div class="attach-wrap">
+          <div>
+            <div class="uploader"><strong>Imágenes</strong><input id="up_imgs" type="file" accept="image/*" multiple></div>
+            <div id="grid_imgs" class="attach-grid"></div>
           </div>
-          <div class="send-to" id="sendToBox">—</div>
-          <div style="margin-top:6px"><small class="small">Puedes añadir manualmente al final si no aparece.</small></div>
-        </div>
-        <div class="area">
-          <div style="display:grid;gap:6px">
-            <label>Asunto (email) / Encabezado (WhatsApp)</label>
-            <input id="sendSubject" placeholder="Asunto">
-            <label>Mensaje</label>
-            <textarea id="sendBody" placeholder="Texto a enviar…"></textarea>
+          <div>
+            <div class="uploader"><strong>Vídeos</strong><input id="up_vids" type="file" accept="video/*" multiple></div>
+            <div id="grid_vids" class="attach-grid"></div>
+          </div>
+          <div>
+            <div class="uploader"><strong>PDFs</strong><input id="up_pdfs" type="file" accept="application/pdf" multiple></div>
+            <div id="grid_pdfs" class="attach-grid"></div>
           </div>
         </div>
       </div>
     </div>
-    <footer>
-      <button class="btn" id="sendCopy">Copiar</button>
-      <button class="btn" id="sendOpenWA">Abrir WhatsApp</button>
-      <button class="btn primary" id="sendOpenMail">Abrir correo</button>
-    </footer>
-  </div>
-</div>
+  </aside>
 
-<div id="toasts" class="toast-wrap"></div>
+  <!-- Modal Enviar -->
+  <div class="modal-back" id="sendBack">
+    <div class="modal" role="dialog" aria-label="Enviar ficha" aria-modal="true">
+      <header><h4>Enviar ficha</h4><button class="btn" id="sendClose">Cerrar</button></header>
+      <div class="body">
+        <div class="row-send">
+          <div>
+            <div class="area" style="margin-bottom:8px">
+              <label>Canal</label>
+              <select id="sendChannel">
+                <option value="email">Email</option>
+                <option value="whatsapp">WhatsApp</option>
+              </select>
+            </div>
+            <div class="send-to" id="sendToBox">—</div>
+            <div style="margin-top:6px"><small class="small">Puedes añadir manualmente al final si no aparece.</small></div>
+          </div>
+          <div class="area">
+            <div style="display:grid;gap:6px">
+              <label>Asunto (email) / Encabezado (WhatsApp)</label>
+              <input id="sendSubject" placeholder="Asunto"/>
+              <label>Mensaje</label>
+              <textarea id="sendBody" placeholder="Texto a enviar…"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer>
+        <button class="btn" id="sendCopy">Copiar</button>
+        <button class="btn" id="sendOpenWA">Abrir WhatsApp</button>
+        <button class="btn primary" id="sendOpenMail">Abrir correo</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="toasts" class="toast-wrap"></div>
 
 <script>
 (function(){
 "use strict";
 
-/* Marca desde cfg (aplica color al vuelo) */
+/* Aplicar brand_color desde cfg */
 try{
-  const cfg=JSON.parse(localStorage.getItem('cfg')||'{}');
-  if(cfg && cfg.brand_color){document.documentElement.style.setProperty('--brand', cfg.brand_color);}
+  var _cfg=JSON.parse(localStorage.getItem('cfg')||'{}');
+  if(_cfg && _cfg.brand_color){ document.documentElement.style.setProperty('--brand', _cfg.brand_color); }
 }catch(_){}
 
-/* Utils */
+/* ===== Utils ===== */
 const id = x=>document.getElementById(x);
 const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
@@ -329,15 +334,14 @@ const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
 const e0 = v=>fmtE0.format(Number(v||0));
 const parseNum = v=>Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
 function toast(msg,kind){
-  const wrap=id('toasts'); if(!wrap) return;
-  const el=document.createElement('div'); el.className='toast '+(kind||''); el.textContent=msg;
-  wrap.appendChild(el); setTimeout(()=>el.style.opacity='0',1600);
-  setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
+  const wrap=id('toasts'); const el=document.createElement('div');
+  el.className='toast '+(kind||''); el.textContent=msg; wrap.appendChild(el);
+  setTimeout(()=>el.style.opacity='0',1600); setTimeout(()=>{try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function toPct(raw){ let v=Number(raw||0); if(v>0&&v<=1)v*=100; while(v>=100)v/=10; return v; }
 
-/* Store */
+/* ===== Store ===== */
 const Store={
   get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},
   set evals(v){localStorage.setItem('evals',JSON.stringify(v))},
@@ -346,14 +350,13 @@ const Store={
   get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}}}
 };
 
-/* Estado */
+/* ===== Estado ===== */
 let data=[], view=[], sortKey='ts', sortAsc=true, openId=null;
 
-/* Carga y KPIs */
+/* ===== Carga y KPIs ===== */
 function load(){
   data=(Store.evals||[]).map(e=>({...e, asig:(e.prospect_ids||[]).length}));
-  applyFilters();
-  kpis();
+  applyFilters(); kpis();
 }
 function kpis(){
   id('k_total').textContent = data.length;
@@ -363,7 +366,7 @@ function kpis(){
 }
 const avg = arr => arr.length? arr.reduce((a,b)=>a+Number(b||0),0)/arr.length : 0;
 
-/* Filtros/orden */
+/* ===== Filtros/orden ===== */
 function applyFilters(){
   const q=(id('f_text').value||'').toLowerCase().trim();
   const t=id('f_tipo').value||'';
@@ -395,7 +398,7 @@ function get(o,k){
   return (o[k]||'').toString().toLowerCase();
 }
 
-/* Render tabla */
+/* ===== Render tabla ===== */
 function render(){
   const tb=id('tbody'); tb.innerHTML='';
   view.forEach(e=>{
@@ -413,27 +416,24 @@ function render(){
     html += '<td style="text-align:right">'+e0(e.kpi_flujo)+'</td>';
     html += '<td style="text-align:right">'+e0(e.pmax)+'</td>';
     html += '<td style="text-align:center">'+(e.prospect_ids||[]).length+'</td>';
-    html += '<td><div class="actions-cell">';
-    html += iconBtn('ver','Ver') + iconBtn('del','Borrar');
-    html += '</div></td>';
-    tr.innerHTML = html;
-    tb.appendChild(tr);
+    html += '<td><div class="actions-cell">'+iconBtn('ver','Ver')+iconBtn('del','Borrar')+'</div></td>';
+    tr.innerHTML = html; tb.appendChild(tr);
   });
 }
 function iconBtn(action,title){
   if(action==='ver'){
     return '<button class="iconbtn" title="'+title+'" data-act="ver" aria-label="'+title+'">'+
       '<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">'+
-      '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'+
-      '<circle cx="12" cy="12" r="3.2" stroke="#111827" stroke-width="1.6" /></svg></button>';
+      '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" stroke="#1a1f23" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'+
+      '<circle cx="12" cy="12" r="3.2" stroke="#1a1f23" stroke-width="1.6" /></svg></button>';
   }
   return '<button class="iconbtn" title="'+title+'" data-act="del" aria-label="'+title+'">'+
     '<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">'+
-    '<path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12" stroke="#111827" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'+
-    '<path d="M10 10v7M14 10v7" stroke="#111827" stroke-width="1.6" stroke-linecap="round"/></svg></button>';
+    '<path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12" stroke="#1a1f23" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'+
+    '<path d="M10 10v7M14 10v7" stroke="#1a1f23" stroke-width="1.6" stroke-linecap="round"/></svg></button>';
 }
 
-/* Drawer */
+/* ===== Drawer ===== */
 function openDrawer(idEv){
   openId=idEv;
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e) return;
@@ -481,7 +481,7 @@ function closeDrawer(){
   openId=null;
 }
 
-/* Matching + avisos */
+/* ===== Matching + avisos ===== */
 function fold(s){ return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
 function isSearching(p){ return fold(p.fase).includes('busq'); }
 function wantsNoReform(p){
@@ -498,7 +498,7 @@ function wantsNoGround(p){
 }
 function prospectBudget(p){
   const raw = p.presupuesto_max??p.presupuesto??p.budget_max??p.budget;
-  return Number(String(raw??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
+  return Number(String(raw??'').replace(/[^\d,.-]/g,'').replace(/\.\s*/g,'').replace(',', '.'))||0;
 }
 function getTargetInfo(p){
   const kind=fold(p.obj_tipo||p.obj_main||'');
@@ -540,7 +540,7 @@ function warnBadges(e,p){
   return warns;
 }
 
-/* Prospects drawer */
+/* ===== Prospects en drawer ===== */
 function renderProspects(e){
   const wrap=id('p_list'); wrap.innerHTML='';
   const pros=Store.pros||[];
@@ -591,7 +591,7 @@ function warnBadge(text){
   return el;
 }
 
-/* Adjuntos */
+/* ===== Adjuntos ===== */
 const MAX_VIDEO_BYTES = 2*1024*1024;
 function renderAttachments(e){
   e.files = e.files || {images:[],videos:[],pdfs:[]};
@@ -629,7 +629,7 @@ function renderAttachments(e){
   function trimName(n){ n=String(n||''); return n.length>14? n.slice(0,12)+'…': n; }
 }
 
-/* Guardar asignación */
+/* ===== Guardar asignación ===== */
 function saveAssignAndFiles(){
   if(!openId) return;
   const list=Store.evals||[];
@@ -638,12 +638,10 @@ function saveAssignAndFiles(){
   const choices=[].slice.call(id('p_list').querySelectorAll('input[type=checkbox]'));
   list[idx].prospect_ids = choices.filter(c=>c.checked).map(c=>c.value);
 
-  Store.evals=list;
-  toast('Asignación y adjuntos guardados','ok');
-  load();
+  Store.evals=list; toast('Asignación y adjuntos guardados','ok'); load();
 }
 
-/* PDF */
+/* ===== PDF rápido ===== */
 function quickPDF(idEv){
   const e=(Store.evals||[]).find(x=>x.id===idEv); if(!e){toast('No encontrado','bad');return;}
   const fecha=new Date(e.ts||e.id?.slice(3)).toLocaleString('es-ES');
@@ -651,7 +649,7 @@ function quickPDF(idEv){
     'body{font-family:Inter,Arial;color:#101828;margin:24px}',
     '.brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}',
     '.brand .ttl{font-weight:800;font-size:22px}',
-    '.bar{height:4px;background:#ff5a1f;margin:8px 0 14px;border-radius:4px}',
+    '.bar{height:4px;background:#c7530c;margin:8px 0 14px;border-radius:4px}',
     '.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}',
     '.box{border:1px solid #e5e7eb;border-radius:10px;padding:10px}',
     '.lab{font-size:12px;color:#667085}.val{font-weight:800}',
@@ -682,42 +680,21 @@ function quickPDF(idEv){
   function kv(l,v){ return '<div class="box"><div class="lab">'+esc(l)+'</div><div class="val">'+esc(v)+'</div></div>'; }
 }
 
-/* ===== Mensajería (sin template literals) ===== */
-function getCfg(){
-  var c = Store.cfg || {};
-  var brand = c.brand_name || 'Unihouser';
-  var notifs = c.notifs || {};
-
-  var subj = notifs.email_subject_tpl || (brand+' · {loc} · {calle}');
-  var body = notifs.email_body_tpl || [
-    'Hola {name},',
-    '',
-    'Te comparto una oportunidad en {loc} · {calle} ({tipo}).',
-    '• Precio: {precio} · Inversión: {inv}',
-    '• Bruta: {rb}% · Neta: {rn}% · Flujo anual: {fl}',
-    '• P. máx orientativo: {pmax}',
-    '{url}',
-    '',
-    'Un saludo,',
-    brand
-  ].join('\n');
-
-  var wa = notifs.wa_text_tpl || [
-    'Hola {name}, te comparto oportunidad: {loc} · {calle} ({tipo})',
-    'Precio {precio} | Inv {inv}',
-    'Bruta {rb}% · Neta {rn}% · Flujo {fl}',
-    'Pmax {pmax}',
-    '{url}'
-  ].join('\n');
-
-  return { brand: brand, notifs: { email_subject_tpl: subj, email_body_tpl: body, wa_text_tpl: wa } };
+/* ===== Mensajería (sin ${} sueltos) ===== */
+function getCfgNotifs(){
+  const c=Store.cfg||{}; const brand=(c.brand_name||'Unihouser'); const n=c.notifs||{};
+  const subj = (n.email_subject_tpl && String(n.email_subject_tpl).trim()) ? n.email_subject_tpl : (brand+' · {loc} · {calle}');
+  const body = (n.email_body_tpl && String(n.email_body_tpl).trim()) ? n.email_body_tpl :
+'Hola {name},\n\nTe comparto una oportunidad en {loc} · {calle} ({tipo}).\n• Precio: {precio} · Inversión: {inv}\n• Bruta: {rb}% · Neta: {rn}% · Flujo anual: {fl}\n• P. máx orientativo: {pmax}\n{url}\n\nUn saludo,\n'+brand;
+  const wa   = (n.wa_text_tpl && String(n.wa_text_tpl).trim()) ? n.wa_text_tpl :
+'Hola {name}, te comparto oportunidad: {loc} · {calle} ({tipo})\nPrecio {precio} | Inv {inv}\nBruta {rb}% · Neta {rn}% · Flujo {fl}\nPmax {pmax}\n{url}';
+  return {brand:brand, subjectTpl:subj, bodyTpl:body, waTpl:wa};
 }
 function fillTpl(tpl, e, person){
   const rb = (Math.round(Number(e.kpi_bruta||0)*10)/10).toFixed(1).replace('.',',');
   const rn = (Math.round(Number(e.kpi_neta ||0)*10)/10).toFixed(1).replace('.',',');
   return tpl
-    .replace(/\{brand\}/g, getCfg().brand)
-    .replace(/\{name\}/g, (person&& (person.nombre||person.name)) || '')
+    .replace(/\{name\}/g, (person&&person.name)||'')
     .replace(/\{loc\}/g, e.loc||'')
     .replace(/\{calle\}/g, e.calle||'')
     .replace(/\{tipo\}/g, e.tipo||'')
@@ -731,12 +708,13 @@ function fillTpl(tpl, e, person){
 }
 function openSendModal(e){
   const back=id('sendBack'), box=id('sendToBox'); back.style.display='flex';
-  const cfg=getCfg();
+  const nf=getCfgNotifs();
 
+  // prospects marcados
   box.innerHTML='';
   const checks=[...id('p_list').querySelectorAll('input[type=checkbox]')];
   const targets = checks.filter(c=>c.checked).map(c=>{
-    return { name:c.parentElement?.querySelector('strong')?.textContent||'-', email:c.dataset.email||'', phone:c.dataset.phone||'' };
+    return { name:c.parentElement.querySelector('strong')?.textContent||'-', email:c.dataset.email||'', phone:c.dataset.phone||'' };
   });
   if(!targets.length) box.textContent='Marca al menos un prospect arriba para proponerles este activo.';
 
@@ -752,17 +730,17 @@ function openSendModal(e){
   });
 
   const subjectEl=id('sendSubject'), bodyEl=id('sendBody');
-  subjectEl.value = fillTpl(cfg.notifs.email_subject_tpl, e);
-  bodyEl.value    = fillTpl(cfg.notifs.email_body_tpl, e, targets[0]);
+  subjectEl.value = fillTpl(nf.subjectTpl, e, targets[0]);
+  bodyEl.value    = fillTpl(nf.bodyTpl, e, targets[0]);
 
   id('sendChannel').onchange=function(){
     if(this.value==='email'){
       subjectEl.disabled=false;
-      subjectEl.value = fillTpl(cfg.notifs.email_subject_tpl, e);
-      bodyEl.value    = fillTpl(cfg.notifs.email_body_tpl, e, targets[0]);
+      subjectEl.value = fillTpl(nf.subjectTpl, e, targets[0]);
+      bodyEl.value    = fillTpl(nf.bodyTpl, e, targets[0]);
     }else{
       subjectEl.disabled=true; subjectEl.value='WhatsApp';
-      bodyEl.value    = fillTpl(cfg.notifs.wa_text_tpl, e, targets[0]);
+      bodyEl.value    = fillTpl(nf.waTpl, e, targets[0]);
     }
   };
 
@@ -782,7 +760,7 @@ function openSendModal(e){
   id('sendClose').onclick=function(){ back.style.display='none'; };
 }
 
-/* Export CSV */
+/* ===== Export CSV ===== */
 function toCSV(rows){
   const headers=["Id","Fecha","Localidad","Calle","Tipo","Precio","ITP","Notaría","PSI","Reforma","Comunidad","IBI","Hogar","Impago","Gestión","Alquiler","Bruta%","Neta%","Flujo","Pmax","InvTotal","Asignados","URL"];
   const lines=[headers.join(';')];
@@ -809,7 +787,7 @@ function download(name,content){
   setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},0);
 }
 
-/* Eventos tabla/UI */
+/* ===== Eventos tabla/UI ===== */
 function onTableClick(ev){
   const btn=ev.target.closest('button[data-act]'); const tr=ev.target.closest('tr');
   if(!tr) return; const idEv=tr.dataset.id;
@@ -831,13 +809,13 @@ function bindSort(){
   });
 }
 
-/* Abrir en Evaluar */
+/* ===== Abrir en Evaluar ===== */
 function goEvaluar(idEv){
   localStorage.setItem('load_eval', idEv);
   location.href = 'evaluar.html';
 }
 
-/* Attach */
+/* ===== Attach ===== */
 function attach(){
   id('b_filtrar').addEventListener('click',applyFilters);
   id('b_limpiar').addEventListener('click',function(){
