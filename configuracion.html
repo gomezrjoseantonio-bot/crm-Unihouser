@@ -8,7 +8,12 @@
 :root{
   --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
   --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
-  --shadow:0 4px 22px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif; --fz:12px;
+  --shadow:0 4px 22px rgba(0,0,0,.06);
+  --ui-font: system-ui,-apple-system,Inter,Roboto,Arial,sans-serif;
+  --ui-font-size:12px;
+  /* compat tokens previos */
+  --ff: var(--ui-font);
+  --fz: var(--ui-font-size);
 }
 *{box-sizing:border-box} html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
@@ -56,8 +61,19 @@ small.muted{color:#8b8f93}
 .toast{position:fixed;top:12px;right:12px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);padding:8px 10px;border-radius:12px;display:none;z-index:100}
 .toast.show{display:block}
 .footer{margin:16px 0 14px;text-align:center;color:#888;font-size:11px}
+.preview-box{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff;max-height:40vh;overflow:auto}
 @media (max-width:980px){.config{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.grid5{grid-template-columns:repeat(3,1fr)}}
 </style>
+
+<script>
+/* Aplicar marca y tipografía al cargar */
+try{
+  const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
+  if(cfg.brand_color) document.documentElement.style.setProperty('--brand', cfg.brand_color);
+  if(cfg.ui_font) document.documentElement.style.setProperty('--ui-font', cfg.ui_font);
+  if(cfg.ui_font_size) document.documentElement.style.setProperty('--ui-font-size', (''+cfg.ui_font_size).replace('px','')+'px');
+}catch(_){}
+</script>
 </head>
 <body>
   <div class="topbar">
@@ -80,6 +96,7 @@ small.muted{color:#8b8f93}
         <button class="tabbtn" data-tab="matching">Matching</button>
         <button class="tabbtn" data-tab="mensajeria">Mensajería</button>
         <button class="tabbtn" data-tab="eval">Parámetros de evaluación</button>
+        <button class="tabbtn" data-tab="contratos">Contratos</button>
         <button class="tabbtn" data-tab="backup">Exportar / Importar</button>
       </aside>
 
@@ -88,12 +105,14 @@ small.muted{color:#8b8f93}
         <div class="panel active" id="panel-general">
           <h3>General</h3>
           <div class="block">
-            <h5>Identidad</h5>
+            <h5>Identidad & Apariencia</h5>
             <div class="grid">
               <div class="field"><label>Nombre marca</label><input id="g_name" maxlength="40" placeholder="Unihouser"/></div>
               <div class="field"><label>Correo general</label><input id="g_email" type="email" maxlength="50" placeholder="info@unihouser.es"/></div>
               <div class="field"><label>Teléfono</label><input id="g_phone" maxlength="15" placeholder="644 300 200"/></div>
               <div class="field"><label>Color marca (hex)</label><input id="g_brand" maxlength="7" placeholder="#c7530c"/></div>
+              <div class="field"><label>Tipografía UI (CSS stack)</label><input id="g_font" placeholder="system-ui, Inter, Roboto"/></div>
+              <div class="field"><label>Tamaño fuente UI (px)</label><input id="g_font_size" type="number" min="10" max="22" step="1" placeholder="12"/></div>
               <div class="field row2"><label>Localidades por defecto (chips)</label>
                 <div class="chips" id="chips_locs"></div>
                 <div class="inline"><input class="chips-input" id="add_loc" maxlength="20" placeholder="Añadir y Enter"/><small class="muted">Máx 12</small></div>
@@ -152,7 +171,6 @@ small.muted{color:#8b8f93}
         <div class="panel" id="panel-mensajeria">
           <h3>Mensajería</h3>
 
-          <!-- NOTIFICACIONES GLOBALES (lo que pediste) -->
           <div class="block">
             <h5>Notificaciones (global)</h5>
             <div class="grid">
@@ -161,7 +179,7 @@ small.muted{color:#8b8f93}
               <div class="field row3"><label>Cuerpo email — plantilla</label><textarea id="n_email_body" rows="2" maxlength="500"></textarea></div>
               <div class="field row3"><label>WhatsApp — plantilla</label><textarea id="n_wa_body" rows="2" maxlength="350"></textarea></div>
             </div>
-            <small class="muted">Placeholders: {NOMBRE}, {LOCALIDAD}, {CALLE}, {PRECIO}, {ALQUILER}, {P_MAX}, {LINK}</small>
+            <small class="muted">Placeholders: {brand}, {name}, {loc}, {calle}, {tipo}, {precio}, {inv}, {rb}, {rn}, {fl}, {pmax}, {url}</small>
           </div>
 
           <!-- Canales (opcional/avanzado) -->
@@ -225,13 +243,16 @@ small.muted{color:#8b8f93}
             <div class="inline" style="margin-top:6px;">
               <select id="ph-insert">
                 <option value="">Insertar placeholder…</option>
-                <option value="{NOMBRE}">{NOMBRE}</option>
-                <option value="{LOCALIDAD}">{LOCALIDAD}</option>
-                <option value="{CALLE}">{CALLE}</option>
-                <option value="{PRECIO}">{PRECIO}</option>
-                <option value="{ALQUILER}">{ALQUILER}</option>
-                <option value="{P_MAX}">{P_MAX}</option>
-                <option value="{LINK}">{LINK}</option>
+                <option value="{name}">{name}</option>
+                <option value="{loc}">{loc}</option>
+                <option value="{calle}">{calle}</option>
+                <option value="{precio}">{precio}</option>
+                <option value="{inv}">{inv}</option>
+                <option value="{rb}">{rb}</option>
+                <option value="{rn}">{rn}</option>
+                <option value="{fl}">{fl}</option>
+                <option value="{pmax}">{pmax}</option>
+                <option value="{url}">{url}</option>
               </select>
               <small class="muted">Coloca el cursor en el campo y elige el placeholder.</small>
             </div>
@@ -254,6 +275,28 @@ small.muted{color:#8b8f93}
             </div>
           </div>
           <div class="actions"><button class="btn save" id="save-eval">Guardar</button></div>
+        </div>
+
+        <!-- CONTRATOS -->
+        <div class="panel" id="panel-contratos">
+          <h3>Contratos</h3>
+          <div class="block">
+            <h5>Plantilla de contrato de servicio</h5>
+            <div class="grid">
+              <div class="field row3">
+                <label>contract_tpl (placeholders soportados: {brand}, {name}, {loc}, {calle}, {tipo}, {precio}, {inv}, {rb}, {rn}, {fl}, {pmax}, {url})</label>
+                <textarea id="c_tpl" rows="8" placeholder="Ej.: {brand} y {name} acuerdan..."></textarea>
+              </div>
+              <div class="field row3">
+                <label>Vista previa</label>
+                <div id="c_preview" class="preview-box">—</div>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="btn sec" id="c_print">Imprimir/Exportar</button>
+              <button class="btn save" id="c_save">Guardar</button>
+            </div>
+          </div>
         </div>
 
         <!-- BACKUP -->
@@ -288,18 +331,18 @@ small.muted{color:#8b8f93}
 var LS={get:function(k,fb){try{var v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch(_){return fb}},set:function(k,v){localStorage.setItem(k,JSON.stringify(v))}};
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},1300);}
 
-/* Normaliza cfg y asegura compatibilidad Evaluar/Evaluaciones */
+/* Normaliza cfg (compat Evaluar/Evaluaciones) */
 function normCfg(c){
   c=c&&typeof c==='object'?JSON.parse(JSON.stringify(c)):{};
 
-  /* Compat: notaría/honorarios en ambos nombres */
+  /* Compat nombres notaría/honorarios */
   if(typeof c.notaria_eur==='number') c.notaria=c.notaria_eur;
   if(typeof c.notaria==='number' && c.notaria_eur==null) c.notaria_eur=c.notaria;
 
   if(typeof c.psi_fee_eur==='number') c.honorarios=c.psi_fee_eur;
   if(typeof c.honorarios==='number' && c.psi_fee_eur==null) c.psi_fee_eur=c.honorarios;
 
-  /* ITP: guardar como porcentaje (8). Si llegó 0.08 lo subimos a 8. */
+  /* ITP como porcentaje (8). Si llegó 0.08 lo subimos a 8. */
   if(typeof c.itp_pct!=='number'){ c.itp_pct=8; }
   else if(c.itp_pct<=1){ c.itp_pct = c.itp_pct*100; }
 
@@ -307,11 +350,13 @@ function normCfg(c){
   c.notaria   =(typeof c.notaria==='number')   ? c.notaria   : 1500;
   c.honorarios=(typeof c.honorarios==='number')? c.honorarios: 4235;
 
-  /* Marca */
+  /* Marca + tipografía */
   c.brand_color = c.brand_color || '#c7530c';
   c.brand_name  = c.brand_name  || c.company_name || 'Unihouser';
   c.company_email = c.company_email || 'info@unihouser.es';
   c.company_phone = c.company_phone || '644 300 200';
+  c.ui_font = c.ui_font || 'system-ui, -apple-system, Inter, Roboto, Arial, sans-serif';
+  c.ui_font_size = c.ui_font_size || 12;
 
   /* Localidades por defecto */
   c.localidades=Array.isArray(c.localidades)&&c.localidades.length?c.localidades:
@@ -338,15 +383,15 @@ function normCfg(c){
   if(pres.honorarios_incluidos_default==null) pres.honorarios_incluidos_default=true;
   c.presupuesto=pres;
 
-  /* MENSAJERÍA: NOTIFICACIONES GLOBALES (lo que pediste) */
+  /* Mensajería: NOTIFICACIONES (minúsculas en placeholders) */
   c.notifs = c.notifs || {
     email_from: c.company_email || 'info@unihouser.es',
-    email_subject_tpl: 'Contacto — {NOMBRE}',
-    email_body_tpl:    'Hola {NOMBRE},\\nTe escribimos sobre el activo en {LOCALIDAD} {CALLE}. Precio {PRECIO}, alquiler {ALQUILER}. Pmáx {P_MAX}.\\n{LINK}',
-    wa_text_tpl:       'Hola {NOMBRE}! Te paso info del activo en {LOCALIDAD} {CALLE}. Precio {PRECIO} · Alq {ALQUILER} · Pmáx {P_MAX}. {LINK}'
+    email_subject_tpl: '{brand} · {loc} · {calle}',
+    email_body_tpl:    'Hola {name},\\nTe escribimos sobre el activo en {loc} {calle}. Precio {precio}, inversión {inv}. Bruta {rb}%, neta {rn}%.\\n{url}',
+    wa_text_tpl:       'Hola {name}! Oportunidad en {loc} {calle}. Precio {precio} · Inv {inv} · Bruta {rb}% · Neta {rn}% · Pmáx {pmax}. {url}'
   };
 
-  /* MENSAJERÍA: Canales + plantillas por fase (avanzado, opcional) */
+  /* Canales + plantillas por fase */
   c.comms=c.comms||{};
   c.comms.channels=c.comms.channels||{
     email:{enabled:true,mode:'mailto',from_name:c.brand_name,from_email:c.company_email,reply_to:'',bcc:'',smtp:{host:'',port:465,secure:true,user:'',pass:''}},
@@ -358,16 +403,23 @@ function normCfg(c){
   c.comms.templates=c.comms.templates||{};
   PH.forEach(function(ph){
     if(!c.comms.templates[ph]){
-      c.comms.templates[ph]={email:{subject:ph+' — {NOMBRE}', body:'Hola {NOMBRE},\\n…'},whatsapp:{body:'Hola {NOMBRE}! …'}};
+      c.comms.templates[ph]={email:{subject:ph+' — {name}', body:'Hola {name},\\n…'},whatsapp:{body:'Hola {name}! …'}};
     }
   });
+
+  /* Contratos */
+  c.contract_tpl = c.contract_tpl || 'CONTRATO DE SERVICIO\\n\\nEntre {brand} y {name}. Inmueble en {loc}, {calle}. Tipo: {tipo}. Precio: {precio}. Inversión: {inv}. Bruta {rb}%, neta {rn}%. Flujo {fl}. Pmáx {pmax}.\\nURL: {url}\\n\\nFirmas: …';
 
   return c;
 }
 var CFG=normCfg(LS.get('cfg',{}));
 
-/* Aplica color de marca a la variable CSS */
-try{ document.documentElement.style.setProperty('--brand', CFG.brand_color); }catch(_){}
+/* Aplica variables CSS */
+try{
+  document.documentElement.style.setProperty('--brand', CFG.brand_color);
+  document.documentElement.style.setProperty('--ui-font', CFG.ui_font);
+  document.documentElement.style.setProperty('--ui-font-size', (''+CFG.ui_font_size).replace('px','')+'px');
+}catch(_){}
 
 /* ===== Tabs ===== */
 document.getElementById('tabs').addEventListener('click',function(e){
@@ -406,6 +458,8 @@ function loadGeneral(){
   document.getElementById('g_email').value = CFG.company_email||'info@unihouser.es';
   document.getElementById('g_phone').value = CFG.company_phone||'644 300 200';
   document.getElementById('g_brand').value = CFG.brand_color||'#c7530c';
+  document.getElementById('g_font').value  = CFG.ui_font||'system-ui, -apple-system, Inter, Roboto, Arial, sans-serif';
+  document.getElementById('g_font_size').value = CFG.ui_font_size||12;
   paintLocs();
 }
 document.getElementById('save-general').onclick=function(){
@@ -413,14 +467,20 @@ document.getElementById('save-general').onclick=function(){
   CFG.company_email= document.getElementById('g_email').value.trim() || 'info@unihouser.es';
   CFG.company_phone= document.getElementById('g_phone').value.trim() || '644 300 200';
   CFG.brand_color  = document.getElementById('g_brand').value.trim() || '#c7530c';
+  CFG.ui_font      = document.getElementById('g_font').value.trim() || 'system-ui, -apple-system, Inter, Roboto, Arial, sans-serif';
+  CFG.ui_font_size = parseInt(document.getElementById('g_font_size').value||'12',10)||12;
   LS.set('cfg',CFG);
-  try{ document.documentElement.style.setProperty('--brand', CFG.brand_color); }catch(_){}
+  try{
+    document.documentElement.style.setProperty('--brand', CFG.brand_color);
+    document.documentElement.style.setProperty('--ui-font', CFG.ui_font);
+    document.documentElement.style.setProperty('--ui-font-size', (''+CFG.ui_font_size).replace('px','')+'px');
+  }catch(_){}
   toast('Guardado general');
 };
 
 /* ===== PRESUPUESTO ===== */
 function loadPresu(){
-  document.getElementById('p_itp').value = CFG.itp_pct;           /* porcentaje (8) */
+  document.getElementById('p_itp').value = CFG.itp_pct;
   document.getElementById('p_not').value = CFG.notaria_eur||CFG.notaria;
   document.getElementById('p_fee').value = CFG.psi_fee_eur||CFG.honorarios;
   document.getElementById('p_bud_incl').checked = !!CFG.presupuesto.honorarios_incluidos_default;
@@ -438,8 +498,7 @@ document.getElementById('save-presu').onclick=function(){
   var notv= Math.max(0, parseInt(document.getElementById('p_not').value||'1500',10));
   var feev= Math.max(0, parseInt(document.getElementById('p_fee').value||'4235',10));
 
-  /* Guardar en ambos nombres para compatibilidad total */
-  CFG.itp_pct      = itp;                 /* porcentaje entero para Evaluar/Evaluaciones */
+  CFG.itp_pct      = itp;
   CFG.notaria      = notv;
   CFG.notaria_eur  = notv;
   CFG.honorarios   = feev;
@@ -489,13 +548,11 @@ function rowTpl(ph){
     '</div>';
 }
 function loadMensajeria(){
-  /* Notifs (global) */
   document.getElementById('n_email_from').value = CFG.notifs.email_from||CFG.company_email||'info@unihouser.es';
   document.getElementById('n_email_subj').value = CFG.notifs.email_subject_tpl||'';
   document.getElementById('n_email_body').value = CFG.notifs.email_body_tpl||'';
   document.getElementById('n_wa_body').value   = CFG.notifs.wa_text_tpl||'';
 
-  /* Email canal */
   var em=CFG.comms.channels.email||{};
   document.getElementById('c_email_en').checked = !!em.enabled;
   document.getElementById('c_email_mode').value = em.mode||'mailto';
@@ -510,9 +567,7 @@ function loadMensajeria(){
   document.getElementById('c_smtp_user').value = sm.user||'';
   document.getElementById('c_smtp_pass').value = sm.pass||'';
 
-  /* WA canal */
-  var wa=CFG.comms.channels.whatsapp||{meta:{},twilio:{}};
-  if(!wa.meta) wa.meta={}; if(!wa.twilio) wa.twilio={};
+  var wa=CFG.comms.channels.whatsapp||{meta:{},twilio:{}}; if(!wa.meta) wa.meta={}; if(!wa.twilio) wa.twilio={};
   document.getElementById('w_en').checked = !!wa.enabled;
   document.getElementById('w_mode').value = wa.mode||'link';
   document.getElementById('w_from').value = wa.from_number||'';
@@ -524,7 +579,6 @@ function loadMensajeria(){
   document.getElementById('w_tw_tok').value=wa.twilio.auth_token||'';
   document.getElementById('w_tw_from').value=wa.twilio.from_whatsapp||'';
 
-  /* Plantillas por fase */
   var box=document.getElementById('tpl-table');
   Array.prototype.forEach.call(box.querySelectorAll('.row:not(.head)'),function(n){n.parentNode.removeChild(n);});
   PHASES.forEach(function(ph){ box.insertAdjacentHTML('beforeend', rowTpl(ph)); });
@@ -536,13 +590,11 @@ function loadMensajeria(){
   });
 }
 document.getElementById('save-mensajeria').onclick=function(){
-  /* Notifs (global) */
   CFG.notifs.email_from      = (document.getElementById('n_email_from').value||'').trim() || (CFG.company_email||'info@unihouser.es');
   CFG.notifs.email_subject_tpl = document.getElementById('n_email_subj').value.slice(0,80);
   CFG.notifs.email_body_tpl    = document.getElementById('n_email_body').value.slice(0,500);
   CFG.notifs.wa_text_tpl       = document.getElementById('n_wa_body').value.slice(0,350);
 
-  /* Canales avanzados + plantillas por fase */
   var em=CFG.comms.channels.email;
   em.enabled=document.getElementById('c_email_en').checked;
   em.mode   =document.getElementById('c_email_mode').value;
@@ -556,8 +608,7 @@ document.getElementById('save-mensajeria').onclick=function(){
   em.smtp.user=document.getElementById('c_smtp_user').value.trim();
   em.smtp.pass=document.getElementById('c_smtp_pass').value;
 
-  var wa=CFG.comms.channels.whatsapp;
-  if(!wa.meta) wa.meta={}; if(!wa.twilio) wa.twilio={};
+  var wa=CFG.comms.channels.whatsapp; if(!wa.meta) wa.meta={}; if(!wa.twilio) wa.twilio={};
   wa.enabled=document.getElementById('w_en').checked;
   wa.mode   =document.getElementById('w_mode').value;
   wa.from_number=document.getElementById('w_from').value.trim();
@@ -592,13 +643,13 @@ document.getElementById('ph-insert').onchange=function(){
 };
 /* Pruebas rápidas */
 document.getElementById('test-email').onclick=function(){
-  var subj=encodeURIComponent((CFG.notifs.email_subject_tpl||'').replace('{NOMBRE}','Test'));
-  var body=encodeURIComponent((CFG.notifs.email_body_tpl||'').replace('{NOMBRE}','Test'));
+  var subj=encodeURIComponent((CFG.notifs.email_subject_tpl||'').replace('{name}','Test').replace('{brand}', CFG.brand_name||'Unihouser'));
+  var body=encodeURIComponent((CFG.notifs.email_body_tpl||'').replace('{name}','Test').replace('{brand}', CFG.brand_name||'Unihouser'));
   var to=encodeURIComponent(CFG.notifs.email_from||CFG.company_email||'info@unihouser.es');
   window.open('mailto:'+to+'?subject='+subj+'&body='+body,'_blank');
 };
 document.getElementById('test-wa').onclick=function(){
-  var msg=encodeURIComponent((CFG.notifs.wa_text_tpl||'').replace('{NOMBRE}','Test'));
+  var msg=encodeURIComponent((CFG.notifs.wa_text_tpl||'').replace('{name}','Test').replace('{brand}', CFG.brand_name||'Unihouser'));
   var n=(CFG.comms.channels.whatsapp.from_number||'').replace(/\D/g,'');
   window.open('https://wa.me/'+n+'?text='+msg,'_blank');
 };
@@ -620,6 +671,65 @@ document.getElementById('save-eval').onclick=function(){
   LS.set('cfg',CFG); toast('Guardado evaluación');
 };
 
+/* ===== CONTRATOS ===== */
+function fillContract(tpl, sample){
+  return (tpl||'')
+    .replace(/\{brand\}/g, CFG.brand_name||'Unihouser')
+    .replace(/\{name\}/g, sample.name||'Nombre Cliente')
+    .replace(/\{loc\}/g, sample.loc||'Localidad')
+    .replace(/\{calle\}/g, sample.calle||'Calle')
+    .replace(/\{tipo\}/g, sample.tipo||'Tradicional')
+    .replace(/\{precio\}/g, sample.precio||'—')
+    .replace(/\{inv\}/g, sample.inv||'—')
+    .replace(/\{rb\}/g, sample.rb||'—')
+    .replace(/\{rn\}/g, sample.rn||'—')
+    .replace(/\{fl\}/g, sample.fl||'—')
+    .replace(/\{pmax\}/g, sample.pmax||'—')
+    .replace(/\{url\}/g, sample.url||'');
+}
+function loadContrato(){
+  document.getElementById('c_tpl').value = CFG.contract_tpl||'';
+  renderContractPreview();
+}
+function getSampleFromLastEval(){
+  try{
+    var evals=JSON.parse(localStorage.getItem('evals')||'[]');
+    if(!evals.length) return {};
+    var e=evals[evals.length-1];
+    var fmtE=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+    var fmtN=new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
+    return {
+      name:'Cliente',
+      loc:e.loc||'', calle:e.calle||'', tipo:e.tipo||'',
+      precio:fmtE.format(e.precio||0), inv:fmtE.format(e.inv_total||0),
+      rb:fmtN.format(e.kpi_bruta||0)+' %', rn:fmtN.format(e.kpi_neta||0)+' %',
+      fl:fmtE.format(e.kpi_flujo||0), pmax:fmtE.format(e.pmax||0),
+      url:e.url||''
+    };
+  }catch(_){ return {}; }
+}
+function renderContractPreview(){
+  var tpl=document.getElementById('c_tpl').value||'';
+  var sample=getSampleFromLastEval();
+  document.getElementById('c_preview').textContent = fillContract(tpl, sample) || '—';
+}
+document.getElementById('c_tpl').addEventListener('input', renderContractPreview);
+document.getElementById('c_save').onclick=function(){
+  CFG.contract_tpl = document.getElementById('c_tpl').value||'';
+  LS.set('cfg',CFG); toast('Contrato guardado');
+};
+document.getElementById('c_print').onclick=function(){
+  var tpl=document.getElementById('c_tpl').value||CFG.contract_tpl||'';
+  var filled=fillContract(tpl, getSampleFromLastEval());
+  var css='body{font-family:'+ (CFG.ui_font||'Inter,Arial,sans-serif') +';font-size:'+((CFG.ui_font_size||12)+'px')+';color:#111;margin:26px;white-space:pre-wrap;} .brand{font-weight:800;font-size:18px;margin-bottom:10px} .bar{height:4px;background:'+ (CFG.brand_color||'#c7530c') +';border-radius:4px;margin:8px 0 14px;}';
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Contrato</title><style>'+css+'</style></head><body>'+
+  '<div class="brand">'+(CFG.brand_name||'Unihouser')+' — Contrato de servicio</div><div class="bar"></div>'+
+  '<div>'+ (filled||'') +'</div></body></html>';
+  var w=window.open('','_blank'); if(!w){toast('Popup bloqueado','show');return;}
+  w.document.open(); w.document.write(html); w.document.close();
+  try{w.focus();}catch(_){}
+};
+
 /* ===== BACKUP ===== */
 document.getElementById('btn-export').onclick=function(){
   var blob=new Blob([JSON.stringify(CFG,null,2)],{type:'application/json'});
@@ -633,8 +743,12 @@ document.getElementById('file-import').addEventListener('change',function(e){
     try{
       var obj=JSON.parse(fr.result);
       CFG=normCfg(obj); LS.set('cfg',CFG);
-      loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval();
-      try{ document.documentElement.style.setProperty('--brand', CFG.brand_color); }catch(_){}
+      loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval(); loadContrato();
+      try{
+        document.documentElement.style.setProperty('--brand', CFG.brand_color);
+        document.documentElement.style.setProperty('--ui-font', CFG.ui_font);
+        document.documentElement.style.setProperty('--ui-font-size', (''+CFG.ui_font_size).replace('px','')+'px');
+      }catch(_){}
       toast('Importado y aplicado');
     }catch(_){ toast('JSON inválido'); }
   };
@@ -642,14 +756,18 @@ document.getElementById('file-import').addEventListener('change',function(e){
 });
 document.getElementById('btn-reset').onclick=function(){
   CFG=normCfg({}); LS.set('cfg',CFG);
-  loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval();
-  try{ document.documentElement.style.setProperty('--brand', CFG.brand_color); }catch(_){}
+  loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval(); loadContrato();
+  try{
+    document.documentElement.style.setProperty('--brand', CFG.brand_color);
+    document.documentElement.style.setProperty('--ui-font', CFG.ui_font);
+    document.documentElement.style.setProperty('--ui-font-size', (''+CFG.ui_font_size).replace('px','')+'px');
+  }catch(_){}
   toast('Valores por defecto');
 };
 
 /* ===== Init ===== */
 (function(){
-  loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval();
+  loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval(); loadContrato();
 })();
 </script>
 </body>
