@@ -29,6 +29,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow);display:grid;gap:4px}
 .kpi .big{font-weight:800;font-size:15px}
 .kpi .lab{font-size:11px;color:#667085}
+.kpi-toggle{display:flex;align-items:center;gap:8px;margin:6px 0 12px}
+.kpi-toggle label{font-size:12px;color:#667085;display:flex;align-items:center;gap:6px}
 /* Board */
 .board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
 .col{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;min-height:520px;box-shadow:var(--shadow)}
@@ -53,6 +55,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .btn-icon.del{border-color:#999} .btn-icon.del svg{stroke:#999}
 .btn-icon.mail{border-color:var(--brand)} .btn-icon.mail svg{stroke:var(--brand)}
 .btn-icon.wa{border-color:#25D366} .btn-icon.wa svg{stroke:#25D366}
+.btn-icon.cal{border-color:#6b7280} .btn-icon.cal svg{stroke:#6b7280}
+.btn-icon.arch{border-color:#6b7280} .btn-icon.arch svg{stroke:#6b7280}
+.btn-icon.asig{border-color:var(--brand)} .btn-icon.asig svg{stroke:var(--brand)}
 .squares{display:flex;gap:4px;margin-left:auto}
 .squares i{width:9px;height:9px;border-radius:2px;border:1px solid var(--line);background:#eee;display:inline-block}
 .squares i.on{background:var(--brand);border-color:var(--brand)}
@@ -74,7 +79,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .row.two{grid-template-columns:1fr 1fr}
 .row.three{grid-template-columns:1fr 1fr 1fr}
 .field{display:flex;flex-direction:column;gap:4px}
-.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:10px;padding:6px 8px;background:#fff;font-size:12px;color:var(--ink)}
+.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:10px;padding:6px 8px;background:#fff;font-size:12px;color:#1a1f23}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;display:inline-flex;gap:6px;align-items:center;font-size:12px}
 .chip .x{cursor:pointer;color:#999}
@@ -93,9 +98,11 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 8px;cursor:pointer;font-weight:700;font-size:12px}
 .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 .small{font-size:11px;color:#6b7280}
-/* Footer nav */
-.footer{margin:16px 0 14px;text-align:center;color:#888;font-size:11px}
-@media(max-width:1100px){.board{grid-template-columns:1fr}}
+/* Mini modal picker */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,18,20,.25);z-index:120}
+.modal.open{display:flex}
+.modal-box{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:12px;min-width:280px;display:grid;gap:10px}
+.modal-box .row{display:grid;gap:8px}
 </style>
 </head>
 <body>
@@ -120,6 +127,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
       <div class="kpi"><div class="lab">Éxito</div><div class="big" id="k_exito">0</div></div>
       <div class="kpi"><div class="lab">Activos asignados</div><div class="big" id="k_asig">0</div></div>
       <div class="kpi"><div class="lab">Archivados</div><div class="big" id="k_arch">0</div></div>
+    </div>
+    <div class="kpi-toggle">
+      <label><input type="checkbox" id="toggle_arch"/> Mostrar archivados</label>
     </div>
 
     <!-- Crear contacto (minimal) -->
@@ -155,6 +165,20 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
     <div class="d-body" id="dr_body"><!-- contenido dinámico --></div>
   </aside>
 
+  <!-- Mini modal datetime -->
+  <div class="modal" id="mmodal">
+    <div class="modal-box">
+      <div class="row">
+        <label for="mm_dt" class="small">Fecha y hora de reunión</label>
+        <input type="datetime-local" id="mm_dt">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" id="mm_clear">Quitar</button>
+        <button class="btn primary" id="mm_save">Guardar</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (function(){
 "use strict";
@@ -179,6 +203,7 @@ const n0=v=>fmtN0.format(Number(v||0));
 const e0=v=>fmtE0.format(Number(v||0));
 const parseNum = v=>Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
 const fold = s=>(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const cap = s=>{s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1);};
 
 /* ===== Store ===== */
 const Store={
@@ -195,19 +220,37 @@ function thresholds(){
   return {g:Number(th.green||1), a:Number(th.amber||0.95), warnOnlyGreen:!!((c.match||{}).warnings_only_when_green)};
 }
 
+/* ===== Costs & helpers ===== */
+function cfgCosts(){
+  const c=Store.cfg||{}; const k=c.costs||{};
+  let itp = Number(k.itp_pct ?? c.itp_pct ?? 0.08); // acepta 0.08 o 8
+  if(itp>1) itp = itp/100;
+  const notaria = Number(k.notaria ?? c.notaria ?? 1500);
+  const psi = Number(k.psi ?? c.psi ?? 0);
+  const reforma = Number(k.reforma ?? 0); // opcional
+  return {itp, notaria, psi, reforma};
+}
+
 /* ===== Columns ===== */
 const PHASES=['CONTACTO','REUNIÓN','CONTRATO','BÚSQUEDA','COMPRAVENTA','ÉXITO'];
 
+/* ===== Archivados toggle ===== */
+let SHOW_ARCH = !!JSON.parse(localStorage.getItem('show_arch')||'false');
+id('toggle_arch').checked = SHOW_ARCH;
+id('toggle_arch').addEventListener('change',()=>{SHOW_ARCH=id('toggle_arch').checked;localStorage.setItem('show_arch',JSON.stringify(SHOW_ARCH));render();});
+
 /* ===== Render board ===== */
 function render(){
-  const pros=(Store.pros||[]).filter(p=>!p.archivado);
+  const all=(Store.pros||[]);
+  const pros = all.filter(p=>SHOW_ARCH || !p.archivado);
   const byPhase=PHASES.map(ph=>pros.filter(p=>p.fase===ph));
+
   // KPIs
   id('k_total').textContent = pros.length;
   id('k_busq').textContent  = byPhase[3].length;
   id('k_compra').textContent= byPhase[4].length;
   id('k_exito').textContent = byPhase[5].length;
-  id('k_arch').textContent  = (Store.pros||[]).filter(p=>p.archivado).length;
+  id('k_arch').textContent  = (all||[]).filter(p=>p.archivado).length;
   id('k_asig').textContent  = pros.reduce((a,p)=>a+((p.asset_ids||[]).length),0);
 
   const board=id('board'); board.innerHTML='';
@@ -226,6 +269,17 @@ function card(p){
   const d=document.createElement('div'); d.className='card'; d.draggable=true; d.dataset.id=p.id;
   const email=esc(p.email||'—'), tel=esc(p.phone||p.telefono||'—');
   const sq = squares((p.asset_ids||[]).length);
+  const extraBtns = [];
+
+  // 1) CONTACTO → Fijar reunión
+  if(p.fase==='CONTACTO') extraBtns.push(iconBtn('cal','Fijar reunión'));
+
+  // 2) ÉXITO → Archivar
+  if(p.fase==='ÉXITO' && !p.archivado) extraBtns.push(iconBtn('arch','Archivar'));
+
+  // 4) BÚSQUEDA → Asignar activos (desde tarjeta)
+  if(p.fase==='BÚSQUEDA') extraBtns.push(iconBtn('asig','Asignar activos'));
+
   d.innerHTML =
     '<header>'+
       '<div style="display:flex;flex-direction:column;gap:2px">'+
@@ -233,7 +287,7 @@ function card(p){
         '<div class="meta">'+email+' · '+tel+'</div>'+
       '</div>'+
       '<div class="actions">'+
-        iconBtn('mail','Email')+iconBtn('wa','WhatsApp')+iconBtn('view','Abrir')+iconBtn('del','Borrar')+
+        iconBtn('mail','Email')+iconBtn('wa','WhatsApp')+extraBtns.join('')+iconBtn('view','Abrir')+iconBtn('del','Borrar')+
       '</div>'+
     '</header>'+
     '<div class="badges seed">'+ seeds(p).map(htmlBadge).join('') +'</div>'+
@@ -248,6 +302,9 @@ function card(p){
   d.querySelector('[data-act="del"]').onclick=()=>delProspect(p.id);
   d.querySelector('[data-act="mail"]').onclick=()=>quickMail(p);
   d.querySelector('[data-act="wa"]').onclick=()=>quickWA(p);
+  const cal=d.querySelector('[data-act="cal"]'); if(cal) cal.onclick=()=>openMeetingPicker(p.id);
+  const ar=d.querySelector('[data-act="arch"]'); if(ar) ar.onclick=()=>archivarDesdeCard(p.id);
+  const as=d.querySelector('[data-act="asig"]'); if(as) as.onclick=()=>openAssignModal(p.id);
   return d;
 }
 function squares(n){ let s=''; for(let i=0;i<n;i++) s+='<i class="on"></i>'; return s; }
@@ -256,14 +313,18 @@ function iconBtn(act,title){
     view:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3.2"/>',
     del:'<path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12"/><path d="M10 10v7M14 10v7"/>',
     mail:'<path d="M3 6h18v12H3z"/><path d="m3 7 9 7 9-7"/>',
-    wa:'<path d="M12 3a9 9 0 0 1 9 9c0 5-4 9-9 9a9.6 9.6 0 0 1-4-1l-4 1 1-4a9.6 9.6 0 0 1-1-4 9 9 0 0 1 9-9"/><path d="M8 9c0 4 4 6 4 6l2-1 2 2"/>'
+    wa:'<path d="M12 3a9 9 0 0 1 9 9c0 5-4 9-9 9a9.6 9.6 0 0 1-4-1l-4 1 1-4a9.6 9.6 0 0 1-1-4 9 9 0 0 1 9-9"/><path d="M8 9c0 4 4 6 4 6l2-1 2 2"/>',
+    cal:'<path d="M7 3v4M17 3v4M3 9h18M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/>',
+    arch:'<path d="M4 7h16M7 7v13h10V7M7 7l2-3h6l2 3"/>',
+    asig:'<path d="M4 12h16M12 4v16M6 6h6M6 10h4M6 14h8M6 18h6"/>'
   };
   return '<button class="btn-icon '+act+'" data-act="'+act+'" title="'+esc(title)+'" aria-label="'+esc(title)+'">'+
     '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">'+paths[act]+'</svg></button>';
 }
 function seeds(p){
-  const main=(fold(p.obj_main||p.obj_tipo||'')||'bruta'); // 'bruta'|'neta'|'flujo'
   const out=[];
+  // objetivo
+  const main=(fold(p.obj_main||p.obj_tipo||'')||'bruta');
   if(main==='bruta' && p.obj_bruta) out.push({t:'RB',v:fmtN1.format(normPct(p.obj_bruta))+' %'});
   if(main==='neta'  && p.obj_neta ) out.push({t:'RN',v:fmtN1.format(normPct(p.obj_neta ))+' %'});
   if(main==='flujo' && (p.obj_flujo||p.obj_flujo_anual)){
@@ -271,9 +332,14 @@ function seeds(p){
     out.push({t:'FL',v:e0(fa)+' /año'});
   }
   // tipo/loc breve
-  const tipo=p.pref_tipo||'Tradicional'; out.push({t:'T',v:tipo});
-  const locs=(p.locs_text||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const tipo=getPref(p,'tipo')||p.pref_tipo||'Tradicional'; out.push({t:'T',v:tipo});
+  const locs=(getPref(p,'localidades')||p.locs_text||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
   if(locs.length) out.push({t:'L',v:locs.join(' · ')});
+  // reunión (CONTACTO)
+  if(p.meeting_ts){
+    const d=new Date(Number(p.meeting_ts)); const dd=d.toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    out.push({t:'MT',v:'Reunión: '+dd});
+  }
   return out;
 }
 function htmlBadge(b){ return '<span class="badge"><span class="lab">'+esc(b.t)+'</span><strong>'+esc(b.v)+'</strong></span>'; }
@@ -292,7 +358,6 @@ function setupDroppable(col){
 function moveToPhase(idp, phase){
   const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
   list[i].fase = phase;
-  // si acepta activo y va a COMPRAVENTA se mantiene; ÉXITO mostrará Archivar
   Store.pros=list; render();
 }
 
@@ -309,6 +374,10 @@ function delProspect(idp){
   if(!confirm('¿Borrar este contacto?')) return;
   Store.pros=(Store.pros||[]).filter(p=>p.id!==idp); render(); toast('Borrado','ok');
 }
+function archivarDesdeCard(idp){
+  const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
+  list[i].archivado=true; Store.pros=list; render(); toast('Archivado','ok');
+}
 
 /* ===== Drawer ===== */
 let OPEN_ID=null;
@@ -320,6 +389,7 @@ function openDrawer(idp){
   body.innerHTML='';
   body.appendChild(blockDatosCliente(p));
   body.appendChild(blockPreferencias(p));
+  body.appendChild(blockObjetivoPresupuestoFinanciacion(p));
   if(p.fase==='BÚSQUEDA'){ body.appendChild(blockAsignacion(p)); }
   body.appendChild(blockAcciones(p));
   ov.classList.add('open'); dr.classList.add('open');
@@ -328,6 +398,15 @@ function closeDrawer(){ id('ov').classList.remove('open'); id('dr').classList.re
 id('ov').onclick=closeDrawer; id('dr_close').onclick=closeDrawer;
 
 /* ===== Bloques Drawer ===== */
+function inputKV(label, idd, val, ro){
+  return '<div class="field"><label>'+esc(label)+'</label><input '+(ro?'readonly':'')+' id="'+idd+'" value="'+esc(val??'')+'"></div>';
+}
+function selectKV(label, idd, opts, val){
+  return '<div class="field"><label>'+esc(label)+'</label><select id="'+idd+'">'+
+    opts.map(o=>'<option '+(o===val?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select></div>';
+}
+
+/* ----- Datos básicos + objetivo ----- */
 function blockDatosCliente(p){
   const b=document.createElement('div'); b.className='block';
   b.innerHTML =
@@ -350,7 +429,7 @@ function blockDatosCliente(p){
     '</div>'+
     '<div class="row two">'+
       inputKV('Flujo objetivo €/año','dc_ofa', p.obj_flujo_anual || (p.obj_flujo? Number(p.obj_flujo)*12 : '') )+
-      '<div></div>'+
+      inputKV('Notas','dc_notes', p.notes||'')+
     '</div>'+
     '<div class="row"><button class="btn primary" id="b_save_cli">Guardar</button></div>';
   b.querySelector('#b_save_cli').onclick=function(){
@@ -364,25 +443,43 @@ function blockDatosCliente(p){
     list[i].obj_bruta = normPct(b.querySelector('#dc_ob').value);
     list[i].obj_neta = normPct(b.querySelector('#dc_on').value);
     list[i].obj_flujo_anual = parseNum(b.querySelector('#dc_ofa').value);
+    list[i].notes = b.querySelector('#dc_notes').value;
     Store.pros=list; render(); toast('Cliente guardado','ok');
-    // si fase cambia y ya no es BÚSQUEDA, re-render drawer
     if(list[i].fase!=='BÚSQUEDA'){ openDrawer(p.id); }
   };
   return b;
 }
-function cap(s){ s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1); }
-function inputKV(label, idd, val){
-  return '<div class="field"><label>'+esc(label)+'</label><input id="'+idd+'" value="'+esc(val??'')+'"></div>';
-}
-function selectKV(label, idd, opts, val){
-  return '<div class="field"><label>'+esc(label)+'</label><select id="'+idd+'">'+
-    opts.map(o=>'<option '+(o===val?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select></div>';
-}
 
+/* ----- Preferencias (corregido, persistidas en p.prefs) ----- */
+function getPref(p,k){
+  const pf=(p.prefs||{}); if(k in (pf||{})) return pf[k];
+  // retrocompat top-level
+  if(k==='tipo') return p.pref_tipo||'';
+  if(k==='localidades') return p.locs_text||'';
+  if(k==='ascensor') return p.ascensor||'';
+  if(k==='evitar_bajos') return p.no_bajo||'';
+  if(k==='reforma') return p.pref_reforma||'';
+  if(k==='m2_min') return p.pref_m2_min||'';
+  if(k==='m2_max') return p.pref_m2_max||'';
+  if(k==='presupuesto_max') return p.presupuesto_max||'';
+  if(k==='habs_min') return p.pref_habs||'';
+  if(k==='banos_min') return p.pref_banos||'';
+  return '';
+}
+function setPrefTarget(p, obj){
+  const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
+  list[i].prefs = Object.assign({}, list[i].prefs||{}, obj);
+  // espejos mínimos para compatibilidad
+  if('tipo' in obj) list[i].pref_tipo=obj.tipo;
+  if('localidades' in obj) list[i].locs_text=obj.localidades;
+  if('habs_min' in obj) list[i].pref_habs=obj.habs_min;
+  if('banos_min' in obj) list[i].pref_banos=obj.banos_min;
+  Store.pros=list;
+}
 function blockPreferencias(p){
   const b=document.createElement('div'); b.className='block';
-  const tipo=p.pref_tipo||'Tradicional';
-  const locs=(p.locs_text||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const tipo=getPref(p,'tipo')||'Tradicional';
+  const locs=(getPref(p,'localidades')||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
   b.innerHTML =
     '<h4>Preferencias de activos</h4>'+
     '<div class="row two">'+
@@ -393,34 +490,141 @@ function blockPreferencias(p){
       '</div>'+
     '</div>'+
     '<div class="row two">'+
-      inputKV('Mín. habitaciones','pf_h', p.pref_habs||'')+
-      inputKV('Mín. baños','pf_b', p.pref_banos||'')+
+      inputKV('Mín. habitaciones','pf_h', getPref(p,'habs_min')||'')+
+      inputKV('Mín. baños','pf_b', getPref(p,'banos_min')||'')+
+    '</div>'+
+    '<div class="row two">'+
+      inputKV('m² min','pf_m2min', getPref(p,'m2_min')||'')+
+      inputKV('m² máx','pf_m2max', getPref(p,'m2_max')||'')+
+    '</div>'+
+    '<div class="row two">'+
+      selectKV('Ascensor','pf_asc',['Indiferente','Requiere','No'], cap(getPref(p,'ascensor')||'Indiferente'))+
+      selectKV('Reforma','pf_ref',['Indiferente','No','Lavado','Integral'], cap(getPref(p,'reforma')||'Indiferente'))+
+    '</div>'+
+    '<div class="row two">'+
+      selectKV('Evitar bajos','pf_bajos',['No','Sí'], cap(getPref(p,'evitar_bajos')||'No'))+
+      inputKV('Presupuesto máx (€)','pf_budget', getPref(p,'presupuesto_max')||'')+
     '</div>'+
     '<div class="row"><button class="btn" id="b_save_pref">Guardar preferencias</button></div>';
   const chips=b.querySelector('#pf_chips'); const add=b.querySelector('#pf_add');
-  function paint(){ chips.innerHTML=''; (p.locs_text||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(l=>{
-    const c=document.createElement('span'); c.className='chip'; c.innerHTML='<span class="t">'+esc(l)+'</span> <span class="x" data-del="'+esc(l)+'">×</span>'; chips.appendChild(c);
-  });}
+  function paint(){
+    chips.innerHTML='';
+    const arr=(getPref(p,'localidades')||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
+    arr.forEach(l=>{
+      const c=document.createElement('span'); c.className='chip'; c.innerHTML='<span class="t">'+esc(l)+'</span> <span class="x" data-del="'+esc(l)+'">×</span>'; chips.appendChild(c);
+    });
+  }
   paint();
   add.addEventListener('keydown',function(e){
     if(e.key!=='Enter') return;
     e.preventDefault(); const v=(add.value||'').trim(); if(!v) return;
-    const arr=(p.locs_text||'').split(',').map(s=>s.trim()).filter(Boolean);
-    if(arr.indexOf(v)===-1) arr.push(v); p.locs_text=arr.join(', ');
+    let arr=(getPref(p,'localidades')||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
+    if(arr.indexOf(v)===-1) arr.push(v);
+    if(arr.length>12) { toast('Máximo 12 localidades','warn'); return; }
+    setPrefTarget(p,{localidades:arr.join(', ')});
     add.value=''; paint();
   });
   chips.addEventListener('click',function(e){
     const del=e.target.getAttribute && e.target.getAttribute('data-del'); if(!del) return;
-    const arr=(p.locs_text||'').split(',').map(s=>s.trim()).filter(Boolean).filter(x=>x!==del);
-    p.locs_text=arr.join(', '); paint();
+    let arr=(getPref(p,'localidades')||'').toString().split(',').map(s=>s.trim()).filter(Boolean).filter(x=>x!==del);
+    setPrefTarget(p,{localidades:arr.join(', ')}); paint();
   });
   b.querySelector('#b_save_pref').onclick=function(){
+    setPrefTarget(p,{
+      tipo: b.querySelector('#pf_tipo').value,
+      habs_min: parseNum(b.querySelector('#pf_h').value),
+      banos_min: parseNum(b.querySelector('#pf_b').value),
+      m2_min: parseNum(b.querySelector('#pf_m2min').value),
+      m2_max: parseNum(b.querySelector('#pf_m2max').value),
+      ascensor: b.querySelector('#pf_asc').value,
+      reforma: b.querySelector('#pf_ref').value,
+      evitar_bajos: b.querySelector('#pf_bajos').value,
+      presupuesto_max: parseNum(b.querySelector('#pf_budget').value)
+    });
+    render(); toast('Preferencias guardadas','ok');
+  };
+  return b;
+}
+
+/* ----- Presupuesto + financiación + alquiler objetivo ----- */
+function blockObjetivoPresupuestoFinanciacion(p){
+  const c=cfgCosts();
+
+  const b=document.createElement('div'); b.className='block';
+  const pmax = Number(p.inv_pmax||0);
+  const inclPres = !!p.psi_in_presupuesto;
+  const inclRent = !!p.psi_en_rentab;
+
+  b.innerHTML =
+   '<h4>Presupuesto y financiación</h4>'+
+   '<div class="row two">'+
+     inputKV('P. máx inversión (€)','bp_pmax', pmax||'')+
+     '<div class="field"><label>Incluir PSI en presupuesto máx</label><select id="bp_psipres"><option '+(inclPres?'':'selected')+'>No</option><option '+(inclPres?'selected':'')+'>Sí</option></select></div>'+
+   '</div>'+
+   '<div class="row three">'+
+     inputKV('PSI (€) · Config','bp_psi', e0(c.psi), true)+
+     inputKV('Notaría (€) · Config','bp_not', e0(c.notaria), true)+
+     inputKV('ITP (%) · Config','bp_itp', (c.itp*100).toFixed(1).replace('.',','), true)+
+   '</div>'+
+   '<div class="row two">'+
+     inputKV('Valor máximo de compra (estimado)','bp_vmax','',true)+
+     inputKV('Coste total operación','bp_cto','',true)+
+   '</div>'+
+   '<div class="row two">'+
+     '<div class="field"><label>Incluir PSI en rentabilidad</label><select id="bp_psirent"><option '+(inclRent?'':'selected')+'>No</option><option '+(inclRent?'selected':'')+'>Sí</option></select></div>'+
+     inputKV('Alquiler objetivo mensual (si objetivo BRUTA)','bp_alq','',true)+
+   '</div>'+
+   '<div class="row two">'+
+     '<div class="field"><label>LTV (%)</label><input id="bp_ltv" value="'+esc(p.ltv??80)+'"></div>'+
+     inputKV('Fondos propios (€)','bp_fp','',true)+
+   '</div>'+
+   '<div class="row"><button class="btn" id="bp_save">Guardar presupuesto</button></div>';
+
+  function recalc(){
+    const Pmax = parseNum(b.querySelector('#bp_pmax').value);
+    const inclPsiPres = (b.querySelector('#bp_psipres').value==='Sí');
+    const inclPsiRent = (b.querySelector('#bp_psirent').value==='Sí');
+    const itp=c.itp, not=c.notaria, psi=c.psi;
+
+    // Valor máx compra:
+    const psiTerm = inclPsiPres ? psi : 0;
+    const V = (Pmax - not - psiTerm) / (1 + itp);
+    const ITPe = V*itp;
+    // Coste total operación
+    const CTO = inclPsiPres ? Pmax : (Pmax + psi);
+
+    // Alquiler objetivo mensual (si principal=bruta)
+    let alq = '';
+    if(fold(p.obj_main||'bruta')==='bruta'){
+      const den = V + ITPe + not + (inclPsiRent? psi: 0) + (cfgCosts().reforma||0);
+      const br = normPct(p.obj_bruta||10)/100;
+      alq = (den*br/12);
+    }
+    b.querySelector('#bp_vmax').value = isFinite(V)? e0(V): '—';
+    b.querySelector('#bp_cto').value  = isFinite(CTO)? e0(CTO): '—';
+    b.querySelector('#bp_alq').value  = alq? e0(alq): '—';
+
+    // Financiación
+    const ltv = Math.max(0,Math.min(100, parseNum(b.querySelector('#bp_ltv').value)||0));
+    const capitalFinanciado = V*(ltv/100);
+    const propio = (V - capitalFinanciado) + ITPe + not + psi; // PSI siempre cuenta en FP
+    b.querySelector('#bp_fp').value = e0(propio);
+  }
+  recalc();
+
+  b.addEventListener('input', (e)=>{
+    if(['bp_pmax','bp_ltv'].includes(e.target.id)) recalc();
+  });
+  b.querySelector('#bp_psipres').addEventListener('change', recalc);
+  b.querySelector('#bp_psirent').addEventListener('change', recalc);
+
+  b.querySelector('#bp_save').onclick=function(){
     const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
-    list[i].pref_tipo = b.querySelector('#pf_tipo').value;
-    list[i].pref_habs = parseNum(b.querySelector('#pf_h').value);
-    list[i].pref_banos= parseNum(b.querySelector('#pf_b').value);
-    list[i].locs_text = p.locs_text||'';
-    Store.pros=list; render(); toast('Preferencias guardadas','ok');
+    list[i].inv_pmax = parseNum(b.querySelector('#bp_pmax').value);
+    list[i].psi_in_presupuesto = (b.querySelector('#bp_psipres').value==='Sí');
+    list[i].psi_en_rentab = (b.querySelector('#bp_psirent').value==='Sí');
+    list[i].ltv = parseNum(b.querySelector('#bp_ltv').value);
+    Store.pros=list; render(); toast('Presupuesto guardado','ok');
   };
   return b;
 }
@@ -430,20 +634,21 @@ function blockAsignacion(p){
   const b=document.createElement('div'); b.className='block';
   b.innerHTML = '<h4>Asignar activos (solo en Búsqueda)</h4><div id="a_list">Cargando…</div>';
   const listBox=b.querySelector('#a_list');
-  const evals=Store.evals||[]; // ya evaluados
+  const evals=Store.evals||[];
+
   const cand = evals.filter(e=>{
-    if(fold(p.pref_tipo)!==fold(e.tipo||'Tradicional')) return false;
-    const locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
-    return !locs.length || locs.includes(fold(e.loc||''));
+    const tipoMatch = fold(getPref(p,'tipo')||p.pref_tipo||'Tradicional')===fold(e.tipo||'Tradicional');
+    const locs=(getPref(p,'localidades')||'').toString().split(',').map(fold).filter(Boolean);
+    const locOk = !locs.length || locs.includes(fold(e.loc||''));
+    return tipoMatch && locOk;
   });
 
   const th=thresholds();
-  listBox.innerHTML='';
-  if(!cand.length){ listBox.textContent='No hay activos compatibles.'; return b; }
+  listBox.innerHTML= cand.length? '' : 'No hay activos compatibles.';
 
   cand.forEach(ev=>{
     const row=document.createElement('div'); row.className='a-row';
-    const k=score(ev,p,th); // {dot:'g|y|r', whyWarns:[...]}
+    const k=score(ev,p,th);
     row.innerHTML =
       '<div class="a-left">'+
         '<input type="checkbox" class="a_chk" '+( (p.asset_ids||[]).includes(ev.id)?'checked':'')+' data-eid="'+ev.id+'">'+
@@ -512,36 +717,27 @@ function score(ev,p,th){
   if(main==='neta'){  asset=rn; target=normPct(p.obj_neta ||6 ); }
   if(main==='flujo'){ asset=fl; target=Number(p.obj_flujo_anual|| (p.obj_flujo?Number(p.obj_flujo)*12:0) ); }
 
-  // ratio asset/target
-  let ratio=0;
-  if(target>0) ratio = asset/target;
-  let dot='r';
-  if(ratio>=th.g) dot='g';
-  else if(ratio>=th.a) dot='y';
+  let ratio=0; if(target>0) ratio = asset/target;
+  let dot='r'; if(ratio>=th.g) dot='g'; else if(ratio>=th.a) dot='y';
 
   const warns = [];
   if( (!th.warnOnlyGreen) || (th.warnOnlyGreen && dot==='g') ){
-    // avisos: reforma/ascensor/bajo/presupuesto
     const necesitaReforma = (ev.ref_tip && ev.ref_tip!=='no');
     const sinAscensor = String(ev.asc||'Sí').toLowerCase()==='no';
-    const esBajo = String(ev.bajo||'No').toLowerCase()==='sí' || String(ev.bajo||'No').toLowerCase()==='si';
-    // preferencias p: quiere ascensor? evita bajos? no-reforma?
-    const wantsElev = fold(p.quiere_ascensor||p.ascensor||p.requiere_ascensor||''); // si/sí/true
-    const wantsNoReform = fold(p.no_reforma||p.pref_reforma||'');
-    const wantsNoBajo = fold(p.no_bajo||p.evitar_bajos||'');
-    if(necesitaReforma && (wantsNoReform==='si'||wantsNoReform==='sí'||wantsNoReform==='true')) warns.push('Requiere reforma');
-    if(sinAscensor && (wantsElev==='si'||wantsElev==='sí'||wantsElev==='true')) warns.push('Sin ascensor');
-    if(esBajo && (wantsNoBajo.includes('si')||wantsNoBajo.includes('sí'))) warns.push('Bajo');
-    // presupuesto: si el cliente tiene budget_max… (opcional)
-    const budget = Number(p.presupuesto_max||p.budget_max||0);
+    const esBajo = /^(si|sí)$/i.test(String(ev.bajo||'No'));
+    const wantsElev = fold(getPref(p,'ascensor'));
+    const wantsNoReform = fold(getPref(p,'reforma'));
+    const wantsNoBajo = fold(getPref(p,'evitar_bajos')||'');
+    if(necesitaReforma && (wantsNoReform==='no'?false:(wantsNoReform==='lavado'||wantsNoReform==='integral') )) warns.push('Requiere reforma');
+    if(sinAscensor && wantsElev==='requiere') warns.push('Sin ascensor');
+    if(esBajo && (wantsNoBajo==='sí' || wantsNoBajo==='si')) warns.push('Bajo');
+    const budget = Number(getPref(p,'presupuesto_max')||0);
     if(budget>0 && Number(ev.inv_total||0)>budget) warns.push('Excede presupuesto');
   }
   return {dot:dot, warns:warns};
 }
-function renderWarns(k, th){
-  if(!k.warns || !k.warns.length) return '<div class="small" style="margin-top:4px;color:#64748b">—</div>';
-  return '<div class="small" style="margin-top:4px">'+k.warns.map(w=>'<span class="badge" style="background:#fff7ed;border-color:#fde68a;color:#b45309">! '+esc(w)+'</span>').join(' ')+'</div>';
-}
+function renderWarns(k){ if(!k.warns || !k.warns.length) return '<div class="small" style="margin-top:4px;color:#64748b">—</div>';
+  return '<div class="small" style="margin-top:4px">'+k.warns.map(w=>'<span class="badge" style="background:#fff7ed;border-color:#fde68a;color:#b45309">! '+esc(w)+'</span>').join(' ')+'</div>'; }
 
 /* ===== Aceptar activo → COMPRAVENTA ===== */
 function aceptarActivo(idp, eid){
@@ -624,6 +820,37 @@ function blockAcciones(p){
     };
   }
   return b;
+}
+
+/* ======= Mini picker de reunión ======= */
+let MEETING_FOR=null;
+function openMeetingPicker(idp){
+  MEETING_FOR=idp;
+  const p=(Store.pros||[]).find(x=>x.id===idp); if(!p) return;
+  const m=id('mmodal'); const inp=id('mm_dt');
+  inp.value = p.meeting_ts? (new Date(Number(p.meeting_ts))).toISOString().slice(0,16) : '';
+  m.classList.add('open');
+}
+id('mm_save').onclick=function(){
+  const idp=MEETING_FOR; if(!idp) return;
+  const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
+  const v=id('mm_dt').value;
+  list[i].meeting_ts = v? (new Date(v)).getTime() : null;
+  Store.pros=list; id('mmodal').classList.remove('open'); render(); toast('Reunión guardada','ok');
+};
+id('mm_clear').onclick=function(){
+  const idp=MEETING_FOR; if(!idp) return;
+  const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
+  list[i].meeting_ts = null; Store.pros=list; id('mmodal').classList.remove('open'); render(); toast('Reunión quitada','ok');
+};
+id('mmodal').addEventListener('click',e=>{if(e.target.id==='mmodal') e.currentTarget.classList.remove('open');});
+
+/* ===== Modal directo de asignación desde tarjeta ===== */
+function openAssignModal(idp){
+  const p=(Store.pros||[]).find(x=>x.id===idp); if(!p) return;
+  openDrawer(idp); // reutilizo el bloque ya implementado y consistente
+  // scroll al bloque de asignación
+  setTimeout(()=>{ const el=document.querySelector('#dr_body .block h4'); if(!el) return; document.querySelectorAll('#dr_body .block h4').forEach(h=>{if(h.textContent.includes('Asignar activos')) h.scrollIntoView({behavior:'smooth'});}); },150);
 }
 
 /* ===== Helpers ===== */
