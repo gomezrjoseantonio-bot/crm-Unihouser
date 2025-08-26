@@ -38,7 +38,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .count{font-weight:700;color:#666}
 /* Crear contacto */
 .create{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:8px;display:grid;gap:6px;margin-bottom:10px}
-.create .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.create .row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
 .create input{border:1px solid var(--line);border-radius:10px;padding:7px 9px;min-height:30px}
 .create .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:7px 9px;font-weight:700;cursor:pointer;font-size:12px}
 /* Tarjeta */
@@ -132,12 +132,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
       <label><input type="checkbox" id="toggle_arch"/> Mostrar archivados</label>
     </div>
 
-    <!-- Crear contacto (minimal) -->
+    <!-- Crear contacto (añadido móvil) -->
     <div class="create">
       <div class="row">
         <input id="c_nombre" placeholder="Nombre">
         <input id="c_apellidos" placeholder="Apellidos">
         <input id="c_email" placeholder="Email">
+        <input id="c_movil" placeholder="Móvil (+34 …)">
       </div>
       <button class="btn" id="btn_create">Crear contacto</button>
       <small class="small">El resto de datos se completan en Contacto o Reunión.</small>
@@ -223,11 +224,11 @@ function thresholds(){
 /* ===== Costs & helpers ===== */
 function cfgCosts(){
   const c=Store.cfg||{}; const k=c.costs||{};
-  let itp = Number(k.itp_pct ?? c.itp_pct ?? 0.08); // acepta 0.08 o 8
-  if(itp>1) itp = itp/100;
+  let itp = Number(k.itp_pct ?? c.itp_pct ?? 0.08); // permite 0.08 o 8
+  if(itp>1) itp = itp/100;          // lo convertimos a 0.08 si viene 8
   const notaria = Number(k.notaria ?? c.notaria ?? 1500);
   const psi = Number(k.psi ?? c.psi ?? 0);
-  const reforma = Number(k.reforma ?? 0); // opcional
+  const reforma = Number(k.reforma ?? 0);
   return {itp, notaria, psi, reforma};
 }
 
@@ -271,14 +272,9 @@ function card(p){
   const sq = squares((p.asset_ids||[]).length);
   const extraBtns = [];
 
-  // 1) CONTACTO → Fijar reunión
-  if(p.fase==='CONTACTO') extraBtns.push(iconBtn('cal','Fijar reunión'));
-
-  // 2) ÉXITO → Archivar
-  if(p.fase==='ÉXITO' && !p.archivado) extraBtns.push(iconBtn('arch','Archivar'));
-
-  // 4) BÚSQUEDA → Asignar activos (desde tarjeta)
-  if(p.fase==='BÚSQUEDA') extraBtns.push(iconBtn('asig','Asignar activos'));
+  if(p.fase==='CONTACTO') extraBtns.push(iconBtn('cal','Fijar reunión'));     // CONTACTO → fijar reunión
+  if(p.fase==='ÉXITO' && !p.archivado) extraBtns.push(iconBtn('arch','Archivar')); // ÉXITO → archivar
+  if(p.fase==='BÚSQUEDA') extraBtns.push(iconBtn('asig','Asignar activos'));      // BÚSQUEDA → asignar
 
   d.innerHTML =
     '<header>'+
@@ -323,7 +319,6 @@ function iconBtn(act,title){
 }
 function seeds(p){
   const out=[];
-  // objetivo
   const main=(fold(p.obj_main||p.obj_tipo||'')||'bruta');
   if(main==='bruta' && p.obj_bruta) out.push({t:'RB',v:fmtN1.format(normPct(p.obj_bruta))+' %'});
   if(main==='neta'  && p.obj_neta ) out.push({t:'RN',v:fmtN1.format(normPct(p.obj_neta ))+' %'});
@@ -331,11 +326,9 @@ function seeds(p){
     const fa=Number(p.obj_flujo_anual||0)||Number(p.obj_flujo||0)*12;
     out.push({t:'FL',v:e0(fa)+' /año'});
   }
-  // tipo/loc breve
   const tipo=getPref(p,'tipo')||p.pref_tipo||'Tradicional'; out.push({t:'T',v:tipo});
   const locs=(getPref(p,'localidades')||p.locs_text||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
   if(locs.length) out.push({t:'L',v:locs.join(' · ')});
-  // reunión (CONTACTO)
   if(p.meeting_ts){
     const d=new Date(Number(p.meeting_ts)); const dd=d.toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     out.push({t:'MT',v:'Reunión: '+dd});
@@ -363,12 +356,15 @@ function moveToPhase(idp, phase){
 
 /* ===== Crear / borrar ===== */
 id('btn_create').onclick=function(){
-  const nombre=(id('c_nombre').value||'').trim(); const ap=(id('c_apellidos').value||'').trim(); const email=(id('c_email').value||'').trim();
+  const nombre=(id('c_nombre').value||'').trim();
+  const ap=(id('c_apellidos').value||'').trim();
+  const email=(id('c_email').value||'').trim();
+  const mov=(id('c_movil').value||'').trim();
   if(!nombre || !email){ toast('Nombre y email son obligatorios','warn'); return; }
   const list=Store.pros||[];
-  list.push({id:'p_'+Date.now(), ts:Date.now(), nombre:nombre, apellidos:ap, email:email, fase:'CONTACTO',
+  list.push({id:'p_'+Date.now(), ts:Date.now(), nombre:nombre, apellidos:ap, email:email, phone:mov, fase:'CONTACTO',
     pref_tipo:'Tradicional', obj_main:'bruta', obj_bruta:10, locs_text:'' , asset_ids:[]});
-  Store.pros=list; id('c_nombre').value=''; id('c_apellidos').value=''; id('c_email').value=''; render(); toast('Creado','ok');
+  Store.pros=list; id('c_nombre').value=''; id('c_apellidos').value=''; id('c_email').value=''; id('c_movil').value=''; render(); toast('Creado','ok');
 };
 function delProspect(idp){
   if(!confirm('¿Borrar este contacto?')) return;
@@ -389,7 +385,8 @@ function openDrawer(idp){
   body.innerHTML='';
   body.appendChild(blockDatosCliente(p));
   body.appendChild(blockPreferencias(p));
-  body.appendChild(blockObjetivoPresupuestoFinanciacion(p));
+  body.appendChild(blockPresupuesto(p));
+  body.appendChild(blockFinanciacion(p));      /* separado como pediste */
   if(p.fase==='BÚSQUEDA'){ body.appendChild(blockAsignacion(p)); }
   body.appendChild(blockAcciones(p));
   ov.classList.add('open'); dr.classList.add('open');
@@ -406,7 +403,7 @@ function selectKV(label, idd, opts, val){
     opts.map(o=>'<option '+(o===val?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select></div>';
 }
 
-/* ----- Datos básicos + objetivo ----- */
+/* ----- Datos cliente + objetivo + contrato ----- */
 function blockDatosCliente(p){
   const b=document.createElement('div'); b.className='block';
   b.innerHTML =
@@ -431,6 +428,19 @@ function blockDatosCliente(p){
       inputKV('Flujo objetivo €/año','dc_ofa', p.obj_flujo_anual || (p.obj_flujo? Number(p.obj_flujo)*12 : '') )+
       inputKV('Notas','dc_notes', p.notes||'')+
     '</div>'+
+    '<h4>Datos para contrato (rellenar en REUNIÓN)</h4>'+
+    '<div class="row two">'+
+      inputKV('DNI/NIF','dc_dni', p.dni||'')+
+      inputKV('Dirección','dc_dir', p.dir||'')+
+    '</div>'+
+    '<div class="row two">'+
+      inputKV('Localidad','dc_loccli', p.loc_cli||'')+
+      inputKV('Código postal','dc_cp', p.cp||'')+
+    '</div>'+
+    '<div class="row two">'+
+      inputKV('Alquiler objetivo mensual (si objetivo BRUTA)','dc_alq_obj','',true)+
+      '<div></div>'+
+    '</div>'+
     '<div class="row"><button class="btn primary" id="b_save_cli">Guardar</button></div>';
   b.querySelector('#b_save_cli').onclick=function(){
     const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
@@ -444,16 +454,23 @@ function blockDatosCliente(p){
     list[i].obj_neta = normPct(b.querySelector('#dc_on').value);
     list[i].obj_flujo_anual = parseNum(b.querySelector('#dc_ofa').value);
     list[i].notes = b.querySelector('#dc_notes').value;
+    list[i].dni  = b.querySelector('#dc_dni').value.trim();
+    list[i].dir  = b.querySelector('#dc_dir').value.trim();
+    list[i].loc_cli = b.querySelector('#dc_loccli').value.trim();
+    list[i].cp   = b.querySelector('#dc_cp').value.trim();
     Store.pros=list; render(); toast('Cliente guardado','ok');
+    // refresco alquiler objetivo mostrado
+    setTimeout(()=>{calcAlqObjetivoVista(list[i], b);}, 0);
     if(list[i].fase!=='BÚSQUEDA'){ openDrawer(p.id); }
   };
+  // pintar alquiler objetivo a la carga
+  calcAlqObjetivoVista(p, b);
   return b;
 }
 
-/* ----- Preferencias (corregido, persistidas en p.prefs) ----- */
+/* ----- Preferencias (persistidas) ----- */
 function getPref(p,k){
   const pf=(p.prefs||{}); if(k in (pf||{})) return pf[k];
-  // retrocompat top-level
   if(k==='tipo') return p.pref_tipo||'';
   if(k==='localidades') return p.locs_text||'';
   if(k==='ascensor') return p.ascensor||'';
@@ -469,7 +486,6 @@ function getPref(p,k){
 function setPrefTarget(p, obj){
   const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
   list[i].prefs = Object.assign({}, list[i].prefs||{}, obj);
-  // espejos mínimos para compatibilidad
   if('tipo' in obj) list[i].pref_tipo=obj.tipo;
   if('localidades' in obj) list[i].locs_text=obj.localidades;
   if('habs_min' in obj) list[i].pref_habs=obj.habs_min;
@@ -479,7 +495,6 @@ function setPrefTarget(p, obj){
 function blockPreferencias(p){
   const b=document.createElement('div'); b.className='block';
   const tipo=getPref(p,'tipo')||'Tradicional';
-  const locs=(getPref(p,'localidades')||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
   b.innerHTML =
     '<h4>Preferencias de activos</h4>'+
     '<div class="row two">'+
@@ -546,17 +561,16 @@ function blockPreferencias(p){
   return b;
 }
 
-/* ----- Presupuesto + financiación + alquiler objetivo ----- */
-function blockObjetivoPresupuestoFinanciacion(p){
+/* ----- Presupuesto (ITP numérico y cálculos) ----- */
+function blockPresupuesto(p){
   const c=cfgCosts();
-
   const b=document.createElement('div'); b.className='block';
   const pmax = Number(p.inv_pmax||0);
   const inclPres = !!p.psi_in_presupuesto;
   const inclRent = !!p.psi_en_rentab;
 
   b.innerHTML =
-   '<h4>Presupuesto y financiación</h4>'+
+   '<h4>Presupuesto de la inversión</h4>'+
    '<div class="row two">'+
      inputKV('P. máx inversión (€)','bp_pmax', pmax||'')+
      '<div class="field"><label>Incluir PSI en presupuesto máx</label><select id="bp_psipres"><option '+(inclPres?'':'selected')+'>No</option><option '+(inclPres?'selected':'')+'>Sí</option></select></div>'+
@@ -574,10 +588,6 @@ function blockObjetivoPresupuestoFinanciacion(p){
      '<div class="field"><label>Incluir PSI en rentabilidad</label><select id="bp_psirent"><option '+(inclRent?'':'selected')+'>No</option><option '+(inclRent?'selected':'')+'>Sí</option></select></div>'+
      inputKV('Alquiler objetivo mensual (si objetivo BRUTA)','bp_alq','',true)+
    '</div>'+
-   '<div class="row two">'+
-     '<div class="field"><label>LTV (%)</label><input id="bp_ltv" value="'+esc(p.ltv??80)+'"></div>'+
-     inputKV('Fondos propios (€)','bp_fp','',true)+
-   '</div>'+
    '<div class="row"><button class="btn" id="bp_save">Guardar presupuesto</button></div>';
 
   function recalc(){
@@ -586,14 +596,11 @@ function blockObjetivoPresupuestoFinanciacion(p){
     const inclPsiRent = (b.querySelector('#bp_psirent').value==='Sí');
     const itp=c.itp, not=c.notaria, psi=c.psi;
 
-    // Valor máx compra:
     const psiTerm = inclPsiPres ? psi : 0;
     const V = (Pmax - not - psiTerm) / (1 + itp);
     const ITPe = V*itp;
-    // Coste total operación
     const CTO = inclPsiPres ? Pmax : (Pmax + psi);
 
-    // Alquiler objetivo mensual (si principal=bruta)
     let alq = '';
     if(fold(p.obj_main||'bruta')==='bruta'){
       const den = V + ITPe + not + (inclPsiRent? psi: 0) + (cfgCosts().reforma||0);
@@ -604,16 +611,16 @@ function blockObjetivoPresupuestoFinanciacion(p){
     b.querySelector('#bp_cto').value  = isFinite(CTO)? e0(CTO): '—';
     b.querySelector('#bp_alq').value  = alq? e0(alq): '—';
 
-    // Financiación
-    const ltv = Math.max(0,Math.min(100, parseNum(b.querySelector('#bp_ltv').value)||0));
-    const capitalFinanciado = V*(ltv/100);
-    const propio = (V - capitalFinanciado) + ITPe + not + psi; // PSI siempre cuenta en FP
-    b.querySelector('#bp_fp').value = e0(propio);
+    // reflejar en bloque de cliente si está abierto
+    const drv=document.getElementById('dr_body');
+    const alqInput=drv && drv.querySelector('#dc_alq_obj'); if(alqInput){ alqInput.value = alq? e0(alq): '—'; }
+
+    return {V,ITPe,CTO,alq};
   }
   recalc();
 
   b.addEventListener('input', (e)=>{
-    if(['bp_pmax','bp_ltv'].includes(e.target.id)) recalc();
+    if(['bp_pmax'].includes(e.target.id)) recalc();
   });
   b.querySelector('#bp_psipres').addEventListener('change', recalc);
   b.querySelector('#bp_psirent').addEventListener('change', recalc);
@@ -623,8 +630,42 @@ function blockObjetivoPresupuestoFinanciacion(p){
     list[i].inv_pmax = parseNum(b.querySelector('#bp_pmax').value);
     list[i].psi_in_presupuesto = (b.querySelector('#bp_psipres').value==='Sí');
     list[i].psi_en_rentab = (b.querySelector('#bp_psirent').value==='Sí');
-    list[i].ltv = parseNum(b.querySelector('#bp_ltv').value);
     Store.pros=list; render(); toast('Presupuesto guardado','ok');
+  };
+  return b;
+}
+
+/* ----- Financiación (separado) ----- */
+function blockFinanciacion(p){
+  const c=cfgCosts();
+  const b=document.createElement('div'); b.className='block';
+  b.innerHTML =
+    '<h4>Financiación</h4>'+
+    '<div class="row two">'+
+      inputKV('LTV (%)','bf_ltv', p.ltv??80)+
+      inputKV('Fondos propios (€)','bf_fp','',true)+
+    '</div>'+
+    '<div class="row"><button class="btn" id="bf_save">Guardar financiación</button></div>';
+
+  function recalcFP(){
+    const Pmax = Number(p.inv_pmax||0);
+    const inclPsiPres = !!p.psi_in_presupuesto;
+    const itp=c.itp, not=c.notaria, psi=c.psi;
+
+    const V = (Pmax - not - (inclPsiPres?psi:0)) / (1 + itp);
+    const ITPe = V*itp;
+    const ltv = Math.max(0,Math.min(100, parseNum(b.querySelector('#bf_ltv').value)||0));
+    const capitalFinanciado = V*(ltv/100);
+    const propio = (V - capitalFinanciado) + ITPe + not + psi; // PSI siempre cuenta en FP
+    b.querySelector('#bf_fp').value = isFinite(propio)? e0(propio): '—';
+  }
+  recalcFP();
+  b.addEventListener('input', (e)=>{ if(e.target.id==='bf_ltv') recalcFP(); });
+
+  b.querySelector('#bf_save').onclick=function(){
+    const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
+    list[i].ltv = parseNum(b.querySelector('#bf_ltv').value);
+    Store.pros=list; render(); toast('Financiación guardada','ok');
   };
   return b;
 }
@@ -674,7 +715,6 @@ function blockAsignacion(p){
     listBox.appendChild(row);
   });
 
-  // eventos
   listBox.addEventListener('change',function(e){
     const chk=e.target.closest('.a_chk'); if(!chk) return;
     const eid=chk.getAttribute('data-eid'); const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
@@ -748,7 +788,7 @@ function aceptarActivo(idp, eid){
   Store.pros=list; render(); toast('Activo aceptado','ok'); openDrawer(idp);
 }
 
-/* ===== Enviar por correo / WA ===== */
+/* ===== Email / WhatsApp ===== */
 function getCfgNotifs(){
   const c=Store.cfg||{}; const brand=(c.brand_name||'Unihouser'); const n=c.notifs||{};
   const subj = (n.email_subject_tpl && String(n.email_subject_tpl).trim()) ? n.email_subject_tpl : (brand+' · {loc} · {calle}');
@@ -790,7 +830,7 @@ function sendAssetWA(p, eid){
   window.open(url,'_blank');
 }
 
-/* ===== Comms rápidos en tarjeta ===== */
+/* ===== Comms rápidos ===== */
 function quickMail(p){
   const nf=getCfgNotifs();
   const subj = nf.subjectTpl.replace('{loc}','').replace('{calle}','').replace(/\s·\s$/, '').replace(/\{\w+\}/g,'');
@@ -848,9 +888,27 @@ id('mmodal').addEventListener('click',e=>{if(e.target.id==='mmodal') e.currentTa
 /* ===== Modal directo de asignación desde tarjeta ===== */
 function openAssignModal(idp){
   const p=(Store.pros||[]).find(x=>x.id===idp); if(!p) return;
-  openDrawer(idp); // reutilizo el bloque ya implementado y consistente
-  // scroll al bloque de asignación
-  setTimeout(()=>{ const el=document.querySelector('#dr_body .block h4'); if(!el) return; document.querySelectorAll('#dr_body .block h4').forEach(h=>{if(h.textContent.includes('Asignar activos')) h.scrollIntoView({behavior:'smooth'});}); },150);
+  openDrawer(idp);
+  setTimeout(()=>{ document.querySelectorAll('#dr_body .block h4').forEach(h=>{if(h.textContent.includes('Asignar activos')) h.scrollIntoView({behavior:'smooth'});}); },150);
+}
+
+/* ===== Cálculo auxiliar de alquiler objetivo para mostrar en Datos cliente ===== */
+function calcAlqObjetivoVista(p, block){
+  const c=cfgCosts();
+  const Pmax = Number(p.inv_pmax||0);
+  const inclPsiPres = !!p.psi_in_presupuesto;
+  const inclPsiRent = !!p.psi_en_rentab;
+  const itp=c.itp, not=c.notaria, psi=c.psi;
+  const V = (Pmax - not - (inclPsiPres?psi:0)) / (1 + itp);
+  const ITPe = V*itp;
+  let alq='';
+  if(fold(p.obj_main||'bruta')==='bruta'){
+    const den = V + ITPe + not + (inclPsiRent? psi: 0) + (c.reforma||0);
+    const br = normPct(p.obj_bruta||10)/100;
+    alq = (den*br/12);
+  }
+  const input=(block||document).querySelector('#dc_alq_obj');
+  if(input) input.value = alq? e0(alq): '—';
 }
 
 /* ===== Helpers ===== */
