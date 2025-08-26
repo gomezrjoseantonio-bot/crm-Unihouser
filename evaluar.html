@@ -11,7 +11,7 @@
   --shadow:0 4px 22px rgba(0,0,0,.06);
   --ui-font: system-ui, -apple-system, Inter, Roboto, Arial, sans-serif;
   --ui-font-size: 12px;
-  /* compat con código previo */
+  /* compat */
   --ff: var(--ui-font);
   --fz: var(--ui-font-size);
 }
@@ -19,11 +19,11 @@
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
 a{color:var(--brand);text-decoration:none}
-.container{max-width:1100px;margin:0 auto;padding:12px 14px}
+.container{max-width:1200px;margin:0 auto;padding:12px 14px}
 
 /* Topbar */
 .topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
-.top-inner{max-width:1100px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:8px}
 .logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
 .title{font-weight:700;color:var(--ink2);font-size:13px}
@@ -63,19 +63,16 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
 .dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
 
-/* Matching (nuevo grid) */
-#candWrap{margin-top:8px}
-.table{width:100%;border-collapse:separate;border-spacing:0 6px}
-.tr{display:grid;grid-template-columns:26px 22px 22px 1.5fr 1fr 1fr 1fr;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
-.th{font-weight:700;color:#374151}
-.td{font-size:12px}
-.badge{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:11px}
-.pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:11px;color:#555}
-.star{width:18px;height:18px;display:inline-grid;place-items:center}
-.star svg{width:18px;height:18px;fill:#f59e0b}
-.state svg{width:14px;height:14px}
-.warn{color:#b45309;background:#fff7ed;border:1px solid #fde68a}
-.mono{font-variant-numeric:tabular-nums}
+/* Clientes potenciales tabla */
+.table{width:100%;border-collapse:separate;border-spacing:0 8px}
+.th, .td{font-size:12px;padding:10px;background:#fff;border:1px solid var(--line)}
+.th{color:#475569;background:#F9F7F5;font-weight:700}
+.tr{display:grid;grid-template-columns:220px 1fr 1fr 220px;gap:8px;align-items:center}
+.tr .td{display:flex;align-items:center;gap:8px}
+.star{color:#f59e0b;margin-left:4px}
+
+/* Chips aviso */
+.badge-warn{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#b45309;background:#fff7ed;border:1px solid #fde68a;border-radius:999px;padding:2px 6px;white-space:nowrap}
 
 /* Toasts */
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
@@ -87,7 +84,7 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
 </style>
 
 <script>
-/* Aplicar marca y tipografía desde cfg */
+/* Aplicar marca desde cfg */
 try{
   const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
   if(cfg.brand_color) document.documentElement.style.setProperty('--brand', cfg.brand_color);
@@ -191,9 +188,6 @@ try{
 
       <div class="actions">
         <button class="btn primary" id="e_calc">Calcular</button>
-        <button class="btn" id="e_save">Guardar</button>
-        <button class="btn" id="e_save_assign">Guardar y asignar</button>
-        <button class="btn" id="e_clean">Limpiar</button>
       </div>
 
       <!-- RESULTADOS -->
@@ -207,13 +201,21 @@ try{
           <div class="kpi"><div class="lab">Precio máx. de compra</div><div class="val" id="r_pmax">—</div></div>
         </div>
 
-        <!-- CLIENTES POTENCIALES (readaptado) -->
         <div class="card" style="margin-top:12px">
           <h3 style="margin:0 0 8px">Clientes potenciales</h3>
-          <div id="candWrap"></div>
-          <div class="actions" style="margin-top:8px">
-            <button class="btn" id="save_only">Guardar evaluación</button>
-            <button class="btn primary" id="save_assign">Guardar y asignar</button>
+
+          <div class="tr">
+            <div class="th">Cliente</div>
+            <div class="th">Real vs Objetivo</div>
+            <div class="th">Aviso</div>
+            <div class="th">Ajuste sugerido</div>
+          </div>
+          <div id="pc_list"></div>
+
+          <div class="actions" style="margin-top:10px;justify-content:flex-end">
+            <button class="btn" id="btn_discard">Descartar</button>
+            <button class="btn" id="btn_save_only">Guardar</button>
+            <button class="btn primary" id="btn_save_assign" disabled>Guardar y asignar</button>
           </div>
         </div>
       </div>
@@ -271,11 +273,11 @@ function toast(msg,kind){
   setTimeout(function(){try{wrap.removeChild(el)}catch(_){}} ,2200);
 }
 
-/* Store (capa preparada para remoto) */
+/* Store */
 var Store={
-  get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}}}, /* SUPABASE: inyectar fetch cfg si remoto */
-  set cfg(v){localStorage.setItem('cfg',JSON.stringify(v));},                       /* SUPABASE: persist cfg remoto */
-  get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}}, /* prospects */
+  get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}}}, 
+  set cfg(v){localStorage.setItem('cfg',JSON.stringify(v));},                       
+  get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}}, 
   set pros(v){localStorage.setItem('pros',JSON.stringify(v));},
   get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},
   set evals(v){localStorage.setItem('evals',JSON.stringify(v));}
@@ -301,18 +303,12 @@ function getCfg(){
   var imp_hab =Number(def(c.impago_hab_pct,4.0));
   var g_trad  =Number(def(c.gestion_trad_pct,15.0));
   var g_hab   =Number(def(c.gestion_hab_pct,25.0));
-  var o=c.objetivos||{}, t=o.tradicional||{}, h=o.habitaciones||{};
   var match=(c.match&&c.match.thresholds)?c.match:{thresholds:{green:1,amber:0.95},warnings_only_when_green:true};
   return {
     itp_pct:itp_pct, notaria_eur:notaria, psi_eur:honor,
     hogar_pct:hogar_pct, impago_pct_trad:imp_trad, impago_pct_hab:imp_hab,
     gestion_pct_trad:g_trad, gestion_pct_hab:g_hab,
-    obj_bruta_trad:Number(def(t.bruta_pct,10.0)),
-    obj_bruta_hab:Number(def(h.bruta_pct,12.0)),
-    obj_neta_trad:Number(def(t.neta_pct,6.0)),
-    obj_neta_hab:Number(def(h.neta_pct,7.0)),
-    thresholds: match.thresholds,
-    warnsOnlyGreen: !!match.warnings_only_when_green
+    thresholds: match.thresholds
   };
 }
 
@@ -348,7 +344,6 @@ function bindAuto(){
 var CURRENT_ID=null;
 
 /* Cálculos y render */
-var lastChart={real:0,obj:0}; /* ya no pintamos gráfico, mantenemos compat mínima */
 function calc(){
   var cfg=getCfg();
   var tipo=(id('e_tipo').value||'Tradicional');
@@ -374,12 +369,8 @@ function calc(){
   var neta =inv_total>0?((alq_a-gastos_a)/inv_total*100):0;
   var flujo=alq_a-gastos_a;
 
-  var obj_bruta=(tipo==='Habitaciones')?cfg.obj_bruta_hab:cfg.obj_bruta_trad;
-  var gapB=bruta-obj_bruta;
-  var obj_neta =(tipo==='Habitaciones')?cfg.obj_neta_hab:cfg.obj_neta_trad;
-  var gapN=neta-obj_neta;
-
   var rate=cfg.itp_pct/100;
+  var obj_bruta = (tipo==='Habitaciones') ? 12 : 10; // solo informativo local
   var targetInv=(obj_bruta>0)?(alq_a/(obj_bruta/100)):0;
   var pmax=0;
   if(targetInv>0){
@@ -394,26 +385,20 @@ function calc(){
   id('r_pmax').textContent=e0(pmax);
   id('e_pmax').value=n0(pmax);
 
-  paintDot('sb',gapB); paintDot('sn',gapN); paintDot('sf',flujo>=0?1:-1);
-  id('r_bruta_diff').textContent=gapText(gapB);
-  id('r_neta_diff').textContent =gapText(gapN);
-
-  lastChart.real=bruta; lastChart.obj=obj_bruta;
+  paintDot('sb',bruta-obj_bruta);
+  paintDot('sn',neta - 6); // referencia visual
+  paintDot('sf',flujo>=0?1:-1);
+  id('r_bruta_diff').textContent=''; id('r_neta_diff').textContent='';
 
   buildCandidates({
     tipo:tipo, loc:id('e_loc').value||'',
     bruta:bruta, neta:neta, flujo:flujo,
-    alq_a:alq_a,
-    gastos_a:gastos_a,
-    inv_total:inv_total,
-    precio:precio,
-    itp_rate:rate,
-    extras:notari+ref+honor,
+    alq_m:alq_m, alq_a:alq_a,
+    inv_total:inv_total, gastos_a:gastos_a,
     ref_tip:id('e_ref_nec').value||'no',
     asc:id('e_asc').value||'Sí',
     bajo:id('e_bajo').value||'No',
-    alt:id('e_alt').value||'',
-    pmax:pmax
+    precio:precio, notaria:notari, psi:honor, itp_pct:rate, reforma:ref
   });
 
   id('e_result').hidden=false;
@@ -426,38 +411,25 @@ function calc(){
     bajo:id('e_bajo').value||'', habs:id('e_habs').value||'',
     banos:id('e_banos').value||'', ref_tip:id('e_ref_nec').value||'no',
     url:id('e_url').value||'', tipo:tipo,
-    precio:precio, itp:parseEs(id('e_itp_eur').value)||itp, notaria:parseEs(id('e_notaria').value)||notari, psi:(id('e_honor').value==='si')?getCfg().psi_eur:0, reforma:parseEs(id('e_reforma').value),
-    comu:parseEs(id('e_comunidad').value), ibi:parseEs(id('e_ibi').value), hogar:parseEs(id('e_hogar').value),
-    impago:parseEs(id('e_impago').value), gestion:parseEs(id('e_gestion').value), alq:parseEs(id('e_alq').value),
-    inv_total:inv_total, kpi_bruta:bruta, kpi_neta:neta, kpi_flujo:flujo, pmax:pmax
+    precio:precio, itp:itp, notaria:notari, psi:honor, reforma:ref,
+    comu:comu, ibi:ibi, hogar:hogar, impago:impago, gestion:gest,
+    alq:alq_m, inv_total:inv_total, kpi_bruta:bruta, kpi_neta:neta, kpi_flujo:flujo, pmax:pmax
   };
 }
-function gapText(g){ if(!isFinite(g))return ''; var s=(g>=0?'+':'−')+fmtN1.format(Math.abs(g))+' pts'; return ' ('+s+')'; }
 function paintDot(dot,gap){ var el=id(dot); el.className='dot '+(gap>=0?'g':(gap>-1?'y':'r')); }
 
 /* Helpers matching */
 function fold(s){return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
-function isBeforeCompra(p){var f=fold(p.fase||''); return !(f.includes('compra')||f.includes('éxito')||f.includes('exito')); }
+function inCompra(p){var f=fold(p.fase||''); return !(f.includes('compra')||f.includes('éxito')||f.includes('exito')); }
 function parseMoney(v){if(v==null)return 0;return Number(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;}
-function getPref(p,k){
-  var pf=p.prefs||{};
-  if(k in pf) return pf[k];
-  if(k==='tipo') return p.pref_tipo||'';
-  if(k==='localidades') return p.locs_text||'';
-  if(k==='ascensor') return p.ascensor||'';
-  if(k==='reforma') return p.pref_reforma||'';
-  if(k==='bajo') return p.evitar_bajos||p.no_bajo||'';
-  if(k==='altura_min') return p.altura_min||'';
-  if(k==='presupuesto_max') return p.presupuesto_max||'';
-  return '';
+function prospectBudgetCTO(p){
+  var cfg=getCfg(); 
+  var pmax = Number(p.inv_pmax||p.pmax||0);
+  var incPsi = !!p.psi_in_presupuesto;
+  return incPsi ? pmax : (pmax + cfg.psi_eur);
 }
-function clientCTO(p){
-  var cfg=getCfg(); var pmax=Number(p.inv_pmax||p.pmax||0)||0;
-  var incl = !!(p.psi_in_presupuesto);
-  return pmax + (incl?0:cfg.psi_eur);
-}
-function targetInfo(p){
-  var main=fold(p.obj_main||p.obj_tipo||'');
+function getTargetInfo(p){
+  var main=(p.obj_main||p.obj_tipo||'').toString().toLowerCase().trim();
   var b=Number(p.obj_bruta||0), n=Number(p.obj_neta||0), fm=Number(p.obj_flujo||0), fa=Number(p.obj_flujo_anual||0);
   if(main==='bruta'&&b>0) return {kind:'bruta',val:b};
   if(main==='neta' &&n>0) return {kind:'neta', val:n};
@@ -467,192 +439,160 @@ function targetInfo(p){
   if(fa>0||fm>0) return {kind:'flujo',val:(fa>0?fa:fm*12)};
   return {kind:'',val:0};
 }
-function classifyRatio(actual,target,th){
+function classifyRatio(actual,target){
+  var th=getCfg().thresholds;
   if(!target||target<=0) return {cls:'r',ratio:0};
-  var ratio=actual/target;
-  var green=Number(th.green||1), amber=Number(th.amber||0.95);
+  var ratio = actual/target;
+  var green = Number(th.green||1);
+  var amber = Number(th.amber||0.95);
   var cls = ratio>=green ? 'g' : (ratio>=amber ? 'y' : 'r');
   return {cls:cls, ratio:ratio};
 }
-
-/* ΔP sugerida para pasar a verde (por cliente) */
-function priceCutToGreen(ctx, tgtKind, tgtVal){
-  var cfg=getCfg();
-  var rate=ctx.itp_rate;                // itp como fracción
-  var E = ctx.extras;                   // notaría+reforma+psi(incluido en evaluación si marcado)
-  if(tgtKind==='bruta'){
-    var invReq = (ctx.alq_a)/(tgtVal/100);
-    var Preq = (invReq - E)/(1+rate);
-    var dP = Math.max(0, (ctx.precio - Preq));
-    return {eur: Math.round(dP), per: (ctx.precio>0? dP/ctx.precio:0)};
-  }else if(tgtKind==='neta'){
-    var netA = (ctx.alq_a - ctx.gastos_a);
-    var invReqN = (netA)/(tgtVal/100);
-    var PreqN = (invReqN - E)/(1+rate);
-    var dPn = Math.max(0, (ctx.precio - PreqN));
-    return {eur: Math.round(dPn), per: (ctx.precio>0? dPn/ctx.precio:0)};
-  }else{
-    // flujo: no depende de precio -> sugerimos ΔAlq/mes
-    var needA = Math.max(0, tgtVal - (ctx.alq_a - ctx.gastos_a));
-    return {eur:0, per:0, upRent: Math.ceil(needA/12)};
+function warnReasons(p,ctx,locOK){
+  var reasons=[];
+  if(!locOK) reasons.push('Otra localidad');
+  var sinAscensor=fold(ctx.asc)==='no', esBajo=fold(ctx.bajo)==='si';
+  var wantsElev = fold((p.prefs&&p.prefs.ascensor)||p.ascensor||'');
+  var wantsNoBajos = fold((p.prefs&&p.prefs.evitar_bajos)||p.evitar_bajos||'');
+  var wantsRef = fold((p.prefs&&p.prefs.reforma)||p.reforma||'');
+  if(sinAscensor && (wantsElev==='requiere'||wantsElev==='si'||wantsElev==='sí')) reasons.push('Sin ascensor');
+  if(esBajo && (wantsNoBajos==='si'||wantsNoBajos==='sí')) reasons.push('Bajo');
+  if((ctx.ref_tip && ctx.ref_tip!=='no') && (wantsRef==='no')) reasons.push('Reforma');
+  var budget=prospectBudgetCTO(p); if(budget>0 && Number(ctx.inv_total||0)>budget) reasons.push('Excede presupuesto');
+  return reasons;
+}
+function adjustments(p,ctx,target){
+  // devuelve {price_down, rent_up}
+  var out={price_down:0, rent_up:0};
+  var rate=ctx.itp_pct||0; // decimal
+  var extras=ctx.notaria + ctx.psi + ctx.reforma;
+  if(target.kind==='flujo'){
+    var need = Math.max(0, target.val - ctx.flujo);
+    out.rent_up = Math.ceil(need/12);
+    return out;
   }
+  if(target.kind==='bruta'){
+    var invNeed = ctx.alq_a/(target.val/100);
+    var pNew = (invNeed - extras) / (1+rate);
+    out.price_down = Math.max(0, Math.round(ctx.precio - pNew));
+    var alqNeed = (target.val/100) * ctx.inv_total;
+    out.rent_up = Math.max(0, Math.ceil((alqNeed - ctx.alq_a)/12));
+    return out;
+  }
+  if(target.kind==='neta'){
+    var invNeedN = ( (ctx.alq_a - ctx.gastos_a) / (target.val/100) );
+    var pNewN = (invNeedN - extras) / (1+rate);
+    out.price_down = Math.max(0, Math.round(ctx.precio - pNewN));
+    var alqNeedN = ctx.gastos_a + (target.val/100)*ctx.inv_total;
+    out.rent_up = Math.max(0, Math.ceil((alqNeedN - ctx.alq_a)/12));
+    return out;
+  }
+  return out;
 }
 
-/* Construcción del grid de candidatos */
+/* Construir candidatos */
 function buildCandidates(ctx){
-  var list=Store.pros||[], cfg=getCfg(), th=cfg.thresholds;
-  var wrap=id('candWrap'); wrap.innerHTML='';
-
-  // Cabecera
-  var head=document.createElement('div'); head.className='tr th';
-  head.innerHTML='<div></div><div></div><div></div>'+
-    '<div class="td">Cliente</div>'+
-    '<div class="td">Objetivo vs real</div>'+
-    '<div class="td">Aviso</div>'+
-    '<div class="td">Ajuste sugerido</div>';
-  wrap.appendChild(head);
-
-  // recolectar candidatos (por fases antes de compraventa) y tipo obligatorio
+  var list=Store.pros||[];
+  var pc=id('pc_list'); pc.innerHTML='';
   var rows=[];
+
   list.forEach(function(p){
-    if(!isBeforeCompra(p)) return;
-    var cliTipo = (getPref(p,'tipo')||p.pref_tipo||'Tradicional');
-    if(fold(cliTipo)!==fold(ctx.tipo)) return; // filtro obligatorio
+    if(!inCompra(p)) return;
 
-    var tgt=targetInfo(p); if(!tgt.val) return;
+    // Tipo de alquiler debe coincidir obligatoriamente
+    if(fold(p.pref_tipo||((p.prefs&&p.prefs.tipo)||''))!==fold(ctx.tipo)) return;
 
-    // KPI del activo para este cliente
-    var actual = tgt.kind==='bruta' ? Number(ctx.bruta||0) :
-                 tgt.kind==='neta'  ? Number(ctx.neta ||0) :
-                                       Number(ctx.flujo||0);
-    var c=classifyRatio(actual, Number(tgt.val), th);
+    var target=getTargetInfo(p); if(!target.val) return;
 
-    // Criterios (presupuesto, ascensor, reforma, bajos, altura)
-    var critFails=[];
-    var ascPref = fold(getPref(p,'ascensor'));
-    var refPref = fold(getPref(p,'reforma'));
-    var bajoPref= fold(getPref(p,'bajo'));
-    var altMin  = Number(getPref(p,'altura_min')||0);
-    var ctoCli  = clientCTO(p);
-    if(ctoCli>0 && Number(ctx.inv_total||0) > ctoCli) critFails.push('presupuesto');
-    if((ascPref==='si'||ascPref==='sí'||ascPref==='requiere') && fold(ctx.asc)==='no') critFails.push('ascensor');
-    if(refPref==='no' && fold(ctx.ref_tip)!=='no') critFails.push('reforma');
-    if((bajoPref==='no'||bajoPref==='evitar'||bajoPref==='sí'||bajoPref==='si') && fold(ctx.bajo)==='si') critFails.push('bajos');
-    if(altMin>0 && Number(ctx.alt||0) < altMin) critFails.push('altura');
+    var actual = (target.kind==='bruta')?ctx.bruta : (target.kind==='neta'?ctx.neta:ctx.flujo);
+    var cls = classifyRatio(actual, target.val).cls;
 
-    // Localidad (para Supermatch)
-    var locs=(getPref(p,'localidades')||'').toString().split(',').map(fold).filter(Boolean);
+    var locs=( (p.locs_text)||((p.prefs&&p.prefs.localidades)||'') ).split(',').map(fold).filter(Boolean);
     var locOK = !locs.length ? false : locs.includes(fold(ctx.loc));
 
-    // Prioridad y avisos
-    var supermatch = (c.cls==='g' && locOK && critFails.length===0);
-    var verdeConAviso = (c.cls==='g' && critFails.length>0);
-    var prio = supermatch?0 : (verdeConAviso?1 : (c.cls==='y'?2:3));
+    var reasons = warnReasons(p,ctx,locOK);
+    var superMatch = (cls==='g' && locOK && reasons.length===0);
 
-    // Ajuste sugerido
-    var adj = (c.cls==='g') ? null : priceCutToGreen(ctx, tgt.kind, Number(tgt.val));
+    var adj = (cls==='g' ? {price_down:0,rent_up:0} : adjustments(p,ctx,target));
 
-    rows.push({p:p, prio:prio, supermatch:supermatch, verdeConAviso:verdeConAviso, cls:c.cls, ratio:c.ratio, tgt:tgt, actual:actual, critFails:critFails, locOK:locOK, adj:adj});
+    rows.push({p:p, cls:cls, super:superMatch, reasons:reasons, target:target, actual:actual, adj:adj});
   });
 
-  // Ordenación
+  // Orden: super ★ → verdes con aviso → ámbar → rojo
   rows.sort(function(a,b){
-    if(a.prio!==b.prio) return a.prio-b.prio;
-    return (b.ratio||0)-(a.ratio||0);
+    if(a.super!==b.super) return a.super? -1: 1;
+    var rank={g:0,y:1,r:2};
+    if(rank[a.cls]!==rank[b.cls]) return rank[a.cls]-rank[b.cls];
+    return (a.reasons.length)-(b.reasons.length);
   });
 
-  // Render filas
   if(!rows.length){
-    var note=document.createElement('div'); note.style.padding='8px';
-    // sugerencia global según objetivo mínimo de Config (bruta por tipo)
-    var objMin = (fold(ctx.tipo)==='habitaciones')? cfg.obj_bruta_hab : cfg.obj_bruta_trad;
-    if((ctx.bruta||0) >= objMin){
-      note.innerHTML='<span class="badge">✅ Buen activo para guardar (supera objetivo mínimo de bruta de Config)</span>';
-    }else{
-      var d=priceCutToGreen(ctx,'bruta',objMin);
-      note.innerHTML='<span class="badge warn">⚠ Sugerir bajar precio en '+e0(d.eur)+' para alcanzar objetivo mínimo de bruta</span>';
-    }
-    wrap.appendChild(note);
-  }else{
-    rows.forEach(function(r){
-      var row=document.createElement('div'); row.className='tr';
-      var fasePill='<span class="pill">'+(r.p.fase||'—')+'</span>';
-      var star = r.supermatch ? '<svg viewBox="0 0 24 24"><path d="m12 3 3 6 7 .9-5 4.8 1.3 7.3L12 18l-6.3 4 1.3-7.3-5-4.8L9 9l3-6z"/></svg>' : '';
-      var dotCls = r.cls; // g/y/r
-      var objTxt = (r.tgt.kind==='bruta'?'RB':'RN');
-      var tgtVal = r.tgt.kind==='flujo' ? (r.tgt.val+' €/año') : (fmtN1.format(r.tgt.val)+' %');
-      var realVal= r.tgt.kind==='flujo' ? (e0(r.actual)) : (fmtN1.format(r.actual)+' %');
-      var aviso = (r.cls==='g' && r.critFails.length>0) ? '<span class="badge warn">⚠ Criterios no alineados</span>' : '—';
-      var ajuste = '—';
-      if(r.adj){
-        if(r.adj.upRent){ ajuste = '↑ '+n0(r.adj.upRent)+' €/mes'; }
-        else{ ajuste = '− '+e0(r.adj.eur); }
-      }
-      row.innerHTML =
-        '<div class="td"><input type="checkbox" class="candChk" data-pid="'+(r.p.id||'')+'"></div>'+
-        '<div class="td star">'+star+'</div>'+
-        '<div class="td state"><span class="dot '+dotCls+'"></span></div>'+
-        '<div class="td"><strong>'+(r.p.nombre||'-')+'</strong> · '+(r.p.email||'')+' '+fasePill+'</div>'+
-        '<div class="td mono">'+objTxt+': '+realVal+' vs '+tgtVal+(r.locOK?' <span class="badge">Loc OK</span>':'')+'</div>'+
-        '<div class="td">'+aviso+'</div>'+
-        '<div class="td mono">'+ajuste+'</div>';
-      wrap.appendChild(row);
-    });
+    var div=document.createElement('div'); div.className='tr';
+    var td=document.createElement('div'); td.className='td'; td.style.gridColumn='1 / -1';
+    td.textContent='No hay candidatos para este activo.'; div.appendChild(td); pc.appendChild(div);
   }
+
+  rows.forEach(function(r){
+    var tr=document.createElement('div'); tr.className='tr';
+
+    var c1=document.createElement('div'); c1.className='td';
+    var chk=document.createElement('input'); chk.type='checkbox'; chk.dataset.id=r.p.id||'';
+    chk.addEventListener('change',toggleAssignButton);
+    var dot=document.createElement('span'); dot.className='dot '+r.cls;
+    var name=document.createElement('span'); name.style.fontWeight='800'; name.textContent=(r.p.nombre||'-')+' ';
+    var email=document.createElement('span'); email.style.color='#6b7280'; email.textContent='· '+(r.p.email||'');
+    c1.appendChild(chk); c1.appendChild(dot); c1.appendChild(name);
+    if(r.super){ var star=document.createElement('span'); star.className='star'; star.textContent='★'; c1.appendChild(star); }
+    c1.appendChild(email);
+
+    var c2=document.createElement('div'); c2.className='td';
+    var label = (r.target.kind==='bruta'?'RB':(r.target.kind==='neta'?'RN':'FL'));
+    var valTxt = label+': '+fmtN1.format(r.actual)+' %';
+    if(r.target.kind==='flujo') valTxt = 'FL: '+fmtE0.format(ctx.flujo)+' vs '+fmtE0.format(r.target.val);
+    else valTxt = label+': '+fmtN1.format(r.actual)+' % vs '+fmtN1.format(r.target.val)+' %';
+    c2.textContent = valTxt;
+
+    var c3=document.createElement('div'); c3.className='td';
+    if(r.reasons.length){ r.reasons.forEach(function(t){ var b=document.createElement('span'); b.className='badge-warn'; b.textContent='⚠ '+t; c3.appendChild(b); }); }
+    else { c3.textContent='—'; }
+
+    var c4=document.createElement('div'); c4.className='td';
+    var chips=[];
+    if(r.adj.price_down>0){ chips.push('−'+fmtE0.format(r.adj.price_down)+' precio'); }
+    if(r.adj.rent_up>0){ chips.push('+'+fmtE0.format(r.adj.rent_up).replace(' €',' €/mes')+' alquiler'); }
+    c4.textContent = chips.length? chips.join(' · ') : '—';
+
+    tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tr.appendChild(c4);
+    pc.appendChild(tr);
+  });
+  toggleAssignButton();
+}
+function toggleAssignButton(){
+  var any = !!document.querySelector('#pc_list input[type="checkbox"]:checked');
+  id('btn_save_assign').disabled = !any;
 }
 
-/* Guardar / Asignar */
+/* Guardar / Asignar / Descartar */
 function gather(){return calc();}
-function selectedProspectIds(){
-  return [].slice.call(document.querySelectorAll('#candWrap .candChk:checked')).map(function(el){return el.getAttribute('data-pid');});
-}
 function save(alsoAssign){
   var e=gather();
-  var loaded=localStorage.getItem('load_eval'); var list=Store.evals||[];
-  if(loaded){
-    var idx=list.findIndex(function(x){return x.id===loaded;});
-    if(idx>=0){e.id=list[idx].id; e.ts=list[idx].ts; CURRENT_ID=e.id;}
-    localStorage.removeItem('load_eval');
-  }
+  var list=Store.evals||[];
   if(CURRENT_ID) e.id=CURRENT_ID;
-
-  if(alsoAssign){
-    var sel=selectedProspectIds();
-    e.prospect_ids=sel;
-  }
-
-  // persist evaluación
   var at=list.findIndex(function(x){return x.id===e.id;});
+  if(alsoAssign){
+    var ids=[].slice.call(document.querySelectorAll('#pc_list input[type="checkbox"]:checked')).map(function(i){return i.dataset.id;});
+    e.prospect_ids=ids;
+  }
   if(at>=0) list[at]=e; else list.push(e);
   Store.evals=list; CURRENT_ID=e.id;
-
-  // propagar asignación a Dashboard (asset_ids)
-  if(alsoAssign && e.prospect_ids && e.prospect_ids.length){
-    var pros=Store.pros||[];
-    e.prospect_ids.forEach(function(pid){
-      var i=pros.findIndex(function(p){return p.id===pid;});
-      if(i>=0){
-        var set=new Set(pros[i].asset_ids||[]);
-        set.add(e.id);
-        pros[i].asset_ids=Array.from(set);
-      }
-    });
-    Store.pros=pros;
-  }
-
-  if(alsoAssign){ var c=(e.prospect_ids&&e.prospect_ids.length)?e.prospect_ids.length:0; toast('Guardado y asignado a '+c+' cliente(s)','ok'); }
-  else{ toast('Evaluación guardada','ok'); }
+  toast(alsoAssign?('Guardado y asignado'):('Evaluación guardada'),'ok');
 }
-
-/* Limpiar */
-function limpiar(){
-  [].forEach.call(document.querySelectorAll('input'),function(i){i.value='';});
-  [].forEach.call(document.querySelectorAll('select'),function(s){
-    if(s.id==='e_tipo'){s.value='Tradicional';}
-    else if(s.id==='e_honor'){s.value='no';}
-    else s.selectedIndex=0;
+function discard(){
+  // Limpia y oculta resultados
+  [].forEach.call(document.querySelectorAll('input'),function(i){
+    if(i.matches('[data-money]')) i.value='';
   });
-  document.getElementById('e_result').hidden=true; CURRENT_ID=null;
+  id('e_result').hidden=true;
 }
 
 /* Precarga desde Evaluaciones */
@@ -676,11 +616,9 @@ function preloadIfAny(){
 function attach(){
   loadLocalidades(); moneyLive(); bindAuto();
   id('e_calc').addEventListener('click',calc);
-  id('e_save').addEventListener('click',function(){save(false);});
-  id('e_save_assign').addEventListener('click',function(){save(true);});
-  if(id('save_only'))  id('save_only').addEventListener('click',function(){save(false);});
-  if(id('save_assign'))id('save_assign').addEventListener('click',function(){save(true);});
-  id('e_clean').addEventListener('click',limpiar);
+  id('btn_save_only').addEventListener('click',function(){ save(false); });
+  id('btn_save_assign').addEventListener('click',function(){ save(true); });
+  id('btn_discard').addEventListener('click',discard);
   preloadIfAny();
 }
 document.addEventListener('DOMContentLoaded',attach);
