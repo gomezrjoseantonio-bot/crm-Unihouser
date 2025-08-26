@@ -812,39 +812,62 @@ function quickWA(p){
 }
 
 /* ===== Export CSV (UTF-8 BOM) ===== */
-id('btn_export').onclick=function(){
-  const pros=Store.pros||[]; const sep=',';
-  const headers=['Id','Nombre','Apellidos','DNI','Email','Movil','Direccion','Localidad','CP','Fase','Meeting','Archivado',
+document.getElementById('btn_export').onclick = function () {
+  var pros = Store.pros || [];
+  var sep = ',';
+  var headers = [
+    'Id','Nombre','Apellidos','DNI','Email','Movil','Direccion','Localidad','CP','Fase','Meeting','Archivado',
     'Pref_Tipo','Pref_Localidades','Pref_Ascensor','Pref_Altura','Pref_Bajo','Pref_Reforma',
     'Obj_Principal','Obj_Bruta_pct','Obj_Neta_pct','Obj_Flujo_anual',
     'Incluye_PSI_en_rent','Pmax','Incluye_PSI_en_Pmax','LTV',
     'ValorCompra','ITP_eur','Notaria_eur','PSI_eur','CTO','AlquilerObjMes','FondosPropios',
-    'Activos_asignados','Aceptado_asset_id','Notas'];
-  const c=cfgCosts();
-  const rows=pros.map(p=>{
-    // recalculo por si acaso
-    const psiTerm=p.psi_in_presupuesto?c.psi:0;
-    const V=(Number(p.inv_pmax||0)-c.notaria-psiTerm)/(1+c.itp);
-    const ITPe=Math.max(0,V*c.itp);
-    const CTO=p.psi_in_presupuesto? Number(p.inv_pmax||0):(Number(p.inv_pmax||0)+c.psi);
-    const alq= (p.obj_main==='bruta')? Math.round(((V+ITPe+c.notaria+(p.psi_en_rentab?c.psi:0))*(normPct(p.obj_bruta||0)/100))/12):0;
-    const capFin = V*(Math.max(0,Math.min(100,Number(p.ltv||0)))/100);
-    const fondos=(V-capFin)+ITPe+c.notaria+c.psi;
-    return [
-      p.id, p.nombre||'', p.apellidos||'', p.dni||'', p.email||'', p.phone||'', p.direccion||'', p.loc||'', p.cp||'',
-      p.fase||'', (p.meeting_ts? ddmm(p.meeting_ts):''), p.archivado?'Sí':'No',
-      ((p.prefs||{}).tipo||''), ((p.prefs||{}).localidades||''), ((p.prefs||{}).ascensor||''), ((p.prefs||{}).altura||''), ((p.prefs||{}).bajo||''), ((p.prefs||{}).reforma||''),
-      p.obj_main||'', normPct(p.obj_bruta||0), normPct(p.obj_neta||0), p.obj_flujo_anual||0,
-      p.psi_en_rentab?'Sí':'No', p.inv_pmax||0, p.psi_in_presupuesto?'Sí':'No', p.ltv||0,
-      Math.round(V), Math.round(ITPe), Math.round(c.notaria), Math.round(c.psi), Math.round(CTO), Math.round(alq), Math.round(fondos),
-      (p.asset_ids||[]).length, p.accepted_eval_id||'', (p.notes||'').replace(/\n/g,' ')
-    ].map(v=>"${String(v).replace(/"/g,'""')}").join(sep);
-  });
-  const csv='\ufeff'+[headers.join(sep), ...rows].join('\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='clientes.csv'; a.click(); URL.revokeObjectURL(a.href);
-};
+    'Activos_asignados','Aceptado_asset_id','Notas'
+  ];
 
+  var c = cfgCosts();
+  var lines = [];
+  lines.push(headers.join(sep));
+
+  for (var i = 0; i < pros.length; i++) {
+    var p = pros[i];
+    var Pmax = Number(p.inv_pmax || 0);
+    var psi = c.psi, notaria = c.notaria, itp = c.itp;
+
+    var psiTerm = p.psi_in_presupuesto ? psi : 0;
+    var V = (Pmax - notaria - psiTerm) / (1 + itp);
+    var ITPe = Math.max(0, V * itp);
+    var CTO = p.psi_in_presupuesto ? Pmax : (Pmax + psi);
+    var alq = (p.obj_main === 'bruta')
+      ? Math.round(((V + ITPe + notaria + (p.psi_en_rentab ? psi : 0)) * (normPct(p.obj_bruta || 0) / 100)) / 12)
+      : 0;
+    var capFin = V * (Math.max(0, Math.min(100, Number(p.ltv || 0))) / 100);
+    var fondos = (V - capFin) + ITPe + notaria + psi;
+
+    var row = [
+      p.id, p.nombre || '', p.apellidos || '', p.dni || '', p.email || '', p.phone || '', p.direccion || '', p.loc || '', p.cp || '',
+      p.fase || '', (p.meeting_ts ? ddmm(p.meeting_ts) : ''), (p.archivado ? 'Sí' : 'No'),
+      (p.prefs && p.prefs.tipo) || '', (p.prefs && p.prefs.localidades) || '', (p.prefs && p.prefs.ascensor) || '', (p.prefs && p.prefs.altura) || '', (p.prefs && p.prefs.bajo) || '', (p.prefs && p.prefs.reforma) || '',
+      p.obj_main || '', normPct(p.obj_bruta || 0), normPct(p.obj_neta || 0), p.obj_flujo_anual || 0,
+      (p.psi_en_rentab ? 'Sí' : 'No'), Pmax, (p.psi_in_presupuesto ? 'Sí' : 'No'), p.ltv || 0,
+      Math.round(V), Math.round(ITPe), Math.round(notaria), Math.round(psi), Math.round(CTO), Math.round(alq), Math.round(fondos),
+      (p.asset_ids || []).length, p.accepted_eval_id || '', (p.notes || '').replace(/\n/g, ' ')
+    ];
+
+    for (var j = 0; j < row.length; j++) {
+      row[j] = '"' + String(row[j]).replace(/"/g, '""') + '"';
+    }
+    lines.push(row.join(sep));
+  }
+
+  var csv = '\ufeff' + lines.join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=UTF-8;' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'clientes.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+    
 /* ===== Helpers ===== */
 function load(){
   try{ const c=Store.cfg||{}; if(c.brand_color) document.documentElement.style.setProperty('--brand', c.brand_color);}catch(_){}
