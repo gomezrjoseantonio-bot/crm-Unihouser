@@ -3,15 +3,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Unihouser — Dashboard </title>
+<title>Unihouser — Dashboard CRM</title>
 <style>
 :root{
   --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
   --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
   --shadow:0 4px 22px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif; --fz:12px;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
+*{box-sizing:border-box} html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
 /* Topbar */
 .topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
@@ -89,7 +88,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 /* Seeds (sin label) */
 .seed{display:flex;gap:6px;flex-wrap:wrap}
 .seed .badge .lab{display:none}
-/* Lista de activos (overlay) */
+/* Overlay asignación */
 .assign-ov{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;width:1100px;max-width:calc(100% - 24px);background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:10px;z-index:85}
 .assign-title{font-weight:700;margin:0 0 8px}
 .a-row{border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:flex-start}
@@ -98,7 +97,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
 .a-info{font-size:12px}
 .a-info .addr{font-weight:700}
-.a-icons{display:flex;gap:10px;color:#555;flex-wrap:wrap}
+.a-icons{display:flex;gap:12px;color:#555;flex-wrap:wrap}
 .a-actions{display:flex;gap:6px;align-items:center}
 .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 8px;cursor:pointer;font-weight:700;font-size:12px}
 .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
@@ -131,7 +130,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
       <div class="kpi"><div class="lab">Activos asignados</div><div class="big" id="k_asig">0</div></div>
       <div class="kpi"><div class="lab">Archivados</div><div class="big" id="k_arch">0</div></div>
     </div>
-    <!-- Herramientas: archivados + export -->
+    <!-- Herramientas -->
     <div class="tools">
       <button class="toolbtn" id="tb_arch" title="Mostrar archivados" aria-label="Mostrar archivados">
         <svg viewBox="0 0 24 24"><path d="M4 7h16M7 7v13h10V7M7 7l2-3h6l2 3"/><path d="M9 12h6"/></svg>
@@ -179,7 +178,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
     <div id="assignList">—</div>
   </div>
 
-  <!-- Mini modal datetime (reunión) -->
+  <!-- Mini modal datetime -->
   <div class="overlay" id="mmodal" style="z-index:120;display:none;align-items:center;justify-content:center;">
     <div style="background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:12px;min-width:280px;display:grid;gap:10px">
       <div class="row">
@@ -210,13 +209,13 @@ try{
 const id=x=>document.getElementById(x);
 const toast=(m,k)=>{const t=id('toast');t.textContent=m;t.className='toast '+(k||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1400);}
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))
-const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
-const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
-const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const fmtN1=new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
+const fmtE0=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 const e0=v=>fmtE0.format(Number(v||0));
-const parseNum = v=>Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
-const fold = s=>(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-const cap = s=>{s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1);};
+const parseNum=v=>Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
+const fold=s=>(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const cap=s=>{s=String(s||'');return s.charAt(0).toUpperCase()+s.slice(1);};
+const normPct=v=>{v=Number(v||0); if(v>0 && v<=1) v=v*100; while(v>=100) v/=10; return v;};
 
 /* ===== Store ===== */
 const Store={
@@ -227,21 +226,19 @@ const Store={
   get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}}}
 };
 
-/* ===== Matching thresholds & warnings policy ===== */
+/* ===== Matching thresholds ===== */
 function thresholds(){
   const c=Store.cfg||{}; const th=(c.match&&c.match.thresholds)||{green:1,amber:0.95};
   return {g:Number(th.green||1), a:Number(th.amber||0.95), warnOnlyGreen:!!((c.match||{}).warnings_only_when_green)};
 }
 
-/* ===== Costs & helpers ===== */
+/* ===== Costs ===== */
 function cfgCosts(){
   const c=Store.cfg||{}; const k=c.costs||{};
-  let itp = Number(k.itp_pct ?? c.itp_pct ?? 0.08); // 0.08 o 8
-  if(itp>1) itp = itp/100;
+  let itp = Number(k.itp_pct ?? c.itp_pct ?? 0.08); if(itp>1) itp/=100; // acepta 8 o 0.08
   const notaria = Number(k.notaria ?? c.notaria ?? 1500);
   const psi = Number(k.psi ?? c.psi ?? 0);
-  const reformaDef = Number(k.reforma ?? 0);
-  return {itp, notaria, psi, reformaDef};
+  return {itp, notaria, psi};
 }
 
 /* ===== Columns ===== */
@@ -259,7 +256,6 @@ function render(){
   const pros = all.filter(p=>SHOW_ARCH || !p.archivado);
   const byPhase=PHASES.map(ph=>pros.filter(p=>p.fase===ph));
 
-  // KPIs
   id('k_total').textContent = pros.length;
   id('k_busq').textContent  = byPhase[3].length;
   id('k_compra').textContent= byPhase[4].length;
@@ -270,7 +266,7 @@ function render(){
   const board=id('board'); board.innerHTML='';
   PHASES.forEach((ph,idx)=>{
     const col=document.createElement('div'); col.className='col'; col.dataset.phase=ph;
-    col.innerHTML='<h3><span>'+ph+'</span><span class="count" id="c_'+idx+'">'+byPhase[idx].length+'</span></h3><div class="col-body"></div>';
+    col.innerHTML='<h3><span>'+ph+'</span><span class="count">'+byPhase[idx].length+'</span></h3><div class="col-body"></div>';
     const body=col.querySelector('.col-body');
     byPhase[idx].forEach(p=> body.appendChild(card(p)) );
     setupDroppable(col);
@@ -282,7 +278,6 @@ function render(){
 function card(p){
   const d=document.createElement('div'); d.className='card'; d.draggable=true; d.dataset.id=p.id;
   const email=esc(p.email||'—'), tel=esc(p.phone||p.telefono||'—');
-  const sq = squares((p.asset_ids||[]).length);
   const extra=[];
   if(p.fase==='CONTACTO') extra.push(iconBtn('cal','Fijar reunión'));
   if(p.fase==='BÚSQUEDA') extra.push(iconBtn('asig','Asignar activos'));
@@ -299,7 +294,7 @@ function card(p){
       '</div>'+
     '</header>'+
     '<div class="badges seed">'+ seeds(p).map(htmlBadge).join('') +'</div>'+
-    '<div class="squares" aria-label="Activos asignados">'+sq+'</div>';
+    '<div class="squares">'+squares((p.asset_ids||[]).length)+'</div>';
 
   d.addEventListener('dragstart',ev=>{ d.classList.add('dragging'); ev.dataTransfer.setData('text/plain', p.id); });
   d.addEventListener('dragend',()=> d.classList.remove('dragging'));
@@ -331,15 +326,15 @@ function iconBtn(act,title){
 }
 function seeds(p){
   const out=[];
-  const main=(fold(p.obj_main||'bruta'));
+  const main=fold(p.obj_main||'bruta');
   if(main==='bruta' && p.obj_bruta) out.push({t:'RB',v:fmtN1.format(normPct(p.obj_bruta))+' %'});
   if(main==='neta'  && p.obj_neta ) out.push({t:'RN',v:fmtN1.format(normPct(p.obj_neta ))+' %'});
-  if(main==='flujo' && (p.obj_flujo||p.obj_flujo_anual)){
-    const fa=Number(p.obj_flujo_anual||0)||Number(p.obj_flujo||0)*12;
-    out.push({t:'FL',v:e0(fa)+' /año'});
+  if(main==='flujo' && (p.obj_flujo_m||p.obj_flujo_anual)){
+    const fm=Number(p.obj_flujo_m||0)||Math.round(Number(p.obj_flujo_anual||0)/12);
+    out.push({t:'FL',v:e0(fm)+' /mes'});
   }
-  const tipo=getPref(p,'tipo')||p.pref_tipo||'Tradicional'; out.push({t:'T',v:tipo});
-  const locs=(getPref(p,'localidades')||p.locs_text||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
+  out.push({t:'T',v:(p.prefs&&p.prefs.tipo)||'Tradicional'});
+  const locs=(p.prefs&&p.prefs.localidades||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
   if(locs.length) out.push({t:'L',v:locs.join(' · ')});
   if(p.meeting_ts){
     const d=new Date(Number(p.meeting_ts)); const dd=d.toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
@@ -348,7 +343,6 @@ function seeds(p){
   return out;
 }
 function htmlBadge(b){ return '<span class="badge"><span class="lab">'+esc(b.t)+'</span><strong>'+esc(b.v)+'</strong></span>'; }
-function normPct(v){ v=Number(v||0); if(v>0 && v<=1) v=v*100; while(v>=100) v/=10; return v; }
 
 /* ===== DnD ===== */
 function setupDroppable(col){
@@ -373,7 +367,7 @@ id('btn_create').onclick=function(){
   if(!nombre || !email){ toast('Nombre y email son obligatorios','warn'); return; }
   const list=Store.pros||[];
   list.push({id:'p_'+Date.now(), ts:Date.now(), nombre:nombre, apellidos:ap, email:email, phone:mov, fase:'CONTACTO',
-    obj_main:'bruta', obj_bruta:10, prefs:{tipo:'Tradicional', localidades:''}, asset_ids:[]});
+    obj_main:'bruta', obj_bruta:10, obj_neta:'', obj_flujo_m:'', prefs:{tipo:'Tradicional', localidades:'', ascensor:'No', bajo:'No', altura:''}, asset_ids:[], ltv:0});
   Store.pros=list; id('c_nombre').value=''; id('c_apellidos').value=''; id('c_email').value=''; id('c_movil').value=''; render(); toast('Creado','ok');
 };
 function delProspect(idp){
@@ -394,19 +388,20 @@ function openDrawer(idp){
   id('dr_title').textContent = (p.nombre||'-')+' '+(p.apellidos||'');
   body.innerHTML='';
 
-  // A) Datos del cliente
+  // 1) Datos del cliente
   body.appendChild(blockDatosCliente(p));
-  // B) Preferencias + Objetivos
-  body.appendChild(blockPrefYObjetivos(p));
-  // C) Presupuesto de la inversión
-  body.appendChild(blockPresupuesto(p));
-  // D) Financiación
-  body.appendChild(blockFinanciacion(p));
+  // 2) Preferencias del activo
+  body.appendChild(blockPreferencias(p));
+  // 3) Objetivos de inversión
+  body.appendChild(blockObjetivos(p));
+  // 4) Estructura de la inversión
+  body.appendChild(blockEstructura(p));
+  // 5) Financiación + notas
+  body.appendChild(blockFinanciacionNotas(p));
+
   // Botón único Guardar
   const saveWrap=document.createElement('div'); saveWrap.className='block'; saveWrap.innerHTML='<div class="row"><button class="btn primary" id="save_all">Guardar</button></div>';
   body.appendChild(saveWrap);
-
-  // Guardar todo
   saveWrap.querySelector('#save_all').onclick=()=>guardarTodo(p);
 
   ov.classList.add('open'); dr.classList.add('open');
@@ -417,7 +412,7 @@ id('ov').onclick=closeDrawer; id('dr_close').onclick=closeDrawer;
 function inputKV(label, idd, val, ro){ return '<div class="field"><label>'+esc(label)+'</label><input '+(ro?'readonly':'')+' id="'+idd+'" value="'+esc(val??'')+'"></div>'; }
 function selectKV(label, idd, opts, val){ return '<div class="field"><label>'+esc(label)+'</label><select id="'+idd+'">'+opts.map(o=>'<option '+(o===val?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select></div>'; }
 
-/* ----- A) Datos del cliente ----- */
+/* ----- 1) Datos del cliente ----- */
 function blockDatosCliente(p){
   const b=document.createElement('div'); b.className='block';
   b.innerHTML =
@@ -427,44 +422,31 @@ function blockDatosCliente(p){
       inputKV('Apellidos','dc_ape',p.apellidos)+
     '</div>'+
     '<div class="row two">'+
-      inputKV('Email','dc_em',p.email)+
+      inputKV('DNI','dc_dni',p.dni||'')+
       inputKV('Móvil','dc_tel',p.phone||p.telefono||'')+
     '</div>'+
     '<div class="row two">'+
-      inputKV('DNI','dc_dni',p.dni||'')+
-      inputKV('Código Postal','dc_cp',p.cp||'')+
-    '</div>'+
-    '<div class="row two">'+
-      inputKV('Dirección','dc_dir',p.direccion||'')+
+      inputKV('Email','dc_em',p.email)+
       inputKV('Localidad','dc_loc',p.localidad||'')+
     '</div>'+
     '<div class="row two">'+
-      selectKV('Objetivo principal','dc_obj',['Bruta','Neta','Flujo'],cap(p.obj_main||'bruta'))+
-      inputKV('Notas','dc_notes', p.notes||'')+
-    '</div>'+
-    '<div class="row two">'+
-      inputKV('Objetivo Bruta %','dc_ob',p.obj_bruta||'')+
-      inputKV('Objetivo Neta %','dc_on',p.obj_neta||'')+
-    '</div>'+
-    '<div class="row two">'+
-      inputKV('Flujo objetivo €/año','dc_ofa', p.obj_flujo_anual || (p.obj_flujo? Number(p.obj_flujo)*12 : '') )+
-      '<div></div>'+
+      inputKV('Dirección','dc_dir',p.direccion||'')+
+      inputKV('Código Postal','dc_cp',p.cp||'')+
     '</div>';
   return b;
 }
 
-/* ----- B) Preferencias + Objetivos (parte de arriba) ----- */
+/* ----- 2) Preferencias del activo ----- */
 function getPref(p,k){ const pf=(p.prefs||{}); return (pf&&pf[k]!==undefined)?pf[k]:''; }
 function setPrefTarget(p, obj){
   const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
   list[i].prefs = Object.assign({}, list[i].prefs||{}, obj); Store.pros=list;
 }
-function blockPrefYObjetivos(p){
+function blockPreferencias(p){
   const b=document.createElement('div'); b.className='block';
   const tipo=getPref(p,'tipo')||'Tradicional';
-  const locs=(getPref(p,'localidades')||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
   b.innerHTML =
-    '<h4>Preferencias del activo · Objetivos</h4>'+
+    '<h4>Preferencias del activo</h4>'+
     '<div class="row two">'+
       selectKV('Tipo de alquiler','pf_tipo',['Tradicional','Habitaciones'],tipo)+
       '<div class="field"><label>Localidades (Enter para añadir)</label>'+
@@ -474,12 +456,8 @@ function blockPrefYObjetivos(p){
     '</div>'+
     '<div class="row three">'+
       selectKV('Ascensor','pf_asc',['Sí','No'], cap(getPref(p,'ascensor')||'No'))+
-      selectKV('Reforma','pf_ref',['Sí','No'], cap(getPref(p,'reforma')||'No'))+
-      selectKV('Bajo','pf_bajo',['Sí','No'], cap(getPref(p,'bajo')||'No'))+
-    '</div>'+
-    '<div class="row two">'+
       inputKV('Altura (1–9)','pf_alt', getPref(p,'altura')||'')+
-      '<div></div>'+
+      selectKV('Bajo','pf_bajo',['Sí','No'], cap(getPref(p,'bajo')||'No'))+
     '</div>';
   const chips=b.querySelector('#pf_chips'); const add=b.querySelector('#pf_add');
   function paint(){
@@ -506,100 +484,127 @@ function blockPrefYObjetivos(p){
   return b;
 }
 
-/* ----- C) Presupuesto de la inversión ----- */
-function blockPresupuesto(p){
-  const c=cfgCosts();
+/* ----- 3) Objetivos de la inversión ----- */
+function blockObjetivos(p){
   const b=document.createElement('div'); b.className='block';
+  const main=cap(p.obj_main||'Bruta');
   b.innerHTML =
-   '<h4>Presupuesto de la inversión</h4>'+
-   '<div class="row two">'+
-     inputKV('P. máx inversión (€)','bp_pmax', p.inv_pmax||'')+
-     selectKV('Incluir PSI en presupuesto máx','bp_psipres',['No','Sí'], (p.psi_in_presupuesto?'Sí':'No'))+
-   '</div>'+
-   '<div class="row three">'+
-     inputKV('PSI (€) · Config','bp_psi', e0(c.psi), true)+
-     inputKV('Notaría (€) · Config','bp_not', e0(c.notaria), true)+
-     inputKV('ITP (€) (calculado)','bp_itpE', '—', true)+
-   '</div>'+
-   '<div class="row two">'+
-     inputKV('Reforma (€) (opcional)','bp_ref', p.reforma || c.reformaDef || '')+
-     '<div></div>'+
-   '</div>'+
-   '<div class="row two">'+
-     inputKV('Valor máximo de compra (estimado)','bp_vmax','—',true)+
-     inputKV('Coste total operación','bp_cto','—',true)+
-   '</div>'+
-   '<div class="row two">'+
-     selectKV('Incluir PSI en rentabilidad','bp_psirent',['No','Sí'], (p.psi_en_rentab?'Sí':'No'))+
-     inputKV('Alquiler objetivo mensual (si objetivo BRUTA)','bp_alq','—',true)+
-   '</div>';
-  // recalcular dinámico
-  function recalcPres(){
-    const Pmax=parseNum(b.querySelector('#bp_pmax').value);
-    const inclPres = b.querySelector('#bp_psipres').value==='Sí';
-    const inclRent = b.querySelector('#bp_psirent').value==='Sí';
-    const psi=cfgCosts().psi, not=cfgCosts().notaria, itp=cfgCosts().itp;
-    const ref=parseNum(b.querySelector('#bp_ref').value)||0;
-
-    const V = (Pmax - not - (inclPres? psi:0)) / (1 + itp);
-    const ITPe = V*itp;
-    const CTO = inclPres ? Pmax : (Pmax + psi);
-
-    b.querySelector('#bp_vmax').value = isFinite(V)? e0(V): '—';
-    b.querySelector('#bp_itpE').value = isFinite(ITPe)? e0(ITPe): '—';
-    b.querySelector('#bp_cto').value = isFinite(CTO)? e0(CTO): '—';
-
-    // alquiler objetivo (solo bruta)
-    if(fold(getVal('dc_obj'))==='bruta'){
-      const br = normPct(getVal('dc_ob'))/100;
-      const den = V + ITPe + not + (inclRent? psi:0) + ref;
-      const alq = den>0? den*br/12 : 0;
-      b.querySelector('#bp_alq').value = e0(alq);
+    '<h4>Objetivos de la inversión</h4>'+
+    '<div class="row two">'+
+      selectKV('Objetivo principal','ob_main',['Bruta','Neta','Flujo'], main)+
+      selectKV('Incluir PSI en rentabilidad','ob_psi',['No','Sí'], (p.psi_en_rentab?'Sí':'No'))+
+    '</div>'+
+    // contenedores para inputs exclusivos
+    '<div class="row two" id="ob_inputs"></div>';
+  const box=b.querySelector('#ob_inputs');
+  function paint(){
+    const m=b.querySelector('#ob_main').value||main;
+    if(m==='Bruta'){
+      box.innerHTML = inputKV('Bruta (%)','ob_br', p.obj_bruta||'') + '<div></div>';
+    }else if(m==='Neta'){
+      box.innerHTML = inputKV('Neta (%)','ob_ne', p.obj_neta||'') + '<div></div>';
     }else{
-      b.querySelector('#bp_alq').value = '—';
+      box.innerHTML = inputKV('Flujo objetivo (€/mes)','ob_fl', p.obj_flujo_m || (p.obj_flujo_anual? Math.round(p.obj_flujo_anual/12):'') ) + '<div></div>';
     }
-    // actualizar cache temporal
-    b.dataset.V=V||0; b.dataset.ITP=ITPe||0;
   }
-  const getVal=id=>{const el=document.getElementById(id); return el?el.value:''};
-  b.addEventListener('input', (e)=>{
-    if(['bp_pmax','bp_ref'].includes(e.target.id)) recalcPres();
-  });
-  b.querySelector('#bp_psipres').addEventListener('change', recalcPres);
-  b.querySelector('#bp_psirent').addEventListener('change', recalcPres);
-  // primera pasada
-  setTimeout(recalcPres,0);
+  // IDs ajustados (selectKV crea id literal)
+  b.querySelector('#ob_main').id='ob_main';
+  b.querySelector('#ob_psi').id='ob_psi';
+  b.querySelector('#ob_main').addEventListener('change',paint);
+  paint();
   return b;
 }
 
-/* ----- D) Financiación ----- */
-function blockFinanciacion(p){
+/* ----- 4) Estructura de la inversión ----- */
+function calcEstructuraTmp(){
+  const c=cfgCosts(); // itp, notaria, psi
+  const Pmax=parseNum(id('es_pmax').value);
+  const inclPsiPres = id('es_psipres').value==='Sí';
+  const V = (Pmax - c.notaria - (inclPsiPres? c.psi:0)) / (1 + c.itp);
+  const ITPe = V*c.itp;
+  const CTO = inclPsiPres ? Pmax : (Pmax + c.psi);
+
+  // Alquiler objetivo si objetivo=Bruta
+  let alq='—';
+  const m=(id('ob_main')?id('ob_main').value:'Bruta');
+  if(m==='Bruta'){
+    const br = normPct(id('ob_br')?id('ob_br').value:10)/100;
+    const inclRent = (id('ob_psi') && id('ob_psi').value==='Sí');
+    const den = V + ITPe + c.notaria + (inclRent? c.psi:0);
+    alq = e0(den*br/12);
+  }
+  return {V,ITPe,CTO,alq};
+}
+function blockEstructura(p){
+  const c=cfgCosts();
+  const b=document.createElement('div'); b.className='block';
+  b.innerHTML =
+   '<h4>Estructura de la inversión</h4>'+
+   '<div class="row two">'+
+     inputKV('P. máx inversión (€)','es_pmax', p.inv_pmax||'')+
+     selectKV('Incluir PSI en presupuesto','es_psipres',['No','Sí'], (p.psi_in_presupuesto?'Sí':'No'))+
+   '</div>'+
+   '<div class="row three">'+
+     inputKV('PSI (€) · Config','es_psi', e0(c.psi), true)+
+     inputKV('Notaría (€) · Config','es_not', e0(c.notaria), true)+
+     inputKV('ITP (€) (calculado)','es_itpe', '—', true)+
+   '</div>'+
+   '<div class="row two">'+
+     inputKV('Valor máximo de compra (calculado)','es_vmax','—',true)+
+     inputKV('Coste total operación (calculado)','es_cto','—',true)+
+   '</div>'+
+   '<div class="row two">'+
+     inputKV('Alquiler objetivo mensual (si Bruta)','es_alq','—',true)+
+     '<div></div>'+
+   '</div>';
+  function recalc(){
+    const r=calcEstructuraTmp();
+    id('es_vmax').value = isFinite(r.V)? e0(r.V): '—';
+    id('es_itpe').value = isFinite(r.ITPe)? e0(r.ITPe): '—';
+    id('es_cto').value = isFinite(r.CTO)? e0(r.CTO): '—';
+    id('es_alq').value = r.alq;
+  }
+  b.addEventListener('input',e=>{
+    if(['es_pmax'].includes(e.target.id)) recalc();
+  });
+  b.querySelector('#es_psipres').addEventListener('change', recalc);
+  // también cuando cambian objetivos
+  document.addEventListener('input',e=>{
+    if(['ob_br','ob_psi','ob_main'].includes(e.target.id)) recalc();
+  });
+  setTimeout(recalc,0);
+  return b;
+}
+
+/* ----- 5) Financiación + notas ----- */
+function blockFinanciacionNotas(p){
   const b=document.createElement('div'); b.className='block';
   b.innerHTML =
    '<h4>Financiación</h4>'+
    '<div class="row two">'+
-     inputKV('LTV (%)','bf_ltv', p.ltv ?? 80)+
-     inputKV('Fondos propios (€)','bf_fp','—',true)+
-   '</div>';
-  function recalcFP(){
-    // toma V e ITP calculados en Presupuesto
-    const pres=document.querySelector('#dr_body'); if(!pres) return;
-    const V = Number(pres.querySelector('#bp_vmax').parentElement.parentElement.parentElement.querySelector('#bp_vmax').value? String(pres.querySelector('#bp_vmax').value).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.') : (pres.querySelector('.block[data-V]')? pres.querySelector('.block[data-V]').dataset.V : 0));
+     inputKV('LTV (%)','fi_ltv', p.ltv ?? 0)+
+     inputKV('Capital financiado (€)','fi_cap','—',true)+
+   '</div>'+
+   '<div class="row two">'+
+     inputKV('Fondos propios (€)','fi_fp','—',true)+
+     '<div></div>'+
+   '</div>'+
+   '<h4 style="margin-top:12px">Notas de la reunión</h4>'+
+   '<div class="row"><div class="field"><textarea id="fi_notes" rows="4" placeholder="Notas...">'+esc(p.meeting_notes||'')+'</textarea></div></div>';
+  function recalc(){
+    const r=calcEstructuraTmp(); const V=r.V||0;
+    const ltv = Math.max(0,Math.min(100, parseNum(id('fi_ltv').value)||0));
+    const capfin = V*(ltv/100);
+    const c=cfgCosts(); const propio = (V - capfin) + (V*c.itp) + c.notaria + c.psi;
+    id('fi_cap').value = e0(capfin);
+    id('fi_fp').value  = e0(propio);
   }
-  function fpFromForm(){
-    // recomputa con los datos actuales (sin depender de dataset)
-    const Pmax=parseNum(id('bp_pmax').value);
-    const inclPres = id('bp_psipres').value==='Sí';
-    const psi=cfgCosts().psi, not=cfgCosts().notaria, itp=cfgCosts().itp;
-    const V = (Pmax - not - (inclPres? psi:0)) / (1 + itp);
-    const ITPe = V*itp;
-    const ltv = Math.max(0,Math.min(100, parseNum(id('bf_ltv').value)||0));
-    const capitalFinanciado = V*(ltv/100);
-    const propio = (V - capitalFinanciado) + ITPe + not + psi;
-    id('bf_fp').value = e0(propio);
-  }
-  b.addEventListener('input', (e)=>{ if(e.target.id==='bf_ltv') fpFromForm(); });
-  setTimeout(fpFromForm,0);
+  b.addEventListener('input',e=>{ if(e.target.id==='fi_ltv') recalc(); });
+  // recalcula cuando cambia presupuesto
+  document.addEventListener('input',e=>{
+    if(['es_pmax','es_psipres'].includes(e.target.id)) recalc();
+  });
+  setTimeout(recalc,0);
   return b;
 }
 
@@ -611,36 +616,36 @@ function guardarTodo(p){
   // Datos cliente
   L.nombre = id('dc_nom').value.trim();
   L.apellidos = id('dc_ape').value.trim();
-  L.email = id('dc_em').value.trim();
-  L.phone = id('dc_tel').value.trim();
   L.dni = id('dc_dni').value.trim();
-  L.cp = id('dc_cp').value.trim();
-  L.direccion = id('dc_dir').value.trim();
+  L.phone = id('dc_tel').value.trim();
+  L.email = id('dc_em').value.trim();
   L.localidad = id('dc_loc').value.trim();
-  L.obj_main = fold(id('dc_obj').value);
-  L.notes = id('dc_notes').value;
-  L.obj_bruta = normPct(id('dc_ob').value);
-  L.obj_neta  = normPct(id('dc_on').value);
-  L.obj_flujo_anual = parseNum(id('dc_ofa').value);
+  L.direccion = id('dc_dir').value.trim();
+  L.cp = id('dc_cp').value.trim();
 
   // Preferencias
   L.prefs = Object.assign({}, L.prefs||{}, {
     tipo: id('pf_tipo').value,
-    localidades: getPref(L,'localidades')||'',
+    localidades: (L.prefs&&L.prefs.localidades)||'',
     ascensor: id('pf_asc').value,
-    reforma: id('pf_ref').value,
-    bajo: id('pf_bajo').value,
-    altura: parseNum(id('pf_alt').value)
+    altura: parseNum(id('pf_alt').value),
+    bajo: id('pf_bajo').value
   });
 
-  // Presupuesto
-  L.inv_pmax = parseNum(id('bp_pmax').value);
-  L.psi_in_presupuesto = (id('bp_psipres').value==='Sí');
-  L.psi_en_rentab = (id('bp_psirent').value==='Sí');
-  L.reforma = parseNum(id('bp_ref').value)||0;
+  // Objetivos
+  L.obj_main = fold(id('ob_main').value);
+  L.psi_en_rentab = (id('ob_psi').value==='Sí');
+  if(L.obj_main==='bruta'){ L.obj_bruta = normPct(id('ob_br').value); L.obj_neta=''; L.obj_flujo_m=''; }
+  else if(L.obj_main==='neta'){ L.obj_neta = normPct(id('ob_ne').value); L.obj_bruta=''; L.obj_flujo_m=''; }
+  else { L.obj_flujo_m = parseNum(id('ob_fl').value); L.obj_bruta=''; L.obj_neta=''; L.obj_flujo_anual = L.obj_flujo_m*12; }
 
-  // Financiación
-  L.ltv = parseNum(id('bf_ltv').value);
+  // Estructura
+  L.inv_pmax = parseNum(id('es_pmax').value);
+  L.psi_in_presupuesto = (id('es_psipres').value==='Sí');
+
+  // Financiación + notas
+  L.ltv = parseNum(id('fi_ltv').value)||0;
+  L.meeting_notes = id('fi_notes').value||'';
 
   Store.pros=list; render(); toast('Guardado','ok');
 }
@@ -667,14 +672,14 @@ id('mm_clear').onclick=function(){
 };
 id('mmodal').addEventListener('click',e=>{if(e.target.id==='mmodal') e.currentTarget.style.display='none';});
 
-/* ===== Asignación — overlay separado ===== */
+/* ===== Asignación — overlay ===== */
 function openAssignOverlay(idp){
   const p=(Store.pros||[]).find(x=>x.id===idp); if(!p || p.fase!=='BÚSQUEDA') { toast('Solo en Búsqueda','warn'); return; }
   const box=id('assignBox'); const listBox=id('assignList'); id('assignTitle').textContent='Asignar activos · '+(p.nombre||'')+' '+(p.apellidos||'');
   const evals=Store.evals||[];
   const cand = evals.filter(e=>{
-    const tipoMatch = fold(getPref(p,'tipo')||'Tradicional')===fold(e.tipo||'Tradicional');
-    const locs=(getPref(p,'localidades')||'').toString().split(',').map(fold).filter(Boolean);
+    const tipoMatch = fold((p.prefs&&p.prefs.tipo)||'Tradicional')===fold(e.tipo||'Tradicional');
+    const locs=(p.prefs&&p.prefs.localidades||'').toString().split(',').map(fold).filter(Boolean);
     const locOk = !locs.length || locs.includes(fold(e.loc||''));
     return tipoMatch && locOk;
   });
@@ -690,13 +695,13 @@ function openAssignOverlay(idp){
       '<div class="a-info">'+
         '<div class="addr">'+esc(ev.calle||'-')+' · '+esc(ev.loc||'')+'</div>'+
         '<div class="a-icons">'+
-          iconMini('habs')+' '+esc(ev.habs||'—')+
-          ' '+iconMini('banos')+' '+esc(ev.banos||'—')+
-          ' '+iconMini('planta')+' '+esc(ev.alt||'—')+
-          ' '+iconMini('asc')+' '+(String(ev.asc||'Sí').toLowerCase()==='no'?'No':'Sí')+
-          ' '+iconMini('bajo')+' '+(/^(si|sí)$/i.test(String(ev.bajo||'no'))?'Sí':'No')+
-          ' '+iconMini('reforma')+' '+esc(refText(ev.ref_tip))+
-          ' '+iconMini('alq')+' '+e0(ev.alq||0)+
+          '<span title="Habitaciones">🛏 Hab. '+esc(ev.habs||'—')+'</span>'+
+          '<span title="Baños">🛁 Baños '+esc(ev.banos||'—')+'</span>'+
+          '<span title="Altura">⤴ Altura '+esc(ev.alt||'—')+'</span>'+
+          '<span title="Ascensor">🛗 Asc. '+(String(ev.asc||'Sí').toLowerCase()==='no'?'No':'Sí')+'</span>'+
+          '<span title="Bajo">⤵ Bajo '+(/^(si|sí)$/i.test(String(ev.bajo||'no'))?'Sí':'No')+'</span>'+
+          '<span title="Reforma">🛠 Ref. '+esc(refText(ev.ref_tip))+'</span>'+
+          '<span title="Alquiler">💶 Alq. '+e0(ev.alq||0)+'</span>'+
         '</div>'+
         renderWarns(k, th)+
       '</div>'+
@@ -726,7 +731,6 @@ function openAssignOverlay(idp){
   };
 
   box.style.display='block';
-  // autocerrar al hacer scroll fuerte del board
   window.addEventListener('keydown', escCloseAssign);
   window.addEventListener('click', clickOutAssign);
 }
@@ -741,20 +745,8 @@ function closeAssign(){
   window.removeEventListener('click', clickOutAssign);
 }
 function refText(x){ if(!x) return '—'; if(x==='no')return'No'; if(x==='lavado')return'Lavado'; if(x==='integral')return'Integral'; return x; }
-function iconMini(kind){
-  const M={
-    habs:'<svg viewBox="0 0 24 24"><path d="M4 11h16M6 11V8a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v3"/></svg>',
-    banos:'<svg viewBox="0 0 24 24"><path d="M5 10h14v3a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5v-3z"/><path d="M7 7h10"/></svg>',
-    planta:'<svg viewBox="0 0 24 24"><path d="M7 20V4h10v16M7 8h10M7 12h10M7 16h10"/></svg>',
-    reforma:'<svg viewBox="0 0 24 24"><path d="M3 21h18M7 17l10-10 3 3-10 10H7v-3z"/></svg>',
-    alq:'<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>',
-    asc:'<svg viewBox="0 0 24 24"><path d="M7 3h10v18H7zM12 7V5m0 14v-2"/></svg>',
-    bajo:'<svg viewBox="0 0 24 24"><path d="M12 5v14M8 15l4 4 4-4"/></svg>'
-  };
-  return '<span class="small" style="display:inline-flex;align-items:center;gap:4px">'+M[kind]+'</span>';
-}
 
-/* — Semáforos: contra objetivo principal — */
+/* — Semáforos (principal) — */
 function score(ev,p,th){
   const main=fold(p.obj_main||'bruta');
   const rb = Number(ev.kpi_bruta||0);
@@ -763,25 +755,20 @@ function score(ev,p,th){
   let asset=0, target=0;
   if(main==='bruta'){ asset=rb; target=normPct(p.obj_bruta||10); }
   if(main==='neta'){  asset=rn; target=normPct(p.obj_neta ||6 ); }
-  if(main==='flujo'){ asset=fl; target=Number(p.obj_flujo_anual|| (p.obj_flujo?Number(p.obj_flujo)*12:0) ); }
+  if(main==='flujo'){ asset=fl; const fm=Number(p.obj_flujo_m||0); target=fm>0? fm*12 : Number(p.obj_flujo_anual||0); }
   let ratio=0; if(target>0) ratio = asset/target;
   let dot='r'; if(ratio>=th.g) dot='g'; else if(ratio>=th.a) dot='y';
 
-  const warns = [];
+  const warns=[];
   if( (!th.warnOnlyGreen) || (th.warnOnlyGreen && dot==='g') ){
-    const necesitaReforma = (ev.ref_tip && ev.ref_tip!=='no');
-    const sinAscensor = String(ev.asc||'Sí').toLowerCase()==='no';
+    const sinAsc = String(ev.asc||'Sí').toLowerCase()==='no';
     const esBajo = /^(si|sí)$/i.test(String(ev.bajo||'no'));
-    const wantsAsc = fold(getPref(p,'ascensor')||'no')==='sí';
-    const wantsNoRef = fold(getPref(p,'reforma')||'no')==='no';
-    const wantsNoBajo = fold(getPref(p,'bajo')||'no')==='no';
-    if(necesitaReforma && wantsNoRef) warns.push('Requiere reforma');
-    if(sinAscensor && wantsAsc) warns.push('Sin ascensor');
+    const wantsAsc = fold((p.prefs&&p.prefs.ascensor)||'no')==='sí';
+    const wantsNoBajo = fold((p.prefs&&p.prefs.bajo)||'no')==='no';
+    if(sinAsc && wantsAsc) warns.push('Sin ascensor');
     if(esBajo && wantsNoBajo) warns.push('Bajo');
-    const budget = Number(p.presupuesto_max||0); // (si alguna vez lo reintroducimos)
-    if(budget>0 && Number(ev.inv_total||0)>budget) warns.push('Excede presupuesto');
   }
-  return {dot:dot, warns:warns};
+  return {dot, warns};
 }
 function renderWarns(k){ if(!k.warns || !k.warns.length) return '<div class="small" style="margin-top:4px;color:#64748b">—</div>';
   return '<div class="small" style="margin-top:4px">'+k.warns.map(w=>'<span class="badge" style="background:#fff7ed;border-color:#fde68a;color:#b45309">! '+esc(w)+'</span>').join(' ')+'</div>'; }
@@ -789,13 +776,12 @@ function renderWarns(k){ if(!k.warns || !k.warns.length) return '<div class="sma
 /* ===== Comprar (aceptar) → COMPRAVENTA ===== */
 function aceptarActivo(idp, eid){
   const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
-  list[i].accepted_eval_id = eid;
-  list[i].fase = 'COMPRAVENTA';
+  list[i].accepted_eval_id = eid; list[i].fase = 'COMPRAVENTA';
   const set=new Set(list[i].asset_ids||[]); set.add(eid); list[i].asset_ids=Array.from(set);
   Store.pros=list; render(); toast('Activo marcado como COMPRAVENTA','ok'); closeAssign();
 }
 
-/* ===== Enviar por correo / WA ===== */
+/* ===== Comms rápidas ===== */
 function getCfgNotifs(){
   const c=Store.cfg||{}; const brand=(c.brand_name||'Unihouser'); const n=c.notifs||{};
   const subj = (n.email_subject_tpl && String(n.email_subject_tpl).trim()) ? n.email_subject_tpl : (brand+' · {loc} · {calle}');
@@ -806,63 +792,56 @@ function getCfgNotifs(){
   return {brand:brand, subjectTpl:subj, bodyTpl:body, waTpl:wa};
 }
 function fillAssetTpl(tpl, p, e){
-  const rb = (Math.round(Number(e.kpi_bruta||0)*10)/10).toFixed(1).replace('.',',');
-  const rn = (Math.round(Number(e.kpi_neta ||0)*10)/10).toFixed(1).replace('.',',');
-  const fl = (Math.round(Number(e.kpi_flujo_anual||e.kpi_flujo||0)*10)/10).toFixed(1).replace('.',',');
+  const rb=(Math.round(Number(e.kpi_bruta||0)*10)/10).toFixed(1).replace('.',',');
+  const rn=(Math.round(Number(e.kpi_neta ||0)*10)/10).toFixed(1).replace('.',',');
+  const fl=(Math.round(Number(e.kpi_flujo_anual||e.kpi_flujo||0)*10)/10).toFixed(1).replace('.',',');
   return tpl
-    .replace(/\{name\}/g, (p.nombre||'').trim())
-    .replace(/\{loc\}/g, e.loc||'')
-    .replace(/\{calle\}/g, e.calle||'')
-    .replace(/\{tipo\}/g, e.tipo||'')
-    .replace(/\{precio\}/g, e0(e.precio||0))
-    .replace(/\{inv\}/g, e0(e.inv_total||0))
-    .replace(/\{rb\}/g, rb)
-    .replace(/\{rn\}/g, rn)
-    .replace(/\{fl\}/g, fl)
-    .replace(/\{pmax\}/g, e0(e.pmax||0))
-    .replace(/\{url\}/g, e.url||'');
+    .replace(/\{name\}/g,(p.nombre||'').trim())
+    .replace(/\{loc\}/g,e.loc||'').replace(/\{calle\}/g,e.calle||'').replace(/\{tipo\}/g,e.tipo||'')
+    .replace(/\{precio\}/g,e0(e.precio||0)).replace(/\{inv\}/g,e0(e.inv_total||0))
+    .replace(/\{rb\}/g,rb).replace(/\{rn\}/g,rn).replace(/\{fl\}/g,fl)
+    .replace(/\{pmax\}/g,e0(e.pmax||0)).replace(/\{url\}/g,e.url||'');
 }
-function sendAssetMail(p, eid){
-  const e=(Store.evals||[]).find(x=>x.id===eid); if(!e){toast('Activo no encontrado','warn');return;}
-  const nf=getCfgNotifs();
-  const mailto='mailto:'+encodeURIComponent(p.email||'')+'?subject='+encodeURIComponent(fillAssetTpl(nf.subjectTpl,p,e))+'&body='+encodeURIComponent(fillAssetTpl(nf.bodyTpl,p,e));
-  window.open(mailto,'_blank');
-}
-function sendAssetWA(p, eid){
-  const e=(Store.evals||[]).find(x=>x.id===eid); if(!e){toast('Activo no encontrado','warn');return;}
-  const nf=getCfgNotifs(); const body=fillAssetTpl(nf.waTpl,p,e);
-  const phone = String(p.phone||p.telefono||'').replace(/[^\d]/g,'');
-  const url='https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(body);
-  window.open(url,'_blank');
-}
-
-/* ===== Comms rápidos en tarjeta ===== */
-function quickMail(p){ const nf=getCfgNotifs(); const subj=nf.subjectTpl.replace(/\{.*?\}/g,'').trim(); const body='Hola '+(p.nombre||'')+',\n\n'; const mailto='mailto:'+encodeURIComponent(p.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body); window.open(mailto,'_blank'); }
+function quickMail(p){ const nf=getCfgNotifs(); const subj=nf.subjectTpl.replace(/\{.*?\}/g,'').trim(); const body='Hola '+(p.nombre||'')+',\n\n'; window.open('mailto:'+encodeURIComponent(p.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body),'_blank'); }
 function quickWA(p){ const body='Hola '+(p.nombre||'')+', '; const phone=String(p.phone||p.telefono||'').replace(/[^\d]/g,''); window.open('https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(body),'_blank'); }
+function sendAssetMail(p,eid){const e=(Store.evals||[]).find(x=>x.id===eid); if(!e)return toast('Activo no encontrado','warn'); const nf=getCfgNotifs(); window.open('mailto:'+encodeURIComponent(p.email||'')+'?subject='+encodeURIComponent(fillAssetTpl(nf.subjectTpl,p,e))+'&body='+encodeURIComponent(fillAssetTpl(nf.bodyTpl,p,e)),'_blank');}
+function sendAssetWA(p,eid){const e=(Store.evals||[]).find(x=>x.id===eid); if(!e)return toast('Activo no encontrado','warn'); const nf=getCfgNotifs(); const body=fillAssetTpl(nf.waTpl,p,e); const phone=String(p.phone||p.telefono||'').replace(/[^\d]/g,''); window.open('https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(body),'_blank');}
 
-/* ===== Export CSV ===== */
+/* ===== Export CSV (todo) ===== */
 function exportCSV(){
-  const rows = (Store.pros||[]).map(p=>({
-    id:p.id, nombre:p.nombre||'', apellidos:p.apellidos||'', email:p.email||'', movil:p.phone||p.telefono||'',
-    fase:p.fase||'', archivado:p.archivado?'sí':'no', objetivo:p.obj_main||'', bruta:p.obj_bruta||'', neta:p.obj_neta||'',
-    flujo_a:p.obj_flujo_anual||'', localidades:(p.prefs&&p.prefs.localidades)||p.locs_text||'',
-    tipo:(p.prefs&&p.prefs.tipo)||p.pref_tipo||'', activos:(p.asset_ids||[]).length
-  }));
-  const header=Object.keys(rows[0]||{id:'',nombre:'',apellidos:'',email:'',movil:'',fase:'',archivado:'',objetivo:'',bruta:'',neta:'',flujo_a:'',localidades:'',tipo:'',activos:''});
+  const c=cfgCosts();
+  function calc(p){
+    const Pmax=Number(p.inv_pmax||0), inclPres=!!p.psi_in_presupuesto;
+    const V=(Pmax - c.notaria - (inclPres?c.psi:0))/(1+c.itp);
+    const ITPe=V*c.itp; const CTO=inclPres?Pmax:(Pmax+c.psi);
+    let alq=''; if((p.obj_main||'bruta')==='bruta'){ const br=normPct(p.obj_bruta||10)/100; const den=V+ITPe+c.notaria+(p.psi_en_rentab?c.psi:0); alq=(den*br/12); }
+    const ltv=Number(p.ltv||0); const capfin=V*(ltv/100); const fp=(V-capfin)+ITPe+c.notaria+c.psi;
+    return {V,ITPe,CTO,alq,capfin,fp};
+  }
+  const rows=(Store.pros||[]).map(p=>{const r=calc(p); return{
+    id:p.id, fase:p.fase||'', archivado:p.archivado?'sí':'no',
+    nombre:p.nombre||'', apellidos:p.apellidos||'', dni:p.dni||'', email:p.email||'', movil:p.phone||p.telefono||'',
+    direccion:p.direccion||'', localidad:p.localidad||'', cp:p.cp||'',
+    obj_main:p.obj_main||'', obj_bruta:p.obj_bruta||'', obj_neta:p.obj_neta||'', obj_flujo_mes:p.obj_flujo_m||'',
+    rentab_incl_psi:p.psi_en_rentab?'sí':'no',
+    pmax:p.inv_pmax||'', incl_psi_pres:p.psi_in_presupuesto?'sí':'no',
+    psi_cfg:c.psi, notaria_cfg:c.notaria, itp_eur:Math.round(r.ITPe),
+    valor_compra:Math.round(r.V), coste_operacion:Math.round(r.CTO), alquiler_obj:Math.round(r.alq||0),
+    ltv:p.ltv||0, cap_financiado:Math.round(r.capfin), fondos_propios:Math.round(r.fp),
+    pref_tipo:(p.prefs&&p.prefs.tipo)||'', pref_localidades:(p.prefs&&p.prefs.localidades)||'',
+    pref_ascensor:(p.prefs&&p.prefs.ascensor)||'', pref_altura:(p.prefs&&p.prefs.altura)||'', pref_bajo:(p.prefs&&p.prefs.bajo)||'',
+    meeting_ts:p.meeting_ts||'', meeting_notes:p.meeting_notes||'',
+    activos_asignados:(p.asset_ids||[]).length, accepted_eval_id:p.accepted_eval_id||''
+  };});
+  const header=Object.keys(rows[0]||{});
   let csv=header.join(';')+'\n';
-  rows.forEach(r=>{ csv+=header.map(k=>('"'+String(r[k]??'').replace(/"/g,'""')+'"')).join(';')+'\n'; });
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='clientes_unihouser.csv'; a.click();
+  rows.forEach(r=>{csv+=header.map(k=>('"'+String(r[k]??'').replace(/"/g,'""')+'"')).join(';')+'\n';});
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='clientes_unihouser.csv';a.click();
 }
 
 /* ===== Helpers ===== */
-function load(){
-  try{
-    const c=Store.cfg||{}; if(c.brand_color) document.documentElement.style.setProperty('--brand', c.brand_color);
-  }catch(_){}
-  render();
-}
-
-/* ===== Init ===== */
+function load(){ try{const c=Store.cfg||{}; if(c.brand_color) document.documentElement.style.setProperty('--brand', c.brand_color);}catch(_){}
+  render(); }
 document.addEventListener('DOMContentLoaded',load);
 })();
 </script>
