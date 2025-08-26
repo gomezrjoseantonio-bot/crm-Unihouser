@@ -19,11 +19,11 @@
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
 a{color:var(--brand);text-decoration:none}
-.container{max-width:1100px;margin:0 auto;padding:12px 14px}
+.container{max-width:1200px;margin:0 auto;padding:12px 14px}
 
 /* Topbar */
 .topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
-.top-inner{max-width:1100px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:8px}
 .logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
 .title{font-weight:700;color:var(--ink2);font-size:13px}
@@ -59,22 +59,25 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
 .kpi .val{font-weight:800;font-size:18px}
 .kpi .muted{color:#667085;font-weight:600;margin-left:6px}
 
-/* Dots estado */
+/* Estado icons */
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
 .dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
+.star{display:inline-block;width:14px;height:14px;vertical-align:middle;margin-right:6px}
+.star svg{width:14px;height:14px;fill:var(--brand)}
 
-/* Mini chart responsive */
-.canvasWrap{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
-.canvasWrap canvas{display:block;width:100%;height:auto}
+/* Clientes potenciales grid */
+#candGrid{display:grid;gap:8px}
+.crow{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px}
+.cname{font-weight:700}
+.cmeta{font-size:11px;color:#667085}
+.cstate{display:flex;align-items:center;gap:6px}
+.cstate .warn{font-size:11px;color:#b45309;display:inline-flex;align-items:center;gap:4px}
+.cstate .warn svg{width:12px;height:12px}
+.cact{display:flex;align-items:center;gap:10px}
+.cact label{font-size:12px}
 
-/* Matching */
-#matchWrap{display:grid;gap:8px;grid-template-columns:1fr 1fr 1fr}
-@media(max-width:980px){#matchWrap{grid-template-columns:1fr}}
-.match-col{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
-.match-col h4{margin:0 0 8px}
-.tag{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 10px;margin:3px 4px;font-size:12px}
-.badge-warn{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#b45309;background:#fff7ed;border:1px solid #fde68a;border-radius:999px;padding:2px 6px}
-.badge-warn svg{width:12px;height:12px}
+/* Avisos vacíos */
+.empty{padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
 
 /* Toasts */
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
@@ -156,7 +159,7 @@ try{
         </div>
         <div class="row three">
           <div class="field"><label>Reforma (€)</label><input id="e_reforma" value="0" data-money></div>
-          <div class="field"><label>Incluir honorarios PSI (4.235 €)</label>
+          <div class="field"><label>Incluir honorarios PSI</label>
             <select id="e_honor"><option value="si">Sí</option><option value="no" selected>No</option></select>
           </div>
           <div class="field"><label>Precio máx. de compra (objetivo bruta)</label><input id="e_pmax" data-money disabled></div>
@@ -206,19 +209,12 @@ try{
           <div class="kpi"><div class="lab">Precio máx. de compra</div><div class="val" id="r_pmax">—</div></div>
         </div>
 
-        <div class="canvasWrap" style="margin-top:10px">
-          <canvas id="chartKPI"></canvas>
-        </div>
-
+        <!-- CLIENTES POTENCIALES (grid único) -->
         <div class="card" style="margin-top:12px">
           <h3 style="margin:0 0 8px">Clientes potenciales</h3>
-          <div id="matchWrap">
-            <div class="match-col"><h4>Bruta ≥ objetivo</h4><div id="m_bruta">—</div></div>
-            <div class="match-col"><h4>Neta ≥ objetivo</h4><div id="m_neta">—</div></div>
-            <div class="match-col"><h4>Flujo ≥ objetivo</h4><div id="m_flujo">—</div></div>
-          </div>
-          <div class="actions" style="margin-top:8px">
-            <select id="assign_cli" size="6" multiple style="min-width:320px"></select>
+          <div id="candGrid"></div>
+          <div id="noMatchMsg" class="empty" style="display:none"></div>
+          <div class="actions" style="margin-top:10px">
             <button class="btn" id="save_only">Guardar evaluación</button>
             <button class="btn primary" id="save_assign">Guardar y asignar</button>
           </div>
@@ -280,9 +276,9 @@ function toast(msg,kind){
 
 /* Store (capa preparada para remoto) */
 var Store={
-  get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}}}, /* SUPABASE: inyectar fetch cfg si remoto */
-  set cfg(v){localStorage.setItem('cfg',JSON.stringify(v));},                       /* SUPABASE: persist cfg remoto */
-  get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}}, /* prospects */
+  get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}}}, 
+  set cfg(v){localStorage.setItem('cfg',JSON.stringify(v));},
+  get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}},
   set pros(v){localStorage.setItem('pros',JSON.stringify(v));},
   get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},
   set evals(v){localStorage.setItem('evals',JSON.stringify(v));}
@@ -355,7 +351,6 @@ function bindAuto(){
 var CURRENT_ID=null;
 
 /* Cálculos y render */
-var lastChart={real:0,obj:0};
 function calc(){
   var cfg=getCfg();
   var tipo=(id('e_tipo').value||'Tradicional');
@@ -405,16 +400,15 @@ function calc(){
   id('r_bruta_diff').textContent=gapText(gapB);
   id('r_neta_diff').textContent =gapText(gapN);
 
-  lastChart.real=bruta; lastChart.obj=obj_bruta;
-  drawChartResponsive();
-
-  suggestProspects({
+  // Render grid de clientes potenciales
+  renderCandidates({
     tipo:tipo, loc:id('e_loc').value||'',
     bruta:bruta, neta:neta, flujo:flujo,
     inv_total:inv_total,
     ref_tip:id('e_ref_nec').value||'no',
     asc:id('e_asc').value||'Sí',
-    bajo:id('e_bajo').value||'No'
+    bajo:id('e_bajo').value||'No',
+    alt: Number(id('e_alt').value||0)
   });
 
   id('e_result').hidden=false;
@@ -435,44 +429,24 @@ function calc(){
 function gapText(g){ if(!isFinite(g))return ''; var s=(g>=0?'+':'−')+fmtN1.format(Math.abs(g))+' pts'; return ' ('+s+')'; }
 function paintDot(dot,gap){ var el=id(dot); el.className='dot '+(gap>=0?'g':(gap>-1?'y':'r')); }
 
-/* Mini chart responsive */
-function drawChartResponsive(){
-  var c=id('chartKPI'); if(!c) return;
-  var wrap=c.parentElement; var ratio=220/540;
-  var W=Math.max(240, Math.floor(wrap.clientWidth-20));
-  var H=Math.max(160, Math.round(W*ratio));
-  c.width=W; c.height=H;
-
-  var ctx=c.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-  var pad=36, max=Math.max(Math.ceil((Math.max(lastChart.real,lastChart.obj)+2)/2)*2,2);
-  ctx.strokeStyle='#e5e7eb'; ctx.lineWidth=1;
-  for(var y=0;y<=max;y+=2){
-    var yy=H-pad-(H-2*pad)*(y/max);
-    ctx.beginPath(); ctx.moveTo(pad,yy); ctx.lineTo(W-pad,yy); ctx.stroke();
-  }
-  var barW=Math.min(80, Math.max(36, Math.round(W*0.12)));
-  var realH=(H-2*pad)*(lastChart.real/max);
-  ctx.fillStyle='#ff5a1f';
-  ctx.fillRect(W/2-barW/2, H-pad-realH, barW, realH);
-  var yObj=H-pad-(H-2*pad)*(lastChart.obj/max);
-  ctx.setLineDash([6,4]); ctx.strokeStyle='#9ca3af'; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(pad,yObj); ctx.lineTo(W-pad,yObj); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle='#111827'; ctx.font='12px Inter, Arial, sans-serif';
-  ctx.fillText('Bruta real', Math.max(pad, W/2-30), H-8);
-  ctx.fillText('Objetivo', pad, Math.max(14, yObj-6));
-}
-window.addEventListener('resize', function(){ if(!id('e_result').hidden) drawChartResponsive(); });
-
-/* Matching de prospects con umbrales y advertencias solo en verde */
+/* Helpers de fold y parse */
 function fold(s){return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
-function isSearching(p){var f=fold(p.fase||'');return f.includes('busq')||f.includes('busc');}
 function parseMoney(v){if(v==null)return 0;return Number(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;}
-function wantsNoReform(p){var r=fold(p.reforma||p.ref||p.pref_reforma||'');return r==='no'||r==='sin reforma'||fold(p.no_reforma||'')==='si'||fold(p.no_reformas||'')==='si';}
-function wantsElevator(p){var a=fold(p.asc||p.ascensor||p.requiere_ascensor||p.quiere_ascensor||'');return a==='si'||a==='sí'||a==='true'||a==='1';}
-function wantsNoGround(p){var b=fold(p.bajos||p.bajo||p.evitar_bajos||'');return b==='no'||b==='evitar'||b==='sin bajos'||b==='evitar bajos';}
-function prospectBudget(p){return (parseMoney(p.max_compra)||parseMoney(p.maxCompra)||parseMoney(p.presupuesto_max)||parseMoney(p.presupuesto)||parseMoney(p.budget_max)||parseMoney(p.budget)||0);}
+
+/* Obtener preferencias del cliente con compat */
+function getPref(p,k){
+  var pf=p.prefs||{};
+  if(k in pf) return pf[k];
+  if(k==='tipo') return p.pref_tipo||'';
+  if(k==='localidades') return p.locs_text||'';
+  if(k==='ascensor') return p.ascensor||'';
+  if(k==='reforma') return p.pref_reforma||'';
+  if(k==='evitar_bajos') return p.no_bajo||'';
+  if(k==='altura_min') return p.altura_min||'';
+  if(k==='presupuesto_max') return p.presupuesto_max||'';
+  return '';
+}
+/* Info objetivo principal del cliente */
 function getTargetInfo(p){
   var main=(p.obj_main||p.obj_tipo||'').toString().toLowerCase().trim();
   var b=Number(p.obj_bruta||0), n=Number(p.obj_neta||0), fm=Number(p.obj_flujo||0), fa=Number(p.obj_flujo_anual||0);
@@ -484,6 +458,7 @@ function getTargetInfo(p){
   if(fa>0||fm>0) return {kind:'flujo',val:(fa>0?fa:fm*12)};
   return {kind:'',val:0};
 }
+/* Clasificación KPI con thresholds */
 function classifyRatio(actual,target,thresholds){
   if(!target||target<=0) return {cls:'r',ratio:0};
   var ratio = actual/target;
@@ -492,75 +467,133 @@ function classifyRatio(actual,target,thresholds){
   var cls = ratio>=green ? 'g' : (ratio>=amber ? 'y' : 'r');
   return {cls:cls, ratio:ratio};
 }
-function warnBadges(p,ctx){
-  var warns=[], necesitaReforma=(ctx.ref_tip&&ctx.ref_tip!=='no');
-  var sinAscensor=fold(ctx.asc)==='no', esBajo=fold(ctx.bajo)==='si';
-  var budget=prospectBudget(p);
-  if(necesitaReforma && wantsNoReform(p)) warns.push({title:'No quiere reforma',icon:'🚧'});
-  if(sinAscensor && wantsElevator(p))     warns.push({title:'Requiere ascensor',icon:'🛗'});
-  if(esBajo && wantsNoGround(p))          warns.push({title:'No quiere bajos',icon:'🏷'});
-  if(budget>0 && Number(ctx.inv_total||0)>budget) warns.push({title:'Excede presupuesto',icon:'💰'});
-  return warns;
-}
-function suggestProspects(ctx){
-  var list=Store.pros||[];
-  var mB=id('m_bruta'), mN=id('m_neta'), mF=id('m_flujo');
-  var asignSel=id('assign_cli');
-  mB.innerHTML=mN.innerHTML=mF.innerHTML='—'; asignSel.innerHTML='';
-  if(!list.length){return;}
+
+/* Cálculo CTO del cliente (como en Dashboard) */
+function ctoCliente(p){
   var cfg=getCfg();
+  var Pmax = Number(p.inv_pmax||0);
+  if(!Pmax) return 0;
+  var inclPsi = !!p.psi_in_presupuesto;
+  // CTO cliente: si incluye PSI en presupuesto → es Pmax; si no → Pmax + PSI
+  return Math.round(Pmax + (inclPsi?0:cfg.psi_eur));
+}
 
-  var wantTipo=fold(ctx.tipo), wantLoc=fold(ctx.loc);
-  var brutaOK=[], netaOK=[], flujoOK=[], added=new Set();
+/* Render grid único de clientes */
+function renderCandidates(ctx){
+  var grid=id('candGrid'); var empty=id('noMatchMsg'); grid.innerHTML=''; empty.style.display='none';
+  var cfg=getCfg();
+  var clients=(Store.pros||[]).filter(function(p){
+    var f=fold(p.fase||'');
+    if(f.includes('compra')||f.includes('compraventa')||f.includes('éxito')||f.includes('exito')) return false;
+    if(p.archivado) return false;
+    return true;
+  });
+  var any=false, selectedCount=0;
 
-  list.forEach(function(p){
-    if(!isSearching(p))return;
-    if(fold(p.pref_tipo)!==wantTipo)return;
-    var locs=(p.locs_text||'').split(',').map(fold).filter(Boolean);
-    if(!locs.includes(wantLoc))return;
-    var tgt=getTargetInfo(p); if(!tgt.val)return;
+  // Para selección previa (si ya está asignado este eval)
+  var evId = CURRENT_ID || localStorage.getItem('load_eval') || null;
 
-    if(tgt.kind==='bruta'){
-      var c=classifyRatio(Number(ctx.bruta||0), Number(tgt.val), cfg.thresholds);
-      if(c.cls==='g'){ brutaOK.push({p:p,cls:c.cls}); }
+  clients.forEach(function(p){
+    var tgt=getTargetInfo(p); if(!tgt.val){ return; } // si no tiene objetivo, no mostramos
+
+    // KPI principal del activo frente a objetivo del cliente
+    var actual = (tgt.kind==='bruta')? Number(ctx.bruta||0)
+               : (tgt.kind==='neta') ? Number(ctx.neta||0)
+               : Number(ctx.flujo||0);
+    var cls = classifyRatio(actual, Number(tgt.val), cfg.thresholds).cls;
+
+    // Criterios “duros”
+    var locs=(getPref(p,'localidades')||'').toString().split(',').map(fold).filter(Boolean);
+    var locOk = (!locs.length) ? true : (locs.includes(fold(ctx.loc||'')));
+    var tipoOk = (!getPref(p,'tipo')) ? true : (fold(getPref(p,'tipo'))===fold(ctx.tipo||''));
+    var budget=ctoCliente(p); var budgetOk = (budget>0) ? (Number(ctx.inv_total||0) <= budget) : true;
+
+    // Preferencias activo (ascensor/reforma/bajo/altura)
+    var ascPref = fold(getPref(p,'ascensor')||'indiferente'); // 'indiferente'|'requiere'|'no'|'si'
+    var ascOk = true;
+    if(ascPref==='requiere'){ ascOk = (fold(ctx.asc)==='si' || fold(ctx.asc)==='sí'); }
+    else if(ascPref==='no'){ ascOk = (fold(ctx.asc)==='no'); }
+
+    var refPref = fold(getPref(p,'reforma')||'indiferente'); // 'indiferente'|'no'|'lavado'|'integral'|'si'
+    var refOk = true;
+    if(refPref==='no'){ refOk = (fold(ctx.ref_tip)==='no'); }
+
+    var bajoPref = fold(getPref(p,'evitar_bajos')||'no'); // 'si'|'no'
+    var bajoOk = true;
+    if(bajoPref==='si'||bajoPref==='sí'){ bajoOk = (fold(ctx.bajo)!=='si'); }
+
+    var altMin = Number(getPref(p,'altura_min')||0);
+    var altOk = (altMin>0)? (Number(ctx.alt||0) >= altMin) : true;
+
+    var allOk = locOk && tipoOk && budgetOk && ascOk && refOk && bajoOk && altOk;
+
+    // Estado visual:
+    // ★ si cls=g y allOk; ● verde+⚠ si cls=g pero !allOk; ● y/r si no alcanza
+    var stateHTML='';
+    var warnHTML='';
+    if(cls==='g' && allOk){
+      stateHTML = '<span class="star" title="Supermatch"><svg viewBox="0 0 24 24"><path d="M12 3.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18.8 6.2 21.5l1.1-6.5-4.7-4.6 6.5-.9L12 3.6z"/></svg></span>';
+      stateHTML += '<span class="dot g" title="Objetivo cumplido"></span>';
+    }else if(cls==='g'){
+      stateHTML = '<span class="dot g" title="Objetivo cumplido"></span>';
+      if(cfg.warnsOnlyGreen!==false){ // por defecto solo avisamos cuando KPI está en verde
+        warnHTML = '<span class="warn" title="Algún criterio no se cumple (localidad/tipo/presupuesto/preferencias)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.4" fill="none"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.8" stroke-linecap="round"/></svg> Aviso</span>';
+      }
+    }else{
+      var clsMap = (cls==='y')?'y':'r';
+      stateHTML = '<span class="dot '+clsMap+'"></span>';
     }
-    if(tgt.kind==='neta'){
-      var c2=classifyRatio(Number(ctx.neta||0), Number(tgt.val), cfg.thresholds);
-      if(c2.cls==='g'){ netaOK.push({p:p,cls:c2.cls}); }
-    }
-    if(tgt.kind==='flujo'){
-      var c3=classifyRatio(Number(ctx.flujo||0), Number(tgt.val), cfg.thresholds);
-      if(c3.cls==='g'){ flujoOK.push({p:p,cls:c3.cls}); }
-    }
+
+    // ¿ya asignado?
+    var already=false;
+    try{
+      var prosList=Store.pros||[];
+      var idx=prosList.findIndex(function(pp){return pp.id===p.id;});
+      if(idx>=0 && evId){
+        var set=new Set(prosList[idx].asset_ids||[]);
+        already = set.has(evId);
+      }
+    }catch(_){}
+
+    var row=document.createElement('div'); row.className='crow';
+    row.innerHTML =
+      '<div class="cact"><input type="checkbox" class="cchk" data-pid="'+(p.id||'')+'" '+(already?'checked':'')+'> <label>Asignar</label></div>'+
+      '<div>'+
+        '<div class="cname">'+(p.nombre||'-')+' '+(p.apellidos||'')+'</div>'+
+        '<div class="cmeta">Fase: '+(p.fase||'-')+'</div>'+
+      '</div>'+
+      '<div class="cstate">'+stateHTML+ (warnHTML||'') +'</div>'+
+      '<div class="cmeta">'+(getPref(p,'tipo')||p.pref_tipo||'')+' · '+((getPref(p,'localidades')||'').toString().split(',')[0]||'')+'</div>';
+    grid.appendChild(row);
+    any=true;
   });
 
-  function chip(p,showWarns){
-    var span=document.createElement('span'); span.className='tag';
-    var name=document.createElement('span'); name.textContent=p.nombre||'-'; span.appendChild(name);
-    if(showWarns){
-      var warns=warnBadges(p,ctx);
-      warns.forEach(function(w){var b=document.createElement('span'); b.className='badge-warn'; b.title=w.title;
-        b.innerHTML='<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.2"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.6" stroke-linecap="round"/></svg>'+w.icon; span.appendChild(b);});
+  // Mensajes cuando no hay matches (o ningún cliente activo)
+  if(!any){
+    // Si bruta >= objetivo mínimo de configuración → buen activo
+    var tipoTxt=(ctx.tipo||'Tradicional');
+    var objMin = (tipoTxt==='Habitaciones') ? cfg.obj_bruta_hab : cfg.obj_bruta_trad;
+    var br = Number(ctx.bruta||0);
+    if(br >= objMin){
+      empty.innerHTML='Buen activo para guardar: la rentabilidad bruta ('+fmtN1.format(br)+' %) supera el objetivo mínimo ('+fmtN1.format(objMin)+' %).';
+      empty.style.display='block';
+    }else{
+      // Sugerir rebaja de precio de compra para alcanzar objMin
+      var alq_a = (parseEs(id('e_alq').value)||0) * 12;
+      var rate = cfg.itp_pct/100;
+      var notari = parseEs(id('e_notaria').value)||cfg.notaria_eur;
+      var ref = parseEs(id('e_reforma').value)||0;
+      var honor = (id('e_honor').value==='si')?cfg.psi_eur:0;
+      var extras = notari + ref + honor;
+      var targetInv = (objMin>0)? (alq_a/(objMin/100)) : 0;
+      var pmax = targetInv>0 ? Math.max(0,Math.floor((targetInv-extras)/(1+rate))) : 0;
+      var precioActual = parseEs(id('e_precio').value)||0;
+      var rebaja = Math.max(0, precioActual - pmax);
+      var pct = (precioActual>0)? (rebaja/precioActual*100) : 0;
+      empty.innerHTML='Rentabilidad insuficiente. Sugerencia: precio objetivo aproximado '+e0(pmax)+' (rebaja de '+e0(rebaja)+' · '+fmtN1.format(pct)+' %).';
+      empty.style.display='block';
     }
-    return span;
   }
-  function render(arr,el){
-    if(!arr.length){el.textContent='—';return;}
-    el.innerHTML='';
-    arr.forEach(function(obj){
-      var p=obj.p;
-      var showWarns = getCfg().warnsOnlyGreen; /* solo si verde */
-      el.appendChild(chip(p, showWarns));
-      var key=p.id||p.email||p.nombre||('p_'+Math.random().toString(36).slice(2,7));
-      if(!added.has(key)){
-        added.add(key);
-        var opt=document.createElement('option'); opt.value=key; opt.textContent=p.nombre||'-';
-        opt.selected=true; /* auto-selección cuando hay match */
-        asignSel.appendChild(opt);
-      }
-    });
-  }
-  render(brutaOK,mB); render(netaOK,mN); render(flujoOK,mF);
 }
 
 /* Guardar / Asignar */
@@ -574,16 +607,31 @@ function save(alsoAssign){
     localStorage.removeItem('load_eval');
   }
   if(CURRENT_ID) e.id=CURRENT_ID;
-  if(alsoAssign){
-    var sel=[].slice.call(document.getElementById('assign_cli').options).filter(function(o){return o.selected;}).map(function(o){return o.value;});
-    e.prospect_ids=sel;
-  }
+
+  // Persist evaluación
   var at=list.findIndex(function(x){return x.id===e.id;});
   if(at>=0) list[at]=e; else list.push(e);
   Store.evals=list; CURRENT_ID=e.id;
 
-  if(alsoAssign){ var c=(e.prospect_ids&&e.prospect_ids.length)?e.prospect_ids.length:0; toast('Guardado y asignado a '+c+' cliente(s)','ok'); }
-  else{ toast('Evaluación guardada','ok'); }
+  // Asignaciones al Dashboard (pros[].asset_ids)
+  if(alsoAssign){
+    var checks=[].slice.call(document.querySelectorAll('#candGrid .cchk'));
+    var selectedIds=checks.filter(function(c){return c.checked;}).map(function(c){return c.getAttribute('data-pid');});
+    var prosList=Store.pros||[];
+    var updated=0;
+    selectedIds.forEach(function(pid){
+      var i=prosList.findIndex(function(pp){return pp.id===pid;});
+      if(i>=0){
+        var set=new Set(prosList[i].asset_ids||[]);
+        if(!set.has(e.id)){ set.add(e.id); updated++; }
+        prosList[i].asset_ids=Array.from(set);
+      }
+    });
+    Store.pros=prosList;
+    toast('Guardado y asignado a '+selectedIds.length+' cliente(s)','ok');
+  }else{
+    toast('Evaluación guardada','ok');
+  }
 }
 
 /* Limpiar */
