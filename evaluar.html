@@ -19,11 +19,11 @@
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
 a{color:var(--brand);text-decoration:none}
-.container{max-width:1200px;margin:0 auto;padding:12px 14px}
+.container{max-width:1100px;margin:0 auto;padding:12px 14px}
 
 /* Topbar */
 .topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
-.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.top-inner{max-width:1100px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:8px}
 .logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
 .title{font-weight:700;color:var(--ink2);font-size:13px}
@@ -59,25 +59,23 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
 .kpi .val{font-weight:800;font-size:18px}
 .kpi .muted{color:#667085;font-weight:600;margin-left:6px}
 
-/* Estado icons */
+/* Dots estado */
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}
 .dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
-.star{display:inline-block;width:14px;height:14px;vertical-align:middle;margin-right:6px}
-.star svg{width:14px;height:14px;fill:var(--brand)}
 
-/* Clientes potenciales grid */
-#candGrid{display:grid;gap:8px}
-.crow{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px}
-.cname{font-weight:700}
-.cmeta{font-size:11px;color:#667085}
-.cstate{display:flex;align-items:center;gap:6px}
-.cstate .warn{font-size:11px;color:#b45309;display:inline-flex;align-items:center;gap:4px}
-.cstate .warn svg{width:12px;height:12px}
-.cact{display:flex;align-items:center;gap:10px}
-.cact label{font-size:12px}
-
-/* Avisos vacíos */
-.empty{padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+/* Matching (nuevo grid) */
+#candWrap{margin-top:8px}
+.table{width:100%;border-collapse:separate;border-spacing:0 6px}
+.tr{display:grid;grid-template-columns:26px 22px 22px 1.5fr 1fr 1fr 1fr;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
+.th{font-weight:700;color:#374151}
+.td{font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:11px}
+.pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:11px;color:#555}
+.star{width:18px;height:18px;display:inline-grid;place-items:center}
+.star svg{width:18px;height:18px;fill:#f59e0b}
+.state svg{width:14px;height:14px}
+.warn{color:#b45309;background:#fff7ed;border:1px solid #fde68a}
+.mono{font-variant-numeric:tabular-nums}
 
 /* Toasts */
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
@@ -159,7 +157,7 @@ try{
         </div>
         <div class="row three">
           <div class="field"><label>Reforma (€)</label><input id="e_reforma" value="0" data-money></div>
-          <div class="field"><label>Incluir honorarios PSI</label>
+          <div class="field"><label>Incluir honorarios PSI (4.235 €)</label>
             <select id="e_honor"><option value="si">Sí</option><option value="no" selected>No</option></select>
           </div>
           <div class="field"><label>Precio máx. de compra (objetivo bruta)</label><input id="e_pmax" data-money disabled></div>
@@ -209,12 +207,11 @@ try{
           <div class="kpi"><div class="lab">Precio máx. de compra</div><div class="val" id="r_pmax">—</div></div>
         </div>
 
-        <!-- CLIENTES POTENCIALES (grid único) -->
+        <!-- CLIENTES POTENCIALES (readaptado) -->
         <div class="card" style="margin-top:12px">
           <h3 style="margin:0 0 8px">Clientes potenciales</h3>
-          <div id="candGrid"></div>
-          <div id="noMatchMsg" class="empty" style="display:none"></div>
-          <div class="actions" style="margin-top:10px">
+          <div id="candWrap"></div>
+          <div class="actions" style="margin-top:8px">
             <button class="btn" id="save_only">Guardar evaluación</button>
             <button class="btn primary" id="save_assign">Guardar y asignar</button>
           </div>
@@ -276,9 +273,9 @@ function toast(msg,kind){
 
 /* Store (capa preparada para remoto) */
 var Store={
-  get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}}}, 
-  set cfg(v){localStorage.setItem('cfg',JSON.stringify(v));},
-  get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}},
+  get cfg(){try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}}}, /* SUPABASE: inyectar fetch cfg si remoto */
+  set cfg(v){localStorage.setItem('cfg',JSON.stringify(v));},                       /* SUPABASE: persist cfg remoto */
+  get pros(){try{return JSON.parse(localStorage.getItem('pros')||'[]')}catch(_){return[]}}, /* prospects */
   set pros(v){localStorage.setItem('pros',JSON.stringify(v));},
   get evals(){try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]}},
   set evals(v){localStorage.setItem('evals',JSON.stringify(v));}
@@ -351,6 +348,7 @@ function bindAuto(){
 var CURRENT_ID=null;
 
 /* Cálculos y render */
+var lastChart={real:0,obj:0}; /* ya no pintamos gráfico, mantenemos compat mínima */
 function calc(){
   var cfg=getCfg();
   var tipo=(id('e_tipo').value||'Tradicional');
@@ -400,15 +398,22 @@ function calc(){
   id('r_bruta_diff').textContent=gapText(gapB);
   id('r_neta_diff').textContent =gapText(gapN);
 
-  // Render grid de clientes potenciales
-  renderCandidates({
+  lastChart.real=bruta; lastChart.obj=obj_bruta;
+
+  buildCandidates({
     tipo:tipo, loc:id('e_loc').value||'',
     bruta:bruta, neta:neta, flujo:flujo,
+    alq_a:alq_a,
+    gastos_a:gastos_a,
     inv_total:inv_total,
+    precio:precio,
+    itp_rate:rate,
+    extras:notari+ref+honor,
     ref_tip:id('e_ref_nec').value||'no',
     asc:id('e_asc').value||'Sí',
     bajo:id('e_bajo').value||'No',
-    alt: Number(id('e_alt').value||0)
+    alt:id('e_alt').value||'',
+    pmax:pmax
   });
 
   id('e_result').hidden=false;
@@ -421,19 +426,19 @@ function calc(){
     bajo:id('e_bajo').value||'', habs:id('e_habs').value||'',
     banos:id('e_banos').value||'', ref_tip:id('e_ref_nec').value||'no',
     url:id('e_url').value||'', tipo:tipo,
-    precio:precio, itp:itp, notaria:notari, psi:honor, reforma:ref,
-    comu:comu, ibi:ibi, hogar:hogar, impago:impago, gestion:gest,
-    alq:alq_m, inv_total:inv_total, kpi_bruta:bruta, kpi_neta:neta, kpi_flujo:flujo, pmax:pmax
+    precio:precio, itp:parseEs(id('e_itp_eur').value)||itp, notaria:parseEs(id('e_notaria').value)||notari, psi:(id('e_honor').value==='si')?getCfg().psi_eur:0, reforma:parseEs(id('e_reforma').value),
+    comu:parseEs(id('e_comunidad').value), ibi:parseEs(id('e_ibi').value), hogar:parseEs(id('e_hogar').value),
+    impago:parseEs(id('e_impago').value), gestion:parseEs(id('e_gestion').value), alq:parseEs(id('e_alq').value),
+    inv_total:inv_total, kpi_bruta:bruta, kpi_neta:neta, kpi_flujo:flujo, pmax:pmax
   };
 }
 function gapText(g){ if(!isFinite(g))return ''; var s=(g>=0?'+':'−')+fmtN1.format(Math.abs(g))+' pts'; return ' ('+s+')'; }
 function paintDot(dot,gap){ var el=id(dot); el.className='dot '+(gap>=0?'g':(gap>-1?'y':'r')); }
 
-/* Helpers de fold y parse */
+/* Helpers matching */
 function fold(s){return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
+function isBeforeCompra(p){var f=fold(p.fase||''); return !(f.includes('compra')||f.includes('éxito')||f.includes('exito')); }
 function parseMoney(v){if(v==null)return 0;return Number(String(v).replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;}
-
-/* Obtener preferencias del cliente con compat */
 function getPref(p,k){
   var pf=p.prefs||{};
   if(k in pf) return pf[k];
@@ -441,14 +446,18 @@ function getPref(p,k){
   if(k==='localidades') return p.locs_text||'';
   if(k==='ascensor') return p.ascensor||'';
   if(k==='reforma') return p.pref_reforma||'';
-  if(k==='evitar_bajos') return p.no_bajo||'';
+  if(k==='bajo') return p.evitar_bajos||p.no_bajo||'';
   if(k==='altura_min') return p.altura_min||'';
   if(k==='presupuesto_max') return p.presupuesto_max||'';
   return '';
 }
-/* Info objetivo principal del cliente */
-function getTargetInfo(p){
-  var main=(p.obj_main||p.obj_tipo||'').toString().toLowerCase().trim();
+function clientCTO(p){
+  var cfg=getCfg(); var pmax=Number(p.inv_pmax||p.pmax||0)||0;
+  var incl = !!(p.psi_in_presupuesto);
+  return pmax + (incl?0:cfg.psi_eur);
+}
+function targetInfo(p){
+  var main=fold(p.obj_main||p.obj_tipo||'');
   var b=Number(p.obj_bruta||0), n=Number(p.obj_neta||0), fm=Number(p.obj_flujo||0), fa=Number(p.obj_flujo_anual||0);
   if(main==='bruta'&&b>0) return {kind:'bruta',val:b};
   if(main==='neta' &&n>0) return {kind:'neta', val:n};
@@ -458,146 +467,145 @@ function getTargetInfo(p){
   if(fa>0||fm>0) return {kind:'flujo',val:(fa>0?fa:fm*12)};
   return {kind:'',val:0};
 }
-/* Clasificación KPI con thresholds */
-function classifyRatio(actual,target,thresholds){
+function classifyRatio(actual,target,th){
   if(!target||target<=0) return {cls:'r',ratio:0};
-  var ratio = actual/target;
-  var green = Number(thresholds.green||1);
-  var amber = Number(thresholds.amber||0.95);
+  var ratio=actual/target;
+  var green=Number(th.green||1), amber=Number(th.amber||0.95);
   var cls = ratio>=green ? 'g' : (ratio>=amber ? 'y' : 'r');
   return {cls:cls, ratio:ratio};
 }
 
-/* Cálculo CTO del cliente (como en Dashboard) */
-function ctoCliente(p){
+/* ΔP sugerida para pasar a verde (por cliente) */
+function priceCutToGreen(ctx, tgtKind, tgtVal){
   var cfg=getCfg();
-  var Pmax = Number(p.inv_pmax||0);
-  if(!Pmax) return 0;
-  var inclPsi = !!p.psi_in_presupuesto;
-  // CTO cliente: si incluye PSI en presupuesto → es Pmax; si no → Pmax + PSI
-  return Math.round(Pmax + (inclPsi?0:cfg.psi_eur));
+  var rate=ctx.itp_rate;                // itp como fracción
+  var E = ctx.extras;                   // notaría+reforma+psi(incluido en evaluación si marcado)
+  if(tgtKind==='bruta'){
+    var invReq = (ctx.alq_a)/(tgtVal/100);
+    var Preq = (invReq - E)/(1+rate);
+    var dP = Math.max(0, (ctx.precio - Preq));
+    return {eur: Math.round(dP), per: (ctx.precio>0? dP/ctx.precio:0)};
+  }else if(tgtKind==='neta'){
+    var netA = (ctx.alq_a - ctx.gastos_a);
+    var invReqN = (netA)/(tgtVal/100);
+    var PreqN = (invReqN - E)/(1+rate);
+    var dPn = Math.max(0, (ctx.precio - PreqN));
+    return {eur: Math.round(dPn), per: (ctx.precio>0? dPn/ctx.precio:0)};
+  }else{
+    // flujo: no depende de precio -> sugerimos ΔAlq/mes
+    var needA = Math.max(0, tgtVal - (ctx.alq_a - ctx.gastos_a));
+    return {eur:0, per:0, upRent: Math.ceil(needA/12)};
+  }
 }
 
-/* Render grid único de clientes */
-function renderCandidates(ctx){
-  var grid=id('candGrid'); var empty=id('noMatchMsg'); grid.innerHTML=''; empty.style.display='none';
-  var cfg=getCfg();
-  var clients=(Store.pros||[]).filter(function(p){
-    var f=fold(p.fase||'');
-    if(f.includes('compra')||f.includes('compraventa')||f.includes('éxito')||f.includes('exito')) return false;
-    if(p.archivado) return false;
-    return true;
-  });
-  var any=false, selectedCount=0;
+/* Construcción del grid de candidatos */
+function buildCandidates(ctx){
+  var list=Store.pros||[], cfg=getCfg(), th=cfg.thresholds;
+  var wrap=id('candWrap'); wrap.innerHTML='';
 
-  // Para selección previa (si ya está asignado este eval)
-  var evId = CURRENT_ID || localStorage.getItem('load_eval') || null;
+  // Cabecera
+  var head=document.createElement('div'); head.className='tr th';
+  head.innerHTML='<div></div><div></div><div></div>'+
+    '<div class="td">Cliente</div>'+
+    '<div class="td">Objetivo vs real</div>'+
+    '<div class="td">Aviso</div>'+
+    '<div class="td">Ajuste sugerido</div>';
+  wrap.appendChild(head);
 
-  clients.forEach(function(p){
-    var tgt=getTargetInfo(p); if(!tgt.val){ return; } // si no tiene objetivo, no mostramos
+  // recolectar candidatos (por fases antes de compraventa) y tipo obligatorio
+  var rows=[];
+  list.forEach(function(p){
+    if(!isBeforeCompra(p)) return;
+    var cliTipo = (getPref(p,'tipo')||p.pref_tipo||'Tradicional');
+    if(fold(cliTipo)!==fold(ctx.tipo)) return; // filtro obligatorio
 
-    // KPI principal del activo frente a objetivo del cliente
-    var actual = (tgt.kind==='bruta')? Number(ctx.bruta||0)
-               : (tgt.kind==='neta') ? Number(ctx.neta||0)
-               : Number(ctx.flujo||0);
-    var cls = classifyRatio(actual, Number(tgt.val), cfg.thresholds).cls;
+    var tgt=targetInfo(p); if(!tgt.val) return;
 
-    // Criterios “duros”
+    // KPI del activo para este cliente
+    var actual = tgt.kind==='bruta' ? Number(ctx.bruta||0) :
+                 tgt.kind==='neta'  ? Number(ctx.neta ||0) :
+                                       Number(ctx.flujo||0);
+    var c=classifyRatio(actual, Number(tgt.val), th);
+
+    // Criterios (presupuesto, ascensor, reforma, bajos, altura)
+    var critFails=[];
+    var ascPref = fold(getPref(p,'ascensor'));
+    var refPref = fold(getPref(p,'reforma'));
+    var bajoPref= fold(getPref(p,'bajo'));
+    var altMin  = Number(getPref(p,'altura_min')||0);
+    var ctoCli  = clientCTO(p);
+    if(ctoCli>0 && Number(ctx.inv_total||0) > ctoCli) critFails.push('presupuesto');
+    if((ascPref==='si'||ascPref==='sí'||ascPref==='requiere') && fold(ctx.asc)==='no') critFails.push('ascensor');
+    if(refPref==='no' && fold(ctx.ref_tip)!=='no') critFails.push('reforma');
+    if((bajoPref==='no'||bajoPref==='evitar'||bajoPref==='sí'||bajoPref==='si') && fold(ctx.bajo)==='si') critFails.push('bajos');
+    if(altMin>0 && Number(ctx.alt||0) < altMin) critFails.push('altura');
+
+    // Localidad (para Supermatch)
     var locs=(getPref(p,'localidades')||'').toString().split(',').map(fold).filter(Boolean);
-    var locOk = (!locs.length) ? true : (locs.includes(fold(ctx.loc||'')));
-    var tipoOk = (!getPref(p,'tipo')) ? true : (fold(getPref(p,'tipo'))===fold(ctx.tipo||''));
-    var budget=ctoCliente(p); var budgetOk = (budget>0) ? (Number(ctx.inv_total||0) <= budget) : true;
+    var locOK = !locs.length ? false : locs.includes(fold(ctx.loc));
 
-    // Preferencias activo (ascensor/reforma/bajo/altura)
-    var ascPref = fold(getPref(p,'ascensor')||'indiferente'); // 'indiferente'|'requiere'|'no'|'si'
-    var ascOk = true;
-    if(ascPref==='requiere'){ ascOk = (fold(ctx.asc)==='si' || fold(ctx.asc)==='sí'); }
-    else if(ascPref==='no'){ ascOk = (fold(ctx.asc)==='no'); }
+    // Prioridad y avisos
+    var supermatch = (c.cls==='g' && locOK && critFails.length===0);
+    var verdeConAviso = (c.cls==='g' && critFails.length>0);
+    var prio = supermatch?0 : (verdeConAviso?1 : (c.cls==='y'?2:3));
 
-    var refPref = fold(getPref(p,'reforma')||'indiferente'); // 'indiferente'|'no'|'lavado'|'integral'|'si'
-    var refOk = true;
-    if(refPref==='no'){ refOk = (fold(ctx.ref_tip)==='no'); }
+    // Ajuste sugerido
+    var adj = (c.cls==='g') ? null : priceCutToGreen(ctx, tgt.kind, Number(tgt.val));
 
-    var bajoPref = fold(getPref(p,'evitar_bajos')||'no'); // 'si'|'no'
-    var bajoOk = true;
-    if(bajoPref==='si'||bajoPref==='sí'){ bajoOk = (fold(ctx.bajo)!=='si'); }
-
-    var altMin = Number(getPref(p,'altura_min')||0);
-    var altOk = (altMin>0)? (Number(ctx.alt||0) >= altMin) : true;
-
-    var allOk = locOk && tipoOk && budgetOk && ascOk && refOk && bajoOk && altOk;
-
-    // Estado visual:
-    // ★ si cls=g y allOk; ● verde+⚠ si cls=g pero !allOk; ● y/r si no alcanza
-    var stateHTML='';
-    var warnHTML='';
-    if(cls==='g' && allOk){
-      stateHTML = '<span class="star" title="Supermatch"><svg viewBox="0 0 24 24"><path d="M12 3.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18.8 6.2 21.5l1.1-6.5-4.7-4.6 6.5-.9L12 3.6z"/></svg></span>';
-      stateHTML += '<span class="dot g" title="Objetivo cumplido"></span>';
-    }else if(cls==='g'){
-      stateHTML = '<span class="dot g" title="Objetivo cumplido"></span>';
-      if(cfg.warnsOnlyGreen!==false){ // por defecto solo avisamos cuando KPI está en verde
-        warnHTML = '<span class="warn" title="Algún criterio no se cumple (localidad/tipo/presupuesto/preferencias)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="#b45309" stroke-width="1.4" fill="none"/><path d="M12 7v6m0 4h.01" stroke="#b45309" stroke-width="1.8" stroke-linecap="round"/></svg> Aviso</span>';
-      }
-    }else{
-      var clsMap = (cls==='y')?'y':'r';
-      stateHTML = '<span class="dot '+clsMap+'"></span>';
-    }
-
-    // ¿ya asignado?
-    var already=false;
-    try{
-      var prosList=Store.pros||[];
-      var idx=prosList.findIndex(function(pp){return pp.id===p.id;});
-      if(idx>=0 && evId){
-        var set=new Set(prosList[idx].asset_ids||[]);
-        already = set.has(evId);
-      }
-    }catch(_){}
-
-    var row=document.createElement('div'); row.className='crow';
-    row.innerHTML =
-      '<div class="cact"><input type="checkbox" class="cchk" data-pid="'+(p.id||'')+'" '+(already?'checked':'')+'> <label>Asignar</label></div>'+
-      '<div>'+
-        '<div class="cname">'+(p.nombre||'-')+' '+(p.apellidos||'')+'</div>'+
-        '<div class="cmeta">Fase: '+(p.fase||'-')+'</div>'+
-      '</div>'+
-      '<div class="cstate">'+stateHTML+ (warnHTML||'') +'</div>'+
-      '<div class="cmeta">'+(getPref(p,'tipo')||p.pref_tipo||'')+' · '+((getPref(p,'localidades')||'').toString().split(',')[0]||'')+'</div>';
-    grid.appendChild(row);
-    any=true;
+    rows.push({p:p, prio:prio, supermatch:supermatch, verdeConAviso:verdeConAviso, cls:c.cls, ratio:c.ratio, tgt:tgt, actual:actual, critFails:critFails, locOK:locOK, adj:adj});
   });
 
-  // Mensajes cuando no hay matches (o ningún cliente activo)
-  if(!any){
-    // Si bruta >= objetivo mínimo de configuración → buen activo
-    var tipoTxt=(ctx.tipo||'Tradicional');
-    var objMin = (tipoTxt==='Habitaciones') ? cfg.obj_bruta_hab : cfg.obj_bruta_trad;
-    var br = Number(ctx.bruta||0);
-    if(br >= objMin){
-      empty.innerHTML='Buen activo para guardar: la rentabilidad bruta ('+fmtN1.format(br)+' %) supera el objetivo mínimo ('+fmtN1.format(objMin)+' %).';
-      empty.style.display='block';
+  // Ordenación
+  rows.sort(function(a,b){
+    if(a.prio!==b.prio) return a.prio-b.prio;
+    return (b.ratio||0)-(a.ratio||0);
+  });
+
+  // Render filas
+  if(!rows.length){
+    var note=document.createElement('div'); note.style.padding='8px';
+    // sugerencia global según objetivo mínimo de Config (bruta por tipo)
+    var objMin = (fold(ctx.tipo)==='habitaciones')? cfg.obj_bruta_hab : cfg.obj_bruta_trad;
+    if((ctx.bruta||0) >= objMin){
+      note.innerHTML='<span class="badge">✅ Buen activo para guardar (supera objetivo mínimo de bruta de Config)</span>';
     }else{
-      // Sugerir rebaja de precio de compra para alcanzar objMin
-      var alq_a = (parseEs(id('e_alq').value)||0) * 12;
-      var rate = cfg.itp_pct/100;
-      var notari = parseEs(id('e_notaria').value)||cfg.notaria_eur;
-      var ref = parseEs(id('e_reforma').value)||0;
-      var honor = (id('e_honor').value==='si')?cfg.psi_eur:0;
-      var extras = notari + ref + honor;
-      var targetInv = (objMin>0)? (alq_a/(objMin/100)) : 0;
-      var pmax = targetInv>0 ? Math.max(0,Math.floor((targetInv-extras)/(1+rate))) : 0;
-      var precioActual = parseEs(id('e_precio').value)||0;
-      var rebaja = Math.max(0, precioActual - pmax);
-      var pct = (precioActual>0)? (rebaja/precioActual*100) : 0;
-      empty.innerHTML='Rentabilidad insuficiente. Sugerencia: precio objetivo aproximado '+e0(pmax)+' (rebaja de '+e0(rebaja)+' · '+fmtN1.format(pct)+' %).';
-      empty.style.display='block';
+      var d=priceCutToGreen(ctx,'bruta',objMin);
+      note.innerHTML='<span class="badge warn">⚠ Sugerir bajar precio en '+e0(d.eur)+' para alcanzar objetivo mínimo de bruta</span>';
     }
+    wrap.appendChild(note);
+  }else{
+    rows.forEach(function(r){
+      var row=document.createElement('div'); row.className='tr';
+      var fasePill='<span class="pill">'+(r.p.fase||'—')+'</span>';
+      var star = r.supermatch ? '<svg viewBox="0 0 24 24"><path d="m12 3 3 6 7 .9-5 4.8 1.3 7.3L12 18l-6.3 4 1.3-7.3-5-4.8L9 9l3-6z"/></svg>' : '';
+      var dotCls = r.cls; // g/y/r
+      var objTxt = (r.tgt.kind==='bruta'?'RB':'RN');
+      var tgtVal = r.tgt.kind==='flujo' ? (r.tgt.val+' €/año') : (fmtN1.format(r.tgt.val)+' %');
+      var realVal= r.tgt.kind==='flujo' ? (e0(r.actual)) : (fmtN1.format(r.actual)+' %');
+      var aviso = (r.cls==='g' && r.critFails.length>0) ? '<span class="badge warn">⚠ Criterios no alineados</span>' : '—';
+      var ajuste = '—';
+      if(r.adj){
+        if(r.adj.upRent){ ajuste = '↑ '+n0(r.adj.upRent)+' €/mes'; }
+        else{ ajuste = '− '+e0(r.adj.eur); }
+      }
+      row.innerHTML =
+        '<div class="td"><input type="checkbox" class="candChk" data-pid="'+(r.p.id||'')+'"></div>'+
+        '<div class="td star">'+star+'</div>'+
+        '<div class="td state"><span class="dot '+dotCls+'"></span></div>'+
+        '<div class="td"><strong>'+(r.p.nombre||'-')+'</strong> · '+(r.p.email||'')+' '+fasePill+'</div>'+
+        '<div class="td mono">'+objTxt+': '+realVal+' vs '+tgtVal+(r.locOK?' <span class="badge">Loc OK</span>':'')+'</div>'+
+        '<div class="td">'+aviso+'</div>'+
+        '<div class="td mono">'+ajuste+'</div>';
+      wrap.appendChild(row);
+    });
   }
 }
 
 /* Guardar / Asignar */
 function gather(){return calc();}
+function selectedProspectIds(){
+  return [].slice.call(document.querySelectorAll('#candWrap .candChk:checked')).map(function(el){return el.getAttribute('data-pid');});
+}
 function save(alsoAssign){
   var e=gather();
   var loaded=localStorage.getItem('load_eval'); var list=Store.evals||[];
@@ -608,30 +616,32 @@ function save(alsoAssign){
   }
   if(CURRENT_ID) e.id=CURRENT_ID;
 
-  // Persist evaluación
+  if(alsoAssign){
+    var sel=selectedProspectIds();
+    e.prospect_ids=sel;
+  }
+
+  // persist evaluación
   var at=list.findIndex(function(x){return x.id===e.id;});
   if(at>=0) list[at]=e; else list.push(e);
   Store.evals=list; CURRENT_ID=e.id;
 
-  // Asignaciones al Dashboard (pros[].asset_ids)
-  if(alsoAssign){
-    var checks=[].slice.call(document.querySelectorAll('#candGrid .cchk'));
-    var selectedIds=checks.filter(function(c){return c.checked;}).map(function(c){return c.getAttribute('data-pid');});
-    var prosList=Store.pros||[];
-    var updated=0;
-    selectedIds.forEach(function(pid){
-      var i=prosList.findIndex(function(pp){return pp.id===pid;});
+  // propagar asignación a Dashboard (asset_ids)
+  if(alsoAssign && e.prospect_ids && e.prospect_ids.length){
+    var pros=Store.pros||[];
+    e.prospect_ids.forEach(function(pid){
+      var i=pros.findIndex(function(p){return p.id===pid;});
       if(i>=0){
-        var set=new Set(prosList[i].asset_ids||[]);
-        if(!set.has(e.id)){ set.add(e.id); updated++; }
-        prosList[i].asset_ids=Array.from(set);
+        var set=new Set(pros[i].asset_ids||[]);
+        set.add(e.id);
+        pros[i].asset_ids=Array.from(set);
       }
     });
-    Store.pros=prosList;
-    toast('Guardado y asignado a '+selectedIds.length+' cliente(s)','ok');
-  }else{
-    toast('Evaluación guardada','ok');
+    Store.pros=pros;
   }
+
+  if(alsoAssign){ var c=(e.prospect_ids&&e.prospect_ids.length)?e.prospect_ids.length:0; toast('Guardado y asignado a '+c+' cliente(s)','ok'); }
+  else{ toast('Evaluación guardada','ok'); }
 }
 
 /* Limpiar */
