@@ -274,13 +274,8 @@ function card(p){
   const sq = squares((p.asset_ids||[]).length);
   const extraBtns = [];
 
-  // 1) CONTACTO → Fijar reunión
   if(p.fase==='CONTACTO') extraBtns.push(iconBtn('cal','Fijar reunión'));
-
-  // 2) ÉXITO → Archivar
   if(p.fase==='ÉXITO' && !p.archivado) extraBtns.push(iconBtn('arch','Archivar'));
-
-  // 4) BÚSQUEDA → Asignar activos (desde tarjeta)
   if(p.fase==='BÚSQUEDA') extraBtns.push(iconBtn('asig','Asignar activos'));
 
   d.innerHTML =
@@ -326,7 +321,6 @@ function iconBtn(act,title){
 }
 function seeds(p){
   const out=[];
-  // objetivo
   const main=(fold(p.obj_main||p.obj_tipo||'')||'bruta');
   if(main==='bruta' && p.obj_bruta) out.push({t:'RB',v:fmtN1.format(normPct(p.obj_bruta))+' %'});
   if(main==='neta'  && p.obj_neta ) out.push({t:'RN',v:fmtN1.format(normPct(p.obj_neta ))+' %'});
@@ -334,11 +328,9 @@ function seeds(p){
     const fa=Number(p.obj_flujo_anual||0)||Number(p.obj_flujo||0)*12;
     out.push({t:'FL',v:e0(fa)+' /año'});
   }
-  // tipo/loc breve
   const tipo=getPref(p,'tipo')||p.pref_tipo||'Tradicional'; out.push({t:'T',v:tipo});
   const locs=(getPref(p,'localidades')||p.locs_text||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
   if(locs.length) out.push({t:'L',v:locs.join(' · ')});
-  // reunión (CONTACTO)
   if(p.meeting_ts){
     const d=new Date(Number(p.meeting_ts)); const dd=d.toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     out.push({t:'MT',v:'Reunión: '+dd});
@@ -391,7 +383,7 @@ function openDrawer(idp){
   id('dr_title').textContent = (p.nombre||'-')+' '+(p.apellidos||'');
   body.innerHTML='';
 
-  /* ⚠ Orden acordado: Datos → Preferencias → (Objetivos+Presupuesto+Financiación) */
+  /* Orden acordado: Datos → Preferencias → (Objetivos+Presupuesto+Financiación) */
   body.appendChild(blockDatosCliente(p));
   body.appendChild(blockPreferencias(p));
   body.appendChild(blockObjetivoPresupuestoFinanciacion(p));
@@ -412,7 +404,7 @@ function selectKV(label, idd, opts, val){
     opts.map(o=>'<option '+(o===val?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select></div>';
 }
 
-/* ----- Datos básicos + objetivo ----- */
+/* ----- Datos del cliente ----- */
 function blockDatosCliente(p){
   const b=document.createElement('div'); b.className='block';
   b.innerHTML =
@@ -456,10 +448,9 @@ function blockDatosCliente(p){
   return b;
 }
 
-/* ----- Preferencias (persistidas en p.prefs) ----- */
+/* ----- Preferencias ----- */
 function getPref(p,k){
   const pf=(p.prefs||{}); if(k in (pf||{})) return pf[k];
-  // retrocompat top-level
   if(k==='tipo') return p.pref_tipo||'';
   if(k==='localidades') return p.locs_text||'';
   if(k==='ascensor') return p.ascensor||'';
@@ -565,7 +556,7 @@ function blockObjetivoPresupuestoFinanciacion(p){
    '<div class="row two">'+
      inputKV('P. máx inversión (€)','bp_pmax', pmax||'')+
      '<div class="field"><label>Incluir PSI en presupuesto máx</label><select id="bp_psipres"><option '+(inclPres?'':'selected')+'>No</option><option '+(inclPres?'selected':'')+'>Sí</option></select></div>'+
-   </div>'+
+   '</div>'+
    '<div class="row three">'+
      inputKV('PSI (€) · Config','bp_psi', e0(c.psi), true)+
      inputKV('Notaría (€) · Config','bp_not', e0(c.notaria), true)+
@@ -591,14 +582,11 @@ function blockObjetivoPresupuestoFinanciacion(p){
     const inclPsiRent = (b.querySelector('#bp_psirent').value==='Sí');
     const itp=c.itp, not=c.notaria, psi=c.psi;
 
-    // Valor máx compra:
     const psiTerm = inclPsiPres ? psi : 0;
     const V = (Pmax - not - psiTerm) / (1 + itp);
     const ITPe = V*itp;
-    // Coste total operación
     const CTO = inclPsiPres ? Pmax : (Pmax + psi);
 
-    // Alquiler objetivo mensual (si principal=bruta)
     let alq = '';
     if(fold(p.obj_main||'bruta')==='bruta'){
       const den = V + ITPe + not + (inclPsiRent? psi: 0) + (cfgCosts().reforma||0);
@@ -609,7 +597,6 @@ function blockObjetivoPresupuestoFinanciacion(p){
     b.querySelector('#bp_cto').value  = isFinite(CTO)? e0(CTO): '—';
     b.querySelector('#bp_alq').value  = alq? e0(alq): '—';
 
-    // Financiación
     const ltv = Math.max(0,Math.min(100, parseNum(b.querySelector('#bp_ltv').value)||0));
     const capitalFinanciado = V*(ltv/100);
     const propio = (V - capitalFinanciado) + ITPe + not + psi; // PSI siempre cuenta en FP
@@ -668,7 +655,7 @@ function blockAsignacion(p){
           ' &nbsp;'+iconMini('reforma')+' '+esc(refText(ev.ref_tip))+
           ' &nbsp;'+iconMini('alq')+' '+e0(ev.alq||0)+
         '</div>'+
-        renderWarns(k, th) +
+        renderWarns(k) +
       '</div>'+
       '<div class="a-actions">'+
         '<button class="btn" data-act="send-wa" data-id="'+ev.id+'">WA</button>'+
@@ -679,7 +666,6 @@ function blockAsignacion(p){
     listBox.appendChild(row);
   });
 
-  // eventos
   listBox.addEventListener('change',function(e){
     const chk=e.target.closest('.a_chk'); if(!chk) return;
     const eid=chk.getAttribute('data-eid'); const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
@@ -711,7 +697,7 @@ function iconMini(kind){
   return '<span class="small" style="display:inline-flex;align-items:center;gap:4px">'+M[kind]+'</span>';
 }
 
-/* — Semáforos: contra objetivo principal — */
+/* — Semáforos y avisos — */
 function score(ev,p,th){
   const main=fold(p.obj_main||'bruta');
   const rb = Number(ev.kpi_bruta||0);
@@ -741,8 +727,13 @@ function score(ev,p,th){
   }
   return {dot:dot, warns:warns};
 }
-function renderWarns(k){ if(!k.warns || !k.warns.length) return '<div class="small" style="margin-top:4px;color:#64748b">—</div>';
-  return '<div class="small" style="margin-top:4px)">'+k.warns.map(w=>'<span class="badge" style="background:#fff7ed;border-color:#fde68a;color:#b45309">! '+esc(w)+'</span>').join(' ')+'</div>'; }
+function renderWarns(k){
+  if(!k.warns || !k.warns.length)
+    return '<div class="small" style="margin-top:4px;color:#64748b">—</div>';
+  return '<div class="small" style="margin-top:4px">'+
+         k.warns.map(w=>'<span class="badge" style="background:#fff7ed;border-color:#fde68a;color:#b45309">! '+esc(w)+'</span>').join(' ')+
+         '</div>';
+}
 
 /* ===== Aceptar activo → COMPRAVENTA ===== */
 function aceptarActivo(idp, eid){
@@ -753,7 +744,7 @@ function aceptarActivo(idp, eid){
   Store.pros=list; render(); toast('Activo aceptado','ok'); openDrawer(idp);
 }
 
-/* ===== Enviar por correo / WA ===== */
+/* ===== Envíos ===== */
 function getCfgNotifs(){
   const c=Store.cfg||{}; const brand=(c.brand_name||'Unihouser'); const n=c.notifs||{};
   const subj = (n.email_subject_tpl && String(n.email_subject_tpl).trim()) ? n.email_subject_tpl : (brand+' · {loc} · {calle}');
@@ -794,8 +785,6 @@ function sendAssetWA(p, eid){
   const url='https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(body);
   window.open(url,'_blank');
 }
-
-/* ===== Comms rápidos en tarjeta ===== */
 function quickMail(p){
   const nf=getCfgNotifs();
   const subj = nf.subjectTpl.replace('{loc}','').replace('{calle}','').replace(/\s·\s$/, '').replace(/\{\w+\}/g,'');
@@ -810,7 +799,7 @@ function quickWA(p){
   window.open(url,'_blank');
 }
 
-/* ===== Acciones finales (ÉXITO -> Archivar) ===== */
+/* ===== Acciones ===== */
 function blockAcciones(p){
   const b=document.createElement('div'); b.className='block';
   const isExito = (p.fase==='ÉXITO');
@@ -827,7 +816,7 @@ function blockAcciones(p){
   return b;
 }
 
-/* ======= Mini picker de reunión ======= */
+/* ===== Reunión ===== */
 let MEETING_FOR=null;
 function openMeetingPicker(idp){
   MEETING_FOR=idp;
@@ -850,22 +839,20 @@ id('mm_clear').onclick=function(){
 };
 id('mmodal').addEventListener('click',e=>{if(e.target.id==='mmodal') e.currentTarget.classList.remove('open');});
 
-/* ===== Modal directo de asignación desde tarjeta ===== */
+/* ===== Abrir Asignación desde tarjeta ===== */
 function openAssignModal(idp){
   const p=(Store.pros||[]).find(x=>x.id===idp); if(!p) return;
-  openDrawer(idp); // reutilizo el bloque ya implementado y consistente
+  openDrawer(idp);
   setTimeout(()=>{ document.querySelectorAll('#dr_body .block h4').forEach(h=>{if(h.textContent.includes('Asignar activos')) h.scrollIntoView({behavior:'smooth'});}); },150);
 }
 
-/* ===== Helpers ===== */
+/* ===== Init ===== */
 function load(){
   try{
     const c=Store.cfg||{}; if(c.brand_color) document.documentElement.style.setProperty('--brand', c.brand_color);
   }catch(_){}
   render();
 }
-
-/* ===== Init ===== */
 document.addEventListener('DOMContentLoaded',load);
 })();
 </script>
