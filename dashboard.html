@@ -15,27 +15,24 @@ html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
 /* Topbar */
 .topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
-.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:8px}
 .logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
 .title{font-weight:700;color:var(--ink2);font-size:13px}
 .nav a{color:var(--ink2);text-decoration:none;padding:5px 8px;border-radius:8px;font-size:12px}
 .nav a.active{background:var(--brand);color:#fff}
 .nav a:hover{background:#f3efe9}
-/* Small actions right */
-.top-actions{display:flex;align-items:center;gap:8px}
-.iconbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px;cursor:pointer}
-.iconbtn svg{width:16px;height:16px;stroke:#555;fill:none;stroke-width:2}
 /* Layout */
 .container{max-width:1200px;margin:12px auto;padding:0 14px}
 /* KPIs */
-.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:8px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:6px}
 .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow);display:grid;gap:4px}
 .kpi .big{font-weight:800;font-size:15px}
 .kpi .lab{font-size:11px;color:#667085}
-/* toggle archivados */
-.top-strip{display:flex;align-items:center;gap:10px;margin:4px 0 10px}
-.top-strip label{font-size:12px;color:#667085;display:flex;align-items:center;gap:6px}
+/* Toolbar local */
+.toolbar{display:flex;gap:8px;justify-content:flex-end;margin:6px 0 10px}
+.toolbar .btn-icon{width:28px;height:28px;border:1px solid var(--line);border-radius:999px;background:#fff;display:grid;place-items:center;cursor:pointer}
+.toolbar .btn-icon svg{width:17px;height:17px}
 /* Board */
 .board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
 .col{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;min-height:520px;box-shadow:var(--shadow)}
@@ -85,32 +82,35 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 .row.three{grid-template-columns:1fr 1fr 1fr}
 .field{display:flex;flex-direction:column;gap:4px}
 .field input,.field select,.field textarea{border:1px solid var(--line);border-radius:10px;padding:6px 8px;background:#fff;font-size:12px;color:#1a1f23}
-textarea{min-height:70px;resize:vertical}
+textarea{min-height:72px;resize:vertical}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;display:inline-flex;gap:6px;align-items:center;font-size:12px}
 .chip .x{cursor:pointer;color:#999}
 /* Seeds (sin label) */
 .seed{display:flex;gap:6px;flex-wrap:wrap}
 .seed .badge .lab{display:none}
-/* Lista de activos (panel) */
-.assign-panel{position:fixed;left:12px;right:12px;bottom:12px;z-index:95;display:none}
-.assign-panel.open{display:block}
-.assign-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:0 10px 24px rgba(0,0,0,.18)}
-.assign-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.a-row{border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:flex-start;margin-bottom:8px}
-.a-left{display:flex;align-items:center;gap:8px}
+/* Lista de activos */
+.a-wrap{position:fixed;left:12px;right:12px;bottom:12px;z-index:85}
+.a-box{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px}
+.a-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.a-row{border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:flex-start;margin-bottom:6px}
+.a-head{display:flex;align-items:center;gap:8px}
 .dot{width:10px;height:10px;border-radius:50%}
 .dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
 .a-info{font-size:12px}
 .a-info .addr{font-weight:700}
-.a-icons{display:flex;gap:10px;color:#444;flex-wrap:wrap;margin-top:3px}
+.a-icons{display:flex;gap:8px;color:#555;margin-top:2px}
+.a-warn{margin-top:6px}
+.a-warn .badge{background:#fff7ed;border-color:#fde68a;color:#b45309}
 .a-actions{display:flex;gap:6px}
 .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 8px;cursor:pointer;font-weight:700;font-size:12px}
 .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
-.badge.warn{background:#fff7ed;border-color:#fde68a;color:#b45309}
+/* Mini modal picker */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,18,20,.25);z-index:120}
+.modal.open{display:flex}
+.modal-box{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:12px;min-width:280px;display:grid;gap:10px}
 /* Footer */
-.footer{max-width:1200px;margin:16px auto 14px;text-align:center;color:#888;font-size:11px}
-@media(max-width:1100px){.board{grid-template-columns:1fr}}
+.footer{margin:24px 0 16px;text-align:center;color:#667085;font-size:11px}
 </style>
 </head>
 <body>
@@ -123,14 +123,6 @@ textarea{min-height:70px;resize:vertical}
         <a class="active" href="dashboard.html">Dashboard</a>
         <a href="configuracion.html">Configuración</a>
       </nav>
-      <div class="top-actions">
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#666">
-          <input type="checkbox" id="toggle_arch"/><span>Arch.</span>
-        </label>
-        <button class="iconbtn" id="btn_export" title="Exportar CSV">
-          <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M6 17h12v4H6z"/></svg>
-        </button>
-      </div>
     </div>
   </div>
 
@@ -145,20 +137,34 @@ textarea{min-height:70px;resize:vertical}
       <div class="kpi"><div class="lab">Archivados</div><div class="big" id="k_arch">0</div></div>
     </div>
 
-    <!-- Crear contacto (4 campos) -->
+    <!-- Toolbar local -->
+    <div class="toolbar" id="toolbar">
+      <button class="btn-icon" id="btn_arch_toggle" title="Mostrar archivados" aria-label="Mostrar archivados">
+        <svg viewBox="0 0 24 24" stroke="#6b7280" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7h18M7 7v12h10V7M7 7l2-3h6l2 3"/>
+        </svg>
+      </button>
+      <button class="btn-icon" id="btn_export" title="Exportar CSV" aria-label="Exportar CSV">
+        <svg viewBox="0 0 24 24" stroke="#6b7280" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v10M8 9l4 4 4-4"/><path d="M4 17h16v3H4z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Crear contacto -->
     <div class="create">
       <div class="row">
         <input id="c_nombre" placeholder="Nombre">
         <input id="c_apellidos" placeholder="Apellidos">
         <input id="c_email" placeholder="Email">
-        <input id="c_phone" placeholder="Móvil">
+        <input id="c_movil" placeholder="Móvil">
       </div>
       <button class="btn" id="btn_create">Crear contacto</button>
-      <small class="small">El resto de datos se completan en la ficha.</small>
+      <small class="small">El resto de datos se completan en Contacto o Reunión.</small>
     </div>
 
     <!-- Board -->
-    <div class="board" id="board"><!-- columnas JS --></div>
+    <div class="board" id="board"></div>
   </div>
 
   <div class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
@@ -177,14 +183,17 @@ textarea{min-height:70px;resize:vertical}
     <div class="d-body" id="dr_body"></div>
   </aside>
 
-  <!-- Panel Asignación -->
-  <div class="assign-panel" id="ap">
-    <div class="assign-box">
-      <div class="assign-head">
-        <strong id="ap_t">Asignar activos</strong>
-        <button class="btn" id="ap_close">Cerrar</button>
+  <!-- Mini modal datetime -->
+  <div class="modal" id="mmodal">
+    <div class="modal-box">
+      <div class="row">
+        <label for="mm_dt" class="small">Fecha y hora de reunión</label>
+        <input type="datetime-local" id="mm_dt">
       </div>
-      <div id="ap_list">—</div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" id="mm_clear">Quitar</button>
+        <button class="btn primary" id="mm_save">Guardar</button>
+      </div>
     </div>
   </div>
 
@@ -203,16 +212,15 @@ try{
 
 /* ===== Utils ===== */
 const id=x=>document.getElementById(x);
-const toast=(m,k)=>{const t=id('toast');t.textContent=m;t.className='toast '+(k||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1400);}
+const toast=(m,k)=>{const t=id('toast');t.textContent=m;t.className='toast '+(k||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500);}
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))
 const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
 const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
 const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 const e0=v=>fmtE0.format(Number(v||0));
-const parseNum=v=>Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
-const fold=s=>(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-const cap=s=>{s=String(s||'');return s.charAt(0).toUpperCase()+s.slice(1);};
-const ddmm=(ms)=>{const d=new Date(ms);return d.toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
+const parseNum = v=>Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
+const fold = s=>(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const cap = s=>{s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1);};
 
 /* ===== Store ===== */
 const Store={
@@ -226,17 +234,18 @@ const Store={
 /* ===== Matching thresholds & warnings policy ===== */
 function thresholds(){
   const c=Store.cfg||{}; const th=(c.match&&c.match.thresholds)||{green:1,amber:0.95};
-  const warnOnlyGreen = (c.match&&c.match.warnings_only_when_green)!==undefined ? !!c.match.warnings_only_when_green : true;
-  return {g:Number(th.green||1), a:Number(th.amber||0.95), warnOnlyGreen};
+  return {g:Number(th.green||1), a:Number(th.amber||0.95), warnOnlyGreen:!!((c.match||{}).warnings_only_when_green)};
 }
 
-/* ===== Costs from config ===== */
+/* ===== Costs & helpers ===== */
 function cfgCosts(){
   const c=Store.cfg||{}; const k=c.costs||{};
-  let itp = Number(k.itp_pct ?? c.itp_pct ?? 0.08); if(itp>1) itp=itp/100;
+  let itp = Number(k.itp_pct ?? c.itp_pct ?? 0.08); // 0.08 ó 8
+  if(itp>1) itp = itp/100;
   const notaria = Number(k.notaria ?? c.notaria ?? 1500);
-  const psi = Number(k.honorarios ?? k.psi ?? c.honorarios ?? c.psi ?? 0); // “honorarios” es el PSI
-  return {itp, notaria, psi};
+  const psi = Number(k.honorarios ?? k.psi ?? c.honorarios ?? c.psi ?? 0);
+  const reforma = Number(k.reforma ?? 0);
+  return {itp, notaria, psi, reforma};
 }
 
 /* ===== Columns ===== */
@@ -244,14 +253,65 @@ const PHASES=['CONTACTO','REUNIÓN','CONTRATO','BÚSQUEDA','COMPRAVENTA','ÉXITO
 
 /* ===== Archivados toggle ===== */
 let SHOW_ARCH = !!JSON.parse(localStorage.getItem('show_arch')||'false');
-id('toggle_arch').checked = SHOW_ARCH;
-id('toggle_arch').addEventListener('change',()=>{SHOW_ARCH=id('toggle_arch').checked;localStorage.setItem('show_arch',JSON.stringify(SHOW_ARCH));render();});
+const archBtn = id('btn_arch_toggle');
+function paintArchBtn(){ archBtn.style.borderColor = SHOW_ARCH ? 'var(--brand)' : 'var(--line)'; }
+archBtn.onclick = ()=>{ SHOW_ARCH=!SHOW_ARCH; localStorage.setItem('show_arch',JSON.stringify(SHOW_ARCH)); paintArchBtn(); render(); };
+paintArchBtn();
+
+/* ===== Export CSV ===== */
+id('btn_export').onclick=function(){
+  const list = Store.pros||[];
+  const cols = [
+    'id','Nombre','Apellidos','DNI','Email','Movil','Direccion','Localidad','CP','Fase','Archivado','ReunionTS',
+    'Pref_Tipo','Pref_Localidades','Pref_Ascensor','Pref_Altura','Pref_Bajo','Pref_Reforma',
+    'Obj_Principal','Obj_Bruta','Obj_Neta','Obj_FlujoAnual','PSI_en_Rentab',
+    'Inv_Pmax','PSI_en_Pres','ITP_EUR','Notaria_EUR','PSI_EUR','ValorCompra','CTO','LTV','FondosPropios','ActivosAsignados'
+  ];
+  const c = cfgCosts();
+  const rows = list.map(p=>{
+    const pres = !!p.psi_in_presupuesto;
+    const rent = !!p.psi_en_rentab;
+    // recomputar V, ITP, CTO, FP para export
+    const V = (Number(p.inv_pmax||0) - c.notaria - (pres?c.psi:0)) / (1+c.itp);
+    const ITPe = Math.max(0, V*c.itp);
+    const CTO = pres ? Number(p.inv_pmax||0) : (Number(p.inv_pmax||0)+c.psi);
+    const ltv = Number(p.ltv||0);
+    const capFin = V*(ltv/100);
+    const fondos = (V - capFin) + ITPe + c.notaria + c.psi;
+
+    const prefs = p.prefs||{};
+    return [
+      p.id, p.nombre||'', p.apellidos||'', p.dni||'', p.email||'', p.phone||p.movil||'', p.dir||'', p.city||p.localidad||'',
+      p.cp||'', p.fase||'', p.archivado?1:0, p.meeting_ts||'',
+      prefs.tipo||p.pref_tipo||'', (prefs.localidades||p.locs_text||''), prefs.ascensor||'', prefs.altura||'',
+      (prefs.bajo||prefs.evitar_bajos||''), prefs.reforma||'',
+      (p.obj_main||''), p.obj_bruta||'', p.obj_neta||'', p.obj_flujo_anual||'', rent?1:0,
+      p.inv_pmax||'', pres?1:0, Math.round(ITPe), c.notaria, c.psi, Math.round(V), Math.round(CTO), p.ltv||0, Math.round(fondos),
+      (p.asset_ids||[]).length
+    ];
+  });
+
+  // CSV con BOM
+  let csv = '\ufeff'+cols.join(',')+'\n';
+  rows.forEach(r=>{
+    csv += r.map(v=>{
+      const s=String(v==null?'':v).replace(/"/g,'""');
+      return '"'+s+'"';
+    }).join(',')+'\n';
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'unihouser_clientes.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+};
 
 /* ===== Render board ===== */
 function render(){
   const all=(Store.pros||[]);
   const pros = all.filter(p=>SHOW_ARCH || !p.archivado);
   const byPhase=PHASES.map(ph=>pros.filter(p=>p.fase===ph));
+
   // KPIs
   id('k_total').textContent = pros.length;
   id('k_busq').textContent  = byPhase[3].length;
@@ -274,12 +334,14 @@ function render(){
 /* ===== Card ===== */
 function card(p){
   const d=document.createElement('div'); d.className='card'; d.draggable=true; d.dataset.id=p.id;
-  const email=esc(p.email||'—'), tel=esc(p.phone||p.telefono||'—');
+  const email=esc(p.email||'—'), tel=esc(p.phone||p.movil||'—');
   const sq = squares((p.asset_ids||[]).length);
-  const extraBtns=[];
+  const extraBtns = [];
+
   if(p.fase==='CONTACTO') extraBtns.push(iconBtn('cal','Fijar reunión'));
   if(p.fase==='ÉXITO' && !p.archivado) extraBtns.push(iconBtn('arch','Archivar'));
   if(p.fase==='BÚSQUEDA') extraBtns.push(iconBtn('asig','Asignar activos'));
+
   d.innerHTML =
     '<header>'+
       '<div style="display:flex;flex-direction:column;gap:2px">'+
@@ -292,16 +354,19 @@ function card(p){
     '</header>'+
     '<div class="badges seed">'+ seeds(p).map(htmlBadge).join('') +'</div>'+
     '<div class="squares" aria-label="Activos asignados">'+sq+'</div>';
+
   d.addEventListener('dragstart',ev=>{ d.classList.add('dragging'); ev.dataTransfer.setData('text/plain', p.id); });
   d.addEventListener('dragend',()=> d.classList.remove('dragging'));
-  d.addEventListener('click',ev=>{ const btn=ev.target.closest('button[data-act]'); if(btn) return; openDrawer(p.id); });
+  d.addEventListener('click',ev=>{
+    const btn=ev.target.closest('button[data-act]'); if(btn) return; openDrawer(p.id);
+  });
   d.querySelector('[data-act="view"]').onclick=()=>openDrawer(p.id);
   d.querySelector('[data-act="del"]').onclick=()=>delProspect(p.id);
   d.querySelector('[data-act="mail"]').onclick=()=>quickMail(p);
   d.querySelector('[data-act="wa"]').onclick=()=>quickWA(p);
   const cal=d.querySelector('[data-act="cal"]'); if(cal) cal.onclick=()=>openMeetingPicker(p.id);
   const ar=d.querySelector('[data-act="arch"]'); if(ar) ar.onclick=()=>archivarDesdeCard(p.id);
-  const as=d.querySelector('[data-act="asig"]'); if(as) as.onclick=()=>openAssignPanel(p.id);
+  const as=d.querySelector('[data-act="asig"]'); if(as) as.onclick=()=>openAssignBar(p.id);
   return d;
 }
 function squares(n){ let s=''; for(let i=0;i<n;i++) s+='<i class="on"></i>'; return s; }
@@ -312,7 +377,7 @@ function iconBtn(act,title){
     mail:'<path d="M3 6h18v12H3z"/><path d="m3 7 9 7 9-7"/>',
     wa:'<path d="M12 3a9 9 0 0 1 9 9c0 5-4 9-9 9a9.6 9.6 0 0 1-4-1l-4 1 1-4a9.6 9.6 0 0 1-1-4 9 9 0 0 1 9-9"/><path d="M8 9c0 4 4 6 4 6l2-1 2 2"/>',
     cal:'<path d="M7 3v4M17 3v4M3 9h18M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/>',
-    arch:'<path d="M4 7h16M7 7v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7"/><path d="M9 4h6l2 3H7z"/><path d="M10 12v6m4-6v6"/>',
+    arch:'<path d="M3 7h18M7 7v12h10V7M7 7l2-3h6l2 3"/><path d="M10 12h4"/>',
     asig:'<path d="M4 12h16M12 4v16M6 6h6M6 10h4M6 14h8M6 18h6"/>'
   };
   return '<button class="btn-icon '+act+'" data-act="'+act+'" title="'+esc(title)+'" aria-label="'+esc(title)+'">'+
@@ -320,18 +385,23 @@ function iconBtn(act,title){
 }
 function seeds(p){
   const out=[];
-  const main=fold(p.obj_main||'bruta');
+  const main=(fold(p.obj_main||'')||'bruta');
   if(main==='bruta' && p.obj_bruta) out.push({t:'RB',v:fmtN1.format(normPct(p.obj_bruta))+' %'});
   if(main==='neta'  && p.obj_neta ) out.push({t:'RN',v:fmtN1.format(normPct(p.obj_neta ))+' %'});
-  if(main==='flujo' && p.obj_flujo_anual){ out.push({t:'FL',v:e0(p.obj_flujo_anual)+' /año'}); }
-  const tipo=getPref(p,'tipo')||p.pref_tipo||'Tradicional'; out.push({t:'T',v:tipo});
-  const locs=(getPref(p,'localidades')||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
+  if(main==='flujo' && (p.obj_flujo_anual)){
+    out.push({t:'FL',v:e0(p.obj_flujo_anual)+' /año'});
+  }
+  const tipo=(p.prefs&&p.prefs.tipo)||p.pref_tipo||'Tradicional'; out.push({t:'T',v:tipo});
+  const locs=((p.prefs&&p.prefs.localidades)||p.locs_text||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
   if(locs.length) out.push({t:'L',v:locs.join(' · ')});
-  if(p.meeting_ts) out.push({t:'MT',v:'Reunión: '+ddmm(p.meeting_ts)});
+  if(p.meeting_ts){
+    const d=new Date(Number(p.meeting_ts)); const dd=d.toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    out.push({t:'MT',v:'Reunión: '+dd});
+  }
   return out;
 }
 function htmlBadge(b){ return '<span class="badge"><span class="lab">'+esc(b.t)+'</span><strong>'+esc(b.v)+'</strong></span>'; }
-function normPct(v){ v=Number(v||0); if(v>0 && v<=1) v=v*100; while(v>=100) v/=10; return v; }
+function normPct(v){ v=Number(v||0); if(v>0 && v<=1) v=v*100; return v; }
 
 /* ===== DnD ===== */
 function setupDroppable(col){
@@ -345,24 +415,31 @@ function setupDroppable(col){
 }
 function moveToPhase(idp, phase){
   const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
-  list[i].fase = phase; Store.pros=list; render();
+  list[i].fase = phase;
+  Store.pros=list; render();
 }
 
-/* ===== Crear / borrar / archivar ===== */
+/* ===== Crear / borrar ===== */
 id('btn_create').onclick=function(){
   const nombre=(id('c_nombre').value||'').trim();
   const ap=(id('c_apellidos').value||'').trim();
   const email=(id('c_email').value||'').trim();
-  const phone=(id('c_phone').value||'').trim();
+  const mov=(id('c_movil').value||'').trim();
   if(!nombre || !email){ toast('Nombre y email son obligatorios','warn'); return; }
   const list=Store.pros||[];
-  list.push({id:'p_'+Date.now(), ts:Date.now(), nombre:nombre, apellidos:ap, email:email, phone:phone, fase:'CONTACTO',
-    prefs:{tipo:'Tradicional', localidades:'', ascensor:'Indiferente', altura:'', bajo:'No', reforma:'No'}, 
+  list.push({id:'p_'+Date.now(), ts:Date.now(), nombre:nombre, apellidos:ap, email:email, phone:mov, fase:'CONTACTO',
+    prefs:{tipo:'Tradicional', localidades:'' , ascensor:'Sí', altura:'', bajo:'No', reforma:'No'},
     obj_main:'bruta', obj_bruta:10, asset_ids:[]});
-  Store.pros=list; id('c_nombre').value=''; id('c_apellidos').value=''; id('c_email').value=''; id('c_phone').value=''; render(); toast('Creado','ok');
+  Store.pros=list; id('c_nombre').value=''; id('c_apellidos').value=''; id('c_email').value=''; id('c_movil').value=''; render(); toast('Creado','ok');
 };
-function delProspect(idp){ if(!confirm('¿Borrar este contacto?')) return; Store.pros=(Store.pros||[]).filter(p=>p.id!==idp); render(); toast('Borrado','ok'); }
-function archivarDesdeCard(idp){ const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return; list[i].archivado=true; Store.pros=list; render(); toast('Archivado','ok'); }
+function delProspect(idp){
+  if(!confirm('¿Borrar este contacto?')) return;
+  Store.pros=(Store.pros||[]).filter(p=>p.id!==idp); render(); toast('Borrado','ok');
+}
+function archivarDesdeCard(idp){
+  const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
+  list[i].archivado=true; Store.pros=list; render(); toast('Archivado','ok');
+}
 
 /* ===== Drawer ===== */
 let OPEN_ID=null;
@@ -372,25 +449,36 @@ function openDrawer(idp){
   const ov=id('ov'), dr=id('dr'), body=id('dr_body');
   id('dr_title').textContent = (p.nombre||'-')+' '+(p.apellidos||'');
   body.innerHTML='';
+  // 1) Datos del cliente
   body.appendChild(blockDatosCliente(p));
-  body.appendChild(blockPrefs(p));
+  // 2) Preferencias del activo
+  body.appendChild(blockPreferencias(p));
+  // 3) Objetivos inversión
   body.appendChild(blockObjetivos(p));
+  // 4) Presupuesto inversión
   body.appendChild(blockPresupuesto(p));
+  // 5) Financiación
   body.appendChild(blockFinanciacion(p));
+  // 6) Notas reunión
   body.appendChild(blockNotas(p));
-  body.appendChild(blockGuardar(p)); // único Guardar aquí
+  // Botón único Guardar
+  body.appendChild(blockGuardar(p));
+
   ov.classList.add('open'); dr.classList.add('open');
 }
 function closeDrawer(){ id('ov').classList.remove('open'); id('dr').classList.remove('open'); OPEN_ID=null; }
 id('ov').onclick=closeDrawer; id('dr_close').onclick=closeDrawer;
 
-function inputKV(label, idd, val, ro){ return '<div class="field"><label>'+esc(label)+'</label><input '+(ro?'readonly':'')+' id="'+idd+'" value="'+esc(val??'')+'"></div>'; }
+/* ========== Bloques Drawer ========== */
+function inputKV(label, idd, val, ro){
+  return '<div class="field"><label>'+esc(label)+'</label><input '+(ro?'readonly':'')+' id="'+idd+'" value="'+esc(val??'')+'"></div>';
+}
 function selectKV(label, idd, opts, val){
   return '<div class="field"><label>'+esc(label)+'</label><select id="'+idd+'">'+
     opts.map(o=>'<option '+(o===val?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select></div>';
 }
 
-/* ===== Bloque 1: Datos del cliente ===== */
+/* ----- 1) Datos del cliente ----- */
 function blockDatosCliente(p){
   const b=document.createElement('div'); b.className='block';
   b.innerHTML =
@@ -401,241 +489,248 @@ function blockDatosCliente(p){
     '</div>'+
     '<div class="row two">'+
       inputKV('DNI','dc_dni',p.dni||'')+
-      inputKV('Móvil','dc_tel',p.phone||p.telefono||'')+
+      inputKV('Móvil','dc_tel',p.phone||p.movil||'')+
     '</div>'+
     '<div class="row two">'+
-      inputKV('Email','dc_em',p.email)+
-      inputKV('Dirección','dc_dir',p.direccion||'')+
+      inputKV('Email','dc_em',p.email||'')+
+      inputKV('Dirección','dc_dir',p.dir||'')+
     '</div>'+
     '<div class="row two">'+
-      inputKV('Localidad','dc_loc',p.loc||'')+
+      inputKV('Localidad','dc_city',p.city||p.localidad||'')+
       inputKV('Código postal','dc_cp',p.cp||'')+
     '</div>';
   return b;
 }
 
-/* ===== Preferencias del activo ===== */
-function getPref(p,k){ return (p.prefs||{})[k]; }
-function setPref(p,k,v){ const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return; list[i].prefs = Object.assign({}, list[i].prefs||{}, {[k]:v}); Store.pros=list; }
-function blockPrefs(p){
-  const pf=Object.assign({tipo:'Tradicional', localidades:'', ascensor:'Indiferente', altura:'', bajo:'No', reforma:'No'}, p.prefs||{});
+/* ----- 2) Preferencias del activo ----- */
+function blockPreferencias(p){
+  const prefs=Object.assign({tipo:'Tradicional',localidades:'',ascensor:'Sí',altura:'',bajo:'No',reforma:'No'}, p.prefs||{});
   const b=document.createElement('div'); b.className='block';
   b.innerHTML =
-   '<h4>Preferencias del activo</h4>'+
-   '<div class="row two">'+
-     selectKV('Tipo de alquiler','pf_tipo',['Tradicional','Habitaciones'],pf.tipo)+
-     '<div class="field"><label>Localidades (Enter para añadir)</label><div class="chips" id="pf_chips"></div><input id="pf_add" placeholder="Añadir y Enter"></div>'+
-   '</div>'+
-   '<div class="row three">'+
-     selectKV('Ascensor','pf_asc',['Sí','No','Indiferente'],pf.ascensor)+
-     inputKV('Altura (1–9)','pf_alt', pf.altura||'')+
-     selectKV('Bajo','pf_bajo',['No','Sí'],pf.bajo)+
-   '</div>'+
-   '<div class="row two">'+
-     selectKV('Reforma','pf_ref',['No','Sí'],pf.reforma)+
-     '<div></div>'+
-   '</div>';
-  // chips
+    '<h4>Preferencias del activo</h4>'+
+    '<div class="row two">'+
+      selectKV('Tipo de alquiler','pf_tipo',['Tradicional','Habitaciones'],prefs.tipo)+
+      '<div class="field"><label>Localidades (Enter para añadir)</label>'+
+        '<div class="chips" id="pf_chips"></div>'+
+        '<input id="pf_add" placeholder="Añadir y Enter">'+
+      '</div>'+
+    '</div>'+
+    '<div class="row three">'+
+      selectKV('Ascensor','pf_asc',['Sí','No'],prefs.ascensor)+
+      inputKV('Altura (1–9)','pf_alt',prefs.altura||'')+
+      selectKV('Bajo','pf_bajo',['No','Sí'],prefs.bajo)+
+    '</div>'+
+    '<div class="row two">'+
+      selectKV('Reforma','pf_ref',['No','Sí'],prefs.reforma)+
+      '<div></div>'+
+    '</div>';
   const chips=b.querySelector('#pf_chips'); const add=b.querySelector('#pf_add');
-  function paint(){ chips.innerHTML=''; (pf.localidades||'').toString().split(',').map(s=>s.trim()).filter(Boolean).forEach(l=>{
-    const c=document.createElement('span'); c.className='chip'; c.innerHTML='<span class="t">'+esc(l)+'</span> <span class="x" data-del="'+esc(l)+'">×</span>'; chips.appendChild(c);
-  });}
+  function paint(){
+    const arr=(prefs.localidades||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
+    chips.innerHTML='';
+    arr.forEach(l=>{
+      const c=document.createElement('span'); c.className='chip'; c.innerHTML='<span class="t">'+esc(l)+'</span> <span class="x" data-del="'+esc(l)+'">×</span>'; chips.appendChild(c);
+    });
+  }
   paint();
-  add.addEventListener('keydown',e=>{
+  add.addEventListener('keydown',function(e){
     if(e.key!=='Enter') return; e.preventDefault();
     const v=(add.value||'').trim(); if(!v) return;
-    let arr=(pf.localidades||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
-    if(!arr.includes(v)) arr.push(v); if(arr.length>12){toast('Máx 12 localidades','warn'); return;}
-    pf.localidades=arr.join(', '); setPref(p,'localidades',pf.localidades); paint(); add.value='';
+    let arr=(prefs.localidades||'').toString().split(',').map(s=>s.trim()).filter(Boolean);
+    if(!arr.includes(v)) arr.push(v);
+    if(arr.length>12){ toast('Máximo 12 localidades','warn'); return; }
+    prefs.localidades=arr.join(', ');
+    paint(); add.value='';
   });
-  chips.addEventListener('click',e=>{
+  chips.addEventListener('click',function(e){
     const del=e.target.getAttribute && e.target.getAttribute('data-del'); if(!del) return;
-    let arr=(pf.localidades||'').toString().split(',').map(s=>s.trim()).filter(Boolean).filter(x=>x!==del);
-    pf.localidades=arr.join(', '); setPref(p,'localidades',pf.localidades); paint();
+    let arr=(prefs.localidades||'').toString().split(',').map(s=>s.trim()).filter(Boolean).filter(x=>x!==del);
+    prefs.localidades=arr.join(', '); paint();
   });
-  // listeners de selects
-  b.querySelector('#pf_tipo').addEventListener('change',e=>setPref(p,'tipo',e.target.value));
-  b.querySelector('#pf_asc').addEventListener('change',e=>setPref(p,'ascensor',e.target.value));
-  b.querySelector('#pf_bajo').addEventListener('change',e=>setPref(p,'bajo',e.target.value));
-  b.querySelector('#pf_ref').addEventListener('change',e=>setPref(p,'reforma',e.target.value));
-  b.querySelector('#pf_alt').addEventListener('input',e=>setPref(p,'altura',parseNum(e.target.value)||''));
+  // guardado diferido (lo recoge el Guardar general)
+  b.getValues = ()=>({
+    prefs:{
+      tipo: b.querySelector('#pf_tipo').value,
+      localidades: prefs.localidades||'',
+      ascensor: b.querySelector('#pf_asc').value,
+      altura: b.querySelector('#pf_alt').value,
+      bajo: b.querySelector('#pf_bajo').value,
+      reforma: b.querySelector('#pf_ref').value
+    }
+  });
   return b;
 }
 
-/* ===== Objetivos de la inversión ===== */
+/* ----- 3) Objetivos de la inversión ----- */
 function blockObjetivos(p){
   const b=document.createElement('div'); b.className='block';
-  const main=cap(p.obj_main||'bruta');
+  const main = cap(p.obj_main||'Bruta');
   b.innerHTML =
-   '<h4>Objetivos de la inversión</h4>'+
-   '<div class="row two">'+
-     selectKV('Objetivo principal','og_main',['Bruta','Neta','Flujo'],cap(p.obj_main||'bruta'))+
-     selectKV('Incluir PSI en rentabilidad','og_psir',['No','Sí'], p.psi_en_rentab?'Sí':'No')+
-   '</div>'+
-   '<div class="row three">'+
-     inputKV('Bruta %','og_br', p.obj_bruta||'')+
-     inputKV('Neta %','og_ne', p.obj_neta||'')+
-     inputKV('Flujo €/mes','og_flm', (p.obj_flujo_anual? Math.round(p.obj_flujo_anual/12): ''))+
-   '</div>'+
-   '<div class="row two">'+
-     inputKV('Alquiler objetivo mensual (si principal = BRUTA)','og_alq','—',true)+
-     '<div></div>'+
-   '</div>';
-  // habilita solo el del principal
-  function toggleInputs(){
-    const m=b.querySelector('#og_main').value;
-    b.querySelector('#og_br').readOnly = m!=='Bruta';
-    b.querySelector('#og_ne').readOnly = m!=='Neta';
-    b.querySelector('#og_flm').readOnly = m!=='Flujo';
-  }
-  toggleInputs();
-  b.querySelector('#og_main').addEventListener('change',toggleInputs);
-  // guardo en objeto temporal al pulsar Guardar (bloque final)
+    '<h4>Objetivos de la inversión</h4>'+
+    '<div class="row two">'+
+      selectKV('Objetivo principal','ob_main',['Bruta','Neta','Flujo'],main)+
+      selectKV('Incluir PSI en rentabilidad','ob_psir',['No','Sí'], (p.psi_en_rentab?'Sí':'No'))+
+    '</div>'+
+    '<div class="row three">'+
+      inputKV('Bruta %','ob_br', p.obj_bruta||'')+
+      inputKV('Neta %','ob_ne', p.obj_neta||'')+
+      inputKV('Flujo €/mes','ob_fl', (p.obj_flujo_anual? Math.round(p.obj_flujo_anual/12):''))+
+    '</div>';
+  b.getValues = ()=>({
+    obj_main: fold(b.querySelector('#ob_main').value),
+    obj_bruta: parseNum(b.querySelector('#ob_br').value),
+    obj_neta: parseNum(b.querySelector('#ob_ne').value),
+    obj_flujo_anual: parseNum(b.querySelector('#ob_fl').value)*12,
+    psi_en_rentab: (b.querySelector('#ob_psir').value==='Sí')
+  });
   return b;
 }
 
-/* ===== Presupuesto de la inversión ===== */
+/* ----- 4) Presupuesto de la inversión ----- */
 function blockPresupuesto(p){
   const c=cfgCosts();
   const b=document.createElement('div'); b.className='block';
-  const pmax = Number(p.inv_pmax||0);
   b.innerHTML =
    '<h4>Presupuesto de la inversión</h4>'+
    '<div class="row two">'+
-     inputKV('P. máx inversión (€)','bp_pmax', pmax||'')+
-     selectKV('Incluir PSI en presupuesto máx','bp_psip',['No','Sí'], p.psi_in_presupuesto?'Sí':'No')+
+     inputKV('P. máx inversión (€)','bp_pmax', p.inv_pmax||'')+
+     selectKV('Incluir PSI en presupuesto máx','bp_psipres',['No','Sí'], (p.psi_in_presupuesto?'Sí':'No'))+
    '</div>'+
    '<div class="row three">'+
      inputKV('PSI (Honorarios) · Config','bp_psi', e0(c.psi), true)+
      inputKV('Notaría (€) · Config','bp_not', e0(c.notaria), true)+
-     inputKV('ITP (€) (calculado)','bp_itp','—',true)+
+     inputKV('ITP (€) (calculado)','bp_itp', '', true)+
    '</div>'+
    '<div class="row two">'+
-     inputKV('Valor máximo de compra (estimado)','bp_vmax','—',true)+
-     inputKV('Coste total operación','bp_cto','—',true)+
+     inputKV('Valor máximo de compra (estimado)','bp_vmax','',true)+
+     inputKV('Coste total operación','bp_cto','',true)+
+   '</div>'+
+   '<div class="row two">'+
+     inputKV('Alquiler objetivo mensual (si objetivo BRUTA)','bp_alq','',true)+
+     '<div></div>'+
    '</div>';
-  // recálculo en tiempo real (sin persistir aún)
   function recalc(){
-    const Pmax=parseNum(b.querySelector('#bp_pmax').value)||0;
-    const inclPsiPres=(b.querySelector('#bp_psip').value==='Sí');
-    const {itp,notaria,psi}=cfgCosts();
-    const psiTerm=inclPsiPres?psi:0;
-    const ValorCompra = (Pmax - notaria - psiTerm) / (1 + itp);
-    const ITPe = Math.max(0, ValorCompra*itp);
+    const Pmax = parseNum(b.querySelector('#bp_pmax').value);
+    const inclPsiPres = (b.querySelector('#bp_psipres').value==='Sí');
+    const inclPsiRent = (id('dr_body').querySelector('#ob_psir')?.value==='Sí') || !!p.psi_en_rentab;
+
+    const itp=c.itp, not=c.notaria, psi=c.psi;
+    const psiTerm = inclPsiPres ? psi : 0;
+    const V = (Pmax - not - psiTerm) / (1 + itp);
+    const ITPe = Math.max(0, V*itp);
     const CTO = inclPsiPres ? Pmax : (Pmax + psi);
-    b.querySelector('#bp_vmax').value = isFinite(ValorCompra)? e0(ValorCompra): '—';
+
+    let alq=''; const main = fold(id('dr_body').querySelector('#ob_main')?.value || p.obj_main || 'bruta');
+    if(main==='bruta'){
+      const br = (parseNum(id('dr_body').querySelector('#ob_br')?.value)||p.obj_bruta||0)/100;
+      const den = V + ITPe + not + (inclPsiRent? psi : 0);
+      alq = den>0 ? (den*br/12) : 0;
+    }
+
+    b.querySelector('#bp_vmax').value = isFinite(V)? e0(V): '—';
     b.querySelector('#bp_itp').value  = isFinite(ITPe)? e0(ITPe): '—';
     b.querySelector('#bp_cto').value  = isFinite(CTO)? e0(CTO): '—';
-    // Alquiler objetivo (si principal bruta): lo muestro en Objetivos
-    const og = document.getElementById('dr_body').querySelector('#og_alq'); if(!og) return;
-    const mainSel = document.getElementById('dr_body').querySelector('#og_main').value;
-    if(mainSel==='Bruta'){
-      const br=normPct(document.getElementById('dr_body').querySelector('#og_br').value||0)/100;
-      const psiRentSel = document.getElementById('dr_body').querySelector('#og_psir').value==='Sí';
-      const den = ValorCompra + ITPe + notaria + (psiRentSel?psi:0);
-      og.value = isFinite(den)? e0(den*br/12) : '—';
-    }else{ og.value='—'; }
+    b.querySelector('#bp_alq').value  = (alq!=='' && isFinite(alq))? e0(alq): '—';
   }
-  b.addEventListener('input', (e)=>{ if(e.target.id==='bp_pmax') recalc(); });
-  b.querySelector('#bp_psip').addEventListener('change', recalc);
+  b.recalc = recalc;
   setTimeout(recalc,0);
+  b.addEventListener('input', (e)=>{
+    if(['bp_pmax'].includes(e.target.id)) recalc();
+  });
+  b.querySelector('#bp_psipres').addEventListener('change', recalc);
+  // valores para guardar
+  b.getValues = ()=>{
+    // devolver últimos cálculos numéricos también
+    const Pmax = parseNum(b.querySelector('#bp_pmax').value);
+    const inclPsiPres = (b.querySelector('#bp_psipres').value==='Sí');
+    return { inv_pmax:Pmax, psi_in_presupuesto:inclPsiPres };
+  };
   return b;
 }
 
-/* ===== Financiación ===== */
+/* ----- 5) Financiación ----- */
 function blockFinanciacion(p){
+  const c=cfgCosts();
   const b=document.createElement('div'); b.className='block';
+  const ltv0 = (p.ltv==null ? 0 : p.ltv);
   b.innerHTML =
    '<h4>Financiación</h4>'+
    '<div class="row two">'+
-     inputKV('LTV (%)','bf_ltv', p.ltv??0)+
-     inputKV('Fondos propios (€)','bf_fp','—',true)+
+     inputKV('LTV (%)','bp_ltv', ltv0)+
+     inputKV('Fondos propios (€)','bp_fp','',true)+
    '</div>';
-  function recalcFP(){
-    const Pmax=parseNum(id('dr_body').querySelector('#bp_pmax').value)||0;
-    const inclPsiPres=(id('dr_body').querySelector('#bp_psip').value==='Sí');
-    const {itp,notaria,psi}=cfgCosts();
-    const psiTerm=inclPsiPres?psi:0;
-    const ValorCompra=(Pmax - notaria - psiTerm)/(1+itp);
-    const ITPe=Math.max(0,ValorCompra*itp);
-    const ltv=Math.max(0,Math.min(100,parseNum(b.querySelector('#bf_ltv').value)||0));
-    const capitalFinanciado=ValorCompra*(ltv/100);
-    const fondos = (ValorCompra - capitalFinanciado) + ITPe + notaria + psi;
-    b.querySelector('#bf_fp').value = isFinite(fondos)? e0(fondos): '—';
+  function recalc(){
+    const Pmax = parseNum(id('dr_body').querySelector('#bp_pmax').value);
+    const inclPsiPres = (id('dr_body').querySelector('#bp_psipres').value==='Sí');
+    const itp=c.itp, not=c.notaria, psi=c.psi;
+    const V = (Pmax - not - (inclPsiPres?psi:0)) / (1 + itp);
+    const ITPe = Math.max(0, V*itp);
+    const ltv = Math.max(0,Math.min(100, parseNum(b.querySelector('#bp_ltv').value)||0));
+    const capFin = V*(ltv/100);
+    const fondos = (V - capFin) + ITPe + not + psi; // PSI SIEMPRE cuenta en fondos
+    b.querySelector('#bp_fp').value = isFinite(fondos)? e0(fondos): '—';
   }
-  b.addEventListener('input',recalcFP);
-  setTimeout(recalcFP,10);
+  b.recalc = recalc;
+  setTimeout(recalc,0);
+  b.addEventListener('input', (e)=>{
+    if(['bp_ltv'].includes(e.target.id)) recalc();
+  });
+  b.getValues = ()=>({ ltv: parseNum(b.querySelector('#bp_ltv').value)||0 });
   return b;
 }
 
-/* ===== Notas ===== */
+/* ----- 6) Notas reunión ----- */
 function blockNotas(p){
   const b=document.createElement('div'); b.className='block';
-  b.innerHTML = '<h4>Notas de la reunión</h4><div class="row"><div class="field"><textarea id="bn_notes" placeholder="Notas...">'+esc(p.notes||'')+'</textarea></div></div>';
+  b.innerHTML = '<h4>Notas de la reunión</h4><div class="row"><div class="field"><textarea id="dc_notes" placeholder="Notas...">'+esc(p.notes||'')+'</textarea></div></div>';
+  b.getValues = ()=>({ notes: b.querySelector('#dc_notes').value||'' });
   return b;
 }
 
-/* ===== Guardar (único botón) ===== */
+/* ----- Botón único Guardar ----- */
 function blockGuardar(p){
   const b=document.createElement('div'); b.className='block';
-  b.innerHTML = '<div class="row"><button class="btn primary" id="btn_save_all">Guardar</button></div>';
-  b.querySelector('#btn_save_all').onclick=function(){
-    const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
+  b.innerHTML = '<div class="row"><button class="btn primary" id="b_save_all">Guardar</button></div>';
+  b.querySelector('#b_save_all').onclick=function(){
     const body=id('dr_body');
+    const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
 
-    // Datos cliente
-    const obj=list[i];
-    obj.nombre = body.querySelector('#dc_nom').value.trim();
-    obj.apellidos = body.querySelector('#dc_ape').value.trim();
-    obj.dni = body.querySelector('#dc_dni').value.trim();
-    obj.phone = body.querySelector('#dc_tel').value.trim();
-    obj.email = body.querySelector('#dc_em').value.trim();
-    obj.direccion = body.querySelector('#dc_dir').value.trim();
-    obj.loc = body.querySelector('#dc_loc').value.trim();
-    obj.cp = body.querySelector('#dc_cp').value.trim();
+    // 1 Datos cliente
+    list[i].nombre = body.querySelector('#dc_nom').value.trim();
+    list[i].apellidos = body.querySelector('#dc_ape').value.trim();
+    list[i].dni = body.querySelector('#dc_dni').value.trim();
+    list[i].phone = body.querySelector('#dc_tel').value.trim();
+    list[i].email = body.querySelector('#dc_em').value.trim();
+    list[i].dir = body.querySelector('#dc_dir').value.trim();
+    list[i].city = body.querySelector('#dc_city').value.trim();
+    list[i].cp = body.querySelector('#dc_cp').value.trim();
 
-    // Preferencias (ya se iban guardando, pero aseguro escritura final)
-    obj.prefs = Object.assign({}, obj.prefs||{}, {
-      tipo: body.querySelector('#pf_tipo').value,
-      ascensor: body.querySelector('#pf_asc').value,
-      altura: body.querySelector('#pf_alt').value,
-      bajo: body.querySelector('#pf_bajo').value,
-      reforma: body.querySelector('#pf_ref').value
-    });
-    // Localidades ya persistidas vía chips
+    // 2 Prefs
+    const pf = (body.querySelectorAll('.block'))[1].getValues().prefs;
+    list[i].prefs = Object.assign({}, list[i].prefs||{}, pf);
 
-    // Objetivos
-    obj.obj_main = fold(body.querySelector('#og_main').value);
-    obj.psi_en_rentab = (body.querySelector('#og_psir').value==='Sí');
-    obj.obj_bruta = normPct(body.querySelector('#og_br').value);
-    obj.obj_neta  = normPct(body.querySelector('#og_ne').value);
-    const flm = parseNum(body.querySelector('#og_flm').value);
-    obj.obj_flujo_anual = flm? Math.round(flm*12):0;
+    // 3 Objetivos
+    const ob = (body.querySelectorAll('.block'))[2].getValues();
+    list[i].obj_main = ob.obj_main;
+    list[i].obj_bruta = ob.obj_bruta;
+    list[i].obj_neta = ob.obj_neta;
+    list[i].obj_flujo_anual = ob.obj_flujo_anual;
+    list[i].psi_en_rentab = ob.psi_en_rentab;
 
-    // Presupuesto
-    obj.inv_pmax = parseNum(body.querySelector('#bp_pmax').value);
-    obj.psi_in_presupuesto = (body.querySelector('#bp_psip').value==='Sí');
+    // 4 Presupuesto
+    const pr = (body.querySelectorAll('.block'))[3].getValues();
+    list[i].inv_pmax = pr.inv_pmax;
+    list[i].psi_in_presupuesto = pr.psi_in_presupuesto;
 
-    // Financiación
-    obj.ltv = parseNum(body.querySelector('#bf_ltv').value);
+    // 5 Financiación
+    const fi = (body.querySelectorAll('.block'))[4].getValues();
+    list[i].ltv = fi.ltv;
 
-    // Notas
-    obj.notes = body.querySelector('#bn_notes').value;
+    // 6 Notas
+    const nt = (body.querySelectorAll('.block'))[5].getValues();
+    list[i].notes = nt.notes;
 
-    // Derivados (calculo final para exportar coherente)
-    const {itp,notaria,psi}=cfgCosts();
-    const psiTerm = obj.psi_in_presupuesto? psi: 0;
-    const ValorCompra = (obj.inv_pmax - notaria - psiTerm) / (1 + itp);
-    const ITPe = Math.max(0,ValorCompra*itp);
-    const CTO = obj.psi_in_presupuesto ? obj.inv_pmax : (obj.inv_pmax + psi);
-    obj._valor_compra = Math.max(0,ValorCompra);
-    obj._itp_eur = Math.max(0,ITPe);
-    obj._cto = Math.max(0,CTO);
-    obj._alq_obj_mes = (obj.obj_main==='bruta')? Math.round(((ValorCompra+ITPe+notaria+(obj.psi_en_rentab?psi:0))* (normPct(obj.obj_bruta||0)/100))/12) : 0;
-    const capitalFinanciado = ValorCompra*(Math.max(0,Math.min(100,obj.ltv||0))/100);
-    obj._fondos_propios = (ValorCompra - capitalFinanciado) + ITPe + notaria + psi;
-
-    Store.pros=list; render(); closeDrawer(); toast('Guardado','ok');
+    Store.pros=list; render(); toast('Guardado','ok'); closeDrawer();
   };
   return b;
 }
@@ -643,78 +738,96 @@ function blockGuardar(p){
 /* ======= Mini picker de reunión ======= */
 let MEETING_FOR=null;
 function openMeetingPicker(idp){
-  const when=prompt('Fecha y hora (YYYY-MM-DD HH:mm)'); if(when===null) return;
-  const stamp = when? new Date(when.replace(' ', 'T')).getTime():null;
-  const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
-  list[i].meeting_ts = stamp || null; Store.pros=list; render(); toast(stamp?'Reunión guardada':'Reunión quitada','ok');
-}
-
-/* ===== Panel de asignación ===== */
-id('ap_close').onclick=()=> id('ap').classList.remove('open');
-function openAssignPanel(idp){
+  MEETING_FOR=idp;
   const p=(Store.pros||[]).find(x=>x.id===idp); if(!p) return;
-  id('ap_t').textContent='Asignar activos · '+(p.nombre||'')+' '+(p.apellidos||'');
-  const box=id('ap_list'); box.innerHTML='';
-  const evals=(Store.evals||[]);
+  const m=id('mmodal'); const inp=id('mm_dt');
+  inp.value = p.meeting_ts? (new Date(Number(p.meeting_ts))).toISOString().slice(0,16) : '';
+  m.classList.add('open');
+}
+id('mm_save').onclick=function(){
+  const idp=MEETING_FOR; if(!idp) return;
+  const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
+  const v=id('mm_dt').value;
+  list[i].meeting_ts = v? (new Date(v)).getTime() : null;
+  Store.pros=list; id('mmodal').classList.remove('open'); render(); toast('Reunión guardada','ok');
+};
+id('mm_clear').onclick=function(){
+  const idp=MEETING_FOR; if(!idp) return;
+  const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
+  list[i].meeting_ts = null; Store.pros=list; id('mmodal').classList.remove('open'); render(); toast('Reunión quitada','ok');
+};
+id('mmodal').addEventListener('click',e=>{if(e.target.id==='mmodal') e.currentTarget.classList.remove('open');});
 
-  const tipoWanted = fold((p.prefs||{}).tipo||'Tradicional');
-  const locPrefs = ((p.prefs||{}).localidades||'').toString().split(',').map(x=>fold(x)).filter(Boolean);
+/* ===== Asignación (barra flotante) ===== */
+function openAssignBar(idp){
+  const p=(Store.pros||[]).find(x=>x.id===idp); if(!p) return;
+  const c=thresholds();
+  const evals=Store.evals||[];
 
-  const cand = evals.filter(e=> fold(e.tipo||'Tradicional')===tipoWanted ); // NO filtramos por localidad; avisamos
-  const th=thresholds();
+  // no filtramos por localidad; mostraremos warning "Otra localidad"
+  const cand = evals; 
+
+  let wrap=document.querySelector('.a-wrap'); if(wrap) wrap.remove();
+  wrap=document.createElement('div'); wrap.className='a-wrap';
+  const box=document.createElement('div'); box.className='a-box';
+  box.innerHTML='<div class="a-top"><strong>Asignar activos · '+esc(p.nombre||'')+' '+esc(p.apellidos||'')+'</strong><button class="btn" id="as_close">Cerrar</button></div>';
+  const list=document.createElement('div'); box.appendChild(list); wrap.appendChild(box); document.body.appendChild(wrap);
+  id('as_close').onclick=()=>wrap.remove();
 
   cand.forEach(ev=>{
-    const k=score(ev,p,th);
-    const otraLoc = locPrefs.length && !locPrefs.includes(fold(ev.loc||''));
+    const sc = score(ev,p,c);
     const row=document.createElement('div'); row.className='a-row';
-    const assigned = (p.asset_ids||[]).includes(ev.id);
     row.innerHTML =
-      '<div class="a-left"><span class="dot '+k.dot+'"></span></div>'+
       '<div class="a-info">'+
-        '<div class="addr">'+esc(ev.calle||'-')+' · '+esc(ev.loc||'')+(otraLoc?' · <span class="small" style="color:#b45309">Otra localidad</span>':'')+'</div>'+
+        '<div class="a-head"><span class="dot '+sc.dot+'"></span><div class="addr">'+esc(ev.calle||'-')+' · '+esc(ev.loc||'')+'</div></div>'+
         '<div class="a-icons">'+
-          '🛏 '+esc(ev.habs||'—')+
-          ' · 🛁 '+esc(ev.banos||'—')+
-          ' · ⤴ Alt '+esc(ev.alt||'—')+
-          ' · ⛗ Asc '+(String(ev.asc||'Sí').toLowerCase()==='no'?'No':'Sí')+
-          ' · 🏷 Bajo '+(/^(si|sí)$/i.test(String(ev.bajo||'No'))?'Sí':'No')+
-          ' · 🛠 '+esc(refText(ev.ref_tip))+
-          ' · 💶 '+e0(ev.alq||0)+
+          iconMini('habs')+' '+esc(ev.habs||'—')+
+          ' &nbsp;'+iconMini('banos')+' '+esc(ev.banos||'—')+
+          ' &nbsp;'+iconMini('planta')+' '+esc(ev.alt||'—')+
+          ' &nbsp;'+iconMini('reforma')+' '+esc(refText(ev.ref_tip))+
+          ' &nbsp;'+iconMini('alq')+' '+e0(ev.alq||0)+
         '</div>'+
-        renderWarns(k, th, otraLoc) +
+        (sc.warns.length?('<div class="a-warn">'+sc.warns.map(w=>'<span class="badge">! '+esc(w)+'</span>').join(' ')+'</div>'):'')+
       '</div>'+
       '<div class="a-actions">'+
-        '<button class="btn" data-act="'+(assigned?'quitar':'asignar')+'" data-id="'+ev.id+'">'+(assigned?'Quitar':'Asignar')+'</button>'+
+        '<button class="btn" data-act="toggle" data-id="'+ev.id+'">'+( (p.asset_ids||[]).includes(ev.id)?'Quitar':'Asignar' )+'</button>'+
         '<button class="btn primary" data-act="comprar" data-id="'+ev.id+'">Comprar</button>'+
         '<button class="btn" data-act="ver" data-id="'+ev.id+'">Ver</button>'+
         '<button class="btn" data-act="wa" data-id="'+ev.id+'">WA</button>'+
         '<button class="btn" data-act="mail" data-id="'+ev.id+'">Email</button>'+
       '</div>';
-    box.appendChild(row);
+    list.appendChild(row);
   });
 
-  box.onclick=function(e){
+  list.addEventListener('click',function(e){
     const b=e.target.closest('button[data-act]'); if(!b) return;
-    const act=b.getAttribute('data-act'); const eid=b.getAttribute('data-id');
-    if(act==='asignar' || act==='quitar'){
-      const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
-      const set=new Set(list[i].asset_ids||[]);
-      if(act==='asignar') set.add(eid); else set.delete(eid);
-      list[i].asset_ids=Array.from(set); Store.pros=list; render();
-      b.textContent = (act==='asignar')?'Quitar':'Asignar';
-      b.setAttribute('data-act', act==='asignar'?'quitar':'asignar');
-    }
-    if(act==='comprar'){ aceptarActivo(idp, eid); id('ap').classList.remove('open'); }
+    const eid=b.getAttribute('data-id'); const act=b.getAttribute('data-act');
     if(act==='ver'){ localStorage.setItem('load_eval', eid); window.open('evaluaciones.html','_blank'); }
-    if(act==='mail'){ const p=(Store.pros||[]).find(x=>x.id===idp); sendAssetMail(p,eid); }
-    if(act==='wa'){ const p=(Store.pros||[]).find(x=>x.id===idp); sendAssetWA(p,eid); }
-  };
-
-  id('ap').classList.add('open');
+    if(act==='mail'){ sendAssetMail(p, eid); }
+    if(act==='wa'){ sendAssetWA(p, eid); }
+    if(act==='comprar'){ aceptarActivo(p.id, eid); /* mueve a COMPRAVENTA */ wrap.remove(); }
+    if(act==='toggle'){ toggleAsignacion(p.id, eid, b); }
+  });
 }
-function refText(x){ if(!x) return '—'; if(x==='no')return'No'; if(x==='lavado')return'lavado'; if(x==='integral')return'integral'; return x; }
+function toggleAsignacion(pid,eid,btn){
+  const list=Store.pros||[]; const i=list.findIndex(x=>x.id===pid); if(i<0) return;
+  const set=new Set(list[i].asset_ids||[]);
+  if(set.has(eid)){ set.delete(eid); btn.textContent='Asignar'; } else { set.add(eid); btn.textContent='Quitar'; }
+  list[i].asset_ids=Array.from(set); Store.pros=list; render();
+}
+function refText(x){ if(!x) return '—'; if(x==='no')return'No'; if(x==='lavado')return'Lavado'; if(x==='integral')return'Integral'; return x; }
+function iconMini(kind){
+  const M={
+    habs:'<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 11h16M6 11V8a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v3"/></svg>',
+    banos:'<svg viewBox="0 0 24 24" width="14" height="14"><path d="M5 10h14v3a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5v-3z"/><path d="M7 7h10"/></svg>',
+    planta:'<svg viewBox="0 0 24 24" width="14" height="14"><path d="M7 20V4h10v16M7 8h10M7 12h10M7 16h10"/></svg>',
+    reforma:'<svg viewBox="0 0 24 24" width="14" height="14"><path d="M3 21h18M7 17l10-10 3 3-10 10H7v-3z"/></svg>',
+    alq:'<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 7h16M4 12h16M4 17h10"/></svg>'
+  };
+  return '<span class="small" style="display:inline-flex;align-items:center;gap:4px">'+M[kind]+'</span>';
+}
 
-/* — Semáforo y advertencias — */
+/* — Semáforos: contra objetivo principal + advertencias — */
 function score(ev,p,th){
   const main=fold(p.obj_main||'bruta');
   const rb = Number(ev.kpi_bruta||0);
@@ -724,34 +837,47 @@ function score(ev,p,th){
   if(main==='bruta'){ asset=rb; target=normPct(p.obj_bruta||10); }
   if(main==='neta'){  asset=rn; target=normPct(p.obj_neta ||6 ); }
   if(main==='flujo'){ asset=fl; target=Number(p.obj_flujo_anual||0); }
-  let ratio=0; if(target>0) ratio=asset/target;
+
+  let ratio=0; if(target>0) ratio = asset/target;
   let dot='r'; if(ratio>=th.g) dot='g'; else if(ratio>=th.a) dot='y';
-  const warns=[];
-  const needsRef = (ev.ref_tip && ev.ref_tip!=='no');
-  const sinAscensor = String(ev.asc||'Sí').toLowerCase()==='no';
-  const esBajo = /^(si|sí)$/i.test(String(ev.bajo||'No'));
-  const budget = Number((p.prefs||{}).presupuesto_max||0); // si existiera
-  if(!th.warnOnlyGreen || (th.warnOnlyGreen && dot==='g')){
-    if(sinAscensor && ((p.prefs||{}).ascensor==='Sí')) warns.push('Sin ascensor');
-    if(esBajo && ((p.prefs||{}).bajo==='No')) warns.push('Bajo');
-    if(needsRef && ((p.prefs||{}).reforma==='No')) warns.push('Reforma');
-    if(budget>0 && Number(ev.inv_total||0)>budget) warns.push('Excede presupuesto');
+
+  const warns = [];
+  // Warnings: solo presupuesto obligatorio; el resto bajo política warnOnlyGreen
+  const c = cfgCosts();
+  // CTO cliente
+  const pres = !!p.psi_in_presupuesto;
+  const V = (Number(p.inv_pmax||0) - c.notaria - (pres?c.psi:0)) / (1+c.itp);
+  const CTOc = pres ? Number(p.inv_pmax||0) : (Number(p.inv_pmax||0)+c.psi);
+  const ctoAsset = Number(ev.inv_total||0);
+  if(ctoAsset > CTOc) warns.push('Presupuesto');
+
+  const showOthers = (!th.warnOnlyGreen) || (th.warnOnlyGreen && dot==='g');
+  if(showOthers){
+    const necesitaReforma = (ev.ref_tip && ev.ref_tip!=='no');
+    const sinAscensor = String(ev.asc||ev.ascensor||'Sí').toLowerCase()==='no';
+    const esBajo = /^(si|sí)$/i.test(String(ev.bajo||'No')) || String(ev.bajo||'').toLowerCase()==='si';
+    const pref = p.prefs||{};
+    if(necesitaReforma && String((pref.reforma||'No')).toLowerCase()==='no') warns.push('Reforma');
+    if(sinAscensor && String((pref.ascensor||'Sí')).toLowerCase()==='sí'){} // ok
+    if(sinAscensor && String((pref.ascensor||'')).toLowerCase()==='si'){} // normalizado
+    if(sinAscensor && String((pref.ascensor||'')).toLowerCase()==='no-requiere'){} // no-op
+    if(sinAscensor && String((pref.ascensor||'')).toLowerCase()==='requiere') warns.push('Sin ascensor');
+    if(esBajo && String((pref.bajo||pref.evitar_bajos||'No')).toLowerCase()==='si') warns.push('Bajo');
+    // Otra localidad
+    const locs=(pref.localidades||'').toString().split(',').map(fold).filter(Boolean);
+    const isOtherLoc = locs.length && !locs.includes(fold(ev.loc||''));
+    if(isOtherLoc) warns.push('Otra localidad');
   }
-  return {dot, warns};
-}
-function renderWarns(k, th, otraLoc){
-  const warns=[...k.warns]; if(otraLoc) warns.push('Otra localidad');
-  if(!warns.length) return '<div class="small" style="margin-top:4px;color:#64748b">—</div>';
-  return '<div style="margin-top:4px">'+warns.map(w=>'<span class="badge warn">! '+esc(w)+'</span>').join(' ')+'</div>';
+  return {dot:dot, warns:warns};
 }
 
 /* ===== Aceptar activo → COMPRAVENTA ===== */
 function aceptarActivo(idp, eid){
   const list=Store.pros||[]; const i=list.findIndex(x=>x.id===idp); if(i<0) return;
-  const set=new Set(list[i].asset_ids||[]); set.add(eid);
-  list[i].asset_ids=Array.from(set);
-  list[i].accepted_eval_id=eid; list[i].fase='COMPRAVENTA';
-  Store.pros=list; render(); toast('Activo comprado','ok'); openDrawer(idp);
+  list[i].accepted_eval_id = eid;
+  list[i].fase = 'COMPRAVENTA';
+  const set=new Set(list[i].asset_ids||[]); set.add(eid); list[i].asset_ids=Array.from(set);
+  Store.pros=list; render(); toast('Activo aceptado','ok'); openDrawer(idp);
 }
 
 /* ===== Enviar por correo / WA ===== */
@@ -791,7 +917,7 @@ function sendAssetMail(p, eid){
 function sendAssetWA(p, eid){
   const e=(Store.evals||[]).find(x=>x.id===eid); if(!e){toast('Activo no encontrado','warn');return;}
   const nf=getCfgNotifs(); const body=fillAssetTpl(nf.waTpl,p,e);
-  const phone = String(p.phone||p.telefono||'').replace(/[^\d]/g,'');
+  const phone = String(p.phone||p.movil||'').replace(/[^\d]/g,'');
   const url='https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(body);
   window.open(url,'_blank');
 }
@@ -806,73 +932,20 @@ function quickMail(p){
 }
 function quickWA(p){
   const nf=getCfgNotifs(); const body='Hola '+(p.nombre||'')+', ';
-  const phone = String(p.phone||p.telefono||'').replace(/[^\d]/g,'');
+  const phone = String(p.phone||p.movil||'').replace(/[^\d]/g,'');
   const url='https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(body);
   window.open(url,'_blank');
 }
 
-/* ===== Export CSV (UTF-8 BOM) ===== */
-document.getElementById('btn_export').onclick = function () {
-  var pros = Store.pros || [];
-  var sep = ',';
-  var headers = [
-    'Id','Nombre','Apellidos','DNI','Email','Movil','Direccion','Localidad','CP','Fase','Meeting','Archivado',
-    'Pref_Tipo','Pref_Localidades','Pref_Ascensor','Pref_Altura','Pref_Bajo','Pref_Reforma',
-    'Obj_Principal','Obj_Bruta_pct','Obj_Neta_pct','Obj_Flujo_anual',
-    'Incluye_PSI_en_rent','Pmax','Incluye_PSI_en_Pmax','LTV',
-    'ValorCompra','ITP_eur','Notaria_eur','PSI_eur','CTO','AlquilerObjMes','FondosPropios',
-    'Activos_asignados','Aceptado_asset_id','Notas'
-  ];
-
-  var c = cfgCosts();
-  var lines = [];
-  lines.push(headers.join(sep));
-
-  for (var i = 0; i < pros.length; i++) {
-    var p = pros[i];
-    var Pmax = Number(p.inv_pmax || 0);
-    var psi = c.psi, notaria = c.notaria, itp = c.itp;
-
-    var psiTerm = p.psi_in_presupuesto ? psi : 0;
-    var V = (Pmax - notaria - psiTerm) / (1 + itp);
-    var ITPe = Math.max(0, V * itp);
-    var CTO = p.psi_in_presupuesto ? Pmax : (Pmax + psi);
-    var alq = (p.obj_main === 'bruta')
-      ? Math.round(((V + ITPe + notaria + (p.psi_en_rentab ? psi : 0)) * (normPct(p.obj_bruta || 0) / 100)) / 12)
-      : 0;
-    var capFin = V * (Math.max(0, Math.min(100, Number(p.ltv || 0))) / 100);
-    var fondos = (V - capFin) + ITPe + notaria + psi;
-
-    var row = [
-      p.id, p.nombre || '', p.apellidos || '', p.dni || '', p.email || '', p.phone || '', p.direccion || '', p.loc || '', p.cp || '',
-      p.fase || '', (p.meeting_ts ? ddmm(p.meeting_ts) : ''), (p.archivado ? 'Sí' : 'No'),
-      (p.prefs && p.prefs.tipo) || '', (p.prefs && p.prefs.localidades) || '', (p.prefs && p.prefs.ascensor) || '', (p.prefs && p.prefs.altura) || '', (p.prefs && p.prefs.bajo) || '', (p.prefs && p.prefs.reforma) || '',
-      p.obj_main || '', normPct(p.obj_bruta || 0), normPct(p.obj_neta || 0), p.obj_flujo_anual || 0,
-      (p.psi_en_rentab ? 'Sí' : 'No'), Pmax, (p.psi_in_presupuesto ? 'Sí' : 'No'), p.ltv || 0,
-      Math.round(V), Math.round(ITPe), Math.round(notaria), Math.round(psi), Math.round(CTO), Math.round(alq), Math.round(fondos),
-      (p.asset_ids || []).length, p.accepted_eval_id || '', (p.notes || '').replace(/\n/g, ' ')
-    ];
-
-    for (var j = 0; j < row.length; j++) {
-      row[j] = '"' + String(row[j]).replace(/"/g, '""') + '"';
-    }
-    lines.push(row.join(sep));
-  }
-
-  var csv = '\ufeff' + lines.join('\n');
-  var blob = new Blob([csv], { type: 'text/csv;charset=UTF-8;' });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'clientes.csv';
-  a.click();
-  URL.revokeObjectURL(a.href);
-};
-    
 /* ===== Helpers ===== */
 function load(){
-  try{ const c=Store.cfg||{}; if(c.brand_color) document.documentElement.style.setProperty('--brand', c.brand_color);}catch(_){}
+  try{
+    const c=Store.cfg||{}; if(c.brand_color) document.documentElement.style.setProperty('--brand', c.brand_color);
+  }catch(_){}
   render();
 }
+
+/* ===== Init ===== */
 document.addEventListener('DOMContentLoaded',load);
 })();
 </script>
