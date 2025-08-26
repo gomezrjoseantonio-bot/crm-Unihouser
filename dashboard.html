@@ -4,9 +4,10 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Unihouser — Dashboard CRM</title>
+<link rel="icon" href="data:,"><!-- evita 404 favicon -->
 <style>
 :root{
-  --brand:#c30b4e; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
+  --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
   --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
   --shadow:0 4px 22px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif; --fz:12px;
 }
@@ -146,9 +147,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
     </div>
 
     <!-- Board -->
-    <div class="board" id="board">
-      <!-- columnas inyectadas por JS -->
-    </div>
+    <div class="board" id="board"></div>
   </div>
 
   <div class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
@@ -164,7 +163,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
         <button class="btn" id="dr_close">Cerrar</button>
       </div>
     </div>
-    <div class="d-body" id="dr_body"><!-- contenido dinámico --></div>
+    <div class="d-body" id="dr_body"></div>
   </aside>
 
   <!-- Mini modal datetime -->
@@ -198,14 +197,12 @@ try{
 const id=x=>document.getElementById(x);
 const toast=(m,k)=>{const t=id('toast');t.textContent=m;t.className='toast '+(k||'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);}
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))
-const fmtN0 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
-const fmtN1 = new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
-const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
-const n0=v=>fmtN0.format(Number(v||0));
+const fmtN1=new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
+const fmtE0=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
 const e0=v=>fmtE0.format(Number(v||0));
-const parseNum = v=>Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
-const fold = s=>(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-const cap = s=>{s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1);};
+const parseNum=v=>Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
+const fold=s=>(s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const cap=s=>{s=String(s||'');return s.charAt(0).toUpperCase()+s.slice(1);};
 
 /* ===== Store ===== */
 const Store={
@@ -225,11 +222,11 @@ function thresholds(){
 /* ===== Costs & helpers ===== */
 function cfgCosts(){
   const c=Store.cfg||{}; const k=c.costs||{};
-  let itp = Number(k.itp_pct ?? c.itp_pct ?? 0.08); // % como 8 o 0.08
+  let itp = Number(k.itp_pct ?? c.itp_pct ?? 0.08);
   if(itp>1) itp = itp/100;
   const notaria = Number(k.notaria ?? c.notaria ?? 1500);
   const psi = Number(k.psi ?? c.psi ?? 0);
-  const reforma = Number(k.reforma ?? 0); // opcional
+  const reforma = Number(k.reforma ?? 0);
   return {itp, notaria, psi, reforma};
 }
 
@@ -272,21 +269,18 @@ function card(p){
   const email=esc(p.email||'—'), tel=esc(p.phone||p.telefono||'—');
   const sq = squares((p.asset_ids||[]).length);
   const extraBtns = [];
-
-  // CONTACTO → Fijar reunión
   if(p.fase==='CONTACTO') extraBtns.push(iconBtn('cal','Fijar reunión'));
-  // ÉXITO → Archivar
   if(p.fase==='ÉXITO' && !p.archivado) extraBtns.push(iconBtn('arch','Archivar'));
-  // BÚSQUEDA → Asignar activos
   if(p.fase==='BÚSQUEDA') extraBtns.push(iconBtn('asig','Asignar activos'));
 
+  // 🔧 FIX: el <div class="actions"> estaba SIN COMILLAS y rompía el JS
   d.innerHTML =
     '<header>'+
       '<div style="display:flex;flex-direction:column;gap:2px">'+
         '<div class="name">'+esc(p.nombre||'-')+' '+esc(p.apellidos||'')+'</div>'+
         '<div class="meta">'+email+' · '+tel+'</div>'+
       '</div>'+
-      <div class="actions">'+
+      '<div class="actions">'+
         iconBtn('mail','Email')+iconBtn('wa','WhatsApp')+extraBtns.join('')+iconBtn('view','Abrir')+iconBtn('del','Borrar')+
       '</div>'+
     '</header>'+
@@ -642,7 +636,7 @@ function blockObjetivos(p){
     const V = (Pmax - c.notaria - (inclPres? c.psi : 0)) / (1 + c.itp);
     const ITPe = Math.max(0,V*c.itp);
     const den = Math.max(0,V) + Math.max(0,ITPe) + c.notaria + (inclRent? c.psi: 0) + (c.reforma||0);
-    const br = normPct(p.obj_bruta||10)/100;
+    const br = (function v(x){x=Number(p.obj_bruta||10); if(x>0&&x<=1)x*=100; while(x>=100)x/=10; return x;})()/100;
     const alq = (den*br/12);
     b.querySelector('#bo_alq').value = (isFinite(alq)&&alq>0)? e0(alq): '—';
   }
@@ -701,7 +695,6 @@ function blockAsignacion(p){
     listBox.appendChild(row);
   });
 
-  // eventos
   listBox.addEventListener('change',function(e){
     const chk=e.target.closest('.a_chk'); if(!chk) return;
     const eid=chk.getAttribute('data-eid'); const list=Store.pros||[]; const i=list.findIndex(x=>x.id===p.id); if(i<0) return;
@@ -733,9 +726,6 @@ function iconMini(kind){
   };
   return '<span class="small" style="display:inline-flex;align-items:center;gap:4px">'+M[kind]+'</span>';
 }
-function refText(x){ if(!x) return '—'; if(x==='no')return'No'; if(x==='lavado')return'Lavado'; if(x==='integral')return'Integral'; return x; }
-
-/* — Semáforos: contra objetivo principal — */
 function score(ev,p,th){
   const main=fold(p.obj_main||'bruta');
   const rb = Number(ev.kpi_bruta||0);
@@ -751,8 +741,7 @@ function score(ev,p,th){
 
   const warns = [];
   if( (!th.warnOnlyGreen) || (th.warnOnlyGreen && dot==='g') ){
-    // preferencias simples Sí/No
-    const cliAsc = fold(getPref(p,'ascensor')); // 'sí' | 'no' | '—'
+    const cliAsc = fold(getPref(p,'ascensor'));
     const cliRef = fold(getPref(p,'reforma'));
     const cliBaj = fold(getPref(p,'bajos'));
     const sinAscensor = String(ev.asc||'Sí').toLowerCase()==='no';
@@ -761,8 +750,7 @@ function score(ev,p,th){
     if(cliAsc==='sí' && sinAscensor) warns.push('Sin ascensor');
     if(cliRef==='no' && requiereReforma) warns.push('Requiere reforma');
     if(cliBaj==='no' && esBajo) warns.push('Bajo');
-    // presupuesto
-    const budget = Number(p.presupuesto_max||getPref(p,'presupuesto_max')||0); // si existiera
+    const budget = Number(p.presupuesto_max||0);
     if(budget>0 && Number(ev.inv_total||0)>budget) warns.push('Excede presupuesto');
   }
   return {dot:dot, warns:warns};
@@ -883,16 +871,8 @@ function openAssignModal(idp){
   setTimeout(()=>{ document.querySelectorAll('#dr_body .block h4').forEach(h=>{if(h.textContent.includes('Asignar activos')) h.scrollIntoView({behavior:'smooth'});}); },150);
 }
 
-/* ===== Helpers ===== */
-function load(){
-  try{
-    const c=Store.cfg||{}; if(c.brand_color) document.documentElement.style.setProperty('--brand', c.brand_color);
-  }catch(_){}
-  render();
-}
-
 /* ===== Init ===== */
-document.addEventListener('DOMContentLoaded',load);
+document.addEventListener('DOMContentLoaded',render);
 })();
 </script>
 </body>
