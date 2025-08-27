@@ -109,6 +109,28 @@ input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6p
 .lb-prev{left:-52px} .lb-next{right:-52px}
 .lb-close{position:absolute;top:-44px;right:0;background:#fff;border:none;border-radius:999px;padding:6px 10px;cursor:pointer}
 
+/* Camera Modal */
+.camera-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:140}
+.camera-modal.open{display:flex}
+.camera-inner{background:#fff;border-radius:12px;max-width:90vw;max-height:90vh;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.camera-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #e5e7eb}
+.camera-header h3{margin:0;font-size:18px;font-weight:600}
+.camera-modes{display:flex;gap:8px}
+.camera-modes .btn{font-size:11px;padding:6px 10px;min-width:auto}
+.camera-modes .btn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.camera-close{background:none;border:none;font-size:18px;cursor:pointer;color:#6b7280;padding:4px}
+.camera-close:hover{color:#374151}
+.camera-body{padding:20px;text-align:center;position:relative}
+.camera-body video{max-width:100%;max-height:60vh;border-radius:8px;background:#000}
+.camera-body canvas{max-width:100%;max-height:60vh;border-radius:8px}
+.camera-error{color:#ef4444;padding:20px;font-size:14px}
+.camera-footer{display:flex;gap:12px;justify-content:center;padding:16px 20px;border-top:1px solid #e5e7eb}
+.camera-footer .btn{min-width:100px}
+.camera-footer > div{display:flex;gap:12px;justify-content:center}
+.recording-indicator{position:absolute;top:30px;left:30px;background:rgba(0,0,0,.8);color:#fff;padding:8px 12px;border-radius:20px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}
+.recording-dot{width:8px;height:8px;background:#ef4444;border-radius:50%;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1} 50%{opacity:0.5}}
+
 /* Toasts */
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:140}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
@@ -247,7 +269,13 @@ try{
           <h4>Adjuntar archivos</h4>
           <div class="attach-wrap">
             <div>
-              <div class="uploader"><strong>Imágenes</strong> <input id="up_imgs" type="file" accept="image/*" multiple></div>
+              <div class="uploader">
+                <strong>Imágenes</strong> 
+                <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                  <input id="up_imgs" type="file" accept="image/*" multiple>
+                  <button id="btn_camera" class="btn sec" style="font-size: 12px; padding: 4px 8px;">📷 Cámara</button>
+                </div>
+              </div>
               <div id="grid_imgs" class="attach-grid"></div>
             </div>
             <div>
@@ -264,6 +292,47 @@ try{
       <footer>
         <span class="note" id="m_note">Los adjuntos se guardan automáticamente.</span>
       </footer>
+    </div>
+  </div>
+
+  <!-- Camera Modal -->
+  <div class="camera-modal" id="cameraModal" aria-hidden="true">
+    <div class="camera-inner">
+      <div class="camera-header">
+        <h3 id="cameraTitle">Capturar Contenido</h3>
+        <div class="camera-modes">
+          <button id="photoModeBtn" class="btn sec active">📷 Foto</button>
+          <button id="videoModeBtn" class="btn sec">🎥 Video</button>
+        </div>
+        <button class="camera-close" id="cameraClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="camera-body">
+        <video id="cameraVideo" autoplay playsinline></video>
+        <canvas id="cameraCanvas" style="display: none;"></canvas>
+        <video id="recordedVideo" controls style="display: none;"></video>
+        <div class="camera-error" id="cameraError" style="display: none;">
+          <p>No se pudo acceder a la cámara. Verifique los permisos del navegador.</p>
+        </div>
+        <div class="recording-indicator" id="recordingIndicator" style="display: none;">
+          <span class="recording-dot"></span>
+          <span class="recording-text">Grabando... <span id="recordingTime">00:00</span></span>
+        </div>
+      </div>
+      <div class="camera-footer">
+        <!-- Photo mode controls -->
+        <div id="photoControls">
+          <button id="captureBtn" class="btn primary">📷 Capturar</button>
+          <button id="retakeBtn" class="btn sec" style="display: none;">🔄 Repetir</button>
+          <button id="savePhotoBtn" class="btn primary" style="display: none;">💾 Guardar Foto</button>
+        </div>
+        <!-- Video mode controls -->
+        <div id="videoControls" style="display: none;">
+          <button id="recordBtn" class="btn primary">🎥 Grabar</button>
+          <button id="stopBtn" class="btn sec" style="display: none;">⏹ Detener</button>
+          <button id="retakeVideoBtn" class="btn sec" style="display: none;">🔄 Repetir</button>
+          <button id="saveVideoBtn" class="btn primary" style="display: none;">💾 Guardar Video</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -701,6 +770,9 @@ function renderAttachments(e){
   id('up_imgs').onchange = (ev)=>{ handleFiles(e, ev.target.files, 'images'); ev.target.value=''; };
   id('up_vids').onchange = (ev)=>{ handleFiles(e, ev.target.files, 'videos'); ev.target.value=''; };
   id('up_pdfs').onchange = (ev)=>{ handleFiles(e, ev.target.files, 'pdfs');   ev.target.value=''; };
+  
+  // Camera button event
+  id('btn_camera').onclick = ()=>{ openCamera(e); };
 
   function handleFiles(E, fileList, kind){
     const arr = Array.prototype.slice.call(fileList||[]);
@@ -728,6 +800,337 @@ function persistFiles(e){
   const list=Store.evals||[]; const i=list.findIndex(x=>x.id===e.id); if(i<0) return;
   list[i].files = e.files; Store.evals=list; toast('Adjuntos guardados','ok');
 }
+
+/* Camera functionality */
+let cameraStream = null;
+let currentEval = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordingTimer = null;
+let recordingStartTime = 0;
+let currentMode = 'photo'; // 'photo' or 'video'
+
+function openCamera(e) {
+  currentEval = e;
+  const modal = id('cameraModal');
+  const video = id('cameraVideo');
+  const canvas = id('cameraCanvas');
+  const recordedVideo = id('recordedVideo');
+  const error = id('cameraError');
+  
+  // Reset UI state
+  video.style.display = 'block';
+  canvas.style.display = 'none';
+  recordedVideo.style.display = 'none';
+  error.style.display = 'none';
+  id('recordingIndicator').style.display = 'none';
+  
+  // Set default mode to photo
+  setMode('photo');
+  
+  modal.classList.add('open');
+
+  // Request camera access with audio for video recording
+  const constraints = {
+    video: { facingMode: 'environment' },
+    audio: true
+  };
+
+  navigator.mediaDevices.getUserMedia(constraints)
+    .then(stream => {
+      cameraStream = stream;
+      video.srcObject = stream;
+    })
+    .catch(err => {
+      console.error('Error accessing camera:', err);
+      video.style.display = 'none';
+      error.style.display = 'block';
+    });
+}
+
+function closeCamera() {
+  const modal = id('cameraModal');
+  modal.classList.remove('open');
+  
+  // Stop recording if active
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+  }
+  
+  // Stop recording timer
+  if (recordingTimer) {
+    clearInterval(recordingTimer);
+    recordingTimer = null;
+  }
+  
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
+  
+  const video = id('cameraVideo');
+  video.srcObject = null;
+  currentEval = null;
+  recordedChunks = [];
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  const photoBtn = id('photoModeBtn');
+  const videoBtn = id('videoModeBtn');
+  const photoControls = id('photoControls');
+  const videoControls = id('videoControls');
+  
+  // Update button states
+  if (mode === 'photo') {
+    photoBtn.classList.add('active');
+    videoBtn.classList.remove('active');
+    photoControls.style.display = 'flex';
+    videoControls.style.display = 'none';
+    resetPhotoMode();
+  } else {
+    videoBtn.classList.add('active');
+    photoBtn.classList.remove('active');
+    photoControls.style.display = 'none';
+    videoControls.style.display = 'flex';
+    resetVideoMode();
+  }
+}
+
+function resetPhotoMode() {
+  const video = id('cameraVideo');
+  const canvas = id('cameraCanvas');
+  
+  video.style.display = 'block';
+  canvas.style.display = 'none';
+  
+  id('captureBtn').style.display = 'inline-block';
+  id('retakeBtn').style.display = 'none';
+  id('savePhotoBtn').style.display = 'none';
+}
+
+function resetVideoMode() {
+  const video = id('cameraVideo');
+  const recordedVideo = id('recordedVideo');
+  
+  video.style.display = 'block';
+  recordedVideo.style.display = 'none';
+  id('recordingIndicator').style.display = 'none';
+  
+  id('recordBtn').style.display = 'inline-block';
+  id('stopBtn').style.display = 'none';
+  id('retakeVideoBtn').style.display = 'none';
+  id('saveVideoBtn').style.display = 'none';
+  
+  // Stop recording timer
+  if (recordingTimer) {
+    clearInterval(recordingTimer);
+    recordingTimer = null;
+  }
+}
+
+function capturePhoto() {
+  const video = id('cameraVideo');
+  const canvas = id('cameraCanvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Set canvas dimensions to video dimensions
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  
+  // Draw the video frame to canvas
+  ctx.drawImage(video, 0, 0);
+  
+  // Hide video, show canvas
+  video.style.display = 'none';
+  canvas.style.display = 'block';
+  
+  // Update buttons
+  id('captureBtn').style.display = 'none';
+  id('retakeBtn').style.display = 'inline-block';
+  id('savePhotoBtn').style.display = 'inline-block';
+}
+
+function retakePhoto() {
+  resetPhotoMode();
+}
+
+function savePhoto() {
+  const canvas = id('cameraCanvas');
+  const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+  
+  // Create a file-like object to use with existing handleFiles function
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const fileName = `camera-${timestamp}.jpg`;
+  
+  // Create a mock file object
+  const file = {
+    name: fileName,
+    size: dataURL.length * 0.75, // Approximate size
+    type: 'image/jpeg'
+  };
+  
+  // Add to evaluation files
+  if (currentEval) {
+    currentEval.files = currentEval.files || {images:[], videos:[], pdfs:[]};
+    const rec = {name: file.name, size: file.size, type: file.type, data: dataURL};
+    currentEval.files.images.push(rec);
+    persistFiles(currentEval);
+    renderAttachments(currentEval);
+    toast('Imagen capturada y guardada', 'ok');
+  }
+  
+  closeCamera();
+}
+
+function startRecording() {
+  if (!cameraStream) return;
+  
+  recordedChunks = [];
+  
+  try {
+    mediaRecorder = new MediaRecorder(cameraStream, {
+      mimeType: 'video/webm; codecs=vp9,opus'
+    });
+  } catch (err) {
+    try {
+      mediaRecorder = new MediaRecorder(cameraStream, {
+        mimeType: 'video/webm'
+      });
+    } catch (err2) {
+      try {
+        mediaRecorder = new MediaRecorder(cameraStream);
+      } catch (err3) {
+        toast('Error: El navegador no soporta grabación de video', 'warn');
+        return;
+      }
+    }
+  }
+  
+  mediaRecorder.ondataavailable = event => {
+    if (event.data.size > 0) {
+      recordedChunks.push(event.data);
+    }
+  };
+  
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const videoURL = URL.createObjectURL(blob);
+    
+    const recordedVideo = id('recordedVideo');
+    recordedVideo.src = videoURL;
+    recordedVideo.style.display = 'block';
+    
+    const cameraVideo = id('cameraVideo');
+    cameraVideo.style.display = 'none';
+    
+    // Update buttons
+    id('recordBtn').style.display = 'none';
+    id('stopBtn').style.display = 'none';
+    id('retakeVideoBtn').style.display = 'inline-block';
+    id('saveVideoBtn').style.display = 'inline-block';
+    
+    // Hide recording indicator
+    id('recordingIndicator').style.display = 'none';
+    
+    // Stop recording timer
+    if (recordingTimer) {
+      clearInterval(recordingTimer);
+      recordingTimer = null;
+    }
+  };
+  
+  mediaRecorder.start();
+  recordingStartTime = Date.now();
+  
+  // Show recording indicator
+  id('recordingIndicator').style.display = 'flex';
+  
+  // Update buttons
+  id('recordBtn').style.display = 'none';
+  id('stopBtn').style.display = 'inline-block';
+  
+  // Start recording timer
+  updateRecordingTime();
+  recordingTimer = setInterval(updateRecordingTime, 1000);
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+  }
+}
+
+function updateRecordingTime() {
+  const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+  const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+  const seconds = (elapsed % 60).toString().padStart(2, '0');
+  id('recordingTime').textContent = `${minutes}:${seconds}`;
+}
+
+function retakeVideo() {
+  const recordedVideo = id('recordedVideo');
+  if (recordedVideo.src) {
+    URL.revokeObjectURL(recordedVideo.src);
+  }
+  resetVideoMode();
+}
+
+function saveVideo() {
+  const recordedVideo = id('recordedVideo');
+  
+  if (recordedChunks.length === 0) return;
+  
+  const blob = new Blob(recordedChunks, { type: 'video/webm' });
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const fileName = `video-${timestamp}.webm`;
+  
+  // Convert blob to data URL
+  const reader = new FileReader();
+  reader.onload = function() {
+    if (currentEval) {
+      currentEval.files = currentEval.files || {images:[], videos:[], pdfs:[]};
+      const rec = {
+        name: fileName,
+        size: blob.size,
+        type: 'video/webm',
+        data: reader.result
+      };
+      currentEval.files.videos.push(rec);
+      persistFiles(currentEval);
+      renderAttachments(currentEval);
+      toast('Video grabado y guardado', 'ok');
+    }
+    
+    closeCamera();
+  };
+  reader.readAsDataURL(blob);
+}
+
+// Camera modal event listeners
+id('cameraClose').onclick = closeCamera;
+
+// Mode switching
+id('photoModeBtn').onclick = () => setMode('photo');
+id('videoModeBtn').onclick = () => setMode('video');
+
+// Photo controls
+id('captureBtn').onclick = capturePhoto;
+id('retakeBtn').onclick = retakePhoto;
+id('savePhotoBtn').onclick = savePhoto;
+
+// Video controls
+id('recordBtn').onclick = startRecording;
+id('stopBtn').onclick = stopRecording;
+id('retakeVideoBtn').onclick = retakeVideo;
+id('saveVideoBtn').onclick = saveVideo;
+
+// Close modal when clicking outside
+id('cameraModal').onclick = function(e) {
+  if (e.target === this) {
+    closeCamera();
+  }
+};
 
 /* Abrir en Evaluar */
 function goEvaluar(idEv){
