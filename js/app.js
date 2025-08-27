@@ -1,6 +1,6 @@
 // js/app.js — reemplazo completo (formatos ES y Store)
 
-// ---------- Store (cfg, pros, evals) ----------
+// ---------- Store (cfg, pros, evals, cuentas, transacciones, presupuestos, inversiones) ----------
 window.Store = {
   get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} },
   set cfg(v){ localStorage.setItem('cfg', JSON.stringify(v)); },
@@ -9,7 +9,20 @@ window.Store = {
   set pros(v){ localStorage.setItem('pros', JSON.stringify(v)); },
 
   get evals(){ try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]} },
-  set evals(v){ localStorage.setItem('evals', JSON.stringify(v)); }
+  set evals(v){ localStorage.setItem('evals', JSON.stringify(v)); },
+
+  // Nuevas entidades para gestión financiera personal
+  get cuentas(){ try{return JSON.parse(localStorage.getItem('cuentas')||'[]')}catch(_){return[]} },
+  set cuentas(v){ localStorage.setItem('cuentas', JSON.stringify(v)); },
+
+  get transacciones(){ try{return JSON.parse(localStorage.getItem('transacciones')||'[]')}catch(_){return[]} },
+  set transacciones(v){ localStorage.setItem('transacciones', JSON.stringify(v)); },
+
+  get presupuestos(){ try{return JSON.parse(localStorage.getItem('presupuestos')||'[]')}catch(_){return[]} },
+  set presupuestos(v){ localStorage.setItem('presupuestos', JSON.stringify(v)); },
+
+  get inversiones(){ try{return JSON.parse(localStorage.getItem('inversiones')||'[]')}catch(_){return[]} },
+  set inversiones(v){ localStorage.setItem('inversiones', JSON.stringify(v)); }
 };
 
 // ---------- Formateadores ES ----------

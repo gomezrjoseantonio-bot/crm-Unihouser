@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FinanceHub — Presupuestos</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+:root{
+  --brand:#2563eb; --accent:#3b82f6; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+}
+.brand-new { 
+  background: linear-gradient(135deg, var(--brand), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900;
+}
+.presupuesto-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  background: #fff;
+}
+.presupuesto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+.categoria-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.categoria-row:last-child {
+  border-bottom: none;
+}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="brand">
+        <div class="logo" style="background: var(--brand);">💰</div>
+        <div class="title brand-new">FinanceHub — Presupuestos</div>
+      </div>
+      <nav class="nav">
+        <a href="finanzas.html">Dashboard</a>
+        <a href="cuentas.html">Cuentas</a>
+        <a href="presupuestos.html" class="active">Presupuestos</a>
+        <a href="inversiones.html">Inversiones</a>
+        <a href="propiedades.html">Propiedades</a>
+        <a href="configuracion.html">Configuración</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h2>Gestión de Presupuestos</h2>
+          <p class="muted">Planifica y controla tus gastos mensuales y anuales</p>
+        </div>
+        <button class="btn primary" onclick="showAddPresupuestoModal()">+ Nuevo Presupuesto</button>
+      </div>
+
+      <div class="stats-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0;">
+        <div class="stat-card" style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Presupuesto Mensual</div>
+          <div id="presupuesto-mensual" style="font-size: 28px; font-weight: 800; color: var(--brand); margin: 8px 0;">€0</div>
+        </div>
+        <div class="stat-card" style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Gastado Este Mes</div>
+          <div id="gastado-mensual" style="font-size: 28px; font-weight: 800; color: var(--warn); margin: 8px 0;">€0</div>
+        </div>
+        <div class="stat-card" style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Disponible</div>
+          <div id="disponible-mensual" style="font-size: 28px; font-weight: 800; color: var(--ok); margin: 8px 0;">€0</div>
+        </div>
+        <div class="stat-card" style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">% Cumplimiento</div>
+          <div id="cumplimiento" style="font-size: 28px; font-weight: 800; color: var(--brand); margin: 8px 0;">0%</div>
+        </div>
+      </div>
+
+      <div id="presupuestos-list">
+        <!-- Los presupuestos se cargarán dinámicamente -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal para agregar/editar presupuesto -->
+  <div id="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: #fff; border-radius: 16px; padding: 24px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+      <h3 id="modal-title">Nuevo Presupuesto</h3>
+      
+      <form id="presupuesto-form">
+        <div class="row">
+          <div class="field">
+            <label>Nombre del presupuesto</label>
+            <input type="text" id="presupuesto-nombre" placeholder="Ej: Presupuesto Mensual 2025" required>
+          </div>
+        </div>
+
+        <div class="row two" style="grid-template-columns: 1fr 1fr;">
+          <div class="field">
+            <label>Tipo de presupuesto</label>
+            <select id="presupuesto-tipo" required>
+              <option value="">Seleccionar tipo</option>
+              <option value="mensual">Mensual</option>
+              <option value="anual">Anual</option>
+              <option value="categoria">Por Categoría</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Año</label>
+            <input type="number" id="presupuesto-ano" min="2020" max="2030" required>
+          </div>
+        </div>
+
+        <div class="row" id="mes-field" style="display: none;">
+          <div class="field">
+            <label>Mes (solo para presupuestos mensuales)</label>
+            <select id="presupuesto-mes">
+              <option value="">Seleccionar mes</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="categorias-presupuesto">
+          <h4>Categorías de Gasto</h4>
+          <div class="field">
+            <button type="button" class="btn ghost" onclick="addCategoriaPresupuesto()">+ Agregar Categoría</button>
+          </div>
+          <div id="categorias-list">
+            <!-- Categorías dinámicas -->
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="btn ghost" onclick="closeModal()">Cancelar</button>
+          <button type="submit" class="btn primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    let editingPresupuestoId = null;
+    let categoriaCounter = 0;
+
+    const categoriasDefault = [
+      'Alimentación', 'Transporte', 'Vivienda', 'Servicios', 'Ocio', 
+      'Salud', 'Ropa', 'Educación', 'Ahorros', 'Otros'
+    ];
+
+    function loadPresupuestos() {
+      const presupuestos = Store.presupuestos || [];
+      const container = document.getElementById('presupuestos-list');
+      
+      if (presupuestos.length === 0) {
+        container.innerHTML = '<p class="muted" style="text-align: center; padding: 40px;">No tienes presupuestos creados. ¡Crea tu primer presupuesto!</p>';
+        updateStats([]);
+        return;
+      }
+
+      container.innerHTML = presupuestos.map(presupuesto => createPresupuestoCard(presupuesto)).join('');
+      updateStats(presupuestos);
+    }
+
+    function createPresupuestoCard(presupuesto) {
+      const totalPresupuestado = presupuesto.categorias ? 
+        Object.values(presupuesto.categorias).reduce((sum, cat) => sum + (cat.limite || 0), 0) : 0;
+      
+      const totalGastado = calcularGastado(presupuesto);
+      const porcentajeUsado = totalPresupuestado > 0 ? (totalGastado / totalPresupuestado) * 100 : 0;
+      const disponible = totalPresupuestado - totalGastado;
+
+      let progressColor = '#16a34a'; // Verde
+      if (porcentajeUsado > 90) progressColor = '#ef4444'; // Rojo
+      else if (porcentajeUsado > 75) progressColor = '#f59e0b'; // Amarillo
+
+      return `
+        <div class="presupuesto-card">
+          <div class="presupuesto-header">
+            <div>
+              <h4 style="margin: 0;">${presupuesto.nombre}</h4>
+              <p style="margin: 4px 0; color: var(--ink2); font-size: 12px;">
+                ${presupuesto.tipo.charAt(0).toUpperCase() + presupuesto.tipo.slice(1)} ${presupuesto.ano}
+                ${presupuesto.mes ? ` - ${getMonthName(presupuesto.mes)}` : ''}
+              </p>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 18px; font-weight: 700; color: ${disponible >= 0 ? 'var(--ok)' : 'var(--bad)'};">
+                ${e0(disponible)} disponible
+              </div>
+              <div style="font-size: 12px; color: var(--ink2);">
+                ${e0(totalGastado)} de ${e0(totalPresupuestado)}
+              </div>
+            </div>
+          </div>
+          
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${Math.min(porcentajeUsado, 100)}%; background: ${progressColor};"></div>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+            <span style="font-size: 12px; color: var(--ink2);">${porcentajeUsado.toFixed(1)}% utilizado</span>
+            <div>
+              <button class="btn-icon" onclick="editPresupuesto('${presupuesto.id}')" title="Editar" style="width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; margin-left: 8px;">✏️</button>
+              <button class="btn-icon" onclick="deletePresupuesto('${presupuesto.id}')" title="Eliminar" style="width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; margin-left: 8px;">🗑️</button>
+            </div>
+          </div>
+          
+          ${presupuesto.categorias ? createCategoriasView(presupuesto.categorias, presupuesto) : ''}
+        </div>
+      `;
+    }
+
+    function createCategoriasView(categorias, presupuesto) {
+      return `
+        <div style="margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px;">
+          <h5 style="margin: 0 0 8px; font-size: 12px; color: var(--ink2); text-transform: uppercase;">Desglose por Categorías</h5>
+          ${Object.entries(categorias).map(([categoria, data]) => {
+            const gastado = calcularGastadoCategoria(presupuesto, categoria);
+            const porcentaje = data.limite > 0 ? (gastado / data.limite) * 100 : 0;
+            let color = '#16a34a';
+            if (porcentaje > 90) color = '#ef4444';
+            else if (porcentaje > 75) color = '#f59e0b';
+            
+            return `
+              <div class="categoria-row">
+                <div>
+                  <span style="font-weight: 600;">${categoria}</span>
+                  <div style="font-size: 11px; color: var(--ink2);">${e0(gastado)} de ${e0(data.limite)}</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-weight: 600; color: ${color};">${porcentaje.toFixed(1)}%</div>
+                  <div style="font-size: 10px; color: var(--ink2);">disponible: ${e0(data.limite - gastado)}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function calcularGastado(presupuesto) {
+      // Por ahora retornamos un valor simulado
+      // En una implementación real, esto consultaría las transacciones reales
+      return Math.random() * Object.values(presupuesto.categorias || {}).reduce((sum, cat) => sum + (cat.limite || 0), 0) * 0.7;
+    }
+
+    function calcularGastadoCategoria(presupuesto, categoria) {
+      // Simulación de gasto por categoría
+      const limite = presupuesto.categorias[categoria]?.limite || 0;
+      return Math.random() * limite * 0.8;
+    }
+
+    function updateStats(presupuestos) {
+      const ahora = new Date();
+      const mesActual = ahora.getMonth() + 1;
+      const anoActual = ahora.getFullYear();
+      
+      const presupuestoMensualActual = presupuestos.find(p => 
+        p.tipo === 'mensual' && p.ano === anoActual && p.mes === mesActual
+      );
+
+      let totalPresupuestado = 0;
+      let totalGastado = 0;
+      
+      if (presupuestoMensualActual) {
+        totalPresupuestado = Object.values(presupuestoMensualActual.categorias || {})
+          .reduce((sum, cat) => sum + (cat.limite || 0), 0);
+        totalGastado = calcularGastado(presupuestoMensualActual);
+      }
+
+      const disponible = totalPresupuestado - totalGastado;
+      const cumplimiento = totalPresupuestado > 0 ? ((totalPresupuestado - totalGastado) / totalPresupuestado) * 100 : 0;
+
+      document.getElementById('presupuesto-mensual').textContent = e0(totalPresupuestado);
+      document.getElementById('gastado-mensual').textContent = e0(totalGastado);
+      document.getElementById('disponible-mensual').textContent = e0(disponible);
+      document.getElementById('cumplimiento').textContent = Math.max(0, cumplimiento).toFixed(1) + '%';
+    }
+
+    function showAddPresupuestoModal() {
+      editingPresupuestoId = null;
+      document.getElementById('modal-title').textContent = 'Nuevo Presupuesto';
+      document.getElementById('presupuesto-form').reset();
+      document.getElementById('presupuesto-ano').value = new Date().getFullYear();
+      document.getElementById('categorias-list').innerHTML = '';
+      categoriaCounter = 0;
+      
+      // Agregar categorías por defecto
+      categoriasDefault.forEach(cat => addCategoriaPresupuesto(cat));
+      
+      document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function addCategoriaPresupuesto(nombre = '') {
+      const container = document.getElementById('categorias-list');
+      const id = `categoria_${categoriaCounter++}`;
+      
+      const div = document.createElement('div');
+      div.className = 'row two';
+      div.style.gridTemplateColumns = '2fr 1fr auto';
+      div.innerHTML = `
+        <div class="field">
+          <input type="text" placeholder="Nombre de la categoría" value="${nombre}" data-categoria-nombre required>
+        </div>
+        <div class="field">
+          <input type="number" step="0.01" placeholder="Límite €" data-categoria-limite required>
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" style="margin-top: 16px; height: 32px; width: 32px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer;">🗑️</button>
+      `;
+      
+      container.appendChild(div);
+    }
+
+    function getMonthName(month) {
+      const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      return meses[month - 1] || '';
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').style.display = 'none';
+      editingPresupuestoId = null;
+    }
+
+    // Manejar cambio de tipo de presupuesto
+    document.getElementById('presupuesto-tipo').addEventListener('change', function() {
+      const mesField = document.getElementById('mes-field');
+      if (this.value === 'mensual') {
+        mesField.style.display = 'block';
+        document.getElementById('presupuesto-mes').required = true;
+      } else {
+        mesField.style.display = 'none';
+        document.getElementById('presupuesto-mes').required = false;
+      }
+    });
+
+    // Manejar envío del formulario
+    document.getElementById('presupuesto-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Recopilar categorías
+      const categorias = {};
+      const categoriasRows = document.querySelectorAll('#categorias-list .row');
+      
+      categoriasRows.forEach(row => {
+        const nombre = row.querySelector('[data-categoria-nombre]').value.trim();
+        const limite = parseFloat(row.querySelector('[data-categoria-limite]').value) || 0;
+        
+        if (nombre && limite > 0) {
+          categorias[nombre] = { limite };
+        }
+      });
+
+      const presupuestoData = {
+        id: editingPresupuestoId || 'presupuesto_' + Date.now(),
+        nombre: document.getElementById('presupuesto-nombre').value.trim(),
+        tipo: document.getElementById('presupuesto-tipo').value,
+        ano: parseInt(document.getElementById('presupuesto-ano').value),
+        mes: document.getElementById('presupuesto-tipo').value === 'mensual' ? 
+             parseInt(document.getElementById('presupuesto-mes').value) : null,
+        categorias,
+        fechaCreacion: editingPresupuestoId ? undefined : new Date().toISOString(),
+        fechaModificacion: new Date().toISOString()
+      };
+
+      const presupuestos = Store.presupuestos || [];
+      
+      if (editingPresupuestoId) {
+        const index = presupuestos.findIndex(p => p.id === editingPresupuestoId);
+        if (index !== -1) {
+          presupuestos[index] = { ...presupuestos[index], ...presupuestoData };
+        }
+      } else {
+        presupuestos.push(presupuestoData);
+      }
+
+      Store.presupuestos = presupuestos;
+      loadPresupuestos();
+      closeModal();
+    });
+
+    function editPresupuesto(id) {
+      const presupuestos = Store.presupuestos || [];
+      const presupuesto = presupuestos.find(p => p.id === id);
+      if (!presupuesto) return;
+
+      editingPresupuestoId = id;
+      document.getElementById('modal-title').textContent = 'Editar Presupuesto';
+      document.getElementById('presupuesto-nombre').value = presupuesto.nombre;
+      document.getElementById('presupuesto-tipo').value = presupuesto.tipo;
+      document.getElementById('presupuesto-ano').value = presupuesto.ano;
+      
+      if (presupuesto.mes) {
+        document.getElementById('mes-field').style.display = 'block';
+        document.getElementById('presupuesto-mes').value = presupuesto.mes;
+      }
+
+      // Cargar categorías
+      document.getElementById('categorias-list').innerHTML = '';
+      categoriaCounter = 0;
+      
+      if (presupuesto.categorias) {
+        Object.entries(presupuesto.categorias).forEach(([nombre, data]) => {
+          addCategoriaPresupuesto(nombre);
+          const lastRow = document.querySelector('#categorias-list .row:last-child');
+          lastRow.querySelector('[data-categoria-limite]').value = data.limite;
+        });
+      }
+      
+      document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function deletePresupuesto(id) {
+      if (confirm('¿Estás seguro de que quieres eliminar este presupuesto?')) {
+        const presupuestos = Store.presupuestos || [];
+        Store.presupuestos = presupuestos.filter(p => p.id !== id);
+        loadPresupuestos();
+      }
+    }
+
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPresupuestos();
+    });
+  </script>
+</body>
+</html>

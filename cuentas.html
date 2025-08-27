@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FinanceHub — Cuentas Bancarias</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+:root{
+  --brand:#2563eb; --accent:#3b82f6; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+}
+.brand-new { 
+  background: linear-gradient(135deg, var(--brand), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900;
+}
+.cuenta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin: 8px 0;
+  background: #fff;
+}
+.cuenta-info h4 {
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+.cuenta-info .details {
+  font-size: 12px;
+  color: var(--ink2);
+}
+.saldo {
+  font-size: 20px;
+  font-weight: 800;
+}
+.saldo.positive { color: var(--ok); }
+.saldo.negative { color: var(--bad); }
+.cuenta-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn-icon:hover {
+  background: var(--chip);
+}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="brand">
+        <div class="logo" style="background: var(--brand);">💰</div>
+        <div class="title brand-new">FinanceHub — Cuentas Bancarias</div>
+      </div>
+      <nav class="nav">
+        <a href="finanzas.html">Dashboard</a>
+        <a href="cuentas.html" class="active">Cuentas</a>
+        <a href="presupuestos.html">Presupuestos</a>
+        <a href="inversiones.html">Inversiones</a>
+        <a href="propiedades.html">Propiedades</a>
+        <a href="configuracion.html">Configuración</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h2>Cuentas Bancarias</h2>
+          <p class="muted">Gestiona todas tus cuentas financieras</p>
+        </div>
+        <button class="btn primary" onclick="showAddCuentaModal()">+ Nueva Cuenta</button>
+      </div>
+
+      <div class="stats-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0;">
+        <div class="stat-card" style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Patrimonio Total</div>
+          <div id="patrimonio-total" style="font-size: 28px; font-weight: 800; color: var(--brand); margin: 8px 0;">€0</div>
+        </div>
+        <div class="stat-card" style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Cuentas Activas</div>
+          <div id="num-cuentas" style="font-size: 28px; font-weight: 800; color: var(--brand); margin: 8px 0;">0</div>
+        </div>
+      </div>
+
+      <div id="cuentas-list">
+        <!-- Las cuentas se cargarán dinámicamente -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal para agregar/editar cuenta -->
+  <div id="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: #fff; border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+      <h3 id="modal-title">Nueva Cuenta</h3>
+      
+      <form id="cuenta-form">
+        <div class="row">
+          <div class="field">
+            <label>Nombre de la cuenta</label>
+            <input type="text" id="cuenta-nombre" placeholder="Ej: Cuenta Corriente BBVA" required>
+          </div>
+        </div>
+
+        <div class="row two" style="grid-template-columns: 1fr 1fr;">
+          <div class="field">
+            <label>Tipo de cuenta</label>
+            <select id="cuenta-tipo" required>
+              <option value="">Seleccionar tipo</option>
+              <option value="corriente">Cuenta Corriente</option>
+              <option value="ahorros">Cuenta de Ahorros</option>
+              <option value="credito">Tarjeta de Crédito</option>
+              <option value="inversion">Cuenta Inversión</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Banco/Entidad</label>
+            <input type="text" id="cuenta-banco" placeholder="Ej: BBVA, Santander...">
+          </div>
+        </div>
+
+        <div class="row two" style="grid-template-columns: 1fr 1fr;">
+          <div class="field">
+            <label>Saldo actual (€)</label>
+            <input type="number" step="0.01" id="cuenta-saldo" placeholder="0.00" required>
+          </div>
+          <div class="field">
+            <label>Número de cuenta (opcional)</label>
+            <input type="text" id="cuenta-numero" placeholder="****1234">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Notas (opcional)</label>
+            <textarea id="cuenta-notas" rows="3" placeholder="Información adicional sobre la cuenta..."></textarea>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="btn ghost" onclick="closeModal()">Cancelar</button>
+          <button type="submit" class="btn primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    let editingCuentaId = null;
+
+    function loadCuentas() {
+      const cuentas = Store.cuentas || [];
+      const container = document.getElementById('cuentas-list');
+      
+      if (cuentas.length === 0) {
+        container.innerHTML = '<p class="muted" style="text-align: center; padding: 40px;">No tienes cuentas registradas. ¡Añade tu primera cuenta!</p>';
+        document.getElementById('patrimonio-total').textContent = '€0';
+        document.getElementById('num-cuentas').textContent = '0';
+        return;
+      }
+
+      const patrimonioTotal = cuentas.reduce((total, cuenta) => total + (cuenta.saldo || 0), 0);
+      document.getElementById('patrimonio-total').textContent = e0(patrimonioTotal);
+      document.getElementById('num-cuentas').textContent = cuentas.length;
+
+      container.innerHTML = cuentas.map(cuenta => `
+        <div class="cuenta-item">
+          <div class="cuenta-info">
+            <h4>${cuenta.nombre}</h4>
+            <div class="details">
+              ${cuenta.tipo} · ${cuenta.banco || 'Sin banco'} 
+              ${cuenta.numero ? '· ' + cuenta.numero : ''}
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div class="saldo ${cuenta.saldo >= 0 ? 'positive' : 'negative'}">
+              ${e0(cuenta.saldo || 0)}
+            </div>
+            <div class="cuenta-actions">
+              <button class="btn-icon" onclick="editCuenta('${cuenta.id}')" title="Editar">✏️</button>
+              <button class="btn-icon" onclick="deleteCuenta('${cuenta.id}')" title="Eliminar">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showAddCuentaModal() {
+      editingCuentaId = null;
+      document.getElementById('modal-title').textContent = 'Nueva Cuenta';
+      document.getElementById('cuenta-form').reset();
+      document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function editCuenta(id) {
+      const cuentas = Store.cuentas || [];
+      const cuenta = cuentas.find(c => c.id === id);
+      if (!cuenta) return;
+
+      editingCuentaId = id;
+      document.getElementById('modal-title').textContent = 'Editar Cuenta';
+      document.getElementById('cuenta-nombre').value = cuenta.nombre;
+      document.getElementById('cuenta-tipo').value = cuenta.tipo;
+      document.getElementById('cuenta-banco').value = cuenta.banco || '';
+      document.getElementById('cuenta-saldo').value = cuenta.saldo || 0;
+      document.getElementById('cuenta-numero').value = cuenta.numero || '';
+      document.getElementById('cuenta-notas').value = cuenta.notas || '';
+      document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function deleteCuenta(id) {
+      if (confirm('¿Estás seguro de que quieres eliminar esta cuenta?')) {
+        const cuentas = Store.cuentas || [];
+        Store.cuentas = cuentas.filter(c => c.id !== id);
+        loadCuentas();
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').style.display = 'none';
+      editingCuentaId = null;
+    }
+
+    // Manejar envío del formulario
+    document.getElementById('cuenta-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const cuentaData = {
+        id: editingCuentaId || 'cuenta_' + Date.now(),
+        nombre: document.getElementById('cuenta-nombre').value.trim(),
+        tipo: document.getElementById('cuenta-tipo').value,
+        banco: document.getElementById('cuenta-banco').value.trim(),
+        saldo: parseFloat(document.getElementById('cuenta-saldo').value) || 0,
+        numero: document.getElementById('cuenta-numero').value.trim(),
+        notas: document.getElementById('cuenta-notas').value.trim(),
+        fechaCreacion: editingCuentaId ? undefined : new Date().toISOString(),
+        fechaModificacion: new Date().toISOString()
+      };
+
+      const cuentas = Store.cuentas || [];
+      
+      if (editingCuentaId) {
+        // Editar cuenta existente
+        const index = cuentas.findIndex(c => c.id === editingCuentaId);
+        if (index !== -1) {
+          cuentas[index] = { ...cuentas[index], ...cuentaData };
+        }
+      } else {
+        // Agregar nueva cuenta
+        cuentas.push(cuentaData);
+      }
+
+      Store.cuentas = cuentas;
+      loadCuentas();
+      closeModal();
+    });
+
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('modal-overlay').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCuentas();
+    });
+  </script>
+</body>
+</html>
