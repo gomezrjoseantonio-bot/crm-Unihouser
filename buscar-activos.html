@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unihouser — Buscar Activos</title>
+<style>
+:root{
+  --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
+  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
+  --shadow:0 4px 22px rgba(0,0,0,.06);
+  --ui-font: system-ui, -apple-system, Inter, Roboto, Arial, sans-serif;
+  --ui-font-size: 12px;
+  --ff: var(--ui-font);
+  --fz: var(--ui-font-size);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
+a{color:var(--brand);text-decoration:none}
+.container{max-width:1200px;margin:0 auto;padding:12px 14px}
+
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
+.title{font-weight:700;color:var(--ink2);font-size:13px}
+.nav a{color:var(--ink2);padding:6px 10px;border-radius:10px}
+.nav a.active{background:var(--brand);color:#fff}
+.nav a:hover{background:#f3efe9}
+
+/* Tarjetas / bloques */
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px}
+.section{border:1px dashed var(--line);border-radius:12px;padding:10px;margin:10px 0;background:#fff}
+h2{margin:0 0 8px;font-size:16px}
+h3{margin:0 0 8px;font-size:14px;color:#444}
+
+/* Form layout */
+.row{display:grid;gap:8px}
+.row.two{grid-template-columns:1fr 1fr}
+.row.three{grid-template-columns:repeat(3,1fr)}
+.row.four{grid-template-columns:repeat(4,1fr)}
+@media(max-width:980px){
+  .row.two,.row.three,.row.four{grid-template-columns:1fr}
+}
+.field{display:flex;flex-direction:column;gap:2px}
+.field label{color:#555;font-size:11px}
+input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min-height:26px;font-size:12px;background:#fff;color:#1a1f23}
+
+/* Botones */
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:800;font-size:12px}
+.btn:hover{background:#FAF8F7}
+.btn.primary{background:var(--brand);color:#fff;border:none}
+.btn.secondary{background:var(--accent);color:#fff;border:none}
+
+/* Resultados */
+.results{margin-top:20px}
+.property-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;box-shadow:var(--shadow)}
+.property-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.property-title{font-weight:700;color:var(--ink);margin:0}
+.property-price{font-weight:800;color:var(--brand);font-size:16px}
+.property-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:8px 0}
+.property-detail{font-size:11px;color:var(--ink2)}
+.property-detail strong{color:var(--ink)}
+.property-actions{display:flex;gap:6px;margin-top:8px}
+.property-actions .btn{padding:4px 8px;font-size:11px}
+
+/* Filtros */
+.filters{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:16px}
+.filters .actions{margin-top:8px}
+
+/* Estados de carga */
+.loading{text-align:center;padding:20px;color:var(--ink2)}
+.empty{text-align:center;padding:40px;color:var(--ink2)}
+
+/* Responsive mejoras */
+@media(max-width:768px){
+  .container{padding:8px}
+  .property-details{grid-template-columns:1fr 1fr}
+  .property-actions{flex-direction:column}
+  .property-actions .btn{width:100%}
+}
+
+/* Toast notifications */
+.toast{position:fixed;top:80px;right:16px;background:var(--ink);color:#fff;padding:12px 16px;border-radius:8px;z-index:1000;opacity:0;transition:opacity 0.3s}
+.toast.show{opacity:1}
+.toast.success{background:var(--ok)}
+.toast.error{background:var(--bad)}
+</style>
+
+<script>
+/* Aplicar marca y tipografía desde cfg */
+try{
+  const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
+  if(cfg.brand_color) document.documentElement.style.setProperty('--brand', cfg.brand_color);
+  if(cfg.ui_font) document.documentElement.style.setProperty('--ui-font', cfg.ui_font);
+  if(cfg.ui_font_size) document.documentElement.style.setProperty('--ui-font-size', (''+cfg.ui_font_size).replace('px','')+'px');
+}catch(_){}
+</script>
+</head>
+<body>
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="brand">
+        <div class="logo" id="logoBox">U</div>
+        <div class="title" id="brandTitle">Unihouser — Buscar Activos</div>
+      </div>
+      <nav class="nav">
+        <a href="evaluar.html">Evaluar</a>
+        <a href="evaluaciones.html">Evaluaciones</a>
+        <a href="buscar-activos.html" class="active">Buscar Activos</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="configuracion.html">Configuración</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="container">
+    <section class="card">
+      <h2>Búsqueda Masiva de Activos</h2>
+      <p style="color:var(--ink2);margin:0 0 16px">Busca propiedades en Idealista.es y Fotocasa.es para evaluación masiva</p>
+
+      <div class="filters">
+        <h3>Filtros de Búsqueda</h3>
+        
+        <div class="row four">
+          <div class="field">
+            <label>Portal</label>
+            <select id="search_portal">
+              <option value="both">Ambos portales</option>
+              <option value="idealista">Solo Idealista</option>
+              <option value="fotocasa">Solo Fotocasa</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tipo de operación</label>
+            <select id="search_operation">
+              <option value="sale">Venta</option>
+              <option value="rent">Alquiler</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tipo de propiedad</label>
+            <select id="search_property_type">
+              <option value="all">Todos</option>
+              <option value="flat">Pisos</option>
+              <option value="house">Casas</option>
+              <option value="duplex">Dúplex</option>
+              <option value="penthouse">Áticos</option>
+              <option value="studio">Estudios</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Localidad</label>
+            <select id="search_location"></select>
+          </div>
+        </div>
+
+        <div class="row four">
+          <div class="field">
+            <label>Precio mínimo (€)</label>
+            <input id="search_price_min" type="number" placeholder="50000" step="1000">
+          </div>
+          <div class="field">
+            <label>Precio máximo (€)</label>
+            <input id="search_price_max" type="number" placeholder="200000" step="1000">
+          </div>
+          <div class="field">
+            <label>Superficie mín. (m²)</label>
+            <input id="search_size_min" type="number" placeholder="60" step="5">
+          </div>
+          <div class="field">
+            <label>Superficie máx. (m²)</label>
+            <input id="search_size_max" type="number" placeholder="150" step="5">
+          </div>
+        </div>
+
+        <div class="row three">
+          <div class="field">
+            <label>Habitaciones mín.</label>
+            <select id="search_rooms_min">
+              <option value="">Cualquiera</option>
+              <option value="1">1+</option>
+              <option value="2">2+</option>
+              <option value="3">3+</option>
+              <option value="4">4+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Baños mín.</label>
+            <select id="search_bathrooms_min">
+              <option value="">Cualquiera</option>
+              <option value="1">1+</option>
+              <option value="2">2+</option>
+              <option value="3">3+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Máx. resultados</label>
+            <select id="search_max_results">
+              <option value="20">20 propiedades</option>
+              <option value="50">50 propiedades</option>
+              <option value="100">100 propiedades</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="searchProperties()">
+            <span id="search_btn_text">🔍 Buscar Propiedades</span>
+          </button>
+          <button class="btn" onclick="clearFilters()">Limpiar Filtros</button>
+          <button class="btn secondary" onclick="evaluateSelected()" id="evaluate_btn" style="display:none">
+            📊 Evaluar Seleccionadas (<span id="selected_count">0</span>)
+          </button>
+        </div>
+      </div>
+
+      <div id="results_section" style="display:none">
+        <h3>Resultados de Búsqueda</h3>
+        <div id="results_summary" class="row three" style="margin-bottom:12px">
+          <div style="color:var(--ink2);font-size:11px">
+            <strong id="total_found">0</strong> propiedades encontradas
+          </div>
+          <div style="color:var(--ink2);font-size:11px">
+            <strong id="selected_for_eval">0</strong> seleccionadas para evaluar
+          </div>
+          <div style="color:var(--ink2);font-size:11px">
+            Promedio: <strong id="avg_price">0 €</strong>
+          </div>
+        </div>
+        <div id="results_container"></div>
+      </div>
+
+      <div id="loading" class="loading" style="display:none">
+        <p>🔍 Buscando propiedades...</p>
+        <div style="font-size:11px;color:var(--ink2)">
+          Esto puede tardar unos segundos
+        </div>
+      </div>
+
+      <div id="empty" class="empty" style="display:none">
+        <p>🏠 No se encontraron propiedades</p>
+        <div style="font-size:11px;color:var(--ink2)">
+          Prueba ajustando los filtros de búsqueda
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div style="text-align:center;color:#888;font-size:11px;margin:14px 0 22px">
+      © 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/buscar-activos.js"></script>
+</body>
+</html>

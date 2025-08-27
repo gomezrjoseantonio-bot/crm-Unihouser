@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unihouser — Evaluación Masiva</title>
+<style>
+:root{
+  --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
+  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
+  --shadow:0 4px 22px rgba(0,0,0,.06);
+  --ui-font: system-ui, -apple-system, Inter, Roboto, Arial, sans-serif;
+  --ui-font-size: 12px;
+  --ff: var(--ui-font);
+  --fz: var(--ui-font-size);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
+a{color:var(--brand);text-decoration:none}
+.container{max-width:1400px;margin:0 auto;padding:12px 14px}
+
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.top-inner{max-width:1400px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
+.title{font-weight:700;color:var(--ink2);font-size:13px}
+.nav a{color:var(--ink2);padding:6px 10px;border-radius:10px}
+.nav a.active{background:var(--brand);color:#fff}
+.nav a:hover{background:#f3efe9}
+
+/* Layout */
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px;margin-bottom:16px}
+.section{border:1px dashed var(--line);border-radius:12px;padding:10px;margin:10px 0;background:#fff}
+h2{margin:0 0 8px;font-size:16px}
+h3{margin:0 0 8px;font-size:14px;color:#444}
+
+/* Parámetros globales */
+.global-params{background:#f8f9fa;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:16px}
+.row{display:grid;gap:8px}
+.row.two{grid-template-columns:1fr 1fr}
+.row.three{grid-template-columns:repeat(3,1fr)}
+.row.four{grid-template-columns:repeat(4,1fr)}
+@media(max-width:980px){
+  .row.two,.row.three,.row.four{grid-template-columns:1fr}
+}
+.field{display:flex;flex-direction:column;gap:2px}
+.field label{color:#555;font-size:11px}
+input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min-height:26px;font-size:12px;background:#fff;color:#1a1f23}
+
+/* Tabla de evaluaciones */
+.eval-table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.eval-table th,.eval-table td{padding:8px;border-bottom:1px solid var(--line);text-align:left;font-size:11px;vertical-align:middle}
+.eval-table th{background:#f8f9fa;color:var(--ink);font-weight:700;position:sticky;top:0;z-index:1}
+.eval-table tr:last-child td{border-bottom:none}
+.eval-table tr:hover{background:#fafafa}
+
+/* Estados de evaluación */
+.status{padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700}
+.status.pending{background:#fff3cd;color:#856404}
+.status.evaluating{background:#cce5ff;color:#0c5460}
+.status.completed{background:#d4edda;color:#155724}
+.status.error{background:#f8d7da;color:#721c24}
+
+/* KPIs */
+.kpi{padding:2px 6px;border-radius:6px;font-size:10px;font-weight:700}
+.kpi.good{background:#d4edda;color:#155724}
+.kpi.warning{background:#fff3cd;color:#856404}
+.kpi.bad{background:#f8d7da;color:#721c24}
+
+/* Botones */
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:800;font-size:12px}
+.btn:hover{background:#FAF8F7}
+.btn.primary{background:var(--brand);color:#fff;border:none}
+.btn.secondary{background:var(--accent);color:#fff;border:none}
+.btn.success{background:var(--ok);color:#fff;border:none}
+
+/* Progress bar */
+.progress{background:#e9ecef;border-radius:10px;height:20px;margin:8px 0}
+.progress-bar{background:var(--brand);height:100%;border-radius:10px;transition:width 0.3s ease;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+
+/* Responsive */
+@media(max-width:768px){
+  .container{padding:8px}
+  .eval-table{font-size:10px}
+  .eval-table th,.eval-table td{padding:4px}
+}
+
+/* Toast notifications */
+.toast{position:fixed;top:80px;right:16px;background:var(--ink);color:#fff;padding:12px 16px;border-radius:8px;z-index:1000;opacity:0;transition:opacity 0.3s}
+.toast.show{opacity:1}
+.toast.success{background:var(--ok)}
+.toast.error{background:var(--bad)}
+
+/* Filtros y acciones */
+.filters-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-group label{font-size:11px;color:var(--ink2)}
+.filter-group select,.filter-group input{min-width:100px}
+
+/* Resumen estadísticas */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin:12px 0}
+.stat{text-align:center;padding:8px;background:#f8f9fa;border-radius:8px}
+.stat-value{font-size:16px;font-weight:800;color:var(--brand)}
+.stat-label{font-size:10px;color:var(--ink2)}
+</style>
+
+<script>
+/* Aplicar marca y tipografía desde cfg */
+try{
+  const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
+  if(cfg.brand_color) document.documentElement.style.setProperty('--brand', cfg.brand_color);
+  if(cfg.ui_font) document.documentElement.style.setProperty('--ui-font', cfg.ui_font);
+  if(cfg.ui_font_size) document.documentElement.style.setProperty('--ui-font-size', (''+cfg.ui_font_size).replace('px','')+'px');
+}catch(_){}
+</script>
+</head>
+<body>
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="brand">
+        <div class="logo" id="logoBox">U</div>
+        <div class="title" id="brandTitle">Unihouser — Evaluación Masiva</div>
+      </div>
+      <nav class="nav">
+        <a href="evaluar.html">Evaluar</a>
+        <a href="evaluaciones.html">Evaluaciones</a>
+        <a href="buscar-activos.html">Buscar Activos</a>
+        <a href="evaluacion-masiva.html" class="active">Evaluación Masiva</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="configuracion.html">Configuración</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="container">
+    <section class="card">
+      <h2>Evaluación Masiva de Activos</h2>
+      <p style="color:var(--ink2);margin:0 0 16px">Evalúa múltiples propiedades con parámetros globales</p>
+
+      <!-- Parámetros globales -->
+      <div class="global-params">
+        <h3>Parámetros Globales de Evaluación</h3>
+        <p style="font-size:11px;color:var(--ink2);margin:0 0 12px">
+          Estos valores se aplicarán a todas las propiedades. Puedes editarlos individualmente después.
+        </p>
+
+        <div class="row four">
+          <div class="field">
+            <label>ITP (%)</label>
+            <input id="global_itp" type="number" value="8" step="0.1" min="0" max="15">
+          </div>
+          <div class="field">
+            <label>Notaría y Registro (€)</label>
+            <input id="global_notaria" type="number" value="1500" step="100" min="0">
+          </div>
+          <div class="field">
+            <label>Reforma estimada (€)</label>
+            <input id="global_reforma" type="number" value="0" step="1000" min="0">
+          </div>
+          <div class="field">
+            <label>Incluir honorarios PSI</label>
+            <select id="global_psi">
+              <option value="si">Sí (4.235 €)</option>
+              <option value="no" selected>No</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row four">
+          <div class="field">
+            <label>Comunidad (€/año)</label>
+            <input id="global_comunidad" type="number" value="600" step="100" min="0">
+          </div>
+          <div class="field">
+            <label>IBI (€/año)</label>
+            <input id="global_ibi" type="number" value="400" step="50" min="0">
+          </div>
+          <div class="field">
+            <label>Tipo de alquiler</label>
+            <select id="global_tipo">
+              <option value="tradicional">Tradicional</option>
+              <option value="habitaciones">Habitaciones</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Alquiler estimado (€/m²/mes)</label>
+            <input id="global_alq_m2" type="number" value="8" step="0.5" min="3" max="20">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="startBulkEvaluation()">
+            🚀 Iniciar Evaluación Masiva
+          </button>
+          <button class="btn" onclick="loadDefaultParams()">
+            ⚙️ Cargar Parámetros por Defecto
+          </button>
+          <button class="btn secondary" onclick="exportResults()" id="export_btn" style="display:none">
+            📊 Exportar Resultados
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div id="progress_section" style="display:none">
+        <h3>Progreso de Evaluación</h3>
+        <div class="progress">
+          <div class="progress-bar" id="progress_bar" style="width:0%">0%</div>
+        </div>
+        <div style="font-size:11px;color:var(--ink2);margin:4px 0">
+          <span id="progress_text">Preparando evaluación...</span>
+        </div>
+      </div>
+
+      <!-- Estadísticas -->
+      <div id="stats_section" style="display:none">
+        <h3>Resumen de Resultados</h3>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value" id="stat_total">0</div>
+            <div class="stat-label">Total Evaluadas</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="stat_good">0</div>
+            <div class="stat-label">Buenas Inversiones</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="stat_avg_roi">0%</div>
+            <div class="stat-label">ROI Promedio</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="stat_avg_price">0€</div>
+            <div class="stat-label">Precio Promedio</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="stat_best_roi">0%</div>
+            <div class="stat-label">Mejor ROI</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros y acciones -->
+      <div id="table_controls" style="display:none">
+        <div class="filters-row">
+          <div class="filter-group">
+            <label>Filtrar por:</label>
+            <select id="filter_status" onchange="filterResults()">
+              <option value="all">Todos los estados</option>
+              <option value="completed">Solo completadas</option>
+              <option value="error">Solo con errores</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>ROI mínimo:</label>
+            <input type="number" id="filter_roi" placeholder="%" step="0.1" onchange="filterResults()">
+          </div>
+          <div class="filter-group">
+            <label>Ordenar por:</label>
+            <select id="sort_by" onchange="sortResults()">
+              <option value="roi_desc">ROI (mayor a menor)</option>
+              <option value="roi_asc">ROI (menor a mayor)</option>
+              <option value="price_desc">Precio (mayor a menor)</option>
+              <option value="price_asc">Precio (menor a mayor)</option>
+              <option value="location">Localización</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de resultados -->
+      <div id="results_section" style="display:none">
+        <div style="overflow-x:auto">
+          <table class="eval-table">
+            <thead>
+              <tr>
+                <th>Estado</th>
+                <th>Propiedad</th>
+                <th>Localización</th>
+                <th>Precio</th>
+                <th>m²</th>
+                <th>€/m²</th>
+                <th>Habs</th>
+                <th>Alquiler Est.</th>
+                <th>ROI Bruto</th>
+                <th>ROI Neto</th>
+                <th>Flujo Mensual</th>
+                <th>Portal</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="results_tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty_state" class="empty" style="text-align:center;padding:40px;color:var(--ink2)">
+        <p>📋 No hay propiedades para evaluar</p>
+        <div style="font-size:11px">
+          Regresa a <a href="buscar-activos.html">Buscar Activos</a> y selecciona propiedades para evaluación masiva
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div style="text-align:center;color:#888;font-size:11px;margin:14px 0 22px">
+      © 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/evaluacion-masiva.js"></script>
+</body>
+</html>

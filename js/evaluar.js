@@ -313,12 +313,97 @@ function attach(){
   $('save_only')?.addEventListener('click', ()=>guardarEvaluacion(false));
   $('save_assign')?.addEventListener('click', ()=>guardarEvaluacion(true));
 
+  // Auto-rellenar desde búsqueda de propiedades
+  checkAutoFill();
+  
   // Prefill si venimos desde Evaluaciones
   prefillDesdeUrl();
 
   // Primera pasada de ITP/notaría si ya hay precio
   autoITP_Notaria();
   autoGastosSobreAlquiler();
+}
+
+/* ====== Auto-rellenar desde búsqueda de propiedades ====== */
+function checkAutoFill(){
+  const urlParams = new URLSearchParams(window.location.search);
+  const isAuto = urlParams.get('auto');
+  
+  if(isAuto === 'true'){
+    try{
+      const prefillData = localStorage.getItem('pre_fill_evaluation');
+      if(prefillData){
+        const data = JSON.parse(prefillData);
+        fillFormFromData(data);
+        localStorage.removeItem('pre_fill_evaluation'); // Limpiar después de usar
+        
+        // Mostrar notificación
+        showToast('Formulario rellenado automáticamente desde búsqueda de propiedades', 'success');
+      }
+    }catch(error){
+      console.error('Error auto-rellenando formulario:', error);
+    }
+  }
+}
+
+/* ====== Rellenar formulario con datos ====== */
+function fillFormFromData(data){
+  if(data.calle && $('e_calle')) $('e_calle').value = data.calle;
+  if(data.m2 && $('e_m2')) $('e_m2').value = data.m2;
+  if(data.anio && $('e_anio')) $('e_anio').value = data.anio;
+  if(data.habs && $('e_habs')) $('e_habs').value = data.habs;
+  if(data.banos && $('e_banos')) $('e_banos').value = data.banos;
+  if(data.alt && $('e_alt')) $('e_alt').value = data.alt;
+  if(data.asc && $('e_asc')) $('e_asc').value = data.asc;
+  if(data.url && $('e_url')) $('e_url').value = data.url;
+  if(data.precio && $('e_precio')){
+    $('e_precio').value = fmtN0.format(data.precio);
+    // Trigger autocálculos
+    setTimeout(() => {
+      autoITP_Notaria();
+    }, 100);
+  }
+  
+  // Si hay superficie, estimar alquiler
+  if(data.m2){
+    const estimatedRentPerM2 = 8; // €/m²/mes por defecto
+    const estimatedRent = data.m2 * estimatedRentPerM2;
+    if($('e_alq')){
+      $('e_alq').value = fmtN0.format(estimatedRent);
+      setTimeout(() => {
+        autoGastosSobreAlquiler();
+        calcPMaxPorObjetivo();
+      }, 200);
+    }
+  }
+}
+
+/* ====== Mostrar notificaciones ====== */
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.cssText = `
+    position:fixed;top:80px;right:16px;background:var(--ink);color:#fff;
+    padding:12px 16px;border-radius:8px;z-index:1000;opacity:0;
+    transition:opacity 0.3s;font-size:12px;max-width:300px;
+  `;
+  
+  if(type === 'success') toast.style.background = 'var(--ok)';
+  if(type === 'error') toast.style.background = 'var(--bad)';
+  
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  // Mostrar
+  setTimeout(() => toast.style.opacity = '1', 10);
+  
+  // Ocultar y remover
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => {
+      if(toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 300);
+  }, 3000);
 }
 
 document.addEventListener('DOMContentLoaded', attach);
