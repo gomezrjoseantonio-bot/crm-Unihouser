@@ -1,0 +1,69 @@
+{
+  "name": "Unihouser CRM",
+  "short_name": "Unihouser",
+  "description": "Sistema CRM para evaluación de activos inmobiliarios con búsqueda en Idealista y Fotocasa",
+  "start_url": "/evaluar.html",
+  "display": "standalone",
+  "background_color": "#FAF8F7",
+  "theme_color": "#c7530c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo_Unihouser.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "finance"],
+  "lang": "es",
+  "scope": "/",
+  "id": "unihouser-crm",
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "logo_Unihouser.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "label": "Interfaz de evaluación de activos"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Evaluar Activo",
+      "short_name": "Evaluar", 
+      "description": "Evaluar un nuevo activo inmobiliario",
+      "url": "/evaluar.html",
+      "icons": [
+        {
+          "src": "logo_Unihouser.svg",
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "Buscar Propiedades",
+      "short_name": "Buscar",
+      "description": "Buscar propiedades en Idealista y Fotocasa",
+      "url": "/buscar-activos.html",
+      "icons": [
+        {
+          "src": "logo_Unihouser.svg", 
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Ver panel de control principal",
+      "url": "/dashboard.html",
+      "icons": [
+        {
+          "src": "logo_Unihouser.svg",
+          "sizes": "any"
+        }
+      ]
+    }
+  ]
+}

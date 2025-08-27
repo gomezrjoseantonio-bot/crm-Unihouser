@@ -437,20 +437,28 @@ function formatPrice(price) {
 }
 
 function showToast(message, type = 'info') {
-  const toast = document.createElement('div');
-  toast.className = `toast ${type} show`;
-  toast.textContent = message;
-  
-  document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.classList.remove('show');
+  if (window.UNotify) {
+    if (type === 'success') UNotify.success(message);
+    else if (type === 'error') UNotify.error(message);
+    else if (type === 'warning') UNotify.warning(message);
+    else UNotify.info(message);
+  } else {
+    // Fallback para compatibilidad
+    const toast = document.createElement('div');
+    toast.className = `toast ${type} show`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
     setTimeout(() => {
-      if (toast.parentNode) {
-        toast.parentNode.removeChild(toast);
-      }
-    }, 300);
-  }, 3000);
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300);
+    }, 3000);
+  }
 }
 
 /* ====== Estilos adicionales para propiedades seleccionadas ====== */
