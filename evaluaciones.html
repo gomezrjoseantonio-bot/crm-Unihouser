@@ -109,6 +109,21 @@ input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6p
 .lb-prev{left:-52px} .lb-next{right:-52px}
 .lb-close{position:absolute;top:-44px;right:0;background:#fff;border:none;border-radius:999px;padding:6px 10px;cursor:pointer}
 
+/* Camera Modal */
+.camera-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:140}
+.camera-modal.open{display:flex}
+.camera-inner{background:#fff;border-radius:12px;max-width:90vw;max-height:90vh;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.camera-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #e5e7eb}
+.camera-header h3{margin:0;font-size:18px;font-weight:600}
+.camera-close{background:none;border:none;font-size:18px;cursor:pointer;color:#6b7280;padding:4px}
+.camera-close:hover{color:#374151}
+.camera-body{padding:20px;text-align:center}
+.camera-body video{max-width:100%;max-height:60vh;border-radius:8px;background:#000}
+.camera-body canvas{max-width:100%;max-height:60vh;border-radius:8px}
+.camera-error{color:#ef4444;padding:20px;font-size:14px}
+.camera-footer{display:flex;gap:12px;justify-content:center;padding:16px 20px;border-top:1px solid #e5e7eb}
+.camera-footer .btn{min-width:100px}
+
 /* Toasts */
 .toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:140}
 .toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
@@ -247,7 +262,13 @@ try{
           <h4>Adjuntar archivos</h4>
           <div class="attach-wrap">
             <div>
-              <div class="uploader"><strong>Imágenes</strong> <input id="up_imgs" type="file" accept="image/*" multiple></div>
+              <div class="uploader">
+                <strong>Imágenes</strong> 
+                <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                  <input id="up_imgs" type="file" accept="image/*" multiple>
+                  <button id="btn_camera" class="btn sec" style="font-size: 12px; padding: 4px 8px;">📷 Cámara</button>
+                </div>
+              </div>
               <div id="grid_imgs" class="attach-grid"></div>
             </div>
             <div>
@@ -264,6 +285,28 @@ try{
       <footer>
         <span class="note" id="m_note">Los adjuntos se guardan automáticamente.</span>
       </footer>
+    </div>
+  </div>
+
+  <!-- Camera Modal -->
+  <div class="camera-modal" id="cameraModal" aria-hidden="true">
+    <div class="camera-inner">
+      <div class="camera-header">
+        <h3>Capturar Imagen</h3>
+        <button class="camera-close" id="cameraClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="camera-body">
+        <video id="cameraVideo" autoplay playsinline></video>
+        <canvas id="cameraCanvas" style="display: none;"></canvas>
+        <div class="camera-error" id="cameraError" style="display: none;">
+          <p>No se pudo acceder a la cámara. Verifique los permisos del navegador.</p>
+        </div>
+      </div>
+      <div class="camera-footer">
+        <button id="captureBtn" class="btn primary">📷 Capturar</button>
+        <button id="retakeBtn" class="btn sec" style="display: none;">🔄 Repetir</button>
+        <button id="savePhotoBtn" class="btn primary" style="display: none;">💾 Guardar</button>
+      </div>
     </div>
   </div>
 
@@ -701,6 +744,9 @@ function renderAttachments(e){
   id('up_imgs').onchange = (ev)=>{ handleFiles(e, ev.target.files, 'images'); ev.target.value=''; };
   id('up_vids').onchange = (ev)=>{ handleFiles(e, ev.target.files, 'videos'); ev.target.value=''; };
   id('up_pdfs').onchange = (ev)=>{ handleFiles(e, ev.target.files, 'pdfs');   ev.target.value=''; };
+  
+  // Camera button event
+  id('btn_camera').onclick = ()=>{ openCamera(e); };
 
   function handleFiles(E, fileList, kind){
     const arr = Array.prototype.slice.call(fileList||[]);
@@ -728,6 +774,134 @@ function persistFiles(e){
   const list=Store.evals||[]; const i=list.findIndex(x=>x.id===e.id); if(i<0) return;
   list[i].files = e.files; Store.evals=list; toast('Adjuntos guardados','ok');
 }
+
+/* Camera functionality */
+let cameraStream = null;
+let currentEval = null;
+
+function openCamera(e) {
+  currentEval = e;
+  const modal = id('cameraModal');
+  const video = id('cameraVideo');
+  const canvas = id('cameraCanvas');
+  const error = id('cameraError');
+  const captureBtn = id('captureBtn');
+  const retakeBtn = id('retakeBtn');
+  const saveBtn = id('savePhotoBtn');
+
+  // Reset UI state
+  video.style.display = 'block';
+  canvas.style.display = 'none';
+  error.style.display = 'none';
+  captureBtn.style.display = 'inline-block';
+  retakeBtn.style.display = 'none';
+  saveBtn.style.display = 'none';
+
+  modal.classList.add('open');
+
+  // Request camera access
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(stream => {
+      cameraStream = stream;
+      video.srcObject = stream;
+    })
+    .catch(err => {
+      console.error('Error accessing camera:', err);
+      video.style.display = 'none';
+      error.style.display = 'block';
+    });
+}
+
+function closeCamera() {
+  const modal = id('cameraModal');
+  modal.classList.remove('open');
+  
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
+  
+  const video = id('cameraVideo');
+  video.srcObject = null;
+  currentEval = null;
+}
+
+function capturePhoto() {
+  const video = id('cameraVideo');
+  const canvas = id('cameraCanvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Set canvas dimensions to video dimensions
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  
+  // Draw the video frame to canvas
+  ctx.drawImage(video, 0, 0);
+  
+  // Hide video, show canvas
+  video.style.display = 'none';
+  canvas.style.display = 'block';
+  
+  // Update buttons
+  id('captureBtn').style.display = 'none';
+  id('retakeBtn').style.display = 'inline-block';
+  id('savePhotoBtn').style.display = 'inline-block';
+}
+
+function retakePhoto() {
+  const video = id('cameraVideo');
+  const canvas = id('cameraCanvas');
+  
+  // Show video, hide canvas
+  video.style.display = 'block';
+  canvas.style.display = 'none';
+  
+  // Update buttons
+  id('captureBtn').style.display = 'inline-block';
+  id('retakeBtn').style.display = 'none';
+  id('savePhotoBtn').style.display = 'none';
+}
+
+function savePhoto() {
+  const canvas = id('cameraCanvas');
+  const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+  
+  // Create a file-like object to use with existing handleFiles function
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const fileName = `camera-${timestamp}.jpg`;
+  
+  // Create a mock file object
+  const file = {
+    name: fileName,
+    size: dataURL.length * 0.75, // Approximate size
+    type: 'image/jpeg'
+  };
+  
+  // Add to evaluation files
+  if (currentEval) {
+    currentEval.files = currentEval.files || {images:[], videos:[], pdfs:[]};
+    const rec = {name: file.name, size: file.size, type: file.type, data: dataURL};
+    currentEval.files.images.push(rec);
+    persistFiles(currentEval);
+    renderAttachments(currentEval);
+    toast('Imagen capturada y guardada', 'ok');
+  }
+  
+  closeCamera();
+}
+
+// Camera modal event listeners
+id('cameraClose').onclick = closeCamera;
+id('captureBtn').onclick = capturePhoto;
+id('retakeBtn').onclick = retakePhoto;
+id('savePhotoBtn').onclick = savePhoto;
+
+// Close modal when clicking outside
+id('cameraModal').onclick = function(e) {
+  if (e.target === this) {
+    closeCamera();
+  }
+};
 
 /* Abrir en Evaluar */
 function goEvaluar(idEv){
