@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unihouser — Evaluación Masiva</title>
+<style>
+:root{
+  --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
+  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
+  --shadow:0 4px 22px rgba(0,0,0,.06);
+  --ui-font: system-ui, -apple-system, Inter, Roboto, Arial, sans-serif;
+  --ui-font-size: 12px;
+  --ff: var(--ui-font);
+  --fz: var(--ui-font-size);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
+a{color:var(--brand);text-decoration:none}
+.container{max-width:1200px;margin:0 auto;padding:12px 14px}
+
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
+.title{font-weight:700;color:var(--ink2);font-size:13px}
+.nav a{color:var(--ink2);padding:6px 10px;border-radius:10px}
+.nav a.active{background:var(--brand);color:#fff}
+.nav a:hover{background:#f3efe9}
+
+/* Cards & sections */
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px;margin-bottom:16px}
+.section{border:1px dashed var(--line);border-radius:12px;padding:16px;margin:16px 0;background:#fff}
+h2{margin:0 0 12px;font-size:18px;color:var(--ink)}
+h3{margin:0 0 8px;font-size:14px;color:#444}
+
+/* Form elements */
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field label{color:#555;font-size:11px;font-weight:600}
+input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;font-size:12px;color:#1a1f23}
+textarea{resize:vertical;min-height:120px}
+
+/* Buttons */
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 16px;cursor:pointer;font-weight:600;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:#FAF8F7}
+.btn.primary{background:var(--brand);color:#fff;border:none}
+.btn.primary:hover{background:#b8491a}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+
+/* Progress */
+.progress-wrap{margin:16px 0}
+.progress-bar{background:#f0f0f0;border-radius:10px;height:8px;overflow:hidden}
+.progress-fill{background:var(--brand);height:100%;transition:width 0.3s ease;border-radius:10px}
+.progress-text{font-size:11px;color:var(--ink2);margin-top:4px}
+
+/* Results table */
+.results-table{width:100%;border-collapse:collapse;margin-top:16px}
+.results-table th{background:#f8f9fa;padding:8px;text-align:left;font-size:11px;font-weight:600;border-bottom:1px solid var(--line)}
+.results-table td{padding:8px;border-bottom:1px solid #f0f0f0;font-size:11px}
+.results-table tr:hover{background:#f8f9fa}
+
+/* Status indicators */
+.status{padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600}
+.status.success{background:#d4edda;color:#155724}
+.status.error{background:#f8d7da;color:#721c24}
+.status.warning{background:#fff3cd;color:#856404}
+
+/* URL list */
+.url-item{display:flex;align-items:center;gap:8px;padding:8px;background:#f8f9fa;border-radius:8px;margin-bottom:4px}
+.url-item .url{flex:1;font-size:11px;color:var(--ink2)}
+.url-item .status{margin-left:auto}
+
+/* Toast notifications */
+.toast-wrap{position:fixed;top:20px;right:20px;z-index:1000}
+.toast{background:#333;color:#fff;padding:12px 16px;border-radius:8px;margin-bottom:8px;font-size:12px;opacity:1;transition:opacity 0.3s ease}
+.toast.ok{background:var(--ok)}
+.toast.warn{background:#f39c12}
+.toast.error{background:var(--bad)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="logo">U</div>
+      <div class="title">Unihouser — Evaluación Masiva</div>
+    </div>
+    <div class="nav">
+      <a href="evaluar.html">Evaluar</a>
+      <a href="evaluaciones.html">Evaluaciones</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="evaluacion-masiva.html" class="active">Evaluación Masiva</a>
+      <a href="configuracion.html">Configuración</a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  
+  <!-- Input Section -->
+  <div class="card">
+    <h2>📋 Evaluación Masiva de Propiedades</h2>
+    <p style="color:var(--ink2);font-size:12px;margin-bottom:16px">
+      Introduce las URLs de las propiedades (Idealista, Fotocasa, etc.) para realizar evaluaciones automáticas en lote.
+    </p>
+    
+    <div class="field">
+      <label>URLs de Propiedades (una por línea)</label>
+      <textarea id="bulk_urls" placeholder="https://www.idealista.com/inmueble/12345678-piso-en-venta-en-calle-ejemplo-oviedo
+https://www.idealista.com/inmueble/87654321-piso-en-venta-en-calle-muestra-gijon
+..."></textarea>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="field">
+        <label>Tipo de Inversión por Defecto</label>
+        <select id="default_tipo">
+          <option value="Tradicional">Tradicional</option>
+          <option value="Habitaciones">Habitaciones</option>
+        </select>
+      </div>
+      
+      <div class="field">
+        <label>Alquiler Base (€/mes) - aplicar si no se puede extraer</label>
+        <input id="default_alq" type="number" placeholder="600" min="0">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button class="btn primary" id="btn_process" onclick="processBulkUrls()">
+        🚀 Procesar URLs
+      </button>
+      <button class="btn" id="btn_clear" onclick="clearResults()">
+        🗑️ Limpiar
+      </button>
+    </div>
+  </div>
+
+  <!-- Progress Section -->
+  <div class="card" id="progress_section" style="display:none">
+    <h3>Progreso del Procesamiento</h3>
+    <div class="progress-wrap">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress_fill" style="width:0%"></div>
+      </div>
+      <div class="progress-text" id="progress_text">Iniciando...</div>
+    </div>
+    <div id="current_processing" style="font-size:11px;color:var(--ink2);margin-top:8px"></div>
+  </div>
+
+  <!-- Results Section -->
+  <div class="card" id="results_section" style="display:none">
+    <h3>Resultados de la Evaluación Masiva</h3>
+    <div style="margin-bottom:16px">
+      <button class="btn" onclick="exportResults()">📊 Exportar Resultados</button>
+      <button class="btn" onclick="saveAllEvaluations()">💾 Guardar Todas las Evaluaciones</button>
+    </div>
+    
+    <table class="results-table" id="results_table">
+      <thead>
+        <tr>
+          <th>Estado</th>
+          <th>URL</th>
+          <th>Ubicación</th>
+          <th>Precio</th>
+          <th>m²</th>
+          <th>Alquiler</th>
+          <th>Rent. Bruta</th>
+          <th>Rent. Neta</th>
+          <th>Flujo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="results_tbody">
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+<script>
+/* ====== Variables globales ====== */
+let processedResults = [];
+let currentProcessIndex = 0;
+
+/* ====== Utils ====== */
+function toast(msg, kind) {
+  const wrap = document.getElementById('toasts') || (function(){
+    const d = document.createElement('div'); 
+    d.id = 'toasts'; 
+    d.className = 'toast-wrap'; 
+    document.body.appendChild(d); 
+    return d;
+  })();
+  const el = document.createElement('div'); 
+  el.className = 'toast ' + (kind || ''); 
+  el.textContent = msg;
+  wrap.appendChild(el); 
+  setTimeout(() => el.style.opacity = '0', 1600);
+  setTimeout(() => { try { wrap.removeChild(el) } catch(_) {} }, 2200);
+}
+
+function $(id) { return document.getElementById(id); }
+
+/* ====== URL Processing ====== */
+function extractPropertyDataFromUrl(url) {
+  // Basic URL parsing - extract what we can from the URL structure
+  const data = {
+    url: url,
+    id: null,
+    precio: null,
+    m2: null,
+    ubicacion: null,
+    error: null
+  };
+
+  try {
+    // Extract Idealista ID if possible
+    const idealistaMatch = url.match(/idealista\.com\/inmueble\/(\d+)/);
+    if (idealistaMatch) {
+      data.id = idealistaMatch[1];
+      data.platform = 'idealista';
+    }
+
+    // Try to extract location from URL path
+    const pathParts = new URL(url).pathname.split('/');
+    if (pathParts.length > 2) {
+      // Look for location indicators in URL
+      const locationPart = pathParts.find(part => 
+        part.includes('oviedo') || part.includes('gijon') || part.includes('aviles') ||
+        part.includes('madrid') || part.includes('barcelona') || part.includes('valencia')
+      );
+      if (locationPart) {
+        data.ubicacion = locationPart.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
+      }
+    }
+
+    return data;
+  } catch (error) {
+    data.error = 'URL inválida: ' + error.message;
+    return data;
+  }
+}
+
+async function processSingleUrl(url, defaultValues) {
+  const result = {
+    url: url.trim(),
+    status: 'processing',
+    data: null,
+    evaluation: null,
+    error: null
+  };
+
+  if (!url.trim()) {
+    result.status = 'error';
+    result.error = 'URL vacía';
+    return result;
+  }
+
+  try {
+    // Extract basic data from URL
+    const extractedData = extractPropertyDataFromUrl(url);
+    
+    if (extractedData.error) {
+      result.status = 'error';
+      result.error = extractedData.error;
+      return result;
+    }
+
+    // Create property data with defaults for missing values
+    const propertyData = {
+      url: url,
+      ubicacion: extractedData.ubicacion || 'Ubicación no detectada',
+      precio: extractedData.precio || 150000, // Default price if not extracted
+      m2: extractedData.m2 || 80, // Default size
+      alquiler: defaultValues.alquiler || 600,
+      tipo: defaultValues.tipo || 'Tradicional'
+    };
+
+    // Simulate evaluation calculation using existing logic
+    const evaluation = calculatePropertyEvaluation(propertyData);
+    
+    result.status = 'success';
+    result.data = propertyData;
+    result.evaluation = evaluation;
+
+  } catch (error) {
+    result.status = 'error';
+    result.error = error.message;
+  }
+
+  return result;
+}
+
+function calculatePropertyEvaluation(data) {
+  // Use simplified version of existing evaluation logic
+  const cfg = Store.cfg || {};
+  
+  // Basic calculations
+  const precio = data.precio || 0;
+  const alquiler_mensual = data.alquiler || 0;
+  const alquiler_anual = alquiler_mensual * 12;
+  
+  // Investment calculation (simplified)
+  const itp = precio * 0.08; // 8% ITP default
+  const notaria = 1500; // Default notary costs
+  const reforma = 5000; // Default reform estimate
+  const inversion_total = precio + itp + notaria + reforma;
+  
+  // Returns calculation
+  const gastos_anuales = alquiler_anual * 0.15; // 15% annual costs estimate
+  const ingreso_neto_anual = alquiler_anual - gastos_anuales;
+  
+  // KPIs
+  const rentabilidad_bruta = (alquiler_anual / inversion_total) * 100;
+  const rentabilidad_neta = (ingreso_neto_anual / inversion_total) * 100;
+  const flujo_mensual = ingreso_neto_anual / 12;
+
+  return {
+    inversion_total: inversion_total,
+    alquiler_anual: alquiler_anual,
+    gastos_anuales: gastos_anuales,
+    ingreso_neto_anual: ingreso_neto_anual,
+    rentabilidad_bruta: rentabilidad_bruta,
+    rentabilidad_neta: rentabilidad_neta,
+    flujo_mensual: flujo_mensual,
+    
+    // Classification
+    clase: rentabilidad_bruta >= 10 ? 'excellent' : 
+           rentabilidad_bruta >= 8 ? 'good' : 
+           rentabilidad_bruta >= 6 ? 'fair' : 'poor'
+  };
+}
+
+/* ====== Main Processing Function ====== */
+async function processBulkUrls() {
+  const urlsText = $('bulk_urls').value.trim();
+  const defaultTipo = $('default_tipo').value;
+  const defaultAlq = parseFloat($('default_alq').value) || 600;
+
+  if (!urlsText) {
+    toast('Por favor, introduce al menos una URL', 'error');
+    return;
+  }
+
+  const urls = urlsText.split('\n').filter(url => url.trim());
+  
+  if (urls.length === 0) {
+    toast('No se encontraron URLs válidas', 'error');
+    return;
+  }
+
+  // Show progress section
+  $('progress_section').style.display = 'block';
+  $('results_section').style.display = 'none';
+  $('btn_process').disabled = true;
+  
+  processedResults = [];
+  currentProcessIndex = 0;
+
+  const defaultValues = {
+    tipo: defaultTipo,
+    alquiler: defaultAlq
+  };
+
+  // Process URLs one by one
+  for (let i = 0; i < urls.length; i++) {
+    currentProcessIndex = i;
+    
+    // Update progress
+    const progress = ((i + 1) / urls.length) * 100;
+    $('progress_fill').style.width = progress + '%';
+    $('progress_text').textContent = `Procesando ${i + 1} de ${urls.length} URLs...`;
+    $('current_processing').textContent = `Procesando: ${urls[i]}`;
+
+    // Process single URL
+    const result = await processSingleUrl(urls[i], defaultValues);
+    processedResults.push(result);
+
+    // Small delay to show progress
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  // Complete processing
+  $('progress_text').textContent = `Completado: ${urls.length} URLs procesadas`;
+  $('current_processing').textContent = '';
+  $('btn_process').disabled = false;
+
+  // Show results
+  displayResults();
+  toast(`Procesamiento completado: ${processedResults.length} URLs`, 'ok');
+}
+
+/* ====== Results Display ====== */
+function displayResults() {
+  $('results_section').style.display = 'block';
+  
+  const tbody = $('results_tbody');
+  tbody.innerHTML = '';
+
+  processedResults.forEach((result, index) => {
+    const row = document.createElement('tr');
+    
+    const statusClass = result.status === 'success' ? 'success' : 'error';
+    const statusText = result.status === 'success' ? '✅ OK' : '❌ Error';
+    
+    let rentBruta = '-', rentNeta = '-', flujo = '-';
+    let precio = '-', m2 = '-', alquiler = '-', ubicacion = '-';
+    
+    if (result.status === 'success' && result.evaluation) {
+      rentBruta = result.evaluation.rentabilidad_bruta.toFixed(1) + '%';
+      rentNeta = result.evaluation.rentabilidad_neta.toFixed(1) + '%';
+      flujo = '€' + Math.round(result.evaluation.flujo_mensual);
+      precio = '€' + (result.data.precio || 0).toLocaleString();
+      m2 = (result.data.m2 || '-') + ' m²';
+      alquiler = '€' + (result.data.alquiler || 0);
+      ubicacion = result.data.ubicacion || '-';
+    }
+    
+    row.innerHTML = `
+      <td><span class="status ${statusClass}">${statusText}</span></td>
+      <td><a href="${result.url}" target="_blank" style="font-size:10px">${result.url.substring(0, 50)}...</a></td>
+      <td>${ubicacion}</td>
+      <td>${precio}</td>
+      <td>${m2}</td>
+      <td>${alquiler}</td>
+      <td>${rentBruta}</td>
+      <td>${rentNeta}</td>
+      <td>${flujo}</td>
+      <td>
+        ${result.status === 'success' ? 
+          `<button class="btn" style="font-size:10px;padding:4px 8px" onclick="editResult(${index})">📝 Editar</button>` : 
+          `<span style="color:var(--bad);font-size:10px">${result.error}</span>`
+        }
+      </td>
+    `;
+    
+    tbody.appendChild(row);
+  });
+}
+
+/* ====== Additional Functions ====== */
+function editResult(index) {
+  const result = processedResults[index];
+  if (result.status !== 'success') return;
+  
+  // Create and save evaluation to existing system for editing
+  const evaluationData = {
+    id: 'ev_' + Date.now() + '_' + index,
+    ts: Date.now(),
+    loc: result.data.ubicacion,
+    calle: '',
+    url: result.url,
+    precio: result.data.precio,
+    m2: result.data.m2,
+    alq: result.data.alquiler,
+    tipo: result.data.tipo,
+    // Add calculated values
+    kpi_bruta: result.evaluation.rentabilidad_bruta,
+    kpi_neta: result.evaluation.rentabilidad_neta,
+    kpi_flujo: result.evaluation.flujo_mensual,
+    inv_total: result.evaluation.inversion_total
+  };
+  
+  // Save to evaluations
+  const evals = Store.evals || [];
+  evals.push(evaluationData);
+  Store.evals = evals;
+  
+  // Open in evaluation editor
+  localStorage.setItem('load_eval', evaluationData.id);
+  window.open('evaluar.html', '_blank');
+}
+
+function exportResults() {
+  if (processedResults.length === 0) {
+    toast('No hay resultados para exportar', 'warn');
+    return;
+  }
+  
+  const csvData = processedResults.map(result => {
+    if (result.status === 'success') {
+      return [
+        result.url,
+        result.data.ubicacion,
+        result.data.precio,
+        result.data.m2,
+        result.data.alquiler,
+        result.evaluation.rentabilidad_bruta.toFixed(2),
+        result.evaluation.rentabilidad_neta.toFixed(2),
+        result.evaluation.flujo_mensual.toFixed(2)
+      ].join(',');
+    } else {
+      return [result.url, 'ERROR', result.error, '', '', '', '', ''].join(',');
+    }
+  });
+  
+  const csvContent = 'URL,Ubicacion,Precio,M2,Alquiler,Rent_Bruta_%,Rent_Neta_%,Flujo_Mensual\n' + csvData.join('\n');
+  
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'evaluacion_masiva_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  toast('Resultados exportados a CSV', 'ok');
+}
+
+function saveAllEvaluations() {
+  const successResults = processedResults.filter(r => r.status === 'success');
+  
+  if (successResults.length === 0) {
+    toast('No hay evaluaciones exitosas para guardar', 'warn');
+    return;
+  }
+  
+  const evals = Store.evals || [];
+  
+  successResults.forEach((result, index) => {
+    const evaluationData = {
+      id: 'ev_bulk_' + Date.now() + '_' + index,
+      ts: Date.now(),
+      loc: result.data.ubicacion,
+      calle: '',
+      url: result.url,
+      precio: result.data.precio,
+      m2: result.data.m2,
+      alq: result.data.alquiler,
+      tipo: result.data.tipo,
+      kpi_bruta: result.evaluation.rentabilidad_bruta,
+      kpi_neta: result.evaluation.rentabilidad_neta,
+      kpi_flujo: result.evaluation.flujo_mensual,
+      inv_total: result.evaluation.inversion_total,
+      // Mark as bulk import
+      bulk_import: true,
+      bulk_import_date: new Date().toISOString()
+    };
+    
+    evals.push(evaluationData);
+  });
+  
+  Store.evals = evals;
+  toast(`${successResults.length} evaluaciones guardadas exitosamente`, 'ok');
+}
+
+function clearResults() {
+  $('bulk_urls').value = '';
+  $('progress_section').style.display = 'none';
+  $('results_section').style.display = 'none';
+  processedResults = [];
+  toast('Resultados limpiados', 'ok');
+}
+
+/* ====== Initialize ====== */
+document.addEventListener('DOMContentLoaded', () => {
+  // Set default alquiler based on config if available
+  const cfg = Store.cfg || {};
+  if (cfg.default_alquiler) {
+    $('default_alq').value = cfg.default_alquiler;
+  }
+});
+</script>
+
+</body>
+</html>
