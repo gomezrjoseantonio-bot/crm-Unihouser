@@ -504,20 +504,20 @@ function blockPresupuesto(p){
    '<div class="row two">'+
      inputKV('P. máx inversión (€)','bp_pmax', p.inv_pmax||'')+
      selectKV('Incluir PSI en presupuesto máx','bp_psip',['No','Sí'], p.psi_in_presupuesto?'Sí':'No')+
-   '</div>'+
+   </div>'+
    '<div class="row three">'+
      inputKV('PSI (Honorarios) · Config','bp_psi', e0(c.psi), true)+
      inputKV('Notaría (€) · Config','bp_not', e0(c.notaria), true)+
      inputKV('ITP (€) (calculado)','bp_itp','',true)+
-   '</div>'+
+   </div>'+
    '<div class="row two">'+
      inputKV('Valor máximo de compra (estimado)','bp_vmax','',true)+
      inputKV('Coste total operación','bp_cto','',true)+
-   '</div>'+
+   </div>'+
    '<div class="row two">'+
      inputKV('Alquiler objetivo mensual (si objetivo BRUTA)','bp_alq','',true)+
      '<div></div>'+
-   '</div>';
+   </div>';
   return b;
 }
 
@@ -529,7 +529,7 @@ function blockFinanciacion(p){
    '<div class="row two">'+
      inputKV('LTV (%)','fi_ltv', p.ltv ?? 0)+
      inputKV('Fondos propios (€)','fi_fp','',true)+
-   '</div>';
+   </div>';
   return b;
 }
 
@@ -728,33 +728,107 @@ function openMeetingPicker(idp){
   Store.pros=list; render(); toast('Reunión guardada','ok');
 }
 
-/* Comms */
-function quickMail(p){
-  const subj='Unihouser';
-  const body='Hola '+(p.nombre||'')+', ';
-  const mailto='mailto:'+encodeURIComponent(p.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
-  window.open(mailto,'_blank');
+/* ===== COMMS (Plantillas por fase: helpers + envío) ===== */
+function getCfg(){ try{ return JSON.parse(localStorage.getItem('cfg')||'{}') || {}; }catch(_){ return {}; } }
+function normPhaseKey(raw){
+  const s=(raw||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+  if(s.includes('CONTACT')) return 'CONTACTO';
+  if(s.includes('REUN'))    return 'REUNION';
+  if(s.includes('CONTRAT')) return 'CONTRATO';
+  if(s.includes('BUSQ'))    return 'BUSQUEDA';
+  if(s.includes('COMPRA'))  return 'COMPRAVENTA';
+  if(s.includes('EXI'))     return 'EXITO';
+  return 'CONTACTO';
 }
-function quickWA(p){
-  const body='Hola '+(p.nombre||'')+', ';
+function getPhaseTemplateStrict(cfg, fase){
+  const key = normPhaseKey(fase);
+  const tpl = cfg && cfg.comms && cfg.comms.templates && cfg.comms.templates[key];
+  const notifs = (cfg && cfg.notifs) || {};
+  const emailSubFB = notifs.email_subject_tpl || '{brand} — {name}';
+  const emailBodyFB= notifs.email_body_tpl    || 'Hola {name}';
+  const waBodyFB   = notifs.wa_text_tpl       || 'Hola {name}';
+
+  const emailSub = (tpl && tpl.email && tpl.email.subject) || '';
+  const emailBod = (tpl && tpl.email && tpl.email.body)    || '';
+  const waBod    = (tpl && tpl.whatsapp && tpl.whatsapp.body) || '';
+
+  return {
+    key,
+    subject: emailSub.trim() ? emailSub : emailSubFB,
+    emailBody: emailBod.trim() ? emailBod : emailBodyFB,
+    waBody: waBod.trim() ? waBod : waBodyFB,
+    hadPhaseTpl: !!(tpl && (emailSub.trim() || emailBod.trim() || waBod.trim()))
+  };
+}
+function fillTpl(tpl, ctx){
+  return (tpl||'')
+    .replace(/\{brand\}/g, ctx.brand||'Unihouser')
+    .replace(/\{name\}/g,  ctx.name||'')
+    .replace(/\{loc\}/g,   ctx.loc||'')
+    .replace(/\{calle\}/g, ctx.calle||'')
+    .replace(/\{tipo\}/g,  ctx.tipo||'')
+    .replace(/\{precio\}/g,ctx.precio||'')
+    .replace(/\{inv\}/g,   ctx.inv||'')
+    .replace(/\{rb\}/g,    ctx.rb||'')
+    .replace(/\{rn\}/g,    ctx.rn||'')
+    .replace(/\{fl\}/g,    ctx.fl||'')
+    .replace(/\{pmax\}/g,  ctx.pmax||'')
+    .replace(/\{url\}/g,   ctx.url||'');
+}
+function ctxFromProspectAndEval(p,e,cfg){
+  const fmtE0 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+  const pct1 = v => {
+    const n=Number(v||0); if(!isFinite(n)) return '';
+    const perc = n>1? n : n*100; return (Math.round(perc*10)/10).toFixed(1).replace('.',',');
+  };
+  return {
+    brand: (cfg&&cfg.brand_name)||'Unihouser',
+    name:  ((p&&p.nombre)||'') + (p&&p.apellidos? ' '+p.apellidos:''),
+    loc:   (e&&e.loc)||'',
+    calle: (e&&e.calle)||'',
+    tipo:  (e&&e.tipo) || (p&&p.prefs&&p.prefs.tipo) || '',
+    precio:(e? fmtE0.format(e.precio||0):''),
+    inv:   (e? fmtE0.format(e.inv_total||0):''),
+    rb:    (e? pct1(e.kpi_bruta):''),
+    rn:    (e? pct1(e.kpi_neta):''),
+    fl:    (e? fmtE0.format(e.kpi_flujo||e.kpi_flujo_anual||0):''),
+    pmax:  (e? fmtE0.format(e.pmax||0):''),
+    url:   (e&&e.url)||''
+  };
+}
+function mailtoEncodeBody(text){
+  return encodeURIComponent(String(text||'').replace(/\n/g, '\r\n')); // CRLF para clientes email
+}
+function composeEmailURL(p, fase, e){
+  const cfg = getCfg();
+  const t = getPhaseTemplateStrict(cfg, fase);
+  const ctx = ctxFromProspectAndEval(p,e,cfg);
+  const subj = fillTpl(t.subject, ctx);
+  const body = fillTpl(t.emailBody, ctx);
+  if(!t.hadPhaseTpl){ toast('Usando plantilla global (fase sin plantilla)','warn'); }
+  const to = (p&&p.email)||'';
+  return 'mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subj)+'&body='+mailtoEncodeBody(body);
+}
+function composeWAURL(p, fase, e){
+  const cfg = getCfg();
+  const t = getPhaseTemplateStrict(cfg, fase);
+  const ctx = ctxFromProspectAndEval(p,e,cfg);
+  const msg = fillTpl(t.waBody, ctx);
+  if(!t.hadPhaseTpl){ toast('WA: usando plantilla global (fase sin plantilla)','warn'); }
   const phone = String(p.movil||p.phone||p.telefono||'').replace(/[^\d]/g,'');
-  const url='https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(body);
-  window.open(url,'_blank');
+  return 'https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(msg);
 }
+
+/* Reemplazo mínimo: estas funciones llaman a las plantillas */
+function quickMail(p){ window.open(composeEmailURL(p, p.fase||'CONTACTO', null),'_blank'); }
+function quickWA(p){   window.open(composeWAURL(p,   p.fase||'CONTACTO', null),'_blank'); }
 function sendAssetMail(p,eid){
-  const e=(Store.evals||[]).find(function(x){return x.id===eid;}); if(!e){toast('Activo no encontrado','warn');return;}
-  const subj='Oportunidad · '+(e.loc||'')+' · '+(e.calle||'');
-  const body='Hola '+(p.nombre||'')+',%0D%0A%0D%0ATe comparto una oportunidad:%0D%0A'+
-             (e.loc||'')+' · '+(e.calle||'')+'%0D%0APrecio '+e0(e.precio||0)+' · Inversión '+e0(e.inv_total||0)+'%0D%0A'+
-             'Bruta '+((+e.kpi_bruta||0).toFixed(1))+'% · Neta '+((+e.kpi_neta||0).toFixed(1))+'%'+
-             '%0D%0A%0D%0AUn saludo.';
-  window.open('mailto:'+encodeURIComponent(p.email||'')+'?subject='+subj+'&body='+body,'_blank');
+  const e=(Store.evals||[]).find(x=>x.id===eid); if(!e){toast('Activo no encontrado','warn');return;}
+  window.open(composeEmailURL(p, 'BUSQUEDA', e),'_blank'); // fase búsqueda para activos
 }
 function sendAssetWA(p,eid){
-  const e=(Store.evals||[]).find(function(x){return x.id===eid;}); if(!e){toast('Activo no encontrado','warn');return;}
-  const body=(e.loc||'')+' · '+(e.calle||'')+' — Bruta '+((+e.kpi_bruta||0).toFixed(1))+'% · Neta '+((+e.kpi_neta||0).toFixed(1))+'% · Inversión '+e0(e.inv_total||0);
-  const phone = String(p.movil||p.phone||p.telefono||'').replace(/[^\d]/g,'');
-  window.open('https://wa.me/'+(phone||'')+'?text='+encodeURIComponent(body),'_blank');
+  const e=(Store.evals||[]).find(x=>x.id===eid); if(!e){toast('Activo no encontrado','warn');return;}
+  window.open(composeWAURL(p, 'BUSQUEDA', e),'_blank');
 }
 
 /* Comprar */
