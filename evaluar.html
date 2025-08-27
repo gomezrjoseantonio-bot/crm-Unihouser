@@ -49,6 +49,8 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min
 .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:800;font-size:12px}
 .btn:hover{background:#FAF8F7}
 .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.secondary{background:#f8fafc;border-color:#e2e8f0;color:#475569}
+.btn.secondary:hover{background:#f1f5f9}
 
 /* KPIs */
 .kpis{display:grid;gap:10px;grid-template-columns:repeat(5,1fr)}
@@ -138,7 +140,13 @@ try{
             </select>
           </div>
           <div class="field"><label>URL Idealista (opcional)</label><input id="e_url" placeholder="https://www.idealista.com/inmueble/..."></div>
-          <div class="field"></div>
+          <div class="field">
+            <label>Buscar propiedades</label>
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="btn secondary" id="e_search_idealista">🔍 Buscar en Idealista</button>
+              <button type="button" class="btn secondary" id="e_extract_idealista">📥 Extraer datos de URL</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -636,10 +644,178 @@ function preloadIfAny(){
   calc();
 }
 
+/* Extraer datos de URL de Idealista */
+function extractFromIdealista(){
+  var url = id('e_url').value.trim();
+  if(!url){
+    toast('Por favor, ingresa una URL de Idealista primero', 'warn');
+    return;
+  }
+  
+  if(!url.includes('idealista.com')){
+    toast('La URL debe ser de Idealista', 'warn');
+    return;
+  }
+  
+  try {
+    var urlObj = new URL(url);
+    var path = urlObj.pathname;
+    var params = new URLSearchParams(urlObj.search);
+    
+    // Extraer información básica de la URL
+    var extracted = false;
+    
+    // Intentar extraer localidad del path
+    // Ejemplo: /alquiler-viviendas/oviedo/piso/12345/
+    var pathParts = path.split('/').filter(Boolean);
+    if(pathParts.length >= 2) {
+      var possibleLocation = pathParts[1];
+      if(possibleLocation && possibleLocation !== 'inmueble') {
+        // Buscar coincidencia en localidades de Asturias
+        var locationMatch = ASTURIAS.find(function(loc) {
+          return fold(loc) === fold(possibleLocation.replace(/-/g, ' '));
+        });
+        if(locationMatch) {
+          id('e_loc').value = locationMatch;
+          extracted = true;
+        }
+      }
+    }
+    
+    // Extraer información de los parámetros de búsqueda si es una URL de búsqueda
+    if(params.has('superficie') || params.has('superficieMin') || params.has('superficieMax')) {
+      var superficie = params.get('superficie') || params.get('superficieMin') || '';
+      if(superficie && !id('e_m2').value) {
+        id('e_m2').value = superficie;
+        extracted = true;
+      }
+    }
+    
+    if(params.has('dormitorios') || params.has('dormitoriosMin')) {
+      var dormitorios = params.get('dormitorios') || params.get('dormitoriosMin') || '';
+      if(dormitorios && !id('e_habs').value) {
+        id('e_habs').value = dormitorios;
+        extracted = true;
+      }
+    }
+    
+    if(params.has('banos') || params.has('banosMin')) {
+      var banos = params.get('banos') || params.get('banosMin') || '';
+      if(banos && !id('e_banos').value) {
+        id('e_banos').value = banos;
+        extracted = true;
+      }
+    }
+    
+    // Extraer precio si está en los parámetros
+    if(params.has('precio') || params.has('precioMin') || params.has('precioMax')) {
+      var precio = params.get('precio') || params.get('precioMax') || '';
+      if(precio && !id('e_precio').value) {
+        // Si es un precio de alquiler, estimamos precio de compra
+        var precioNum = parseInt(precio);
+        if(precioNum > 0 && precioNum < 10000) { // probablemente alquiler mensual
+          var precioCompraEstimado = Math.round((precioNum * 12) / 0.08); // 8% rentabilidad
+          id('e_precio').value = precioCompraEstimado;
+          extracted = true;
+        }
+      }
+    }
+    
+    if(extracted) {
+      toast('Datos extraídos de la URL de Idealista', 'ok');
+      // Recalcular automáticamente si hay datos suficientes
+      var hasBasicData = id('e_loc').value && id('e_precio').value;
+      if(hasBasicData) {
+        setTimeout(calc, 500); // pequeño delay para que se actualicen los campos
+      }
+    } else {
+      toast('No se pudieron extraer datos automáticamente de esta URL', 'warn');
+    }
+    
+  } catch(e) {
+    toast('URL no válida', 'warn');
+  }
+}
+
+/* Buscar en Idealista */
+function searchIdealista(){
+  var loc = id('e_loc').value || '';
+  var precio = parseMoney(id('e_precio').value || '0');
+  var m2 = id('e_m2').value || '';
+  var habs = id('e_habs').value || '';
+  var banos = id('e_banos').value || '';
+  
+  // Construir URL de búsqueda de Idealista
+  var baseUrl = 'https://www.idealista.com/alquiler-viviendas/';
+  
+  // Normalizar localidad para URL
+  var locUrl = '';
+  if(loc) {
+    locUrl = loc.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // eliminar acentos
+      .replace(/\s+/g, '-') // espacios a guiones
+      .replace(/[^a-z0-9-]/g, ''); // solo letras, números y guiones
+    baseUrl += locUrl + '/';
+  } else {
+    baseUrl += 'asturias-provincia/';
+  }
+  
+  // Parámetros de búsqueda
+  var params = [];
+  
+  // Precio máximo (usar precio de compra como referencia o precio máximo calculado)
+  if(precio > 0) {
+    // Estimar alquiler basado en rentabilidad del 8-10%
+    var alquilerEstimado = Math.round((precio * 0.08) / 12);
+    if(alquilerEstimado > 0) {
+      params.push('precioHasta=' + alquilerEstimado);
+    }
+  }
+  
+  // Superficie
+  if(m2) {
+    var superficie = parseInt(m2);
+    if(superficie > 0) {
+      params.push('superficieDesde=' + Math.max(superficie - 10, 20));
+      params.push('superficieHasta=' + (superficie + 20));
+    }
+  }
+  
+  // Habitaciones
+  if(habs) {
+    var habitaciones = parseInt(habs);
+    if(habitaciones > 0) {
+      params.push('dormitoriosDesde=' + Math.max(habitaciones - 1, 1));
+    }
+  }
+  
+  // Baños
+  if(banos) {
+    var bathrooms = parseInt(banos);
+    if(bathrooms > 0) {
+      params.push('banosDesde=' + bathrooms);
+    }
+  }
+  
+  // Construir URL final
+  var searchUrl = baseUrl;
+  if(params.length > 0) {
+    searchUrl += '?' + params.join('&');
+  }
+  
+  // Abrir en nueva pestaña
+  window.open(searchUrl, '_blank', 'noopener,noreferrer');
+  
+  // Mostrar mensaje
+  toast('Abriendo búsqueda en Idealista...', 'ok');
+}
+
 /* Eventos */
 function attach(){
   loadLocalidades(); moneyLive(); bindAuto();
   id('e_calc').addEventListener('click',calc);
+  id('e_search_idealista').addEventListener('click',searchIdealista);
+  id('e_extract_idealista').addEventListener('click',extractFromIdealista);
   id('btn_save_only').addEventListener('click',function(){ save(false); });
   id('btn_save_assign').addEventListener('click',function(){ save(true); });
   id('btn_discard').addEventListener('click',discard);
