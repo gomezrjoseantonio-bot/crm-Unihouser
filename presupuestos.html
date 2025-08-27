@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>FinanceManager — Gestión de Presupuestos</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+:root{
+  --brand:#c7530c; --accent:#DB824B; --ok:#2E7D32; --bad:#B53928;
+  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
+  --shadow:0 4px 22px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif; --fz:12px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
+.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
+.title{font-weight:700;color:var(--ink2);font-size:13px}
+.nav a{color:var(--ink2);text-decoration:none;padding:5px 8px;border-radius:8px;font-size:12px}
+.nav a.active{background:var(--brand);color:#fff}
+.nav a:hover{background:#f3efe9}
+.container{max-width:1200px;margin:12px auto;padding:0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin:16px 0}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;margin-bottom:6px;font-weight:700;color:var(--ink2)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:14px}
+.btn{background:var(--brand);color:#fff;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:700}
+.btn:hover{opacity:0.9}
+.budget-item{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px}
+.progress-bar{background:#f0f0f0;border-radius:4px;height:8px;margin:8px 0}
+.progress-fill{height:100%;border-radius:4px;transition:width 0.3s ease}
+.budget-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:16px}
+.budget-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.budget-amount{font-size:18px;font-weight:700}
+.budget-status{font-size:12px;padding:4px 8px;border-radius:12px;color:#fff}
+.status-ok{background:var(--ok)}
+.status-warning{background:#f59e0b}
+.status-danger{background:var(--bad)}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="brand"><div class="logo">₱</div><div class="title">FinanceManager — Presupuestos</div></div>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="ingresos.html">Ingresos</a>
+        <a href="gastos.html">Gastos</a>
+        <a class="active" href="presupuestos.html">Presupuestos</a>
+        <a href="reportes.html">Reportes</a>
+        <a href="configuracion.html">Configuración</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Gestión de Presupuestos</h1>
+    
+    <div class="card">
+      <h2>Crear Nuevo Presupuesto</h2>
+      <form id="budget-form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="budget-name">Nombre del Presupuesto</label>
+            <input type="text" id="budget-name" placeholder="Ej: Presupuesto Mensual, Vacaciones" required>
+          </div>
+          <div class="form-group">
+            <label for="budget-amount">Cantidad (€)</label>
+            <input type="number" id="budget-amount" step="0.01" placeholder="0.00" required>
+          </div>
+          <div class="form-group">
+            <label for="budget-month">Mes</label>
+            <input type="month" id="budget-month" required>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="budget-category">Categoría (opcional)</label>
+            <select id="budget-category">
+              <option value="">Todas las categorías</option>
+              <option value="alimentacion">Alimentación</option>
+              <option value="transporte">Transporte</option>
+              <option value="vivienda">Vivienda</option>
+              <option value="entretenimiento">Entretenimiento</option>
+              <option value="salud">Salud</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="budget-alert">Alerta cuando se alcance (%)</label>
+            <select id="budget-alert">
+              <option value="80">80%</option>
+              <option value="90">90%</option>
+              <option value="95">95%</option>
+              <option value="100">100%</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="budget-notes">Notas (opcional)</label>
+          <textarea id="budget-notes" rows="3" placeholder="Descripción del presupuesto..."></textarea>
+        </div>
+        <button type="submit" class="btn">Crear Presupuesto</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Presupuestos Activos</h2>
+      <div id="budget-list" class="budget-grid">
+        <!-- Los presupuestos se cargarán aquí dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+    
+    const Store = {
+      get budgets(){try{return JSON.parse(localStorage.getItem('budgets')||'[]')}catch(_){return[]}}, 
+      set budgets(v){localStorage.setItem('budgets',JSON.stringify(v));},
+      get transactions(){try{return JSON.parse(localStorage.getItem('transactions')||'[]')}catch(_){return[]}}, 
+      set transactions(v){localStorage.setItem('transactions',JSON.stringify(v));}
+    };
+    
+    const $ = id => document.getElementById(id);
+    const esc = s => (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    const fmtE2 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:2});
+    const e2 = v => fmtE2.format(Number(v||0));
+    const parseNum = v => Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
+    
+    function toast(msg, type='info') {
+      const toast = document.createElement('div');
+      toast.textContent = msg;
+      toast.style.cssText = `position:fixed;top:20px;right:20px;background:${type==='ok'?'var(--ok)':'var(--bad)'};color:#fff;padding:12px 16px;border-radius:8px;z-index:1000`;
+      document.body.appendChild(toast);
+      setTimeout(() => document.body.removeChild(toast), 3000);
+    }
+    
+    function getSpentAmount(budget) {
+      const expenses = Store.transactions.filter(t => 
+        t.type === 'gasto' && 
+        t.date.startsWith(budget.month) &&
+        (!budget.category || t.category === budget.category)
+      );
+      
+      return expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    }
+    
+    function getBudgetStatus(spent, budget, alertThreshold) {
+      const percentage = budget > 0 ? (spent / budget * 100) : 0;
+      
+      if (percentage >= 100) return 'danger';
+      if (percentage >= alertThreshold) return 'warning';
+      return 'ok';
+    }
+    
+    function renderBudgets() {
+      const budgets = Store.budgets;
+      const container = $('budget-list');
+      
+      if (budgets.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">No hay presupuestos creados</p>';
+        return;
+      }
+      
+      container.innerHTML = budgets.map(budget => {
+        const spent = getSpentAmount(budget);
+        const remaining = budget.amount - spent;
+        const percentage = budget.amount > 0 ? (spent / budget.amount * 100) : 0;
+        const status = getBudgetStatus(spent, budget.amount, budget.alertThreshold || 80);
+        
+        return `
+          <div class="budget-item">
+            <div class="budget-header">
+              <div>
+                <div style="font-weight: 700; font-size: 16px;">${esc(budget.name)}</div>
+                <div style="font-size: 12px; color: #666;">${budget.month}${budget.category ? ' • ' + budget.category : ''}</div>
+              </div>
+              <span class="budget-status status-${status}">
+                ${percentage.toFixed(1)}%
+              </span>
+            </div>
+            
+            <div style="margin: 12px 0;">
+              <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px;">
+                <span>Gastado: ${e2(spent)}</span>
+                <span>Restante: ${e2(remaining)}</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="background: ${status === 'danger' ? 'var(--bad)' : status === 'warning' ? '#f59e0b' : 'var(--ok)'}; width: ${Math.min(percentage, 100)}%;"></div>
+              </div>
+            </div>
+            
+            <div class="budget-amount">Presupuesto: ${e2(budget.amount)}</div>
+            
+            ${budget.notes ? `<div style="font-size: 12px; color: #666; margin-top: 8px;">${esc(budget.notes)}</div>` : ''}
+            
+            <div style="margin-top: 12px;">
+              <button onclick="deleteBudget(${budget.id})" style="background: var(--bad); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                Eliminar
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    window.deleteBudget = function(budgetId) {
+      if (!confirm('¿Estás seguro de que quieres eliminar este presupuesto?')) return;
+      
+      const budgets = Store.budgets.filter(b => b.id !== budgetId);
+      Store.budgets = budgets;
+      renderBudgets();
+      toast('Presupuesto eliminado', 'ok');
+    };
+    
+    // Set current month as default
+    const now = new Date();
+    const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    $('budget-month').value = currentMonth;
+    
+    $('budget-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const budget = {
+        id: Date.now(),
+        name: $('budget-name').value.trim(),
+        amount: parseNum($('budget-amount').value),
+        month: $('budget-month').value,
+        category: $('budget-category').value || null,
+        alertThreshold: parseInt($('budget-alert').value),
+        notes: $('budget-notes').value.trim(),
+        created: new Date().toISOString()
+      };
+      
+      if (!budget.name || !budget.amount || !budget.month) {
+        toast('Por favor completa todos los campos requeridos', 'error');
+        return;
+      }
+      
+      // Check if budget already exists for this month/category
+      const existing = Store.budgets.find(b => 
+        b.month === budget.month && 
+        b.category === budget.category
+      );
+      
+      if (existing) {
+        toast('Ya existe un presupuesto para este mes y categoría', 'error');
+        return;
+      }
+      
+      const budgets = Store.budgets;
+      budgets.push(budget);
+      Store.budgets = budgets;
+      
+      // Clear form
+      this.reset();
+      $('budget-month').value = currentMonth;
+      
+      renderBudgets();
+      toast('Presupuesto creado correctamente', 'ok');
+    });
+    
+    // Initial render
+    renderBudgets();
+    
+    // Apply brand configuration
+    try{
+      const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
+      if(cfg.brand_color) document.documentElement.style.setProperty('--brand', cfg.brand_color);
+    }catch(_){}
+  })();
+  </script>
+</body>
+</html>

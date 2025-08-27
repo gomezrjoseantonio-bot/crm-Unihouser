@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>FinanceManager — Gestión de Ingresos</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+:root{
+  --brand:#c7530c; --accent:#DB824B; --ok:#2E7D32; --bad:#B53928;
+  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
+  --shadow:0 4px 22px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif; --fz:12px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
+.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
+.title{font-weight:700;color:var(--ink2);font-size:13px}
+.nav a{color:var(--ink2);text-decoration:none;padding:5px 8px;border-radius:8px;font-size:12px}
+.nav a.active{background:var(--brand);color:#fff}
+.nav a:hover{background:#f3efe9}
+.container{max-width:1200px;margin:12px auto;padding:0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin:16px 0}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;margin-bottom:6px;font-weight:700;color:var(--ink2)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:14px}
+.btn{background:var(--brand);color:#fff;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:700}
+.btn:hover{opacity:0.9}
+.btn-secondary{background:#f0f0f0;color:var(--ink)}
+.table{width:100%;border-collapse:collapse;margin-top:16px}
+.table th,.table td{padding:12px;text-align:left;border-bottom:1px solid var(--line)}
+.table th{background:#f8f9fa;font-weight:700}
+.income-item{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.income-amount{font-weight:700;color:var(--ok);font-size:16px}
+.income-meta{font-size:12px;color:#666}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="brand"><div class="logo">₱</div><div class="title">FinanceManager — Ingresos</div></div>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a class="active" href="ingresos.html">Ingresos</a>
+        <a href="gastos.html">Gastos</a>
+        <a href="presupuestos.html">Presupuestos</a>
+        <a href="reportes.html">Reportes</a>
+        <a href="configuracion.html">Configuración</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Gestión de Ingresos</h1>
+    
+    <div class="card">
+      <h2>Añadir Nuevo Ingreso</h2>
+      <form id="income-form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="income-description">Descripción</label>
+            <input type="text" id="income-description" placeholder="Ej: Salario, Freelance, Dividendos" required>
+          </div>
+          <div class="form-group">
+            <label for="income-amount">Cantidad (€)</label>
+            <input type="number" id="income-amount" step="0.01" placeholder="0.00" required>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label for="income-category">Categoría</label>
+            <select id="income-category" required>
+              <option value="">Seleccionar categoría</option>
+              <option value="salario">Salario</option>
+              <option value="freelance">Freelance</option>
+              <option value="negocio">Negocio</option>
+              <option value="inversiones">Inversiones</option>
+              <option value="alquiler">Alquiler</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="income-date">Fecha</label>
+            <input type="date" id="income-date" required>
+          </div>
+          <div class="form-group">
+            <label for="income-recurring">Recurrente</label>
+            <select id="income-recurring">
+              <option value="no">No</option>
+              <option value="semanal">Semanal</option>
+              <option value="mensual">Mensual</option>
+              <option value="anual">Anual</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="income-notes">Notas (opcional)</label>
+          <textarea id="income-notes" rows="3" placeholder="Información adicional..."></textarea>
+        </div>
+        <button type="submit" class="btn">Añadir Ingreso</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Ingresos Registrados</h2>
+      <div id="income-list">
+        <!-- Los ingresos se cargarán aquí dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+    
+    const Store = {
+      get transactions(){try{return JSON.parse(localStorage.getItem('transactions')||'[]')}catch(_){return[]}}, 
+      set transactions(v){localStorage.setItem('transactions',JSON.stringify(v));}
+    };
+    
+    const $ = id => document.getElementById(id);
+    const esc = s => (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    const fmtE2 = new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:2});
+    const e2 = v => fmtE2.format(Number(v||0));
+    const parseNum = v => Number(String(v??'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'))||0;
+    
+    function toast(msg, type='info') {
+      const toast = document.createElement('div');
+      toast.textContent = msg;
+      toast.style.cssText = `position:fixed;top:20px;right:20px;background:${type==='ok'?'var(--ok)':'var(--bad)'};color:#fff;padding:12px 16px;border-radius:8px;z-index:1000`;
+      document.body.appendChild(toast);
+      setTimeout(() => document.body.removeChild(toast), 3000);
+    }
+    
+    function renderIncomes() {
+      const incomes = Store.transactions.filter(t => t.type === 'ingreso');
+      const container = $('income-list');
+      
+      if (incomes.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #666;">No hay ingresos registrados</p>';
+        return;
+      }
+      
+      container.innerHTML = incomes
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .map(income => `
+          <div class="income-item">
+            <div>
+              <div style="font-weight: 700;">${esc(income.description)}</div>
+              <div class="income-meta">
+                ${esc(income.category)} • ${income.date}
+                ${income.recurring && income.recurring !== 'no' ? ' • Recurrente: ' + income.recurring : ''}
+              </div>
+              ${income.notes ? `<div class="income-meta">${esc(income.notes)}</div>` : ''}
+            </div>
+            <div class="income-amount">${e2(income.amount)}</div>
+          </div>
+        `).join('');
+    }
+    
+    // Set today's date as default
+    $('income-date').value = new Date().toISOString().split('T')[0];
+    
+    $('income-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const income = {
+        id: Date.now(),
+        description: $('income-description').value.trim(),
+        amount: parseNum($('income-amount').value),
+        category: $('income-category').value,
+        date: $('income-date').value,
+        type: 'ingreso',
+        recurring: $('income-recurring').value,
+        notes: $('income-notes').value.trim()
+      };
+      
+      if (!income.description || !income.amount || !income.category) {
+        toast('Por favor completa todos los campos requeridos', 'error');
+        return;
+      }
+      
+      const transactions = Store.transactions;
+      transactions.push(income);
+      Store.transactions = transactions;
+      
+      // Clear form
+      this.reset();
+      $('income-date').value = new Date().toISOString().split('T')[0];
+      
+      renderIncomes();
+      toast('Ingreso añadido correctamente', 'ok');
+    });
+    
+    // Initial render
+    renderIncomes();
+    
+    // Apply brand configuration
+    try{
+      const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
+      if(cfg.brand_color) document.documentElement.style.setProperty('--brand', cfg.brand_color);
+    }catch(_){}
+  })();
+  </script>
+</body>
+</html>
