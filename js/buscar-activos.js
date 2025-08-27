@@ -290,9 +290,9 @@ function createPropertyCard(prop) {
         <button class="btn" onclick="viewProperty('${prop.id}')">
           👁️ Ver Detalles
         </button>
-        <a href="${prop.url}" target="_blank" class="btn" style="text-decoration:none">
+        <button class="btn" onclick="showDemoMessage()">
           🔗 Ver Original
-        </a>
+        </button>
       </div>
     </div>
   `;
@@ -399,6 +399,11 @@ window.evaluateProperty = function(propertyId) {
   
   // Navegar a página de evaluación individual
   window.location.href = 'evaluar.html?auto=true';
+};
+
+/* ====== Mostrar mensaje de demostración ====== */
+window.showDemoMessage = function() {
+  showToast('Las propiedades mostradas son simuladas para demostración. En una versión completa, este enlace llevaría al listado real en Idealista/Fotocasa.', 'warning');
 };
 
 /* ====== Ver detalles de propiedad ====== */
