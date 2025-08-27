@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FinanceHub — Propiedades Inmobiliarias</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+:root{
+  --brand:#2563eb; --accent:#3b82f6; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+}
+.brand-new { 
+  background: linear-gradient(135deg, var(--brand), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900;
+}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="brand">
+        <div class="logo" style="background: var(--brand);">💰</div>
+        <div class="title brand-new">FinanceHub — Propiedades Inmobiliarias</div>
+      </div>
+      <nav class="nav">
+        <a href="finanzas.html">Dashboard</a>
+        <a href="cuentas.html">Cuentas</a>
+        <a href="presupuestos.html">Presupuestos</a>
+        <a href="inversiones.html">Inversiones</a>
+        <a href="propiedades.html" class="active">Propiedades</a>
+        <a href="configuracion.html">Configuración</a>
+      </nav>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h2>Cartera de Propiedades</h2>
+          <p class="muted">Evalúa y gestiona la rentabilidad de tus inversiones inmobiliarias</p>
+        </div>
+        <button class="btn primary" onclick="location.href='evaluar.html'">+ Evaluar Nueva Propiedad</button>
+      </div>
+
+      <div class="stats-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0;">
+        <div class="stat-card" style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Propiedades</div>
+          <div id="num-propiedades" style="font-size: 28px; font-weight: 800; color: var(--brand); margin: 8px 0;">0</div>
+        </div>
+        <div class="stat-card" style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Inversión Total</div>
+          <div id="inversion-total" style="font-size: 28px; font-weight: 800; color: var(--brand); margin: 8px 0;">€0</div>
+        </div>
+        <div class="stat-card" style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Renta Bruta Promedio</div>
+          <div id="rentabilidad-promedio" style="font-size: 28px; font-weight: 800; color: var(--ok); margin: 8px 0;">0%</div>
+        </div>
+        <div class="stat-card" style="background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="color: var(--ink2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Flujo Mensual</div>
+          <div id="flujo-mensual" style="font-size: 28px; font-weight: 800; color: var(--ok); margin: 8px 0;">€0</div>
+        </div>
+      </div>
+
+      <div id="propiedades-list">
+        <!-- Las propiedades se cargarán dinámicamente -->
+      </div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    function loadPropiedades() {
+      const evaluaciones = Store.evals || [];
+      const container = document.getElementById('propiedades-list');
+      
+      if (evaluaciones.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px;">
+            <p class="muted">No tienes propiedades evaluadas.</p>
+            <button class="btn primary" onclick="location.href='evaluar.html'">Evaluar tu Primera Propiedad</button>
+          </div>
+        `;
+        updateStats(evaluaciones);
+        return;
+      }
+
+      // Crear tabla de propiedades
+      container.innerHTML = `
+        <div class="table-wrapper" style="overflow-x: auto;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Propiedad</th>
+                <th>Ubicación</th>
+                <th>Inversión</th>
+                <th>Rent. Bruta</th>
+                <th>Rent. Neta</th>
+                <th>Flujo Mes.</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${evaluaciones.map(prop => createPropiedadRow(prop)).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      updateStats(evaluaciones);
+    }
+
+    function createPropiedadRow(prop) {
+      const invTotal = prop.inv_total || 0;
+      const rentBruta = prop.kpi_bruta || 0;
+      const rentNeta = prop.kpi_neta || 0;
+      const flujoMensual = (prop.kpi_flujo || 0) / 12;
+      
+      // Determinar color del indicador según rentabilidad
+      let indicator = '🔴'; // Rojo por defecto
+      if (rentBruta >= 8) indicator = '🟢'; // Verde para buena rentabilidad
+      else if (rentBruta >= 5) indicator = '🟡'; // Amarillo para rentabilidad moderada
+
+      return `
+        <tr>
+          <td>
+            <div style="font-weight: 600;">${prop.calle || 'Sin dirección'}</div>
+            <div style="font-size: 12px; color: var(--ink2);">${prop.m2 || '-'} m² · ${prop.habs || '-'} hab.</div>
+          </td>
+          <td>${prop.loc || '-'}</td>
+          <td style="font-weight: 600;">${e0(invTotal)}</td>
+          <td style="color: ${rentBruta >= 8 ? 'var(--ok)' : rentBruta >= 5 ? 'var(--warn)' : 'var(--bad)'}; font-weight: 600;">
+            ${rentBruta.toFixed(1)}%
+          </td>
+          <td style="color: ${rentNeta >= 6 ? 'var(--ok)' : rentNeta >= 3 ? 'var(--warn)' : 'var(--bad)'}; font-weight: 600;">
+            ${rentNeta.toFixed(1)}%
+          </td>
+          <td style="color: ${flujoMensual >= 0 ? 'var(--ok)' : 'var(--bad)'}; font-weight: 600;">
+            ${e0(flujoMensual)}
+          </td>
+          <td style="font-size: 20px;" title="Rentabilidad: ${rentBruta.toFixed(1)}%">${indicator}</td>
+          <td>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-icon" onclick="viewPropiedad('${prop.id}')" title="Ver detalles" style="width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;">👁️</button>
+              <button class="btn-icon" onclick="editPropiedad('${prop.id}')" title="Editar" style="width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;">✏️</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
+    function updateStats(evaluaciones) {
+      const numPropiedades = evaluaciones.length;
+      const inversionTotal = evaluaciones.reduce((total, prop) => total + (prop.inv_total || 0), 0);
+      const rentabilidadPromedio = numPropiedades > 0 
+        ? evaluaciones.reduce((total, prop) => total + (prop.kpi_bruta || 0), 0) / numPropiedades 
+        : 0;
+      const flujoMensualTotal = evaluaciones.reduce((total, prop) => total + ((prop.kpi_flujo || 0) / 12), 0);
+
+      document.getElementById('num-propiedades').textContent = numPropiedades;
+      document.getElementById('inversion-total').textContent = e0(inversionTotal);
+      document.getElementById('rentabilidad-promedio').textContent = rentabilidadPromedio.toFixed(1) + '%';
+      document.getElementById('flujo-mensual').textContent = e0(flujoMensualTotal);
+    }
+
+    function viewPropiedad(id) {
+      // Redirigir a evaluaciones con el ID específico
+      location.href = `evaluaciones.html#${id}`;
+    }
+
+    function editPropiedad(id) {
+      // Redirigir al evaluador con los datos precargados
+      location.href = `evaluar.html#edit=${id}`;
+    }
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPropiedades();
+    });
+  </script>
+</body>
+</html>
