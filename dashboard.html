@@ -143,6 +143,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
       <div class="row">
         <input id="c_nombre" placeholder="Nombre">
         <input id="c_apellidos" placeholder="Apellidos">
+        <input id="c_dni" placeholder="DNI">
         <input id="c_email" placeholder="Email">
         <input id="c_movil" placeholder="Móvil">
       </div>
@@ -351,21 +352,23 @@ function moveToPhase(idp, phase){
 $('btn_create').onclick=function(){
   const nombre=($('c_nombre').value||'').trim();
   const ap=($('c_apellidos').value||'').trim();
+  const dni=($('c_dni').value||'').trim();
   const email=($('c_email').value||'').trim();
   const movil=($('c_movil').value||'').trim();
   if(!nombre || !email || !movil){ toast('Nombre, email y móvil son obligatorios','warn'); return; }
   const list=Store.pros||[];
   list.push({
     id:'p_'+Date.now(), ts:Date.now(),
-    nombre:nombre, apellidos:ap, email:email, movil:movil,
+    nombre:nombre, apellidos:ap, dni:dni, email:email, movil:movil,
     fase:'CONTACTO',
     prefs:{tipo:'Tradicional', localidades:'', ascensor:'Sí', bajo:'No', reforma:'No', altura:5},
     obj_main:'bruta', obj_bruta_pct:10, psi_en_rentab:false,
     inv_pmax:0, psi_in_presupuesto:false, ltv:0,
-    asset_ids:[]
+    asset_ids:[],
+    prestamos:[]
   });
   Store.pros=list;
-  $('c_nombre').value=''; $('c_apellidos').value=''; $('c_email').value=''; $('c_movil').value='';
+  $('c_nombre').value=''; $('c_apellidos').value=''; $('c_dni').value=''; $('c_email').value=''; $('c_movil').value='';
   render(); toast('Creado','ok');
 };
 function delProspect(idp){
@@ -375,6 +378,64 @@ function delProspect(idp){
 function archivarDesdeCard(idp){
   const list=Store.pros||[]; const i=list.findIndex(function(x){return x.id===idp;}); if(i<0){return;}
   list[i].archivado=true; Store.pros=list; render(); toast('Archivado','ok');
+}
+
+/* ===== Gestión de Préstamos ===== */
+function agregarPrestamo(idp){
+  const list=Store.pros||[]; const i=list.findIndex(function(x){return x.id===idp;}); if(i<0){return;}
+  if(!list[i].prestamos) list[i].prestamos = [];
+  
+  list[i].prestamos.push({
+    id: 'loan_' + Date.now(),
+    monto: 0,
+    tasa: 0,
+    plazo: 12,
+    estado: 'Activo',
+    concepto: '',
+    fechaInicio: new Date().toISOString().split('T')[0],
+    fechaCreacion: Date.now()
+  });
+  
+  Store.pros=list; 
+  openDrawer(idp); // Refresh drawer
+  toast('Préstamo agregado','ok');
+}
+
+function eliminarPrestamo(idp, idx){
+  if(!confirm('¿Eliminar este préstamo?')) return;
+  
+  const list=Store.pros||[]; const i=list.findIndex(function(x){return x.id===idp;}); if(i<0){return;}
+  if(!list[i].prestamos) return;
+  
+  list[i].prestamos.splice(idx, 1);
+  Store.pros=list;
+  openDrawer(idp); // Refresh drawer  
+  toast('Préstamo eliminado','ok');
+}
+
+function generarCuadroAmortizacion(prestamo) {
+  const { monto, tasa, plazo } = prestamo;
+  const tasaMensual = (tasa / 100) / 12;
+  const cuota = (monto * tasaMensual * Math.pow(1 + tasaMensual, plazo)) / (Math.pow(1 + tasaMensual, plazo) - 1);
+  
+  const cuadro = [];
+  let saldoPendiente = monto;
+  
+  for(let mes = 1; mes <= plazo; mes++) {
+    const interes = saldoPendiente * tasaMensual;
+    const capital = cuota - interes;
+    saldoPendiente -= capital;
+    
+    cuadro.push({
+      mes,
+      cuota: Math.round(cuota * 100) / 100,
+      capital: Math.round(capital * 100) / 100,
+      interes: Math.round(interes * 100) / 100,
+      saldoPendiente: Math.round(Math.max(0, saldoPendiente) * 100) / 100
+    });
+  }
+  
+  return cuadro;
 }
 
 /* ===== Drawer ===== */
@@ -390,6 +451,7 @@ function openDrawer(idp){
   body.appendChild(blockObjetivos(p));
   body.appendChild(blockPresupuesto(p));
   body.appendChild(blockFinanciacion(p));
+  body.appendChild(blockPrestamos(p));
   body.appendChild(blockNotas(p));
 
   $('ov').classList.add('open'); $('dr').classList.add('open');
@@ -533,6 +595,38 @@ function blockFinanciacion(p){
   return b;
 }
 
+/* Block 6: Préstamos */
+function blockPrestamos(p){
+  const b=document.createElement('div'); b.className='block';
+  const prestamos = p.prestamos || [];
+  
+  let prestamosHtml = '';
+  prestamos.forEach(function(prestamo, idx) {
+    prestamosHtml += 
+      '<div class="prestamo-item" style="border:1px solid var(--line); border-radius:8px; padding:12px; margin:8px 0;">' +
+        '<div class="row two">' +
+          inputKV('Monto (€)', 'prest_monto_' + idx, prestamo.monto || '') +
+          inputKV('Tasa (%)', 'prest_tasa_' + idx, prestamo.tasa || '') +
+        '</div>' +
+        '<div class="row two">' +
+          inputKV('Plazo (meses)', 'prest_plazo_' + idx, prestamo.plazo || '') +
+          selectKV('Estado', 'prest_estado_' + idx, ['Activo', 'Pagado', 'Vencido'], prestamo.estado || 'Activo') +
+        '</div>' +
+        '<div class="row">' +
+          inputKV('Concepto', 'prest_concepto_' + idx, prestamo.concepto || '') +
+        '</div>' +
+        '<button class="btn" style="background:var(--bad);color:#fff;font-size:11px;padding:6px 8px;" onclick="eliminarPrestamo(\'' + p.id + '\', ' + idx + ')">Eliminar</button>' +
+      '</div>';
+  });
+  
+  b.innerHTML = 
+    '<h4>Gestión de Préstamos</h4>' +
+    '<div id="prestamos-list">' + prestamosHtml + '</div>' +
+    '<button class="btn" style="background:var(--accent);color:#fff;" onclick="agregarPrestamo(\'' + p.id + '\')">+ Nuevo Préstamo</button>';
+  
+  return b;
+}
+
 /* Notas */
 function blockNotas(p){
   const b=document.createElement('div'); b.className='block';
@@ -575,6 +669,23 @@ $('dr_save').onclick=function(){
   p.ltv = parseNum($('fi_ltv').value);
 
   p.notes = $('dc_notes')? $('dc_notes').value : (p.notes||'');
+
+  // Guardar datos de préstamos
+  if(p.prestamos) {
+    p.prestamos.forEach(function(prestamo, idx) {
+      const montoEl = $('prest_monto_' + idx);
+      const tasaEl = $('prest_tasa_' + idx);
+      const plazoEl = $('prest_plazo_' + idx);
+      const estadoEl = $('prest_estado_' + idx);
+      const conceptoEl = $('prest_concepto_' + idx);
+      
+      if(montoEl) prestamo.monto = parseNum(montoEl.value) || 0;
+      if(tasaEl) prestamo.tasa = parseNum(tasaEl.value) || 0;
+      if(plazoEl) prestamo.plazo = parseNum(plazoEl.value) || 12;
+      if(estadoEl) prestamo.estado = estadoEl.value || 'Activo';
+      if(conceptoEl) prestamo.concepto = conceptoEl.value || '';
+    });
+  }
 
   Store.pros=list; render(); closeDrawer(); toast('Ficha guardada','ok');
 };
