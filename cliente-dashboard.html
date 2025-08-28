@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smaartflip - Mi Panel</title>
+<style>
+:root{
+  --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
+  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
+  --shadow:0 4px 22px rgba(0,0,0,.06);
+  --ui-font: system-ui, -apple-system, Inter, Roboto, Arial, sans-serif;
+  --ui-font-size: 14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui-font);font-size:var(--ui-font-size)}
+
+.topbar{
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  padding:16px 0;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.topbar-content{
+  max-width:1200px;
+  margin:0 auto;
+  padding:0 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo{
+  width:32px;
+  height:32px;
+  border-radius:8px;
+  background:var(--brand);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:16px;
+}
+
+.brand-name{
+  font-weight:800;
+  font-size:18px;
+  color:var(--ink);
+}
+
+.user-info{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:var(--ink2);
+}
+
+.logout-btn{
+  padding:8px 16px;
+  background:transparent;
+  border:1px solid var(--line);
+  border-radius:8px;
+  color:var(--ink2);
+  cursor:pointer;
+  font-size:13px;
+}
+
+.logout-btn:hover{
+  background:var(--chip);
+}
+
+.container{
+  max-width:1200px;
+  margin:0 auto;
+  padding:20px;
+}
+
+.welcome{
+  background:#fff;
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:24px;
+  box-shadow:var(--shadow);
+}
+
+.welcome h1{
+  margin:0 0 8px;
+  font-size:24px;
+  font-weight:800;
+  color:var(--ink);
+}
+
+.welcome p{
+  margin:0;
+  color:var(--ink2);
+  font-size:15px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:24px;
+  margin-bottom:24px;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns:2fr 1fr;
+  }
+}
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:24px;
+  box-shadow:var(--shadow);
+}
+
+.card h2{
+  margin:0 0 16px;
+  font-size:18px;
+  font-weight:700;
+  color:var(--ink);
+}
+
+.loans-list{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.loan-item{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:16px;
+  background:var(--chip);
+}
+
+.loan-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.loan-concept{
+  font-weight:600;
+  color:var(--ink);
+}
+
+.loan-status{
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.loan-status.activo{
+  background:#d1fae5;
+  color:#065f46;
+}
+
+.loan-status.pagado{
+  background:#dbeafe;
+  color:#1e40af;
+}
+
+.loan-status.vencido{
+  background:#fee2e2;
+  color:#dc2626;
+}
+
+.loan-details{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+  gap:12px;
+  font-size:13px;
+}
+
+.detail-item{
+  color:var(--ink2);
+}
+
+.detail-value{
+  font-weight:600;
+  color:var(--ink);
+  display:block;
+  margin-top:2px;
+}
+
+.progress-bar{
+  width:100%;
+  height:8px;
+  background:var(--line);
+  border-radius:4px;
+  overflow:hidden;
+  margin-top:12px;
+}
+
+.progress-fill{
+  height:100%;
+  background:var(--brand);
+  transition:width 0.3s ease;
+}
+
+.chart-container{
+  height:200px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--line);
+  border-radius:12px;
+  color:var(--ink2);
+  margin-top:16px;
+}
+
+.quick-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.stat-card{
+  padding:16px;
+  background:var(--chip);
+  border-radius:12px;
+  text-align:center;
+}
+
+.stat-value{
+  font-size:20px;
+  font-weight:800;
+  color:var(--brand);
+  display:block;
+}
+
+.stat-label{
+  font-size:12px;
+  color:var(--ink2);
+  margin-top:4px;
+}
+
+.receipts-list{
+  max-height:400px;
+  overflow-y:auto;
+}
+
+.receipt-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
+}
+
+.receipt-item:last-child{
+  border-bottom:none;
+}
+
+.receipt-info{
+  flex:1;
+}
+
+.receipt-date{
+  font-weight:600;
+  color:var(--ink);
+}
+
+.receipt-amount{
+  color:var(--ink2);
+  font-size:13px;
+}
+
+.receipt-status{
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:600;
+}
+
+.receipt-status.pagado{
+  background:#d1fae5;
+  color:#065f46;
+}
+
+.receipt-status.pendiente{
+  background:#fef3c7;
+  color:#92400e;
+}
+
+.receipt-status.vencido{
+  background:#fee2e2;
+  color:#dc2626;
+}
+
+.no-data{
+  text-align:center;
+  padding:40px 20px;
+  color:var(--ink2);
+}
+
+.btn{
+  padding:8px 16px;
+  background:var(--brand);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-block;
+}
+
+.btn:hover{
+  background:#a0460a;
+}
+
+.btn.secondary{
+  background:transparent;
+  color:var(--brand);
+  border:1px solid var(--brand);
+}
+
+.btn.secondary:hover{
+  background:var(--brand);
+  color:#fff;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-content">
+    <div class="brand">
+      <div class="logo">S</div>
+      <div class="brand-name">Smaartflip</div>
+    </div>
+    <div class="user-info">
+      <span id="userName">Cliente</span>
+      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="welcome">
+    <h1>Bienvenido a tu panel, <span id="welcomeName">Cliente</span></h1>
+    <p>Aquí puedes consultar tus préstamos, pagos y toda la información de tus productos financieros.</p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Mis Préstamos</h2>
+      <div class="loans-list" id="loansList">
+        <div class="no-data">No tienes préstamos registrados</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Resumen</h2>
+      <div class="quick-stats">
+        <div class="stat-card">
+          <span class="stat-value" id="totalLoans">0</span>
+          <div class="stat-label">Préstamos activos</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="totalDebt">€0</span>
+          <div class="stat-label">Deuda total</div>
+        </div>
+      </div>
+      
+      <h3 style="margin:24px 0 12px;font-size:16px;">Proyección de finalización</h3>
+      <div class="chart-container" id="chartContainer">
+        <div>Gráfica de proyección se mostrará aquí</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Recibos y Pagos</h2>
+    <div class="receipts-list" id="receiptsList">
+      <div class="no-data">No hay recibos disponibles</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Contratos</h2>
+    <div id="contractsList">
+      <div class="no-data">No hay contratos disponibles</div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const Store = {
+  get pros() {
+    try {
+      return JSON.parse(localStorage.getItem('pros') || '[]');
+    } catch(_) {
+      return [];
+    }
+  }
+};
+
+let currentClient = null;
+
+function initDashboard() {
+  // Verificar sesión
+  const session = sessionStorage.getItem('clientSession');
+  if (!session) {
+    window.location.href = 'cliente-login.html';
+    return;
+  }
+
+  const sessionData = JSON.parse(session);
+  const clients = Store.pros;
+  currentClient = clients.find(c => c.id === sessionData.clientId);
+
+  if (!currentClient) {
+    alert('Sesión inválida');
+    logout();
+    return;
+  }
+
+  // Mostrar nombre del cliente
+  const fullName = `${currentClient.nombre || ''} ${currentClient.apellidos || ''}`.trim();
+  document.getElementById('userName').textContent = fullName || 'Cliente';
+  document.getElementById('welcomeName').textContent = fullName || 'Cliente';
+
+  // Cargar datos
+  loadLoans();
+  loadReceipts();
+  loadContracts();
+  updateStats();
+}
+
+function loadLoans() {
+  const loansContainer = document.getElementById('loansList');
+  const loans = currentClient.prestamos || [];
+
+  if (loans.length === 0) {
+    loansContainer.innerHTML = '<div class="no-data">No tienes préstamos registrados</div>';
+    return;
+  }
+
+  loansContainer.innerHTML = loans.map(loan => {
+    const cuadro = generateAmortizationTable(loan);
+    const progress = calculateProgress(cuadro);
+    
+    return `
+      <div class="loan-item">
+        <div class="loan-header">
+          <div class="loan-concept">${loan.concepto || 'Préstamo sin concepto'}</div>
+          <div class="loan-status ${loan.estado.toLowerCase()}">${loan.estado}</div>
+        </div>
+        <div class="loan-details">
+          <div class="detail-item">
+            Monto inicial
+            <span class="detail-value">€${formatNumber(loan.monto)}</span>
+          </div>
+          <div class="detail-item">
+            Tasa de interés
+            <span class="detail-value">${loan.tasa}%</span>
+          </div>
+          <div class="detail-item">
+            Plazo
+            <span class="detail-value">${loan.plazo} meses</span>
+          </div>
+          <div class="detail-item">
+            Saldo pendiente
+            <span class="detail-value">€${formatNumber(progress.saldoPendiente)}</span>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${progress.percentage}%"></div>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-size:13px;color:var(--ink2);">
+          ${progress.percentage.toFixed(1)}% completado - ${progress.mesesRestantes} meses restantes
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function loadReceipts() {
+  const receiptsContainer = document.getElementById('receiptsList');
+  const loans = currentClient.prestamos || [];
+  
+  let allReceipts = [];
+  
+  loans.forEach(loan => {
+    const cuadro = generateAmortizationTable(loan);
+    const receipts = cuadro.map((pago, index) => ({
+      ...pago,
+      loanId: loan.id,
+      loanConcept: loan.concepto || 'Préstamo',
+      date: new Date(Date.now() + (index * 30 * 24 * 60 * 60 * 1000)), // Simular fechas mensuales
+      status: index < 3 ? 'pagado' : (index === 3 ? 'pendiente' : 'pendiente')
+    }));
+    allReceipts = allReceipts.concat(receipts);
+  });
+
+  if (allReceipts.length === 0) {
+    receiptsContainer.innerHTML = '<div class="no-data">No hay recibos disponibles</div>';
+    return;
+  }
+
+  // Mostrar solo los próximos 10 recibos
+  const recentReceipts = allReceipts.slice(0, 10);
+  
+  receiptsContainer.innerHTML = recentReceipts.map(receipt => `
+    <div class="receipt-item">
+      <div class="receipt-info">
+        <div class="receipt-date">${receipt.date.toLocaleDateString('es-ES')} - Cuota ${receipt.mes}</div>
+        <div class="receipt-amount">${receipt.loanConcept} - €${formatNumber(receipt.cuota)}</div>
+      </div>
+      <div class="receipt-status ${receipt.status}">${receipt.status}</div>
+    </div>
+  `).join('');
+}
+
+function loadContracts() {
+  const contractsContainer = document.getElementById('contractsList');
+  const loans = currentClient.prestamos || [];
+  
+  if (loans.length === 0) {
+    contractsContainer.innerHTML = '<div class="no-data">No hay contratos disponibles</div>';
+    return;
+  }
+
+  contractsContainer.innerHTML = loans.map(loan => `
+    <div style="border:1px solid var(--line);border-radius:12px;padding:16px;margin:8px 0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:600;">${loan.concepto || 'Contrato de Préstamo'}</div>
+          <div style="color:var(--ink2);font-size:13px;">Monto: €${formatNumber(loan.monto)} | Plazo: ${loan.plazo} meses</div>
+        </div>
+        <button class="btn secondary" onclick="downloadContract('${loan.id}')">Descargar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateStats() {
+  const loans = currentClient.prestamos || [];
+  const activeLoans = loans.filter(l => l.estado === 'Activo');
+  
+  document.getElementById('totalLoans').textContent = activeLoans.length;
+  
+  const totalDebt = activeLoans.reduce((sum, loan) => {
+    const cuadro = generateAmortizationTable(loan);
+    return sum + (cuadro[cuadro.length - 1]?.saldoPendiente || 0);
+  }, 0);
+  
+  document.getElementById('totalDebt').textContent = `€${formatNumber(totalDebt)}`;
+}
+
+function generateAmortizationTable(loan) {
+  const { monto, tasa, plazo } = loan;
+  const tasaMensual = (tasa / 100) / 12;
+  const cuota = (monto * tasaMensual * Math.pow(1 + tasaMensual, plazo)) / (Math.pow(1 + tasaMensual, plazo) - 1);
+  
+  const cuadro = [];
+  let saldoPendiente = monto;
+  
+  for(let mes = 1; mes <= plazo; mes++) {
+    const interes = saldoPendiente * tasaMensual;
+    const capital = cuota - interes;
+    saldoPendiente -= capital;
+    
+    cuadro.push({
+      mes,
+      cuota: Math.round(cuota * 100) / 100,
+      capital: Math.round(capital * 100) / 100,
+      interes: Math.round(interes * 100) / 100,
+      saldoPendiente: Math.round(Math.max(0, saldoPendiente) * 100) / 100
+    });
+  }
+  
+  return cuadro;
+}
+
+function calculateProgress(cuadro) {
+  // Simular progreso - en realidad se calcularía basado en pagos realizados
+  const totalMeses = cuadro.length;
+  const mesesPagados = Math.min(3, totalMeses); // Simular 3 meses pagados
+  const percentage = (mesesPagados / totalMeses) * 100;
+  const mesesRestantes = totalMeses - mesesPagados;
+  const saldoPendiente = cuadro[mesesPagados - 1]?.saldoPendiente || cuadro[cuadro.length - 1]?.saldoPendiente || 0;
+  
+  return {
+    percentage,
+    mesesRestantes,
+    saldoPendiente
+  };
+}
+
+function formatNumber(num) {
+  return new Intl.NumberFormat('es-ES', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  }).format(num || 0);
+}
+
+function downloadContract(loanId) {
+  alert('Funcionalidad de descarga de contrato será implementada próximamente');
+}
+
+function logout() {
+  sessionStorage.removeItem('clientSession');
+  window.location.href = 'cliente-login.html';
+}
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', initDashboard);
+</script>
+
+</body>
+</html>
