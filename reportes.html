@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Unihouser — Reportes</title>
+<style>
+:root{
+  --brand:#c7530c; --accent:#DB824B; --ok:#2E7D32; --bad:#B53928;
+  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
+  --shadow:0 4px 22px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif; --fz:12px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
+.title{font-weight:700;color:var(--ink2);font-size:13px}
+.nav a{color:var(--ink2);text-decoration:none;padding:5px 8px;border-radius:8px;font-size:12px}
+.nav a.active{background:var(--brand);color:#fff}
+.nav a:hover{background:#f3efe9}
+/* Layout */
+.container{max-width:1200px;margin:12px auto;padding:0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow);margin-bottom:12px}
+.row{display:grid;gap:12px}
+.row.two{grid-template-columns:1fr 1fr}
+.row.three{grid-template-columns:1fr 1fr 1fr}
+h2{margin:0 0 12px;font-size:16px}
+h3{margin:0 0 8px;font-size:14px;color:#444}
+/* Chart controls */
+.chart-controls{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.chart-controls button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:11px}
+.chart-controls button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.chart-controls select{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:11px}
+/* Chart container */
+.chart-container{position:relative;height:300px;margin:8px 0}
+.chart-canvas{width:100%;height:100%;border:1px solid var(--line);border-radius:8px}
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow);display:grid;gap:4px}
+.kpi .big{font-weight:800;font-size:15px}
+.kpi .lab{font-size:11px;color:#667085}
+/* Filters */
+.filters{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.filters select, .filters input{border:1px solid var(--line);border-radius:6px;padding:4px 6px;font-size:11px}
+.filters label{font-size:11px;color:#666}
+@media (max-width:980px){.row.two, .row.three{grid-template-columns:1fr} .kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="top-inner">
+      <div class="brand"><div class="logo" id="logoTop">U</div><div class="title" id="titleTop">Unihouser — Reportes</div></div>
+      <nav class="nav">
+        <a href="evaluar.html">Evaluar</a>
+        <a href="evaluaciones.html">Evaluaciones</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a class="active" href="reportes.html">Reportes</a>
+        <a href="configuracion.html">Configuración</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Filters -->
+    <div class="filters">
+      <label>Período:</label>
+      <select id="filter-period">
+        <option value="30">Últimos 30 días</option>
+        <option value="90">Últimos 3 meses</option>
+        <option value="365">Último año</option>
+        <option value="all">Todo el tiempo</option>
+      </select>
+      
+      <label>Categoría:</label>
+      <select id="filter-category">
+        <option value="">Todas las categorías</option>
+      </select>
+      
+      <label>Tipo:</label>
+      <select id="filter-type">
+        <option value="">Todos los tipos</option>
+        <option value="Tradicional">Tradicional</option>
+        <option value="Habitaciones">Habitaciones</option>
+      </select>
+      
+      <button id="refresh-data" style="background:var(--brand);color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;">Actualizar</button>
+      <button id="export-all" style="background:#2563eb;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;">Exportar todos</button>
+    </div>
+
+    <!-- KPIs Summary -->
+    <div class="kpis">
+      <div class="kpi"><div class="lab">Total evaluaciones</div><div class="big" id="kpi-total">0</div></div>
+      <div class="kpi"><div class="lab">Rentabilidad promedio</div><div class="big" id="kpi-avg-rent">0%</div></div>
+      <div class="kpi"><div class="lab">Inversión promedio</div><div class="big" id="kpi-avg-inv">€0</div></div>
+      <div class="kpi"><div class="lab">Flujo promedio</div><div class="big" id="kpi-avg-flow">€0</div></div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="row two">
+      <!-- Rentabilidad por tipo -->
+      <div class="card">
+        <h3>Rentabilidad por tipo de propiedad</h3>
+        <div class="chart-controls">
+          <button class="active" data-chart="rent-type" data-type="bars">Barras</button>
+          <button data-chart="rent-type" data-type="pie">Circular</button>
+          <button onclick="SimpleChart.export('chart-rent-type', 'rentabilidad_tipo.png')">Exportar</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-rent-type" class="chart-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Distribución por categorías -->
+      <div class="card">
+        <h3>Distribución por categorías</h3>
+        <div class="chart-controls">
+          <button data-chart="categories" data-type="bars">Barras</button>
+          <button class="active" data-chart="categories" data-type="pie">Circular</button>
+          <button onclick="SimpleChart.export('chart-categories', 'categorias.png')">Exportar</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-categories" class="chart-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="row two">
+      <!-- Evolución temporal -->
+      <div class="card">
+        <h3>Evolución temporal de evaluaciones</h3>
+        <div class="chart-controls">
+          <button class="active" data-chart="timeline" data-type="line">Línea</button>
+          <button data-chart="timeline" data-type="bars">Barras</button>
+          <button onclick="SimpleChart.export('chart-timeline', 'evolucion.png')">Exportar</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-timeline" class="chart-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Inversión vs Rentabilidad -->
+      <div class="card">
+        <h3>Precio vs Rentabilidad</h3>
+        <div class="chart-controls">
+          <button class="active" data-chart="scatter" data-type="scatter">Dispersión</button>
+          <button onclick="SimpleChart.export('chart-scatter', 'precio_vs_rent.png')">Exportar</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-scatter" class="chart-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="js/chart-enhanced.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* Brand name/initial */
+try{
+  const cfg=JSON.parse(localStorage.getItem('cfg')||'{}')||{};
+  const name=cfg.brand_name||cfg.company_name||'Unihouser';
+  document.getElementById('titleTop').textContent = name+' — Reportes';
+  document.getElementById('logoTop').textContent  = (name||'U').toString().trim().charAt(0).toUpperCase()||'U';
+}catch(_){}
+
+/* Data store */
+const Store = {
+  get evals(){ try{return JSON.parse(localStorage.getItem('evals')||'[]')}catch(_){return[]} },
+  get cfg(){ try{return JSON.parse(localStorage.getItem('cfg')||'{}')}catch(_){return{}} }
+};
+
+/* Current filters */
+let currentFilters = {
+  period: 30,
+  category: '',
+  type: ''
+};
+
+/* Initialize */
+function init(){
+  loadCategories();
+  attachEvents();
+  loadData();
+}
+
+function loadCategories(){
+  const select = document.getElementById('filter-category');
+  const categories = Store.cfg.categorias || [];
+  
+  categories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.name;
+    opt.textContent = cat.name;
+    select.appendChild(opt);
+  });
+}
+
+function attachEvents(){
+  // Filter changes
+  document.getElementById('filter-period').addEventListener('change', function(){
+    currentFilters.period = this.value === 'all' ? null : parseInt(this.value);
+    loadData();
+  });
+  
+  document.getElementById('filter-category').addEventListener('change', function(){
+    currentFilters.category = this.value;
+    loadData();
+  });
+  
+  document.getElementById('filter-type').addEventListener('change', function(){
+    currentFilters.type = this.value;
+    loadData();
+  });
+  
+  // Chart type switches
+  document.addEventListener('click', function(e){
+    if(e.target.matches('[data-chart]')){
+      const chart = e.target.dataset.chart;
+      const type = e.target.dataset.type;
+      
+      // Update active button
+      document.querySelectorAll(`[data-chart="${chart}"]`).forEach(btn => btn.classList.remove('active'));
+      e.target.classList.add('active');
+      
+      // Render chart
+      renderChart(chart, type);
+    }
+  });
+  
+  document.getElementById('refresh-data').addEventListener('click', loadData);
+  document.getElementById('export-all').addEventListener('click', exportAllCharts);
+}
+
+function loadData(){
+  const rawData = Store.evals;
+  const now = Date.now();
+  
+  // Apply filters
+  let filtered = rawData.filter(eval => {
+    // Period filter
+    if(currentFilters.period){
+      const evalDate = new Date(eval.ts || eval.id?.slice(3)).getTime();
+      if(now - evalDate > currentFilters.period * 24 * 60 * 60 * 1000) return false;
+    }
+    
+    // Category filter
+    if(currentFilters.category && eval.categoria !== currentFilters.category) return false;
+    
+    // Type filter
+    if(currentFilters.type && eval.tipo !== currentFilters.type) return false;
+    
+    return true;
+  });
+  
+  updateKPIs(filtered);
+  renderAllCharts(filtered);
+}
+
+function updateKPIs(data){
+  const total = data.length;
+  const avgRent = total > 0 ? data.reduce((sum, e) => sum + (e.kpi_bruta || 0), 0) / total : 0;
+  const avgInv = total > 0 ? data.reduce((sum, e) => sum + (e.inv_total || 0), 0) / total : 0;
+  const avgFlow = total > 0 ? data.reduce((sum, e) => sum + (e.kpi_flujo || 0), 0) / total : 0;
+  
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-avg-rent').textContent = avgRent.toFixed(1) + '%';
+  document.getElementById('kpi-avg-inv').textContent = '€' + Math.round(avgInv).toLocaleString('es-ES');
+  document.getElementById('kpi-avg-flow').textContent = '€' + Math.round(avgFlow).toLocaleString('es-ES');
+}
+
+function renderAllCharts(data){
+  renderChart('rent-type', 'bars', data);
+  renderChart('categories', 'pie', data);
+  renderChart('timeline', 'line', data);
+  renderChart('scatter', 'scatter', data);
+}
+
+function renderChart(chartId, type, data){
+  if(!data) data = getFilteredData();
+  
+  switch(chartId){
+    case 'rent-type':
+      renderRentByType(type, data);
+      break;
+    case 'categories':
+      renderCategories(type, data);
+      break;
+    case 'timeline':
+      renderTimeline(type, data);
+      break;
+    case 'scatter':
+      renderScatter(data);
+      break;
+  }
+}
+
+function renderRentByType(type, data){
+  const byType = {};
+  data.forEach(eval => {
+    const t = eval.tipo || 'Tradicional';
+    if(!byType[t]) byType[t] = [];
+    byType[t].push(eval.kpi_bruta || 0);
+  });
+  
+  const labels = Object.keys(byType);
+  const values = labels.map(t => {
+    const arr = byType[t];
+    return arr.reduce((sum, v) => sum + v, 0) / arr.length;
+  });
+  
+  if(type === 'pie'){
+    SimpleChart.pie('chart-rent-type', {
+      data: values,
+      labels: labels,
+      colors: ['#ff5a1f', '#2563eb', '#16a34a']
+    });
+  } else {
+    SimpleChart.bars('chart-rent-type', {
+      labels: labels,
+      values: values,
+      colors: ['#ff5a1f', '#2563eb', '#16a34a']
+    });
+  }
+}
+
+function renderCategories(type, data){
+  const byCat = {};
+  data.forEach(eval => {
+    const cat = eval.categoria || 'Sin categoría';
+    byCat[cat] = (byCat[cat] || 0) + 1;
+  });
+  
+  const labels = Object.keys(byCat);
+  const values = Object.values(byCat);
+  
+  if(type === 'pie'){
+    SimpleChart.pie('chart-categories', {
+      data: values,
+      labels: labels
+    });
+  } else {
+    SimpleChart.bars('chart-categories', {
+      labels: labels,
+      values: values
+    });
+  }
+}
+
+function renderTimeline(type, data){
+  // Group by month
+  const byMonth = {};
+  data.forEach(eval => {
+    const date = new Date(eval.ts || eval.id?.slice(3));
+    const month = date.toLocaleDateString('es-ES', {year: 'numeric', month: 'short'});
+    byMonth[month] = (byMonth[month] || 0) + 1;
+  });
+  
+  const labels = Object.keys(byMonth).sort();
+  const values = labels.map(m => byMonth[m]);
+  
+  if(type === 'line'){
+    SimpleChart.line('chart-timeline', {
+      data: values,
+      labels: labels,
+      color: '#2563eb'
+    });
+  } else {
+    SimpleChart.bars('chart-timeline', {
+      labels: labels,
+      values: values,
+      colors: ['#2563eb']
+    });
+  }
+}
+
+function renderScatter(data){
+  // Simple scatter as bars showing price ranges vs avg rent
+  const ranges = {
+    '< 100k': [],
+    '100k-200k': [],
+    '200k-300k': [],
+    '300k-500k': [],
+    '> 500k': []
+  };
+  
+  data.forEach(eval => {
+    const price = eval.precio || 0;
+    const rent = eval.kpi_bruta || 0;
+    
+    if(price < 100000) ranges['< 100k'].push(rent);
+    else if(price < 200000) ranges['100k-200k'].push(rent);
+    else if(price < 300000) ranges['200k-300k'].push(rent);
+    else if(price < 500000) ranges['300k-500k'].push(rent);
+    else ranges['> 500k'].push(rent);
+  });
+  
+  const labels = Object.keys(ranges);
+  const values = labels.map(range => {
+    const arr = ranges[range];
+    return arr.length > 0 ? arr.reduce((sum, v) => sum + v, 0) / arr.length : 0;
+  });
+  
+  SimpleChart.bars('chart-scatter', {
+    labels: labels,
+    values: values,
+    colors: ['#dc2626', '#ea580c', '#ca8a04', '#16a34a', '#2563eb']
+  });
+}
+
+function getFilteredData(){
+  const rawData = Store.evals;
+  const now = Date.now();
+  
+  return rawData.filter(eval => {
+    if(currentFilters.period){
+      const evalDate = new Date(eval.ts || eval.id?.slice(3)).getTime();
+      if(now - evalDate > currentFilters.period * 24 * 60 * 60 * 1000) return false;
+    }
+    if(currentFilters.category && eval.categoria !== currentFilters.category) return false;
+    if(currentFilters.type && eval.tipo !== currentFilters.type) return false;
+    return true;
+  });
+}
+
+function exportAllCharts(){
+  SimpleChart.export('chart-rent-type', 'rentabilidad_tipo.png');
+  setTimeout(() => SimpleChart.export('chart-categories', 'categorias.png'), 100);
+  setTimeout(() => SimpleChart.export('chart-timeline', 'evolucion.png'), 200);
+  setTimeout(() => SimpleChart.export('chart-scatter', 'precio_vs_rent.png'), 300);
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>

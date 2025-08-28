@@ -92,7 +92,9 @@ try{
     <div class="config">
       <aside class="side" id="tabs">
         <button class="tabbtn active" data-tab="general">General</button>
-        <button class="tabbtn" data-tab="presu">Presupuesto & cálculos</button>
+        <button class="tabbtn" data-tab="categorias">Categorías</button>
+        <button class="tabbtn" data-tab="presupuestos">Presupuestos & Alertas</button>
+        <button class="tabbtn" data-tab="presu">Cálculos</button>
         <button class="tabbtn" data-tab="matching">Matching</button>
         <button class="tabbtn" data-tab="mensajeria">Mensajería</button>
         <button class="tabbtn" data-tab="eval">Parámetros de evaluación</button>
@@ -122,9 +124,75 @@ try{
           <div class="actions"><button class="btn save" id="save-general">Guardar</button></div>
         </div>
 
-        <!-- PRESUPUESTO -->
+        <!-- CATEGORÍAS -->
+        <div class="panel" id="panel-categorias">
+          <h3>Categorías personalizables</h3>
+          <div class="block">
+            <h5>Categorías de propiedades</h5>
+            <div class="grid">
+              <div class="field row2">
+                <label>Nueva categoría</label>
+                <div class="inline">
+                  <input id="cat_name" maxlength="30" placeholder="Ej: Lujo, Inversión, Centro..."/>
+                  <input id="cat_color" type="color" value="#c7530c" title="Color"/>
+                  <button class="btn" id="add_cat">Añadir</button>
+                </div>
+              </div>
+            </div>
+            <div id="cat_list" class="grid" style="margin-top:10px;">
+              <!-- Las categorías se renderizan aquí dinámicamente -->
+            </div>
+            <small class="muted">Las categorías se pueden usar para filtrar y organizar propiedades en evaluaciones y dashboard.</small>
+          </div>
+          <div class="block">
+            <h5>Categorías automáticas (por criterios)</h5>
+            <div class="grid">
+              <div class="field"><label>Alto valor (precio > €)</label><input id="auto_cat_lujo" type="number" min="0" step="10000" placeholder="500000"/></div>
+              <div class="field"><label>Inversión (rentabilidad > %)</label><input id="auto_cat_inversion" type="number" min="0" max="50" step="0.1" placeholder="8"/></div>
+              <div class="field"><label>Oportunidad (bajo precio/m² < €)</label><input id="auto_cat_oportunidad" type="number" min="0" step="100" placeholder="2000"/></div>
+            </div>
+            <small class="muted">Se asignan automáticamente cuando se cumplen los criterios.</small>
+          </div>
+          <div class="actions"><button class="btn save" id="save-categorias">Guardar</button></div>
+        </div>
+
+        <!-- PRESUPUESTOS & ALERTAS -->
+        <div class="panel" id="panel-presupuestos">
+          <h3>Presupuestos & Alertas Automáticas</h3>
+          <div class="block">
+            <h5>Presupuestos mensuales</h5>
+            <div class="grid">
+              <div class="field"><label>Evaluaciones objetivo/mes</label><input id="budget_evals" type="number" min="0" step="1" placeholder="20"/></div>
+              <div class="field"><label>Inversión objetivo/mes (€)</label><input id="budget_inv" type="number" min="0" step="10000" placeholder="500000"/></div>
+              <div class="field"><label>Comisiones objetivo/mes (€)</label><input id="budget_comision" type="number" min="0" step="1000" placeholder="15000"/></div>
+            </div>
+          </div>
+          <div class="block">
+            <h5>Alertas automáticas</h5>
+            <div class="grid">
+              <div class="field row3 inline"><label><input type="checkbox" id="alert_low_activity"/> Alertar si actividad < 50% objetivo semanal</label></div>
+              <div class="field row3 inline"><label><input type="checkbox" id="alert_high_value"/> Alertar propiedades de alto valor (> configurado)</label></div>
+              <div class="field row3 inline"><label><input type="checkbox" id="alert_poor_metrics"/> Alertar métricas pobres (rentabilidad < objetivo)</label></div>
+            </div>
+            <div class="grid">
+              <div class="field"><label>Valor alto alerta (€)</label><input id="alert_high_value_amount" type="number" min="0" step="50000" placeholder="400000"/></div>
+              <div class="field"><label>Rentabilidad mínima alerta (%)</label><input id="alert_min_rent" type="number" min="0" max="50" step="0.1" placeholder="6"/></div>
+              <div class="field"><label>Email notificaciones</label><input id="alert_email" type="email" placeholder="alertas@empresa.com"/></div>
+            </div>
+          </div>
+          <div class="block">
+            <h5>Notificaciones push</h5>
+            <div class="grid">
+              <div class="field row2 inline"><label><input type="checkbox" id="push_enabled"/> Habilitar notificaciones del navegador</label></div>
+              <div class="field inline"><label><input type="checkbox" id="push_daily_summary"/> Resumen diario a las</label><input type="time" id="push_daily_time" value="09:00" style="width:80px;"/></div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn save" id="save-presupuestos">Guardar</button></div>
+        </div>
+
+        <!-- CÁLCULOS -->
         <div class="panel" id="panel-presu">
-          <h3>Presupuesto & cálculos</h3>
+          <h3>Cálculos</h3>
           <div class="block">
             <h5>Compras</h5>
             <div class="grid">
@@ -515,6 +583,106 @@ document.getElementById('save-presu').onclick=function(){
   LS.set('cfg',CFG); toast('Guardado presupuesto');
 };
 
+/* ===== CATEGORÍAS ===== */
+function loadCategorias(){
+  var list = document.getElementById('cat_list');
+  list.innerHTML = '';
+  (CFG.categorias || []).forEach(function(cat, idx){
+    var div = document.createElement('div');
+    div.className = 'field inline';
+    div.innerHTML = 
+      '<div style="display:flex;align-items:center;gap:6px;">' +
+        '<div style="width:16px;height:16px;border-radius:3px;background:' + (cat.color || '#c7530c') + '"></div>' +
+        '<span>' + (cat.name || '') + '</span>' +
+        '<button class="btn" onclick="removeCat(' + idx + ')" style="background:#f44;color:#fff;padding:2px 6px;font-size:10px;">×</button>' +
+      '</div>';
+    list.appendChild(div);
+  });
+  document.getElementById('auto_cat_lujo').value = CFG.auto_categorias?.lujo_precio || '';
+  document.getElementById('auto_cat_inversion').value = CFG.auto_categorias?.inversion_rent || '';
+  document.getElementById('auto_cat_oportunidad').value = CFG.auto_categorias?.oportunidad_pm2 || '';
+}
+
+function removeCat(idx){
+  CFG.categorias = CFG.categorias || [];
+  CFG.categorias.splice(idx, 1);
+  loadCategorias();
+}
+
+document.getElementById('add_cat').onclick = function(){
+  var name = document.getElementById('cat_name').value.trim();
+  var color = document.getElementById('cat_color').value;
+  if (!name) {
+    toast('Ingresa un nombre para la categoría');
+    return;
+  }
+  CFG.categorias = CFG.categorias || [];
+  if (CFG.categorias.length >= 20) {
+    toast('Máximo 20 categorías');
+    return;
+  }
+  CFG.categorias.push({ name: name, color: color });
+  document.getElementById('cat_name').value = '';
+  loadCategorias();
+};
+
+document.getElementById('save-categorias').onclick = function(){
+  CFG.auto_categorias = CFG.auto_categorias || {};
+  CFG.auto_categorias.lujo_precio = parseFloat(document.getElementById('auto_cat_lujo').value) || null;
+  CFG.auto_categorias.inversion_rent = parseFloat(document.getElementById('auto_cat_inversion').value) || null;
+  CFG.auto_categorias.oportunidad_pm2 = parseFloat(document.getElementById('auto_cat_oportunidad').value) || null;
+  LS.set('cfg', CFG);
+  toast('Categorías guardadas');
+};
+
+/* ===== PRESUPUESTOS & ALERTAS ===== */
+function loadPresupuestos(){
+  document.getElementById('budget_evals').value = CFG.presupuestos?.evals_mes || '';
+  document.getElementById('budget_inv').value = CFG.presupuestos?.inversion_mes || '';
+  document.getElementById('budget_comision').value = CFG.presupuestos?.comision_mes || '';
+  
+  document.getElementById('alert_low_activity').checked = !!CFG.alertas?.actividad_baja;
+  document.getElementById('alert_high_value').checked = !!CFG.alertas?.alto_valor;
+  document.getElementById('alert_poor_metrics').checked = !!CFG.alertas?.metricas_pobres;
+  
+  document.getElementById('alert_high_value_amount').value = CFG.alertas?.alto_valor_monto || '';
+  document.getElementById('alert_min_rent').value = CFG.alertas?.rentabilidad_minima || '';
+  document.getElementById('alert_email').value = CFG.alertas?.email || '';
+  
+  document.getElementById('push_enabled').checked = !!CFG.notificaciones?.push_enabled;
+  document.getElementById('push_daily_summary').checked = !!CFG.notificaciones?.resumen_diario;
+  document.getElementById('push_daily_time').value = CFG.notificaciones?.hora_resumen || '09:00';
+}
+
+document.getElementById('save-presupuestos').onclick = function(){
+  CFG.presupuestos = CFG.presupuestos || {};
+  CFG.presupuestos.evals_mes = parseInt(document.getElementById('budget_evals').value) || null;
+  CFG.presupuestos.inversion_mes = parseInt(document.getElementById('budget_inv').value) || null;
+  CFG.presupuestos.comision_mes = parseInt(document.getElementById('budget_comision').value) || null;
+  
+  CFG.alertas = CFG.alertas || {};
+  CFG.alertas.actividad_baja = document.getElementById('alert_low_activity').checked;
+  CFG.alertas.alto_valor = document.getElementById('alert_high_value').checked;
+  CFG.alertas.metricas_pobres = document.getElementById('alert_poor_metrics').checked;
+  CFG.alertas.alto_valor_monto = parseInt(document.getElementById('alert_high_value_amount').value) || null;
+  CFG.alertas.rentabilidad_minima = parseFloat(document.getElementById('alert_min_rent').value) || null;
+  CFG.alertas.email = document.getElementById('alert_email').value.trim();
+  
+  CFG.notificaciones = CFG.notificaciones || {};
+  CFG.notificaciones.push_enabled = document.getElementById('push_enabled').checked;
+  CFG.notificaciones.resumen_diario = document.getElementById('push_daily_summary').checked;
+  CFG.notificaciones.hora_resumen = document.getElementById('push_daily_time').value;
+  
+  LS.set('cfg', CFG);
+  
+  // Solicitar permisos de notificación si se habilitó
+  if (CFG.notificaciones.push_enabled && 'Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+  
+  toast('Presupuestos y alertas guardados');
+};
+
 /* ===== MATCHING ===== */
 function loadMatching(){
   var th=(CFG.match&&CFG.match.thresholds)?CFG.match.thresholds:{green:1,amber:.95};
@@ -756,7 +924,7 @@ document.getElementById('file-import').addEventListener('change',function(e){
 });
 document.getElementById('btn-reset').onclick=function(){
   CFG=normCfg({}); LS.set('cfg',CFG);
-  loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval(); loadContrato();
+  loadGeneral(); loadCategorias(); loadPresupuestos(); loadPresu(); loadMatching(); loadMensajeria(); loadEval(); loadContrato();
   try{
     document.documentElement.style.setProperty('--brand', CFG.brand_color);
     document.documentElement.style.setProperty('--ui-font', CFG.ui_font);
@@ -767,7 +935,7 @@ document.getElementById('btn-reset').onclick=function(){
 
 /* ===== Init ===== */
 (function(){
-  loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval(); loadContrato();
+  loadGeneral(); loadCategorias(); loadPresupuestos(); loadPresu(); loadMatching(); loadMensajeria(); loadEval(); loadContrato();
 })();
 </script>
 </body>

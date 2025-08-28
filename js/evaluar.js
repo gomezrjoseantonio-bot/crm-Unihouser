@@ -169,8 +169,37 @@ function calcular(){
   if($('sn')) $('sn').textContent = colorDot(kpi_neta, kpi_neta); // si existe → verde
   if($('sf')) $('sf').textContent = colorDot(kpi_flujo, kpi_flujo>0?0:1); // verde si >0
 
+  // Auto-categorización
+  autoCategorizar(precio, kpi_bruta, kpi_neta);
+
   // Prepara match básico de prospects (muy simple)
   pintarMatches();
+}
+
+/* ====== Auto-categorización ====== */
+function autoCategorizar(precio, rentBruta, rentNeta){
+  const c = CFG();
+  const auto = c.auto_categorias;
+  if (!auto) return;
+  
+  const m2 = parseEs($('e_m2').value);
+  const precioM2 = m2 > 0 ? precio / m2 : 0;
+  const select = $('e_categoria');
+  
+  // Solo auto-asignar si no hay categoría manual seleccionada
+  if (!select || select.value) return;
+  
+  // Verificar criterios automáticos
+  if (auto.lujo_precio && precio >= auto.lujo_precio) {
+    const luxCat = (c.categorias || []).find(cat => cat.name.toLowerCase().includes('lujo') || cat.name.toLowerCase().includes('alto'));
+    if (luxCat) select.value = luxCat.name;
+  } else if (auto.inversion_rent && rentBruta >= auto.inversion_rent) {
+    const invCat = (c.categorias || []).find(cat => cat.name.toLowerCase().includes('inver') || cat.name.toLowerCase().includes('rent'));
+    if (invCat) select.value = invCat.name;
+  } else if (auto.oportunidad_pm2 && precioM2 > 0 && precioM2 <= auto.oportunidad_pm2) {
+    const oppCat = (c.categorias || []).find(cat => cat.name.toLowerCase().includes('oport') || cat.name.toLowerCase().includes('ganga'));
+    if (oppCat) select.value = oppCat.name;
+  }
 }
 
 /* ====== Guardar evaluación ====== */
@@ -205,6 +234,7 @@ function recolectarDTO(){
     // explotación
     tipo: $('e_tipo')?.value || 'Tradicional',
     alq: parseEs($('e_alq')?.value),
+    categoria: $('e_categoria')?.value || '',
     // KPIs mostrados
     inv_total: parseEs(($('r_inv')?.textContent||'').replace(/[^\d,.]/g,'')),
     kpi_bruta: Number(String(($('r_bruta')?.textContent||'')).replace(/[^\d,.-]/g,'').replace(',', '.'))||0,
@@ -300,6 +330,7 @@ function limpiar(){
 /* ====== Eventos ====== */
 function attach(){
   bindMoney();
+  loadCategorias();
 
   // Cuando cambian precio o tipo / alquiler → autocalcular
   $('e_precio')?.addEventListener('input', ()=>{ autoITP_Notaria(); calcPMaxPorObjetivo(); });
@@ -319,6 +350,22 @@ function attach(){
   // Primera pasada de ITP/notaría si ya hay precio
   autoITP_Notaria();
   autoGastosSobreAlquiler();
+}
+
+/* ====== Categorías ====== */
+function loadCategorias(){
+  const c = CFG();
+  const select = $('e_categoria');
+  if (!select) return;
+  
+  select.innerHTML = '<option value="">Seleccionar...</option>';
+  (c.categorias || []).forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.name;
+    opt.textContent = cat.name;
+    opt.style.background = cat.color + '22';
+    select.appendChild(opt);
+  });
 }
 
 document.addEventListener('DOMContentLoaded', attach);
