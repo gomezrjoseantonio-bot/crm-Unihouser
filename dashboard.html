@@ -1,118 +1,43 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="professional">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Unihouser — Dashboard CRM</title>
-<style>
-:root{
-  --brand:#c7530c; --accent:#DB824B; --ok:#2E7D32; --bad:#B53928;
-  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
-  --shadow:0 4px 22px rgba(0,0,0,.06); --ff:system-ui,-apple-system,Inter,Roboto,Arial,sans-serif; --fz:12px;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
-/* Topbar */
-.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
-.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:8px}
-.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
-.title{font-weight:700;color:var(--ink2);font-size:13px}
-.nav a{color:var(--ink2);text-decoration:none;padding:5px 8px;border-radius:8px;font-size:12px}
-.nav a.active{background:var(--brand);color:#fff}
-.nav a:hover{background:#f3efe9}
-/* Layout */
-.container{max-width:1200px;margin:12px auto;padding:0 14px}
-/* KPIs */
-.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:8px}
-.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow);display:grid;gap:4px}
-.kpi .big{font-weight:800;font-size:15px}
-.kpi .lab{font-size:11px;color:#667085}
-/* Iconos de barra */
-.kbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:4px 0 12px}
-.kicon{width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:10px;display:grid;place-items:center;cursor:pointer}
-.kicon svg{width:16px;height:16px;stroke:#555;fill:none;stroke-width:2}
-.kicon.active{border-color:var(--brand)}
-/* Crear contacto */
-.create{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:8px;display:grid;gap:6px;margin-bottom:10px}
-.create .row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.create input{border:1px solid var(--line);border-radius:10px;padding:7px 9px;min-height:30px}
-.create .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:7px 9px;font-weight:700;cursor:pointer;font-size:12px}
-/* Board */
-.board{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
-.col{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;min-height:520px;box-shadow:var(--shadow)}
-.col h3{margin:0 0 6px;color:var(--ink2);display:flex;align-items:center;justify-content:space-between;font-size:13px}
-.count{font-weight:700;color:#666}
-/* Tarjeta */
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:var(--shadow);display:grid;gap:6px;cursor:grab}
-.card header{display:flex;align-items:center;gap:8px}
-.name{font-weight:800;font-size:13px}
-.meta{font-size:11px;color:#6b7280}
-.badges{display:flex;gap:6px;flex-wrap:wrap}
-.badge{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 7px;display:inline-flex;align-items:center;gap:6px;font-size:11px}
-.actions{display:flex;gap:6px;align-items:center;margin-left:auto}
-.btn-icon{width:26px;height:26px;border-radius:999px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer}
-.btn-icon svg{width:15px;height:15px;stroke-width:2;fill:none;stroke:#555}
-.btn-icon.view{border-color:var(--brand)} .btn-icon.view svg{stroke:var(--brand)}
-.btn-icon.del{border-color:#999} .btn-icon.del svg{stroke:#999}
-.btn-icon.mail{border-color:var(--brand)} .btn-icon.mail svg{stroke:var(--brand)}
-.btn-icon.wa{border-color:#25D366} .btn-icon.wa svg{stroke:#25D366}
-.btn-icon.cal{border-color:#6b7280} .btn-icon.cal svg{stroke:#6b7280}
-.btn-icon.arch{border-color:#6b7280} .btn-icon.arch svg{stroke:#6b7280}
-.btn-icon.asig{border-color:var(--brand)} .btn-icon.asig svg{stroke:var(--brand)}
-.squares{display:flex;gap:4px;margin-left:auto}
-.squares i{width:9px;height:9px;border-radius:2px;border:1px solid var(--line);background:#eee;display:inline-block}
-.squares i.on{background:var(--brand);border-color:var(--brand)}
-.card.dragging{opacity:.5} .col.drop{outline:2px dashed var(--brand);outline-offset:-6px}
-/* Toast */
-.toast{position:fixed;top:12px;right:12px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);padding:8px 10px;border-radius:12px;display:none;z-index:100}
-.toast.ok{border-color:var(--ok)} .toast.bad{border-color:var(--bad)} .toast.warn{border-color:var(--accent)}
-.toast.show{display:block}
-/* Drawer */
-.overlay{position:fixed;inset:0;background:rgba(15,18,20,.28);backdrop-filter:blur(2px);display:none;z-index:80}
-.overlay.open{display:block}
-.drawer{position:fixed;top:0;right:-560px;height:100%;width:560px;max-width:100%;background:#fff;border-left:1px solid var(--line);box-shadow:0 10px 24px rgba(0,0,0,.25);transition:right .2s ease;z-index:90;display:flex;flex-direction:column}
-.drawer.open{right:0}
-.d-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--line)}
-.d-body{padding:10px 12px 16px;overflow:auto;flex:1;display:grid;gap:10px}
-.block{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:8px}
-.block h4{margin:0 0 6px}
-.row{display:grid;gap:8px}
-.row.two{grid-template-columns:1fr 1fr}
-.row.three{grid-template-columns:1fr 1fr 1fr}
-.field{display:flex;flex-direction:column;gap:4px}
-.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:10px;padding:6px 8px;background:#fff;font-size:12px;color:#1a1f23}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 8px;display:inline-flex;gap:6px;align-items:center;font-size:12px}
-.chip .x{cursor:pointer;color:#999}
-/* Bottom sheet asignación */
-.assign{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(100% - 28px);max-width:1160px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);display:none;z-index:95}
-.assign.open{display:block}
-.assign .as-head{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
-.assign .as-body{padding:10px 12px;display:grid;gap:8px;max-height:45vh;overflow:auto}
-.a-row{border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:flex-start}
-.dot{width:10px;height:10px;border-radius:50%}
-.dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
-.a-title{font-weight:700}
-.a-specs{font-size:12px;color:#374151;margin-top:2px}
-.a-specs b{font-weight:700}
-.a-warns{margin-top:6px}
-.a-warns .w{font-size:11px;border:1px solid #fde68a;background:#fff7ed;color:#b45309;border-radius:999px;padding:2px 6px;margin-right:4px;display:inline-block}
-.a-actions{display:flex;gap:6px}
-.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 8px;cursor:pointer;font-weight:700;font-size:12px}
-.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
-/* Footer */
-.footer{max-width:1200px;margin:18px auto;padding:6px 14px;text-align:center;color:#777;font-size:11px}
-</style>
+<link rel="stylesheet" href="css/style.css">
+
+<script>
+/* Apply brand settings from configuration */
+try{
+  const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
+  if(cfg.brand_color) document.documentElement.style.setProperty('--brand-primary', cfg.brand_color);
+  if(cfg.ui_font) document.documentElement.style.setProperty('--font-family', cfg.ui_font);
+  if(cfg.ui_font_size) document.documentElement.style.setProperty('--font-size-base', (''+cfg.ui_font_size).replace('px','')+'px');
+  if(cfg.ui_theme) document.documentElement.setAttribute('data-theme', cfg.ui_theme);
+  if(cfg.brand_logo) {
+    window.addEventListener('DOMContentLoaded', () => {
+      const logoBox = document.getElementById('logoBox');
+      if(logoBox && cfg.brand_logo) {
+        logoBox.innerHTML = `<img src="${cfg.brand_logo}" alt="Logo">`;
+      }
+    });
+  }
+}catch(_){}
+</script>
 </head>
 <body>
   <div class="topbar">
-    <div class="top-inner">
-      <div class="brand"><div class="logo" id="logoBox">U</div><div class="title" id="brandTitle">Unihouser — Dashboard</div></div>
+    <div class="container">
+      <div class="brand">
+        <div class="logo-container" id="logoBox">
+          <div class="logo-fallback">U</div>
+        </div>
+        <div class="title" id="brandTitle">Unihouser — Dashboard</div>
+      </div>
       <nav class="nav">
         <a href="evaluar.html">Evaluar</a>
         <a href="evaluaciones.html">Evaluaciones</a>
+        <a href="evaluaciones.html?mode=search">Buscar Activos</a>
         <a class="active" href="dashboard.html">Dashboard</a>
         <a href="configuracion.html">Configuración</a>
       </nav>
@@ -154,7 +79,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
     <div class="board" id="board"></div>
   </div>
 
-  <div class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
+  <div class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
 
   <div class="toast" id="toast"></div>
 
@@ -187,10 +112,17 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-s
 /* ===== Brand ===== */
 try{
   const c=JSON.parse(localStorage.getItem('cfg')||'{}')||{};
-  const col=c.brand_color||'#c7530c'; document.documentElement.style.setProperty('--brand', col);
+  const col=c.brand_color||'#c7530c'; 
+  document.documentElement.style.setProperty('--brand-primary', col);
+  document.documentElement.style.setProperty('--brand', col); // Keep backward compatibility
   const name=c.brand_name||c.company_name||'Unihouser';
   document.getElementById('brandTitle').textContent = name+' — Dashboard';
-  document.getElementById('logoBox').textContent = (name||'U').toString().trim().charAt(0).toUpperCase() || 'U';
+  const logoBox = document.getElementById('logoBox');
+  if (c.brand_logo) {
+    logoBox.innerHTML = `<img src="${c.brand_logo}" alt="Logo">`;
+  } else {
+    logoBox.innerHTML = `<div class="logo-fallback">${(name||'U').toString().trim().charAt(0).toUpperCase() || 'U'}</div>`;
+  }
 }catch(e){}
 
 /* ===== Utils ===== */
@@ -894,7 +826,26 @@ function exportCSV(){
 
 /* Helpers */
 function updatePros(p){ const list=Store.pros||[]; const i=list.findIndex(function(x){return x.id===p.id;}); if(i<0){return;} list[i]=p; Store.pros=list; }
-function load(){ try{const c=Store.cfg||{}; if(c.brand_color){ document.documentElement.style.setProperty('--brand', c.brand_color); }}catch(e){} render(); }
+function load(){ 
+  try{
+    const c=Store.cfg||{}; 
+    if(c.brand_color){ 
+      document.documentElement.style.setProperty('--brand-primary', c.brand_color);
+      document.documentElement.style.setProperty('--brand', c.brand_color); // Backward compatibility
+      document.documentElement.style.setProperty('--accent', c.brand_color); // Backward compatibility
+    }
+    if(c.ui_theme){ 
+      document.documentElement.setAttribute('data-theme', c.ui_theme);
+    }
+    if(c.ui_font) {
+      document.documentElement.style.setProperty('--font-family', c.ui_font);
+    }
+    if(c.ui_font_size) {
+      document.documentElement.style.setProperty('--font-size-base', (''+c.ui_font_size).replace('px','')+'px');
+    }
+  }catch(e){} 
+  render(); 
+}
 
 /* Init */
 document.addEventListener('DOMContentLoaded',function(){

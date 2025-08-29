@@ -1,142 +1,44 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="professional">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Evaluaciones</title>
 <link rel="icon" href="data:,">
-<style>
-:root{
-  --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
-  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
-  --shadow:0 4px 22px rgba(0,0,0,.06);
-  --ui-font: system-ui, -apple-system, Inter, Roboto, Arial, sans-serif;
-  --ui-font-size: 12px;
-  --ff: var(--ui-font);
-  --fz: var(--ui-font-size);
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
-
-/* Topbar & nav */
-.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
-.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:8px}
-.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
-.title{font-weight:700;color:#var(--ink2);font-size:13px}
-.nav a{color:var(--ink2);text-decoration:none;padding:5px 8px;border-radius:8px;font-size:12px}
-.nav a.active{background:var(--brand);color:#fff}
-.nav a:hover{background:#f3efe9}
-
-/* Layout */
-.container{max-width:1200px;margin:12px auto;padding:0 14px}
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow)}
-h2{margin:0 0 8px}
-h3{margin:0 0 6px;font-size:14px;color:#444}
-
-/* KPIs */
-.kpis{display:grid;gap:8px;grid-template-columns:repeat(4,1fr)}
-.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
-.kpi .lab{font-size:11px;color:#667085}
-.kpi .val{font-weight:800;font-size:18px}
-
-/* Filtros */
-.filters .row{display:grid;gap:8px;grid-template-columns:2fr 1fr 1fr 1fr auto auto auto}
-.field{display:flex;flex-direction:column;gap:4px}
-.field label{font-size:11px;color:#555}
-input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:6px 7px;background:#fff;font-size:12px;color:#1a1f23}
-.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:800;font-size:12px}
-.btn.primary{background:var(--brand);color:#fff;border:none}
-
-/* Tabla responsive */
-.table-wrap{overflow:auto}
-.table{min-width:980px;width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.table th,.table td{padding:9px 10px;border-bottom:1px dashed var(--line);text-align:left;font-size:12px;white-space:nowrap}
-.table th{background:#FAF8F7;color:#1a1f23;cursor:pointer;position:sticky;top:0;z-index:1}
-.table tr:last-child td{border-bottom:none}
-.pill{display:inline-block;padding:.15rem .45rem;border-radius:999px;background:var(--chip);font-size:11px;border:1px solid var(--line)}
-
-/* Acciones */
-.actions-cell{display:flex;gap:6px;align-items:center}
-.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer}
-.iconbtn:hover{background:#f3efe9}
-.icon{width:18px;height:18px;display:block}
-
-/* Modal (sustituye drawer) */
-.modal-back{position:fixed;inset:0;background:rgba(15,18,20,.28);display:none;align-items:center;justify-content:center;z-index:120}
-.modal-back.open{display:flex}
-.modal{width:960px;max-width:95vw;max-height:90vh;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
-.modal header{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
-.modal h4{margin:0}
-.modal .body{padding:12px;display:grid;gap:10px;grid-template-columns:1.2fr 1fr}
-@media(max-width:980px){.modal .body{grid-template-columns:1fr}}
-.modal footer{padding:10px 12px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
-
-/* Bloques modal */
-.block{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:8px}
-.block h4{margin:0 0 6px}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px}
-.kv .k{font-size:11px;color:#667085}
-.kv .v{font-weight:700}
-
-/* Adjuntos */
-.attach-wrap{display:grid;gap:8px}
-.attach-grid{display:grid;gap:6px;grid-template-columns:repeat(auto-fit,minmax(90px,1fr))}
-.thumb{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;height:64px;cursor:pointer}
-.thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.thumb .mini{display:flex;align-items:center;justify-content:center;height:100%;font-size:10px;color:#333;text-align:center;line-height:1.15}
-.thumb .x{position:absolute;top:3px;right:3px;background:#fff;border:1px solid var(--line);border-radius:8px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-
-/* Candidatos (solo lectura) */
-.cands{display:grid;gap:8px}
-.cand{border:1px solid var(--line);border-radius:10px;padding:8px;display:grid;gap:4px}
-.cand .top{display:flex;align-items:center;gap:8px}
-.dot{display:inline-block;width:10px;height:10px;border-radius:50%}
-.dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
-.badges{display:flex;flex-wrap:wrap;gap:6px}
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;border-radius:999px;padding:2px 8px;border:1px solid var(--line);background:#f9fafb}
-.badge.warn{border-color:#fde68a;background:#fff7ed;color:#b45309}
-.badge small{font-weight:700}
-.note{font-size:11px;color:#667085}
-
-/* Lightbox imágenes */
-.lb-back{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:130}
-.lb-back.open{display:flex}
-.lb-inner{position:relative;max-width:95vw;max-height:90vh}
-.lb-inner img{max-width:95vw;max-height:90vh;display:block}
-.lb-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);border:none;color:#fff;font-weight:800;border-radius:10px;padding:10px;cursor:pointer}
-.lb-prev{left:-52px} .lb-next{right:-52px}
-.lb-close{position:absolute;top:-44px;right:0;background:#fff;border:none;border-radius:999px;padding:6px 10px;cursor:pointer}
-
-/* Toasts */
-.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:140}
-.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
-.toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
-
-/* Footer centered */
-.footer{margin:14px 0 22px;text-align:center;color:#888;font-size:11px}
-
-@media (max-width:1100px){.filters .row{grid-template-columns:1fr 1fr}}
-</style>
+<link rel="stylesheet" href="css/style.css">
 
 <script>
-/* Aplicar marca y tipografía desde cfg */
+/* Apply brand settings from configuration */
 try{
   const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
-  if(cfg.brand_color) document.documentElement.style.setProperty('--brand', cfg.brand_color);
-  if(cfg.ui_font) document.documentElement.style.setProperty('--ui-font', cfg.ui_font);
-  if(cfg.ui_font_size) document.documentElement.style.setProperty('--ui-font-size', (''+cfg.ui_font_size).replace('px','')+'px');
+  if(cfg.brand_color) document.documentElement.style.setProperty('--brand-primary', cfg.brand_color);
+  if(cfg.ui_font) document.documentElement.style.setProperty('--font-family', cfg.ui_font);
+  if(cfg.ui_font_size) document.documentElement.style.setProperty('--font-size-base', (''+cfg.ui_font_size).replace('px','')+'px');
+  if(cfg.ui_theme) document.documentElement.setAttribute('data-theme', cfg.ui_theme);
+  if(cfg.brand_logo) {
+    window.addEventListener('DOMContentLoaded', () => {
+      const logoBox = document.getElementById('logoBox');
+      if(logoBox && cfg.brand_logo) {
+        logoBox.innerHTML = `<img src="${cfg.brand_logo}" alt="Logo">`;
+      }
+    });
+  }
 }catch(_){}
 </script>
 </head>
 <body>
   <div class="topbar">
-    <div class="top-inner">
-      <div class="brand"><div class="logo" id="logoTop">U</div><div class="title" id="titleTop">Unihouser — Evaluaciones</div></div>
+    <div class="container">
+      <div class="brand">
+        <div class="logo-container" id="logoBox">
+          <div class="logo-fallback">U</div>
+        </div>
+        <div class="title" id="brandTitle">Unihouser — Evaluaciones</div>
+      </div>
       <nav class="nav">
         <a href="evaluar.html">Evaluar</a>
-        <a class="active" href="evaluaciones.html">Evaluaciones</a>
+        <a href="evaluaciones.html" id="nav-evaluaciones">Evaluaciones</a>
+        <a href="evaluaciones.html?mode=search" id="nav-buscar">Buscar Activos</a>
         <a href="dashboard.html">Dashboard</a>
         <a href="configuracion.html">Configuración</a>
       </nav>
@@ -145,7 +47,7 @@ try{
 
   <div class="container">
     <section class="card">
-      <h2>Evaluaciones</h2>
+      <h2 id="page-title">Evaluaciones</h2>
 
       <div class="kpis" style="margin-top:6px">
         <div class="kpi"><div class="lab">Total evaluaciones</div><div class="val" id="k_total">0</div></div>
@@ -198,7 +100,7 @@ try{
     </section>
   </div>
 
-  <footer class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</footer>
+  <footer class="foot">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</footer>
 
   <!-- MODAL FICHA + ADJUNTOS -->
   <div id="mBack" class="modal-back" aria-hidden="true">
@@ -287,9 +189,28 @@ try{
 try{
   const cfg=JSON.parse(localStorage.getItem('cfg')||'{}')||{};
   const name=cfg.brand_name||cfg.company_name||'Unihouser';
-  document.getElementById('titleTop').textContent = name+' — Evaluaciones';
-  document.getElementById('logoTop').textContent  = (name||'U').toString().trim().charAt(0).toUpperCase()||'U';
+  const titleElement = document.getElementById('brandTitle');
+  if(titleElement) titleElement.textContent = name+' — Evaluaciones';
+  
+  const logoElement = document.querySelector('.logo-fallback');
+  if(logoElement) logoElement.textContent = (name||'U').toString().trim().charAt(0).toUpperCase()||'U';
 }catch(_){}
+
+/* Handle search mode */
+const urlParams = new URLSearchParams(window.location.search);
+const isSearchMode = urlParams.get('mode') === 'search';
+
+if (isSearchMode) {
+  document.getElementById('page-title').textContent = 'Buscar Activos';
+  document.getElementById('nav-buscar').classList.add('active');
+  document.title = 'Unihouser — Buscar Activos';
+  // Focus search input when in search mode
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('f_text').focus();
+  });
+} else {
+  document.getElementById('nav-evaluaciones').classList.add('active');
+}
 
 /* Utils */
 const id = x=>document.getElementById(x);

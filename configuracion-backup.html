@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="professional">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Unihouser — Configuración</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* Configuration specific styles */
+.config{display:grid;grid-template-columns:220px 1fr;gap:var(--space-4);min-height:70vh}
+.sidebar{background:var(--bg-elevated);border:1px solid var(--border-light);border-radius:var(--radius-xl);padding:var(--space-4);box-shadow:var(--shadow-md);height:fit-content}
+.tabbtn{display:block;width:100%;padding:var(--space-3);margin-bottom:var(--space-2);background:transparent;border:1px solid var(--border-light);border-radius:var(--radius-lg);cursor:pointer;text-align:left;color:var(--text-secondary);font-weight:600;transition:all var(--transition-fast)}
+.tabbtn:hover{background:var(--bg-secondary);border-color:var(--border-medium)}
+.tabbtn.active{background:var(--gradient-primary);color:white;border-color:transparent;box-shadow:var(--shadow-md)}
+.content{background:var(--bg-elevated);border:1px solid var(--border-light);border-radius:var(--radius-xl);padding:var(--space-6);box-shadow:var(--shadow-md)}
+.panel{display:none}
+.panel.active{display:block}
+.block{margin-bottom:var(--space-6);padding:var(--space-5);background:var(--bg-secondary);border:1px solid var(--border-light);border-radius:var(--radius-lg)}
+.grid{display:grid;gap:var(--space-4);grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.grid5{display:grid;gap:var(--space-3);grid-template-columns:repeat(5,1fr)}
+.row2{grid-column:span 2}
+.row3{grid-column:span 3}
+.inline{display:flex;align-items:center;gap:var(--space-2)}
+.chips{display:flex;flex-wrap:wrap;gap:var(--space-2);margin:var(--space-2) 0}
+.chip{background:var(--bg-tertiary);border:1px solid var(--border-light);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3);font-size:var(--font-size-sm);display:flex;align-items:center;gap:var(--space-2)}
+.chip .remove{cursor:pointer;color:var(--text-muted);font-weight:bold}
+.chip .remove:hover{color:var(--error)}
+.chips-input{flex:1;min-width:150px}
+
+/* Logo upload section */
+.logo-upload-section{display:flex;gap:var(--space-4);align-items:flex-start}
+.logo-preview{width:80px;height:80px;border:2px dashed var(--border-light);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;background:var(--bg-secondary);transition:all var(--transition-base)}
+.logo-preview:hover{border-color:var(--brand-primary)}
+.logo-preview img{width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg)}
+.logo-placeholder{color:var(--text-muted);font-size:var(--font-size-xs);text-align:center}
+.logo-upload-controls{display:flex;flex-direction:column;gap:var(--space-2)}
+</style>
+
+<script>
+/* Apply brand settings from configuration */
+try{
+  const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
+  if(cfg.brand_color) document.documentElement.style.setProperty('--brand-primary', cfg.brand_color);
+  if(cfg.ui_font) document.documentElement.style.setProperty('--font-family', cfg.ui_font);
+  if(cfg.ui_font_size) document.documentElement.style.setProperty('--font-size-base', (''+cfg.ui_font_size).replace('px','')+'px');
+  if(cfg.ui_theme) document.documentElement.setAttribute('data-theme', cfg.ui_theme);
+}catch(_){}
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <div class="brand">
+        <div class="logo-container" id="logoBox">
+          <div class="logo-fallback">U</div>
+        </div>
+        <div class="title">Unihouser — Configuración</div>
+      </div>
+      <nav class="nav">
+        <a href="evaluar.html">Evaluar</a>
+        <a href="evaluaciones.html">Evaluaciones</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a class="active" href="configuracion.html">Configuración</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="config animate-slide-in">
+      <aside class="sidebar" id="tabs">
+        <button class="tabbtn active" data-tab="general">General</button>
+        <button class="tabbtn" data-tab="presu">Presupuesto & cálculos</button>
+        <button class="tabbtn" data-tab="matching">Matching</button>
+        <button class="tabbtn" data-tab="mensajeria">Mensajería</button>
+        <button class="tabbtn" data-tab="eval">Parámetros de evaluación</button>
+        <button class="tabbtn" data-tab="contratos">Contratos</button>
+        <button class="tabbtn" data-tab="backup">Exportar / Importar</button>
+      </aside>
+
+      <section class="content">
+        <!-- GENERAL -->
+        <div class="panel active" id="panel-general">
+          <h3>General</h3>
+          <div class="block">
+            <h5>Identidad & Apariencia</h5>
+            <div class="grid">
+              <div class="field"><label>Nombre marca</label><input id="g_name" maxlength="40" placeholder="Unihouser"/></div>
+              <div class="field"><label>Correo general</label><input id="g_email" type="email" maxlength="50" placeholder="info@unihouser.es"/></div>
+              <div class="field"><label>Teléfono</label><input id="g_phone" maxlength="15" placeholder="644 300 200"/></div>
+              <div class="field"><label>Color marca (hex)</label><input id="g_brand" maxlength="7" placeholder="#c7530c"/></div>
+              <div class="field">
+                <label>Tema visual</label>
+                <select id="g_theme">
+                  <option value="professional">Profesional (Mejorado)</option>
+                  <option value="fintech">Fintech (Moderno & Gradientes)</option>
+                  <option value="minimal">Minimalista (Limpio & Espacioso)</option>
+                  <option value="dark">Oscuro</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Logo de la marca</label>
+                <div class="logo-upload-section">
+                  <div class="logo-preview" id="logoPreview">
+                    <div class="logo-placeholder">Sin logo</div>
+                  </div>
+                  <div class="logo-upload-controls">
+                    <input type="file" id="logoInput" accept="image/*" style="display:none">
+                    <button type="button" class="btn ghost" id="uploadLogoBtn">Subir Logo</button>
+                    <button type="button" class="btn ghost" id="removeLogoBtn" style="display:none">Eliminar</button>
+                    <small class="muted">Recomendado: 64x64px, formato PNG/JPG</small>
+                  </div>
+                </div>
+              </div>
+              <div class="field"><label>Tipografía UI (CSS stack)</label><input id="g_font" placeholder="system-ui, Inter, Roboto"/></div>
+              <div class="field"><label>Tamaño fuente UI (px)</label><input id="g_font_size" type="number" min="10" max="22" step="1" placeholder="12"/></div>
+              <div class="field row2"><label>Localidades por defecto (chips)</label>
+                <div class="chips" id="chips_locs"></div>
+                <div class="inline"><input class="chips-input" id="add_loc" maxlength="20" placeholder="Añadir y Enter"/><small class="muted">Máx 12</small></div>
+              </div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn save" id="save-general">Guardar</button></div>
+        </div>
+
+        <!-- PRESUPUESTO -->
+        <div class="panel" id="panel-presu">
+          <h3>Presupuesto & cálculos</h3>
+          <div class="block">
+            <h5>Compras</h5>
+            <div class="grid">
+              <div class="field"><label>ITP (%)</label><input id="p_itp" type="number" inputmode="decimal" min="0" max="21" step="0.1" placeholder="8"/></div>
+              <div class="field"><label>Notaría (€)</label><input id="p_not" type="number" inputmode="numeric" min="0" step="100" placeholder="1500"/></div>
+              <div class="field"><label>Honorarios (€)</label><input id="p_fee" type="number" inputmode="numeric" min="0" step="10" placeholder="4235"/></div>
+              <div class="field row3 inline">
+                <label><input type="checkbox" id="p_bud_incl"/> Incluir honorarios por defecto en presupuesto del cliente</label>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <h5>Objetivos por defecto</h5>
+            <div class="grid5">
+              <div class="field"><label>Tradicional · Bruta (%)</label><input id="o_tb" type="number" min="0" max="30" step="0.1"/></div>
+              <div class="field"><label>Tradicional · Neta (%)</label><input id="o_tn" type="number" min="0" max="30" step="0.1"/></div>
+              <div class="field"><label>Tradicional · Flujo €/mes</label><input id="o_tf" type="number" min="0" step="10"/></div>
+              <div class="field"><label>Habitaciones · Bruta (%)</label><input id="o_hb" type="number" min="0" max="30" step="0.1"/></div>
+              <div class="field"><label>Habitaciones · Neta (%)</label><input id="o_hn" type="number" min="0" max="30" step="0.1"/></div>
+            </div>
+            <div class="grid">
+              <div class="field inline row3"><label><input type="checkbox" id="o_bruta_inc"/> Incluir honorarios en Bruta por defecto</label></div>
+              <div class="field inline row3"><label><input type="checkbox" id="o_neta_inc"/> Incluir honorarios en Neta por defecto</label></div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn save" id="save-presu">Guardar</button></div>
+        </div>
+
+        <!-- MATCHING -->
+        <div class="panel" id="panel-matching">
+          <h3>Matching</h3>
+          <div class="block">
+            <h5>Umbrales</h5>
+            <div class="grid">
+              <div class="field"><label>Verde (ratio)</label><input id="m_green" type="number" min="0.1" max="2" step="0.01" placeholder="1.00"/></div>
+              <div class="field"><label>Ámbar (ratio)</label><input id="m_amber" type="number" min="0.1" max="2" step="0.01" placeholder="0.95"/></div>
+              <div class="field inline"><label><input type="checkbox" id="m_warn_green"/> Mostrar advertencias sólo si es verde</label></div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn save" id="save-matching">Guardar</button></div>
+        </div>
+
+        <!-- MENSAJERÍA -->
+        <div class="panel" id="panel-mensajeria">
+          <h3>Mensajería</h3>
+
+          <div class="block">
+            <h5>Notificaciones (global)</h5>
+            <div class="grid">
+              <div class="field row3"><label>Email remitente (por defecto)</label><input id="n_email_from" type="email" maxlength="60"/></div>
+              <div class="field row3"><label>Asunto email — plantilla</label><input id="n_email_subj" maxlength="80"/></div>
+              <div class="field row3"><label>Cuerpo email — plantilla</label><textarea id="n_email_body" rows="2" maxlength="500"></textarea></div>
+              <div class="field row3"><label>WhatsApp — plantilla</label><textarea id="n_wa_body" rows="2" maxlength="350"></textarea></div>
+            </div>
+            <small class="muted">Placeholders: {brand}, {name}, {loc}, {calle}, {tipo}, {precio}, {inv}, {rb}, {rn}, {fl}, {pmax}, {url}</small>
+          </div>
+
+          <!-- Canales (opcional/avanzado) -->
+          <div class="block">
+            <h5>Canales</h5>
+            <div class="grid">
+              <div class="field inline row3"><label><input type="checkbox" id="c_email_en"/> Email habilitado</label></div>
+              <div class="field"><label>Modo Email</label>
+                <select id="c_email_mode">
+                  <option value="mailto">mailto (cliente correo)</option>
+                  <option value="smtp">SMTP</option>
+                  <option value="gmail">Gmail API</option>
+                </select>
+              </div>
+              <div class="field"><label>Nombre remitente</label><input id="c_email_from_name" maxlength="40"/></div>
+              <div class="field"><label>Correo remitente</label><input id="c_email_from" type="email" maxlength="60"/></div>
+              <div class="field"><label>Reply-To (opcional)</label><input id="c_email_reply" type="email" maxlength="60"/></div>
+              <div class="field"><label>BCC (opcional)</label><input id="c_email_bcc" maxlength="120"/></div>
+              <div class="field row3"><small class="muted">SMTP (sólo si Modo=SMTP)</small></div>
+              <div class="field"><label>SMTP Host</label><input id="c_smtp_host" /></div>
+              <div class="field"><label>Puerto</label><input id="c_smtp_port" type="number" min="1" step="1"/></div>
+              <div class="field inline"><label><input type="checkbox" id="c_smtp_tls"/> SSL/TLS</label></div>
+              <div class="field"><label>Usuario</label><input id="c_smtp_user"/></div>
+              <div class="field"><label>Contraseña</label><input id="c_smtp_pass" type="password"/></div>
+            </div>
+            <div class="inline"><button class="btn sec" id="test-email">Probar email</button><small class="muted">Usa plantillas de la fase CONTACTO</small></div>
+          </div>
+
+          <div class="block">
+            <h5>WhatsApp</h5>
+            <div class="grid">
+              <div class="field inline row3"><label><input type="checkbox" id="w_en"/> WhatsApp habilitado</label></div>
+              <div class="field"><label>Modo</label>
+                <select id="w_mode">
+                  <option value="link">wa.me link</option>
+                  <option value="api">API</option>
+                </select>
+              </div>
+              <div class="field"><label>Nº remitente (+34…)</label><input id="w_from" maxlength="20"/></div>
+              <div class="field"><label>Proveedor API</label>
+                <select id="w_prov">
+                  <option value="meta">Meta Cloud</option>
+                  <option value="twilio">Twilio</option>
+                </select>
+              </div>
+              <div class="field"><label>Meta · Business ID</label><input id="w_meta_bid"/></div>
+              <div class="field"><label>Meta · Phone Number ID</label><input id="w_meta_pid"/></div>
+              <div class="field"><label>Meta · Access Token</label><input id="w_meta_tok" type="password"/></div>
+              <div class="field"><label>Twilio · Account SID</label><input id="w_tw_sid"/></div>
+              <div class="field"><label>Twilio · Auth Token</label><input id="w_tw_tok" type="password"/></div>
+              <div class="field"><label>Twilio · From (whatsapp:+…)</label><input id="w_tw_from"/></div>
+            </div>
+            <div class="inline"><button class="btn sec" id="test-wa">Probar WhatsApp</button><small class="muted">Usa plantilla CONTACTO</small></div>
+          </div>
+
+          <div class="block">
+            <h5>Plantillas por fase</h5>
+            <div class="table" id="tpl-table">
+              <div class="row head"><div>Fase</div><div>Email (asunto + cuerpo)</div><div>WhatsApp</div></div>
+            </div>
+            <div class="inline" style="margin-top:6px;">
+              <select id="ph-insert">
+                <option value="">Insertar placeholder…</option>
+                <option value="{name}">{name}</option>
+                <option value="{loc}">{loc}</option>
+                <option value="{calle}">{calle}</option>
+                <option value="{precio}">{precio}</option>
+                <option value="{inv}">{inv}</option>
+                <option value="{rb}">{rb}</option>
+                <option value="{rn}">{rn}</option>
+                <option value="{fl}">{fl}</option>
+                <option value="{pmax}">{pmax}</option>
+                <option value="{url}">{url}</option>
+              </select>
+              <small class="muted">Coloca el cursor en el campo y elige el placeholder.</small>
+            </div>
+          </div>
+
+          <div class="actions"><button class="btn save" id="save-mensajeria">Guardar</button></div>
+        </div>
+
+        <!-- PARÁMETROS EVALUACIÓN -->
+        <div class="panel" id="panel-eval">
+          <h3>Parámetros de evaluación</h3>
+          <div class="block">
+            <h5>Porcentajes y gestión</h5>
+            <div class="grid">
+              <div class="field"><label>Hogar (%)</label><input id="e_hogar" type="number" min="0" max="20" step="0.1"/></div>
+              <div class="field"><label>Impago Trad. (%)</label><input id="e_imp_trad" type="number" min="0" max="20" step="0.1"/></div>
+              <div class="field"><label>Impago Hab. (%)</label><input id="e_imp_hab" type="number" min="0" max="20" step="0.1"/></div>
+              <div class="field"><label>Gestión Trad. (%)</label><input id="e_g_trad" type="number" min="0" max="50" step="0.1"/></div>
+              <div class="field"><label>Gestión Hab. (%)</label><input id="e_g_hab" type="number" min="0" max="50" step="0.1"/></div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn save" id="save-eval">Guardar</button></div>
+        </div>
+
+        <!-- CONTRATOS -->
+        <div class="panel" id="panel-contratos">
+          <h3>Contratos</h3>
+          <div class="block">
+            <h5>Plantilla de contrato de servicio</h5>
+            <div class="grid">
+              <div class="field row3">
+                <label>contract_tpl (placeholders soportados: {brand}, {name}, {loc}, {calle}, {tipo}, {precio}, {inv}, {rb}, {rn}, {fl}, {pmax}, {url})</label>
+                <textarea id="c_tpl" rows="8" placeholder="Ej.: {brand} y {name} acuerdan..."></textarea>
+              </div>
+              <div class="field row3">
+                <label>Vista previa</label>
+                <div id="c_preview" class="preview-box">—</div>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="btn sec" id="c_print">Imprimir/Exportar</button>
+              <button class="btn save" id="c_save">Guardar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BACKUP -->
+        <div class="panel" id="panel-backup">
+          <h3>Exportar / Importar configuración</h3>
+          <div class="block">
+            <div class="inline">
+              <button class="btn sec" id="btn-export">Exportar JSON</button>
+              <label class="btn sec" for="file-import">Importar JSON</label>
+              <input id="file-import" type="file" accept="application/json" style="display:none"/>
+              <small class="muted">Se guardará en localStorage como <b>cfg</b>.</small>
+            </div>
+          </div>
+          <div class="block">
+            <h5>Peligro</h5>
+            <div class="inline">
+              <button class="btn" id="btn-reset" style="background:#ffe9e6;border:1px solid #f2c2bc;">Reiniciar a valores por defecto</button>
+              <small class="muted">No borra tus prospectos ni evaluaciones.</small>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="footer">© 2025 Unihouser · unihouser.es · info@unihouser.es · 644 300 200</div>
+
+<script>
+"use strict";
+/* ===== Utils & CFG ===== */
+var LS={get:function(k,fb){try{var v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch(_){return fb}},set:function(k,v){localStorage.setItem(k,JSON.stringify(v))}};
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},1300);}
+
+/* Normaliza cfg (compat Evaluar/Evaluaciones) */
+function normCfg(c){
+  c=c&&typeof c==='object'?JSON.parse(JSON.stringify(c)):{};
+
+  /* Compat nombres notaría/honorarios */
+  if(typeof c.notaria_eur==='number') c.notaria=c.notaria_eur;
+  if(typeof c.notaria==='number' && c.notaria_eur==null) c.notaria_eur=c.notaria;
+
+  if(typeof c.psi_fee_eur==='number') c.honorarios=c.psi_fee_eur;
+  if(typeof c.honorarios==='number' && c.psi_fee_eur==null) c.psi_fee_eur=c.honorarios;
+
+  /* ITP como porcentaje (8). Si llegó 0.08 lo subimos a 8. */
+  if(typeof c.itp_pct!=='number'){ c.itp_pct=8; }
+  else if(c.itp_pct<=1){ c.itp_pct = c.itp_pct*100; }
+
+  /* Defaults varios */
+  c.notaria   =(typeof c.notaria==='number')   ? c.notaria   : 1500;
+  c.honorarios=(typeof c.honorarios==='number')? c.honorarios: 4235;
+
+  /* Marca + tipografía */
+  c.brand_color = c.brand_color || '#c7530c';
+  c.brand_name  = c.brand_name  || c.company_name || 'Unihouser';
+  c.company_email = c.company_email || 'info@unihouser.es';
+  c.company_phone = c.company_phone || '644 300 200';
+  c.ui_font = c.ui_font || 'system-ui, -apple-system, Inter, Roboto, Arial, sans-serif';
+  c.ui_font_size = c.ui_font_size || 12;
+
+  /* Localidades por defecto */
+  c.localidades=Array.isArray(c.localidades)&&c.localidades.length?c.localidades:
+    ['Oviedo','Gijón','Avilés','Mieres','Pola de Siero','Langreo','Gozón'];
+
+  /* Objetivos */
+  c.objetivos=c.objetivos||{
+    tradicional :{bruta_pct:10,neta_pct:6,flujo_mes_eur:0},
+    habitaciones:{bruta_pct:12,neta_pct:7,flujo_mes_eur:0}
+  };
+
+  /* Matching */
+  c.match=c.match||{thresholds:{green:1,amber:0.95},warnings_only_when_green:true};
+
+  /* Bruta/Neta flags */
+  c.bruta=c.bruta||{include_honorarios_default:false};
+  c.neta =c.neta ||{include_honorarios_default:false};
+
+  /* Presupuesto */
+  var pres=c.presupuesto||{};
+  if(typeof c.incluir_psi_por_defecto==='boolean' && pres.honorarios_incluidos_default==null){
+    pres.honorarios_incluidos_default=c.incluir_psi_por_defecto;
+  }
+  if(pres.honorarios_incluidos_default==null) pres.honorarios_incluidos_default=true;
+  c.presupuesto=pres;
+
+  /* Mensajería: NOTIFICACIONES (minúsculas en placeholders) */
+  c.notifs = c.notifs || {
+    email_from: c.company_email || 'info@unihouser.es',
+    email_subject_tpl: '{brand} · {loc} · {calle}',
+    email_body_tpl:    'Hola {name},\\nTe escribimos sobre el activo en {loc} {calle}. Precio {precio}, inversión {inv}. Bruta {rb}%, neta {rn}%.\\n{url}',
+    wa_text_tpl:       'Hola {name}! Oportunidad en {loc} {calle}. Precio {precio} · Inv {inv} · Bruta {rb}% · Neta {rn}% · Pmáx {pmax}. {url}'
+  };
+
+  /* Canales + plantillas por fase */
+  c.comms=c.comms||{};
+  c.comms.channels=c.comms.channels||{
+    email:{enabled:true,mode:'mailto',from_name:c.brand_name,from_email:c.company_email,reply_to:'',bcc:'',smtp:{host:'',port:465,secure:true,user:'',pass:''}},
+    whatsapp:{enabled:true,mode:'link',from_number:'+34644300200',provider:'meta',
+      meta:{business_id:'',phone_number_id:'',access_token:''},
+      twilio:{account_sid:'',auth_token:'',from_whatsapp:''}}
+  };
+  var PH=['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA','EXITO'];
+  c.comms.templates=c.comms.templates||{};
+  PH.forEach(function(ph){
+    if(!c.comms.templates[ph]){
+      c.comms.templates[ph]={email:{subject:ph+' — {name}', body:'Hola {name},\\n…'},whatsapp:{body:'Hola {name}! …'}};
+    }
+  });
+
+  /* Contratos */
+  c.contract_tpl = c.contract_tpl || 'CONTRATO DE SERVICIO\\n\\nEntre {brand} y {name}. Inmueble en {loc}, {calle}. Tipo: {tipo}. Precio: {precio}. Inversión: {inv}. Bruta {rb}%, neta {rn}%. Flujo {fl}. Pmáx {pmax}.\\nURL: {url}\\n\\nFirmas: …';
+
+  return c;
+}
+var CFG=normCfg(LS.get('cfg',{}));
+
+/* Aplica variables CSS */
+try{
+  document.documentElement.style.setProperty('--brand', CFG.brand_color);
+  document.documentElement.style.setProperty('--ui-font', CFG.ui_font);
+  document.documentElement.style.setProperty('--ui-font-size', (''+CFG.ui_font_size).replace('px','')+'px');
+}catch(_){}
+
+/* ===== Tabs ===== */
+document.getElementById('tabs').addEventListener('click',function(e){
+  var b=e.target.closest('.tabbtn'); if(!b) return;
+  Array.prototype.forEach.call(document.querySelectorAll('.tabbtn'),function(x){x.classList.remove('active')});
+  b.classList.add('active');
+  var id='panel-'+b.getAttribute('data-tab');
+  Array.prototype.forEach.call(document.querySelectorAll('.panel'),function(p){p.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+});
+
+/* ===== GENERAL ===== */
+var chipsWrap=document.getElementById('chips_locs');
+function paintLocs(){
+  chipsWrap.innerHTML='';
+  (CFG.localidades||[]).slice(0,12).forEach(function(l){
+    var sp=document.createElement('span'); sp.className='chip';
+    sp.innerHTML='<span class="t">'+l+'</span> <span class="x" data-del="'+l+'">×</span>';
+    chipsWrap.appendChild(sp);
+  });
+}
+document.getElementById('add_loc').addEventListener('keydown',function(e){
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  var v=(e.target.value||'').trim(); if(!v) return;
+  if(CFG.localidades.length>=12){ toast('Máximo 12 localidades'); return; }
+  if(CFG.localidades.indexOf(v)===-1) CFG.localidades.push(v);
+  e.target.value=''; paintLocs();
+});
+chipsWrap.addEventListener('click',function(e){
+  var del=e.target.getAttribute && e.target.getAttribute('data-del'); if(!del) return;
+  CFG.localidades=CFG.localidades.filter(function(x){return x!==del}); paintLocs();
+});
+function loadGeneral(){
+  document.getElementById('g_name').value  = CFG.brand_name||'Unihouser';
+  document.getElementById('g_email').value = CFG.company_email||'info@unihouser.es';
+  document.getElementById('g_phone').value = CFG.company_phone||'644 300 200';
+  document.getElementById('g_brand').value = CFG.brand_color||'#c7530c';
+  document.getElementById('g_theme').value = CFG.ui_theme||'professional';
+  document.getElementById('g_font').value  = CFG.ui_font||'system-ui, -apple-system, Inter, Roboto, Arial, sans-serif';
+  document.getElementById('g_font_size').value = CFG.ui_font_size||12;
+  
+  // Load logo if exists
+  if(CFG.brand_logo) {
+    const logoPreview = document.getElementById('logoPreview');
+    logoPreview.innerHTML = `<img src="${CFG.brand_logo}" alt="Logo">`;
+    document.getElementById('removeLogoBtn').style.display = 'inline-block';
+  }
+  
+  paintLocs();
+}
+document.getElementById('save-general').onclick=function(){
+  CFG.brand_name   = document.getElementById('g_name').value.trim() || 'Unihouser';
+  CFG.company_email= document.getElementById('g_email').value.trim() || 'info@unihouser.es';
+  CFG.company_phone= document.getElementById('g_phone').value.trim() || '644 300 200';
+  CFG.brand_color  = document.getElementById('g_brand').value.trim() || '#c7530c';
+  CFG.ui_theme     = document.getElementById('g_theme').value.trim() || 'professional';
+  CFG.ui_font      = document.getElementById('g_font').value.trim() || 'system-ui, -apple-system, Inter, Roboto, Arial, sans-serif';
+  CFG.ui_font_size = parseInt(document.getElementById('g_font_size').value||'12',10)||12;
+  LS.set('cfg',CFG);
+  
+  // Apply changes immediately
+  try{
+    document.documentElement.style.setProperty('--brand-primary', CFG.brand_color);
+    document.documentElement.style.setProperty('--font-family', CFG.ui_font);
+    document.documentElement.style.setProperty('--font-size-base', (''+CFG.ui_font_size).replace('px','')+'px');
+    document.documentElement.setAttribute('data-theme', CFG.ui_theme);
+    
+    // Update logo in header if exists
+    const logoBox = document.getElementById('logoBox');
+    if(logoBox && CFG.brand_logo) {
+      logoBox.innerHTML = `<img src="${CFG.brand_logo}" alt="Logo">`;
+    }
+  }catch(_){}
+  toast('Guardado general');
+};
+
+/* ===== LOGO UPLOAD FUNCTIONALITY ===== */
+document.getElementById('uploadLogoBtn').onclick = function() {
+  document.getElementById('logoInput').click();
+};
+
+document.getElementById('logoInput').onchange = function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    toast('Por favor selecciona un archivo de imagen válido');
+    return;
+  }
+  
+  // Validate file size (max 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    toast('El archivo es muy grande. Máximo 2MB');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    CFG.brand_logo = dataUrl;
+    
+    // Update preview
+    const logoPreview = document.getElementById('logoPreview');
+    logoPreview.innerHTML = `<img src="${dataUrl}" alt="Logo">`;
+    document.getElementById('removeLogoBtn').style.display = 'inline-block';
+    
+    // Save to localStorage
+    LS.set('cfg', CFG);
+    toast('Logo cargado correctamente');
+  };
+  reader.readAsDataURL(file);
+};
+
+document.getElementById('removeLogoBtn').onclick = function() {
+  delete CFG.brand_logo;
+  const logoPreview = document.getElementById('logoPreview');
+  logoPreview.innerHTML = '<div class="logo-placeholder">Sin logo</div>';
+  this.style.display = 'none';
+  LS.set('cfg', CFG);
+  toast('Logo eliminado');
+};
+
+/* ===== THEME PREVIEW ===== */
+document.getElementById('g_theme').onchange = function() {
+  // Apply theme immediately for preview
+  document.documentElement.setAttribute('data-theme', this.value);
+};
+
+/* ===== THRESHOLD EDITING IMPROVEMENTS ===== */
+// Make thresholds editable without deletion
+function makeThresholdEditable(element) {
+  element.addEventListener('dblclick', function() {
+    const currentValue = this.textContent;
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = '0.01';
+    input.min = '0';
+    input.max = '2';
+    input.value = currentValue;
+    input.style.width = '80px';
+    input.style.fontSize = '12px';
+    
+    this.textContent = '';
+    this.appendChild(input);
+    input.focus();
+    input.select();
+    
+    const saveValue = () => {
+      const newValue = parseFloat(input.value);
+      if (!isNaN(newValue) && newValue >= 0 && newValue <= 2) {
+        this.textContent = newValue.toFixed(2);
+        // Update configuration
+        if (this.id === 'm_green') CFG.match.thresholds.green = newValue;
+        if (this.id === 'm_amber') CFG.match.thresholds.amber = newValue;
+        LS.set('cfg', CFG);
+        toast('Umbral actualizado');
+      } else {
+        this.textContent = currentValue;
+      }
+    };
+    
+    input.onblur = saveValue;
+    input.onkeypress = function(e) {
+      if (e.key === 'Enter') saveValue();
+    };
+  });
+}
+
+// Apply to threshold elements when they exist
+setTimeout(() => {
+  const greenThreshold = document.getElementById('m_green');
+  const amberThreshold = document.getElementById('m_amber');
+  if (greenThreshold) makeThresholdEditable(greenThreshold);
+  if (amberThreshold) makeThresholdEditable(amberThreshold);
+}, 1000);
+
+/* ===== PRESUPUESTO ===== */
+function loadPresu(){
+  document.getElementById('p_itp').value = CFG.itp_pct;
+  document.getElementById('p_not').value = CFG.notaria_eur||CFG.notaria;
+  document.getElementById('p_fee').value = CFG.psi_fee_eur||CFG.honorarios;
+  document.getElementById('p_bud_incl').checked = !!CFG.presupuesto.honorarios_incluidos_default;
+  var o=CFG.objetivos;
+  document.getElementById('o_tb').value=o.tradicional.bruta_pct;
+  document.getElementById('o_tn').value=o.tradicional.neta_pct;
+  document.getElementById('o_tf').value=o.tradicional.flujo_mes_eur;
+  document.getElementById('o_hb').value=o.habitaciones.bruta_pct;
+  document.getElementById('o_hn').value=o.habitaciones.neta_pct;
+  document.getElementById('o_bruta_inc').checked = !!CFG.bruta.include_honorarios_default;
+  document.getElementById('o_neta_inc').checked  = !!CFG.neta.include_honorarios_default;
+}
+document.getElementById('save-presu').onclick=function(){
+  var itp = parseFloat(document.getElementById('p_itp').value||'8'); if(isNaN(itp)) itp=8;
+  var notv= Math.max(0, parseInt(document.getElementById('p_not').value||'1500',10));
+  var feev= Math.max(0, parseInt(document.getElementById('p_fee').value||'4235',10));
+
+  CFG.itp_pct      = itp;
+  CFG.notaria      = notv;
+  CFG.notaria_eur  = notv;
+  CFG.honorarios   = feev;
+  CFG.psi_fee_eur  = feev;
+
+  CFG.presupuesto.honorarios_incluidos_default = document.getElementById('p_bud_incl').checked;
+  CFG.objetivos.tradicional.bruta_pct = parseFloat(document.getElementById('o_tb').value||'10')||10;
+  CFG.objetivos.tradicional.neta_pct  = parseFloat(document.getElementById('o_tn').value||'6')||6;
+  CFG.objetivos.tradicional.flujo_mes_eur = parseInt(document.getElementById('o_tf').value||'0',10)||0;
+  CFG.objetivos.habitaciones.bruta_pct = parseFloat(document.getElementById('o_hb').value||'12')||12;
+  CFG.objetivos.habitaciones.neta_pct  = parseFloat(document.getElementById('o_hn').value||'7')||7;
+  CFG.bruta.include_honorarios_default = document.getElementById('o_bruta_inc').checked;
+  CFG.neta.include_honorarios_default  = document.getElementById('o_neta_inc').checked;
+  LS.set('cfg',CFG); toast('Guardado presupuesto');
+};
+
+/* ===== MATCHING ===== */
+function loadMatching(){
+  var th=(CFG.match&&CFG.match.thresholds)?CFG.match.thresholds:{green:1,amber:.95};
+  document.getElementById('m_green').value=th.green;
+  document.getElementById('m_amber').value=th.amber;
+  document.getElementById('m_warn_green').checked=!!CFG.match.warnings_only_when_green;
+}
+document.getElementById('save-matching').onclick=function(){
+  var g=parseFloat(document.getElementById('m_green').value||'1')||1;
+  var a=parseFloat(document.getElementById('m_amber').value||'0.95')||0.95;
+  CFG.match=CFG.match||{};
+  CFG.match.thresholds={green:g, amber:a};
+  CFG.match.warnings_only_when_green=document.getElementById('m_warn_green').checked;
+  LS.set('cfg',CFG); toast('Guardado matching');
+};
+
+/* ===== MENSAJERÍA ===== */
+var PHASES=['CONTACTO','REUNION','CONTRATO','BUSQUEDA','COMPRAVENTA','EXITO'];
+function rowTpl(ph){
+  var id=ph.toLowerCase();
+  return ''+
+    '<div class="row">'+
+      '<div>'+ph+'</div>'+
+      '<div>'+
+        '<div class="kv"><span>Asunto</span><input id="t_'+id+'_es" maxlength="80"/></div>'+
+        '<div class="kv"><span>Cuerpo</span><textarea id="t_'+id+'_eb" rows="2" maxlength="500"></textarea></div>'+
+      '</div>'+
+      '<div>'+
+        '<div class="kv"><span>Mensaje</span><textarea id="t_'+id+'_wb" rows="2" maxlength="350"></textarea></div>'+
+      '</div>'+
+    '</div>';
+}
+function loadMensajeria(){
+  document.getElementById('n_email_from').value = CFG.notifs.email_from||CFG.company_email||'info@unihouser.es';
+  document.getElementById('n_email_subj').value = CFG.notifs.email_subject_tpl||'';
+  document.getElementById('n_email_body').value = CFG.notifs.email_body_tpl||'';
+  document.getElementById('n_wa_body').value   = CFG.notifs.wa_text_tpl||'';
+
+  var em=CFG.comms.channels.email||{};
+  document.getElementById('c_email_en').checked = !!em.enabled;
+  document.getElementById('c_email_mode').value = em.mode||'mailto';
+  document.getElementById('c_email_from_name').value = em.from_name||CFG.brand_name||'Unihouser';
+  document.getElementById('c_email_from').value = em.from_email||CFG.company_email||'info@unihouser.es';
+  document.getElementById('c_email_reply').value = em.reply_to||'';
+  document.getElementById('c_email_bcc').value   = em.bcc||'';
+  var sm=em.smtp||{host:'',port:465,secure:true,user:'',pass:''};
+  document.getElementById('c_smtp_host').value = sm.host||'';
+  document.getElementById('c_smtp_port').value = sm.port||465;
+  document.getElementById('c_smtp_tls').checked= !!sm.secure;
+  document.getElementById('c_smtp_user').value = sm.user||'';
+  document.getElementById('c_smtp_pass').value = sm.pass||'';
+
+  var wa=CFG.comms.channels.whatsapp||{meta:{},twilio:{}}; if(!wa.meta) wa.meta={}; if(!wa.twilio) wa.twilio={};
+  document.getElementById('w_en').checked = !!wa.enabled;
+  document.getElementById('w_mode').value = wa.mode||'link';
+  document.getElementById('w_from').value = wa.from_number||'';
+  document.getElementById('w_prov').value = wa.provider||'meta';
+  document.getElementById('w_meta_bid').value=wa.meta.business_id||'';
+  document.getElementById('w_meta_pid').value=wa.meta.phone_number_id||'';
+  document.getElementById('w_meta_tok').value=wa.meta.access_token||'';
+  document.getElementById('w_tw_sid').value=wa.twilio.account_sid||'';
+  document.getElementById('w_tw_tok').value=wa.twilio.auth_token||'';
+  document.getElementById('w_tw_from').value=wa.twilio.from_whatsapp||'';
+
+  var box=document.getElementById('tpl-table');
+  Array.prototype.forEach.call(box.querySelectorAll('.row:not(.head)'),function(n){n.parentNode.removeChild(n);});
+  PHASES.forEach(function(ph){ box.insertAdjacentHTML('beforeend', rowTpl(ph)); });
+  PHASES.forEach(function(ph){
+    var id=ph.toLowerCase(); var t=CFG.comms.templates[ph];
+    document.getElementById('t_'+id+'_es').value=t.email.subject||'';
+    document.getElementById('t_'+id+'_eb').value=t.email.body||'';
+    document.getElementById('t_'+id+'_wb').value=t.whatsapp.body||'';
+  });
+}
+document.getElementById('save-mensajeria').onclick=function(){
+  CFG.notifs.email_from      = (document.getElementById('n_email_from').value||'').trim() || (CFG.company_email||'info@unihouser.es');
+  CFG.notifs.email_subject_tpl = document.getElementById('n_email_subj').value.slice(0,80);
+  CFG.notifs.email_body_tpl    = document.getElementById('n_email_body').value.slice(0,500);
+  CFG.notifs.wa_text_tpl       = document.getElementById('n_wa_body').value.slice(0,350);
+
+  var em=CFG.comms.channels.email;
+  em.enabled=document.getElementById('c_email_en').checked;
+  em.mode   =document.getElementById('c_email_mode').value;
+  em.from_name=document.getElementById('c_email_from_name').value.trim() || CFG.brand_name || 'Unihouser';
+  em.from_email=document.getElementById('c_email_from').value.trim() || CFG.company_email || 'info@unihouser.es';
+  em.reply_to=document.getElementById('c_email_reply').value.trim();
+  em.bcc=document.getElementById('c_email_bcc').value.trim();
+  em.smtp.host=document.getElementById('c_smtp_host').value.trim();
+  em.smtp.port=parseInt(document.getElementById('c_smtp_port').value||'465',10);
+  em.smtp.secure=document.getElementById('c_smtp_tls').checked;
+  em.smtp.user=document.getElementById('c_smtp_user').value.trim();
+  em.smtp.pass=document.getElementById('c_smtp_pass').value;
+
+  var wa=CFG.comms.channels.whatsapp; if(!wa.meta) wa.meta={}; if(!wa.twilio) wa.twilio={};
+  wa.enabled=document.getElementById('w_en').checked;
+  wa.mode   =document.getElementById('w_mode').value;
+  wa.from_number=document.getElementById('w_from').value.trim();
+  wa.provider=document.getElementById('w_prov').value;
+  wa.meta.business_id=document.getElementById('w_meta_bid').value.trim();
+  wa.meta.phone_number_id=document.getElementById('w_meta_pid').value.trim();
+  wa.meta.access_token=document.getElementById('w_meta_tok').value;
+  wa.twilio.account_sid=document.getElementById('w_tw_sid').value.trim();
+  wa.twilio.auth_token=document.getElementById('w_tw_tok').value;
+  wa.twilio.from_whatsapp=document.getElementById('w_tw_from').value.trim();
+
+  PHASES.forEach(function(ph){
+    var id=ph.toLowerCase(); var t=CFG.comms.templates[ph];
+    t.email.subject=document.getElementById('t_'+id+'_es').value.slice(0,80);
+    t.email.body   =document.getElementById('t_'+id+'_eb').value.slice(0,500);
+    t.whatsapp.body=document.getElementById('t_'+id+'_wb').value.slice(0,350);
+  });
+
+  LS.set('cfg',CFG); toast('Guardado mensajería');
+};
+/* Placeholder helper */
+var lastFocused=null;
+document.addEventListener('focusin',function(e){
+  if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') lastFocused=e.target;
+});
+document.getElementById('ph-insert').onchange=function(){
+  var ph=this.value; this.value='';
+  if(!ph||!lastFocused) return;
+  var el=lastFocused; var s=el.selectionStart||0; var ee=el.selectionEnd||0;
+  el.value=el.value.slice(0,s)+ph+el.value.slice(ee);
+  el.focus(); el.selectionStart=el.selectionEnd=s+ph.length;
+};
+/* Pruebas rápidas */
+document.getElementById('test-email').onclick=function(){
+  var subj=encodeURIComponent((CFG.notifs.email_subject_tpl||'').replace('{name}','Test').replace('{brand}', CFG.brand_name||'Unihouser'));
+  var body=encodeURIComponent((CFG.notifs.email_body_tpl||'').replace('{name}','Test').replace('{brand}', CFG.brand_name||'Unihouser'));
+  var to=encodeURIComponent(CFG.notifs.email_from||CFG.company_email||'info@unihouser.es');
+  window.open('mailto:'+to+'?subject='+subj+'&body='+body,'_blank');
+};
+document.getElementById('test-wa').onclick=function(){
+  var msg=encodeURIComponent((CFG.notifs.wa_text_tpl||'').replace('{name}','Test').replace('{brand}', CFG.brand_name||'Unihouser'));
+  var n=(CFG.comms.channels.whatsapp.from_number||'').replace(/\D/g,'');
+  window.open('https://wa.me/'+n+'?text='+msg,'_blank');
+};
+
+/* ===== PARÁMETROS DE EVALUACIÓN ===== */
+function loadEval(){
+  document.getElementById('e_hogar').value = (CFG.hogar_pct != null ? CFG.hogar_pct : 3.5);
+  document.getElementById('e_imp_trad').value = (CFG.impago_trad_pct != null ? CFG.impago_trad_pct : 4);
+  document.getElementById('e_imp_hab').value = (CFG.impago_hab_pct != null ? CFG.impago_hab_pct : 4);
+  document.getElementById('e_g_trad').value = (CFG.gestion_trad_pct != null ? CFG.gestion_trad_pct : 15);
+  document.getElementById('e_g_hab').value = (CFG.gestion_hab_pct != null ? CFG.gestion_hab_pct : 25);
+}
+document.getElementById('save-eval').onclick=function(){
+  CFG.hogar_pct = parseFloat(document.getElementById('e_hogar').value||'3.5')||3.5;
+  CFG.impago_trad_pct = parseFloat(document.getElementById('e_imp_trad').value||'4')||4;
+  CFG.impago_hab_pct  = parseFloat(document.getElementById('e_imp_hab').value||'4')||4;
+  CFG.gestion_trad_pct= parseFloat(document.getElementById('e_g_trad').value||'15')||15;
+  CFG.gestion_hab_pct = parseFloat(document.getElementById('e_g_hab').value||'25')||25;
+  LS.set('cfg',CFG); toast('Guardado evaluación');
+};
+
+/* ===== CONTRATOS ===== */
+function fillContract(tpl, sample){
+  return (tpl||'')
+    .replace(/\{brand\}/g, CFG.brand_name||'Unihouser')
+    .replace(/\{name\}/g, sample.name||'Nombre Cliente')
+    .replace(/\{loc\}/g, sample.loc||'Localidad')
+    .replace(/\{calle\}/g, sample.calle||'Calle')
+    .replace(/\{tipo\}/g, sample.tipo||'Tradicional')
+    .replace(/\{precio\}/g, sample.precio||'—')
+    .replace(/\{inv\}/g, sample.inv||'—')
+    .replace(/\{rb\}/g, sample.rb||'—')
+    .replace(/\{rn\}/g, sample.rn||'—')
+    .replace(/\{fl\}/g, sample.fl||'—')
+    .replace(/\{pmax\}/g, sample.pmax||'—')
+    .replace(/\{url\}/g, sample.url||'');
+}
+function loadContrato(){
+  document.getElementById('c_tpl').value = CFG.contract_tpl||'';
+  renderContractPreview();
+}
+function getSampleFromLastEval(){
+  try{
+    var evals=JSON.parse(localStorage.getItem('evals')||'[]');
+    if(!evals.length) return {};
+    var e=evals[evals.length-1];
+    var fmtE=new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+    var fmtN=new Intl.NumberFormat('es-ES',{maximumFractionDigits:1});
+    return {
+      name:'Cliente',
+      loc:e.loc||'', calle:e.calle||'', tipo:e.tipo||'',
+      precio:fmtE.format(e.precio||0), inv:fmtE.format(e.inv_total||0),
+      rb:fmtN.format(e.kpi_bruta||0)+' %', rn:fmtN.format(e.kpi_neta||0)+' %',
+      fl:fmtE.format(e.kpi_flujo||0), pmax:fmtE.format(e.pmax||0),
+      url:e.url||''
+    };
+  }catch(_){ return {}; }
+}
+function renderContractPreview(){
+  var tpl=document.getElementById('c_tpl').value||'';
+  var sample=getSampleFromLastEval();
+  document.getElementById('c_preview').textContent = fillContract(tpl, sample) || '—';
+}
+document.getElementById('c_tpl').addEventListener('input', renderContractPreview);
+document.getElementById('c_save').onclick=function(){
+  CFG.contract_tpl = document.getElementById('c_tpl').value||'';
+  LS.set('cfg',CFG); toast('Contrato guardado');
+};
+document.getElementById('c_print').onclick=function(){
+  var tpl=document.getElementById('c_tpl').value||CFG.contract_tpl||'';
+  var filled=fillContract(tpl, getSampleFromLastEval());
+  var css='body{font-family:'+ (CFG.ui_font||'Inter,Arial,sans-serif') +';font-size:'+((CFG.ui_font_size||12)+'px')+';color:#111;margin:26px;white-space:pre-wrap;} .brand{font-weight:800;font-size:18px;margin-bottom:10px} .bar{height:4px;background:'+ (CFG.brand_color||'#c7530c') +';border-radius:4px;margin:8px 0 14px;}';
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Contrato</title><style>'+css+'</style></head><body>'+
+  '<div class="brand">'+(CFG.brand_name||'Unihouser')+' — Contrato de servicio</div><div class="bar"></div>'+
+  '<div>'+ (filled||'') +'</div></body></html>';
+  var w=window.open('','_blank'); if(!w){toast('Popup bloqueado','show');return;}
+  w.document.open(); w.document.write(html); w.document.close();
+  try{w.focus();}catch(_){}
+};
+
+/* ===== BACKUP ===== */
+document.getElementById('btn-export').onclick=function(){
+  var blob=new Blob([JSON.stringify(CFG,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='unihouser_cfg.json'; a.click(); URL.revokeObjectURL(a.href);
+  toast('Exportado');
+};
+document.getElementById('file-import').addEventListener('change',function(e){
+  var f=e.target.files[0]; if(!f) return;
+  var fr=new FileReader();
+  fr.onload=function(){
+    try{
+      var obj=JSON.parse(fr.result);
+      CFG=normCfg(obj); LS.set('cfg',CFG);
+      loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval(); loadContrato();
+      try{
+        document.documentElement.style.setProperty('--brand', CFG.brand_color);
+        document.documentElement.style.setProperty('--ui-font', CFG.ui_font);
+        document.documentElement.style.setProperty('--ui-font-size', (''+CFG.ui_font_size).replace('px','')+'px');
+      }catch(_){}
+      toast('Importado y aplicado');
+    }catch(_){ toast('JSON inválido'); }
+  };
+  fr.readAsText(f);
+});
+document.getElementById('btn-reset').onclick=function(){
+  CFG=normCfg({}); LS.set('cfg',CFG);
+  loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval(); loadContrato();
+  try{
+    document.documentElement.style.setProperty('--brand', CFG.brand_color);
+    document.documentElement.style.setProperty('--ui-font', CFG.ui_font);
+    document.documentElement.style.setProperty('--ui-font-size', (''+CFG.ui_font_size).replace('px','')+'px');
+  }catch(_){}
+  toast('Valores por defecto');
+};
+
+/* ===== Init ===== */
+(function(){
+  loadGeneral(); loadPresu(); loadMatching(); loadMensajeria(); loadEval(); loadContrato();
+})();
+</script>
+</body>
+</html>
