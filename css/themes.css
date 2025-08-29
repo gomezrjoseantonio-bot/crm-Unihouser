@@ -91,6 +91,13 @@
   --bg-tertiary: #ffffff;
   --shadow-card: var(--shadow-lg);
   --card-gradient: var(--gradient-subtle);
+  
+  /* Backward Compatibility Updates */
+  --brand: var(--brand-primary);
+  --accent: var(--brand-primary);
+  --bg: var(--bg-primary);
+  --card: var(--bg-tertiary);
+  --shadow: var(--shadow-lg);
 }
 
 /* Fintech Theme (Modern & Bold) */
@@ -104,6 +111,13 @@
   --shadow-card: var(--shadow-2xl);
   --card-gradient: var(--gradient-glass);
   --border-light: var(--glass-border);
+  
+  /* Backward Compatibility Updates */
+  --brand: var(--brand-primary);
+  --accent: var(--brand-primary);
+  --bg: var(--bg-primary);
+  --card: var(--bg-tertiary);
+  --shadow: var(--shadow-2xl);
 }
 
 /* Minimal Theme (Clean & Spacious) */
@@ -124,6 +138,16 @@
   --shadow-card: none;
   --glass-bg: rgba(255, 255, 255, 0.95);
   --gradient-primary: linear-gradient(135deg, #000000 0%, #333333 100%);
+  
+  /* Backward Compatibility Updates */
+  --brand: var(--brand-primary);
+  --accent: var(--brand-primary);
+  --bg: var(--bg-primary);
+  --card: var(--bg-tertiary);
+  --text: var(--text-primary);
+  --muted: var(--text-muted);
+  --border: var(--border-light);
+  --shadow: none;
 }
 
 /* Dark Theme */
@@ -141,6 +165,16 @@
   --border-light: #334155;
   --border-medium: #475569;
   --shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  
+  /* Backward Compatibility Updates */
+  --brand: var(--brand-primary);
+  --accent: var(--brand-primary);
+  --bg: var(--bg-primary);
+  --card: var(--bg-tertiary);
+  --text: var(--text-primary);
+  --muted: var(--text-muted);
+  --border: var(--border-light);
+  --shadow: var(--shadow-card);
 }
 
 /* Theme-aware logo container */

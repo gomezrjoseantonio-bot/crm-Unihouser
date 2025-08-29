@@ -826,7 +826,19 @@ function exportCSV(){
 
 /* Helpers */
 function updatePros(p){ const list=Store.pros||[]; const i=list.findIndex(function(x){return x.id===p.id;}); if(i<0){return;} list[i]=p; Store.pros=list; }
-function load(){ try{const c=Store.cfg||{}; if(c.brand_color){ document.documentElement.style.setProperty('--brand', c.brand_color); }}catch(e){} render(); }
+function load(){ 
+  try{
+    const c=Store.cfg||{}; 
+    if(c.brand_color){ 
+      document.documentElement.style.setProperty('--brand-primary', c.brand_color);
+      document.documentElement.style.setProperty('--brand', c.brand_color); // Backward compatibility
+    }
+    if(c.ui_theme){ 
+      document.documentElement.setAttribute('data-theme', c.ui_theme);
+    }
+  }catch(e){} 
+  render(); 
+}
 
 /* Init */
 document.addEventListener('DOMContentLoaded',function(){

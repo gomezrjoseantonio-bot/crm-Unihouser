@@ -8,6 +8,16 @@
   --brand-primary: #c7530c;
   --brand-secondary: #DB824B;
   
+  /* Backward Compatibility */
+  --brand: var(--brand-primary);
+  --accent: var(--brand-primary);
+  --bg: var(--bg-primary);
+  --text: var(--text-primary);
+  --muted: var(--text-muted);
+  --border: var(--border-light);
+  --card: var(--bg-tertiary);
+  --shadow: var(--shadow-md);
+  
   /* Modern Fintech Color Palette */
   --bg-primary: #fafbfc;
   --bg-secondary: #f8fafc;
@@ -240,7 +250,7 @@ body{
 .container{
   max-width:1200px;
   margin:0 auto;
-  padding:var(--space-6);
+  padding:var(--space-4) var(--space-6);
   animation: fadeIn 0.4s ease-out;
 }
 
@@ -330,10 +340,10 @@ body{
 .card{
   background:var(--bg-elevated);
   border:1px solid var(--border-light);
-  border-radius:var(--radius-2xl);
-  padding:var(--space-6);
-  box-shadow:var(--shadow-lg);
-  margin:var(--space-6) 0;
+  border-radius:var(--radius-xl);
+  padding:var(--space-5);
+  box-shadow:var(--shadow-md);
+  margin:var(--space-4) 0;
   transition:all var(--transition-base);
   position:relative;
   overflow:hidden;
@@ -353,8 +363,8 @@ body{
 }
 
 .card:hover{
-  transform:translateY(-4px);
-  box-shadow:var(--shadow-2xl);
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-lg);
 }
 
 .card:hover:before{
