@@ -1,101 +1,37 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="professional">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unihouser — Evaluar</title>
-<style>
-:root{
-  --brand:#c7530c; --accent:#DB824B; --ok:#58736F; --bad:#B53928;
-  --line:#E7E1DE; --chip:#F3EEE9; --bg:#FAF8F7; --ink:#1a1f23; --ink2:#535b63;
-  --shadow:0 4px 22px rgba(0,0,0,.06);
-  --ui-font: system-ui, -apple-system, Inter, Roboto, Arial, sans-serif;
-  --ui-font-size: 12px;
-  --ff: var(--ui-font);
-  --fz: var(--ui-font-size);
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ff);font-size:var(--fz)}
-a{color:var(--brand);text-decoration:none}
-.container{max-width:1200px;margin:0 auto;padding:12px 14px}
-
-/* Topbar */
-.topbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
-.top-inner{max-width:1200px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:8px}
-.logo{width:24px;height:24px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
-.title{font-weight:700;color:var(--ink2);font-size:13px}
-.nav a{color:var(--ink2);padding:6px 10px;border-radius:10px}
-.nav a.active{background:var(--brand);color:#fff}
-.nav a:hover{background:#f3efe9}
-
-/* Tarjetas / bloques */
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:12px}
-.section{border:1px dashed var(--line);border-radius:12px;padding:10px;margin:10px 0;background:#fff}
-h2{margin:0 0 8px;font-size:16px}
-h3{margin:0 0 8px;font-size:14px;color:#444}
-
-/* Form layout */
-.row{display:grid;gap:8px}
-.row.three{grid-template-columns:repeat(3,1fr)}
-@media(max-width:980px){.row.three{grid-template-columns:1fr}}
-.field{display:flex;flex-direction:column;gap:2px}
-.field label{color:#555;font-size:11px}
-input,select{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min-height:26px;font-size:12px;background:#fff;color:#1a1f23}
-
-/* Botones */
-.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:800;font-size:12px}
-.btn:hover{background:#FAF8F7}
-.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
-
-/* KPIs */
-.kpis{display:grid;gap:10px;grid-template-columns:repeat(5,1fr)}
-.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
-.kpi .lab{font-size:11px;color:#667085}
-.kpi .val{font-weight:800;font-size:18px}
-.kpi .muted{color:#667085;font-weight:600;margin-left:6px}
-
-/* Dots y pill fase */
-.dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle}
-.dot.g{background:#16a34a}.dot.y{background:#f59e0b}.dot.r{background:#ef4444}
-.pill{display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;color:#475569;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:8px}
-
-/* Tabla candidatos */
-.th, .td{font-size:12px;padding:10px;background:#fff;border:1px solid var(--line)}
-.th{color:#475569;background:#F9F7F5;font-weight:700}
-.tr{display:grid;grid-template-columns:minmax(220px,2fr) minmax(120px,.5fr) 1fr minmax(180px,.8fr);gap:8px;align-items:center}
-.tr .td{display:flex;align-items:center;gap:8px}
-.star{color:#f59e0b;margin-left:4px}
-
-/* Chips aviso */
-.badge-warn{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#b45309;background:#fff7ed;border:1px solid #fde68a;border-radius:999px;padding:2px 6px;white-space:nowrap}
-
-/* Toasts */
-.toast-wrap{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:8px;z-index:100}
-.toast{background:#0f1112;color:#fff;padding:10px 12px;border-radius:10px;opacity:.98}
-.toast.ok{background:#16a34a}.toast.warn{background:#f59e0b}.toast.bad{background:#ef4444}
-
-/* Footer */
-.foot{margin:12px 0 20px;text-align:center;color:#888;font-size:11px}
-</style>
+<link rel="stylesheet" href="css/style.css">
 
 <script>
-/* Marca desde cfg */
+/* Apply brand settings from configuration */
 try{
   const cfg = JSON.parse(localStorage.getItem('cfg')||'{}');
-  if(cfg.brand_color) document.documentElement.style.setProperty('--brand', cfg.brand_color);
-  if(cfg.ui_font) document.documentElement.style.setProperty('--ui-font', cfg.ui_font);
-  if(cfg.ui_font_size) document.documentElement.style.setProperty('--ui-font-size', (''+cfg.ui_font_size).replace('px','')+'px');
+  if(cfg.brand_color) document.documentElement.style.setProperty('--brand-primary', cfg.brand_color);
+  if(cfg.ui_font) document.documentElement.style.setProperty('--font-family', cfg.ui_font);
+  if(cfg.ui_font_size) document.documentElement.style.setProperty('--font-size-base', (''+cfg.ui_font_size).replace('px','')+'px');
+  if(cfg.ui_theme) document.documentElement.setAttribute('data-theme', cfg.ui_theme);
+  if(cfg.brand_logo) {
+    window.addEventListener('DOMContentLoaded', () => {
+      const logoBox = document.getElementById('logoBox');
+      if(logoBox && cfg.brand_logo) {
+        logoBox.innerHTML = `<img src="${cfg.brand_logo}" alt="Logo">`;
+      }
+    });
+  }
 }catch(_){}
 </script>
 </head>
 <body>
   <div class="topbar">
-    <div class="top-inner">
+    <div class="container">
       <div class="brand">
-        <div class="logo" id="logoBox">U</div>
+        <div class="logo-container" id="logoBox">
+          <div class="logo-fallback">U</div>
+        </div>
         <div class="title" id="brandTitle">Unihouser — Evaluar</div>
       </div>
       <nav class="nav">
@@ -108,7 +44,7 @@ try{
   </div>
 
   <main class="container">
-    <section class="card">
+    <section class="card animate-slide-in">
       <h2>Evaluar Activo</h2>
 
       <!-- DATOS DEL INMUEBLE -->
