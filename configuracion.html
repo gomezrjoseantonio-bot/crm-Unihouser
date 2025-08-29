@@ -58,6 +58,7 @@ try{
       <nav class="nav">
         <a href="evaluar.html">Evaluar</a>
         <a href="evaluaciones.html">Evaluaciones</a>
+        <a href="evaluaciones.html?mode=search">Buscar Activos</a>
         <a href="dashboard.html">Dashboard</a>
         <a class="active" href="configuracion.html">Configuración</a>
       </nav>
@@ -71,6 +72,9 @@ try{
         <button class="tabbtn" data-tab="temas">Temas y Apariencia</button>
         <button class="tabbtn" data-tab="presu">Presupuesto</button>
         <button class="tabbtn" data-tab="matching">Matching</button>
+        <button class="tabbtn" data-tab="mensajeria">Mensajería</button>
+        <button class="tabbtn" data-tab="eval">Parámetros de evaluación</button>
+        <button class="tabbtn" data-tab="backup">Exportar / Importar</button>
       </aside>
 
       <section class="content">
@@ -159,6 +163,68 @@ try{
           </div>
           <div class="actions"><button class="btn primary" onclick="saveMatching()">Guardar</button></div>
         </div>
+
+        <!-- MENSAJERÍA -->
+        <div class="panel" id="panel-mensajeria">
+          <h3>Mensajería</h3>
+          <div class="block">
+            <h5>Notificaciones Globales</h5>
+            <div class="grid">
+              <div class="field row3"><label>Email remitente (por defecto)</label><input id="n_email_from" type="email" maxlength="60"/></div>
+              <div class="field row3"><label>Asunto email — plantilla</label><input id="n_email_subj" maxlength="80" placeholder="{brand} — {name}"/></div>
+              <div class="field row3"><label>Cuerpo email — plantilla</label><textarea id="n_email_body" rows="3" maxlength="500" placeholder="Hola {name}"></textarea></div>
+              <div class="field row3"><label>WhatsApp — plantilla</label><textarea id="n_wa_body" rows="3" maxlength="350" placeholder="Hola {name}"></textarea></div>
+            </div>
+            <small class="muted">Placeholders disponibles: {brand}, {name}, {loc}, {calle}, {tipo}, {precio}, {inv}, {rb}, {rn}, {fl}, {pmax}, {url}</small>
+          </div>
+          <div class="actions"><button class="btn primary" onclick="saveMensajeria()">Guardar</button></div>
+        </div>
+
+        <!-- PARÁMETROS EVALUACIÓN -->
+        <div class="panel" id="panel-eval">
+          <h3>Parámetros de Evaluación</h3>
+          <div class="block">
+            <h5>Porcentajes de Gestión</h5>
+            <div class="grid">
+              <div class="field"><label>Seguro hogar (%)</label><input id="e_hogar" type="number" min="0" max="20" step="0.1" placeholder="2.0"/></div>
+              <div class="field"><label>Impago Tradicional (%)</label><input id="e_imp_trad" type="number" min="0" max="20" step="0.1" placeholder="5.0"/></div>
+              <div class="field"><label>Impago Habitaciones (%)</label><input id="e_imp_hab" type="number" min="0" max="20" step="0.1" placeholder="8.0"/></div>
+              <div class="field"><label>Gestión Tradicional (%)</label><input id="e_g_trad" type="number" min="0" max="50" step="0.1" placeholder="10.0"/></div>
+              <div class="field"><label>Gestión Habitaciones (%)</label><input id="e_g_hab" type="number" min="0" max="50" step="0.1" placeholder="15.0"/></div>
+            </div>
+          </div>
+          <div class="block">
+            <h5>Localidades por Defecto</h5>
+            <div class="inline">
+              <div class="chips" id="chips_locs"></div>
+            </div>
+            <div class="inline">
+              <input class="chips-input" id="add_loc" maxlength="20" placeholder="Añadir localidad y Enter"/>
+              <small class="muted">Máximo 12 localidades</small>
+            </div>
+          </div>
+          <div class="actions"><button class="btn primary" onclick="saveEval()">Guardar</button></div>
+        </div>
+
+        <!-- EXPORTAR / IMPORTAR -->
+        <div class="panel" id="panel-backup">
+          <h3>Exportar / Importar</h3>
+          <div class="block">
+            <h5>Copia de Seguridad</h5>
+            <p class="muted">Exporta todos los datos de la aplicación para hacer una copia de seguridad o transferir a otro dispositivo.</p>
+            <div class="actions">
+              <button class="btn primary" onclick="exportBackup()">Exportar Datos Completos</button>
+            </div>
+          </div>
+          <div class="block">
+            <h5>Restaurar desde Copia</h5>
+            <p class="muted">Importa datos previamente exportados. <strong>Atención:</strong> Esto sobrescribirá todos los datos actuales.</p>
+            <div class="field">
+              <input type="file" id="importFile" accept=".json" style="margin-bottom: var(--space-3);">
+              <button class="btn ghost" onclick="importBackup()">Importar Datos</button>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   </div>
@@ -220,6 +286,22 @@ function loadValues() {
   document.getElementById('m_green').value = CFG.match.thresholds.green;
   document.getElementById('m_amber').value = CFG.match.thresholds.amber;
   
+  // Load messaging values
+  document.getElementById('n_email_from').value = CFG.notifs?.email_from || '';
+  document.getElementById('n_email_subj').value = CFG.notifs?.email_subject_tpl || '{brand} — {name}';
+  document.getElementById('n_email_body').value = CFG.notifs?.email_body_tpl || 'Hola {name}';
+  document.getElementById('n_wa_body').value = CFG.notifs?.wa_text_tpl || 'Hola {name}';
+  
+  // Load evaluation params
+  document.getElementById('e_hogar').value = CFG.eval_params?.hogar_pct || 2;
+  document.getElementById('e_imp_trad').value = CFG.eval_params?.impago_trad_pct || 5;
+  document.getElementById('e_imp_hab').value = CFG.eval_params?.impago_hab_pct || 8;
+  document.getElementById('e_g_trad').value = CFG.eval_params?.gestion_trad_pct || 10;
+  document.getElementById('e_g_hab').value = CFG.eval_params?.gestion_hab_pct || 15;
+  
+  // Load default locations
+  loadLocations();
+  
   // Load logo if exists
   if(CFG.brand_logo) {
     document.getElementById('logoPreview').innerHTML = `<img src="${CFG.brand_logo}" alt="Logo">`;
@@ -261,6 +343,126 @@ function saveMatching() {
   CFG.match.thresholds.amber = parseFloat(document.getElementById('m_amber').value) || 0.95;
   localStorage.setItem('cfg', JSON.stringify(CFG));
   showToast('Configuración de matching guardada');
+}
+
+function saveMensajeria() {
+  CFG.notifs = CFG.notifs || {};
+  CFG.notifs.email_from = document.getElementById('n_email_from').value.trim();
+  CFG.notifs.email_subject_tpl = document.getElementById('n_email_subj').value.trim() || '{brand} — {name}';
+  CFG.notifs.email_body_tpl = document.getElementById('n_email_body').value.trim() || 'Hola {name}';
+  CFG.notifs.wa_text_tpl = document.getElementById('n_wa_body').value.trim() || 'Hola {name}';
+  localStorage.setItem('cfg', JSON.stringify(CFG));
+  showToast('Configuración de mensajería guardada');
+}
+
+function saveEval() {
+  CFG.eval_params = CFG.eval_params || {};
+  CFG.eval_params.hogar_pct = parseFloat(document.getElementById('e_hogar').value) || 2;
+  CFG.eval_params.impago_trad_pct = parseFloat(document.getElementById('e_imp_trad').value) || 5;
+  CFG.eval_params.impago_hab_pct = parseFloat(document.getElementById('e_imp_hab').value) || 8;
+  CFG.eval_params.gestion_trad_pct = parseFloat(document.getElementById('e_g_trad').value) || 10;
+  CFG.eval_params.gestion_hab_pct = parseFloat(document.getElementById('e_g_hab').value) || 15;
+  localStorage.setItem('cfg', JSON.stringify(CFG));
+  showToast('Parámetros de evaluación guardados');
+}
+
+// Location management
+function loadLocations() {
+  const container = document.getElementById('chips_locs');
+  const locations = CFG.default_locations || [];
+  container.innerHTML = '';
+  
+  locations.forEach(loc => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = `<span class="t">${escapeHtml(loc)}</span> <span class="remove" onclick="removeLocation('${escapeHtml(loc)}')">×</span>`;
+    container.appendChild(chip);
+  });
+}
+
+function addLocation() {
+  const input = document.getElementById('add_loc');
+  const value = input.value.trim();
+  if (!value) return;
+  
+  CFG.default_locations = CFG.default_locations || [];
+  if (CFG.default_locations.includes(value)) {
+    showToast('La localidad ya existe', 'error');
+    return;
+  }
+  
+  if (CFG.default_locations.length >= 12) {
+    showToast('Máximo 12 localidades', 'error');
+    return;
+  }
+  
+  CFG.default_locations.push(value);
+  localStorage.setItem('cfg', JSON.stringify(CFG));
+  input.value = '';
+  loadLocations();
+}
+
+function removeLocation(loc) {
+  CFG.default_locations = (CFG.default_locations || []).filter(l => l !== loc);
+  localStorage.setItem('cfg', JSON.stringify(CFG));
+  loadLocations();
+}
+
+// Backup functions
+function exportBackup() {
+  const data = {
+    cfg: JSON.parse(localStorage.getItem('cfg') || '{}'),
+    evals: JSON.parse(localStorage.getItem('evals') || '[]'),
+    pros: JSON.parse(localStorage.getItem('pros') || '[]'),
+    exportDate: new Date().toISOString()
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `unihouser-backup-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  showToast('Copia de seguridad exportada');
+}
+
+function importBackup() {
+  const file = document.getElementById('importFile').files[0];
+  if (!file) {
+    showToast('Selecciona un archivo primero', 'error');
+    return;
+  }
+  
+  if (!confirm('¿Estás seguro? Esto sobrescribirá todos los datos actuales.')) {
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      
+      if (data.cfg) localStorage.setItem('cfg', JSON.stringify(data.cfg));
+      if (data.evals) localStorage.setItem('evals', JSON.stringify(data.evals));
+      if (data.pros) localStorage.setItem('pros', JSON.stringify(data.pros));
+      
+      showToast('Datos importados correctamente');
+      setTimeout(() => location.reload(), 1500);
+    } catch (err) {
+      showToast('Error al importar: archivo inválido', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 // Theme and color changes
@@ -334,6 +536,14 @@ function showToast(message, type = 'success') {
 
 // Initialize
 loadValues();
+
+// Add location on Enter key
+document.getElementById('add_loc').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    addLocation();
+  }
+});
 </script>
 </body>
 </html>
