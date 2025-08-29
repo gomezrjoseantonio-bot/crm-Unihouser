@@ -109,13 +109,21 @@
 /* Minimal Theme (Clean & Spacious) */
 [data-theme="minimal"] {
   --brand-primary: #000000;
-  --brand-secondary: #404040;
+  --brand-secondary: #333333;
   --bg-primary: #ffffff;
-  --bg-secondary: #fafafa;
+  --bg-secondary: #ffffff;
   --bg-tertiary: #ffffff;
-  --shadow-card: var(--shadow-sm);
-  --border-light: #f0f0f0;
-  --text-primary: #1a1a1a;
+  --bg-elevated: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --text-tertiary: #666666;
+  --text-muted: #999999;
+  --border-light: #e0e0e0;
+  --border-medium: #cccccc;
+  --border-strong: #999999;
+  --shadow-card: none;
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --gradient-primary: linear-gradient(135deg, #000000 0%, #333333 100%);
 }
 
 /* Dark Theme */

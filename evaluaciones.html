@@ -37,18 +37,17 @@ try{
       </div>
       <nav class="nav">
         <a href="evaluar.html">Evaluar</a>
-        <a href="evaluaciones.html" class="active">Evaluaciones</a>
-        <a href="evaluaciones.html?mode=search">Buscar Activos</a>
+        <a href="evaluaciones.html" id="nav-evaluaciones">Evaluaciones</a>
+        <a href="evaluaciones.html?mode=search" id="nav-buscar">Buscar Activos</a>
         <a href="dashboard.html">Dashboard</a>
         <a href="configuracion.html">Configuración</a>
       </nav>
     </div>
-</head>
-<body>
+  </div>
 
   <div class="container">
     <section class="card">
-      <h2>Evaluaciones</h2>
+      <h2 id="page-title">Evaluaciones</h2>
 
       <div class="kpis" style="margin-top:6px">
         <div class="kpi"><div class="lab">Total evaluaciones</div><div class="val" id="k_total">0</div></div>
@@ -193,6 +192,22 @@ try{
   document.getElementById('titleTop').textContent = name+' — Evaluaciones';
   document.getElementById('logoTop').textContent  = (name||'U').toString().trim().charAt(0).toUpperCase()||'U';
 }catch(_){}
+
+/* Handle search mode */
+const urlParams = new URLSearchParams(window.location.search);
+const isSearchMode = urlParams.get('mode') === 'search';
+
+if (isSearchMode) {
+  document.getElementById('page-title').textContent = 'Buscar Activos';
+  document.getElementById('nav-buscar').classList.add('active');
+  document.title = 'Unihouser — Buscar Activos';
+  // Focus search input when in search mode
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('f_text').focus();
+  });
+} else {
+  document.getElementById('nav-evaluaciones').classList.add('active');
+}
 
 /* Utils */
 const id = x=>document.getElementById(x);

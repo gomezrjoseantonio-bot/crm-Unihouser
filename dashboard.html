@@ -112,10 +112,17 @@ try{
 /* ===== Brand ===== */
 try{
   const c=JSON.parse(localStorage.getItem('cfg')||'{}')||{};
-  const col=c.brand_color||'#c7530c'; document.documentElement.style.setProperty('--brand', col);
+  const col=c.brand_color||'#c7530c'; 
+  document.documentElement.style.setProperty('--brand-primary', col);
+  document.documentElement.style.setProperty('--brand', col); // Keep backward compatibility
   const name=c.brand_name||c.company_name||'Unihouser';
   document.getElementById('brandTitle').textContent = name+' — Dashboard';
-  document.getElementById('logoBox').textContent = (name||'U').toString().trim().charAt(0).toUpperCase() || 'U';
+  const logoBox = document.getElementById('logoBox');
+  if (c.brand_logo) {
+    logoBox.innerHTML = `<img src="${c.brand_logo}" alt="Logo">`;
+  } else {
+    logoBox.innerHTML = `<div class="logo-fallback">${(name||'U').toString().trim().charAt(0).toUpperCase() || 'U'}</div>`;
+  }
 }catch(e){}
 
 /* ===== Utils ===== */
