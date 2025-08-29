@@ -832,9 +832,16 @@ function load(){
     if(c.brand_color){ 
       document.documentElement.style.setProperty('--brand-primary', c.brand_color);
       document.documentElement.style.setProperty('--brand', c.brand_color); // Backward compatibility
+      document.documentElement.style.setProperty('--accent', c.brand_color); // Backward compatibility
     }
     if(c.ui_theme){ 
       document.documentElement.setAttribute('data-theme', c.ui_theme);
+    }
+    if(c.ui_font) {
+      document.documentElement.style.setProperty('--font-family', c.ui_font);
+    }
+    if(c.ui_font_size) {
+      document.documentElement.style.setProperty('--font-size-base', (''+c.ui_font_size).replace('px','')+'px');
     }
   }catch(e){} 
   render(); 

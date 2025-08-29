@@ -189,8 +189,11 @@ try{
 try{
   const cfg=JSON.parse(localStorage.getItem('cfg')||'{}')||{};
   const name=cfg.brand_name||cfg.company_name||'Unihouser';
-  document.getElementById('titleTop').textContent = name+' — Evaluaciones';
-  document.getElementById('logoTop').textContent  = (name||'U').toString().trim().charAt(0).toUpperCase()||'U';
+  const titleElement = document.getElementById('brandTitle');
+  if(titleElement) titleElement.textContent = name+' — Evaluaciones';
+  
+  const logoElement = document.querySelector('.logo-fallback');
+  if(logoElement) logoElement.textContent = (name||'U').toString().trim().charAt(0).toUpperCase()||'U';
 }catch(_){}
 
 /* Handle search mode */
