@@ -422,13 +422,54 @@ try{
 }catch(_){}
 
 /* ===== Tabs ===== */
+function activateTab(tabName) {
+  // Remove active class from all tabs and panels
+  Array.prototype.forEach.call(document.querySelectorAll('.tabbtn'),function(x){
+    x.classList.remove('active');
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.panel'),function(p){
+    p.classList.remove('active');
+  });
+  
+  // Find and activate the requested tab
+  var targetTab = document.querySelector('.tabbtn[data-tab="' + tabName + '"]');
+  var targetPanel = document.getElementById('panel-' + tabName);
+  
+  if (targetTab && targetPanel) {
+    targetTab.classList.add('active');
+    targetPanel.classList.add('active');
+    return true;
+  }
+  return false;
+}
+
+function handleHashChange() {
+  var hash = window.location.hash.substring(1); // Remove the #
+  
+  if (hash && activateTab(hash)) {
+    // Successfully activated the tab
+  } else {
+    // If hash doesn't match any tab, or no hash, activate default (general)
+    activateTab('general');
+  }
+}
+
 document.getElementById('tabs').addEventListener('click',function(e){
   var b=e.target.closest('.tabbtn'); if(!b) return;
-  Array.prototype.forEach.call(document.querySelectorAll('.tabbtn'),function(x){x.classList.remove('active')});
-  b.classList.add('active');
-  var id='panel-'+b.getAttribute('data-tab');
-  Array.prototype.forEach.call(document.querySelectorAll('.panel'),function(p){p.classList.remove('active')});
-  document.getElementById(id).classList.add('active');
+  var tabName = b.getAttribute('data-tab');
+  
+  // Update URL hash
+  window.location.hash = tabName;
+  
+  // The hashchange event will handle the tab activation
+});
+
+// Handle browser back/forward navigation
+window.addEventListener('hashchange', handleHashChange);
+
+// Handle initial page load
+document.addEventListener('DOMContentLoaded', function() {
+  handleHashChange();
 });
 
 /* ===== GENERAL ===== */
